@@ -1,2 +1,3 @@
 # isolated-package-feeds
-NuGet and Package Feed providers for development environments that are isolated from the internet.
+
+NuGet and NPM Package Feed providers for development environments that are isolated from the internet.
