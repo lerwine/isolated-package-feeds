@@ -17,7 +17,7 @@ if (string.IsNullOrWhiteSpace(databaseFilePath))
 else
     databaseFilePath = Path.IsPathFullyQualified(databaseFilePath) ? Path.GetFullPath(databaseFilePath) : Path.Combine(builder.Environment.WebRootPath, databaseFilePath);
 app.Logger.LogInformation("Using database {databaseFilePath}", databaseFilePath);
-builder.Services.AddDbContext<CdnServer.CdnAppDbContext>(opt =>
+builder.Services.AddDbContext<CdnServer.Services.CdnAppDbContext>(opt =>
     opt.UseSqlite(new SqliteConnectionStringBuilder
     {
         DataSource = string.IsNullOrWhiteSpace(databaseFilePath) ? "ScrumPoker.db" : databaseFilePath,
