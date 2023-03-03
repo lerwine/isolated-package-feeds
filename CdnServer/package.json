@@ -1,0 +1,37 @@
+{
+  "name": "isolated-package-feeds",
+  "version": "1.0.0",
+  "description": "Isolate Package Feeds web application",
+  "scripts": {
+    "build": "tsc -p ./ClientApp/tsconfig.app.json"
+  },
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lerwine/isolated-package-feeds.git"
+  },
+  "author": "Leonard T. Erwine",
+  "license": "GPL-3.0-only",
+  "bugs": {
+    "url": "https://github.com/lerwine/isolated-package-feeds/issues"
+  },
+  "homepage": "https://github.com/lerwine/isolated-package-feeds#readme",
+  "dependencies": {
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0",
+    "zone.js": "~0.12.0",
+    "@types/angular": "^1.8.4",
+    "@types/angular-route": "^1.7.2",
+    "@types/jquery": "^3.5.16",
+    "typescript": "~4.9.4"
+  },
+  "devDependencies": {
+    "@types/jasmine": "~4.3.0",
+    "jasmine-core": "~4.5.0",
+    "karma": "~6.4.0",
+    "karma-chrome-launcher": "~3.1.0",
+    "karma-coverage": "~2.2.0",
+    "karma-jasmine": "~5.1.0",
+    "karma-jasmine-html-reporter": "~2.0.0"
+  }
+}
