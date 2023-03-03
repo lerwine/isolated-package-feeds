@@ -8,7 +8,8 @@
 		"ghcr.io/devcontainers/features/dotnet:1": {
 			"installUsingApt": true,
 			"version": "6"
-		}
+		},
+		"ghcr.io/warrenbuckley/codespace-features/sqlite:1": {}
 	},
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
