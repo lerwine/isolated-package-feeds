@@ -24,7 +24,7 @@ public class CdnAppDbContext : DbContext
 
     public DbSet<LibFile> Files { get; set; } = null!;
 
-    public DbSet<FileContent> FileContents { get; set; } = null;
+    public DbSet<FileContent> FileContents { get; set; } = null!;
 
     public DbSet<LibGroup> Groups { get; set; } = null!;
 

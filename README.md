@@ -6,6 +6,8 @@ The initial scope is to create NuGet and NPM Package Feed services as well as co
 
 ## References
 
+- [SQLite Data Types](https://learn.microsoft.com/en-us/dotnet/standard/data/sqlite/types)
+
 ### NuGet
 
 - [Overview of Hosting Your Own NuGet Feeds | Microsoft Learn](https://learn.microsoft.com/en-au/nuget/hosting-packages/overview)
