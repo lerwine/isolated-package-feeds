@@ -9,7 +9,9 @@
 			"installUsingApt": true,
 			"version": "6"
 		},
-		"ghcr.io/warrenbuckley/codespace-features/sqlite:1": {}
+		"ghcr.io/warrenbuckley/codespace-features/sqlite:1": {},
+		"ghcr.io/devcontainers/features/node:1": {},
+		"ghcr.io/devcontainers-contrib/features/typescript:2": {}
 	},
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
