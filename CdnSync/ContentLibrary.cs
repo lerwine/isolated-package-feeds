@@ -7,6 +7,7 @@ using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
+using Microsoft.Extensions.Logging;
 
 namespace CdnSync;
 

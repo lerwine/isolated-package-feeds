@@ -13,22 +13,38 @@ internal class Program
 
     private static void Main(string[] args)
     {
-        Console.WriteLine("Hello, World!");
-        HostApplicationBuilder builder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(args);
-        IConfigurationSection section = builder.Configuration.GetSection(nameof(CdnSync));
-        builder.Services.Configure<CdnSync.CdnSyncAppSettings>(section);
-        string? databaseFilePath = section.Get<CdnSync.CdnSyncAppSettings>()?.DbFile;
-        if (string.IsNullOrWhiteSpace(databaseFilePath))
-            databaseFilePath = Path.Combine(builder.Environment.ContentRootPath, CdnSync.CdnSyncAppSettings.DEFAULT_DbFile);
-        else
-            databaseFilePath = Path.GetFullPath(Path.IsPathFullyQualified(databaseFilePath) ? databaseFilePath : Path.Combine(builder.Environment.ContentRootPath, databaseFilePath));
-        builder.Services.AddDbContext<CdnSync.CdnSyncDb>(opt =>
-            opt.UseSqlite(new SqliteConnectionStringBuilder
-            {
-                DataSource = databaseFilePath,
-                ForeignKeys = true,
-                Mode = File.Exists(databaseFilePath) ? SqliteOpenMode.ReadWrite : SqliteOpenMode.ReadWriteCreate
-            }.ConnectionString));
-        Host = builder.Build();
+        IConfiguration config = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json")
+            .AddEnvironmentVariables()
+            .Build();
+        
+        Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
+            // .ConfigureHostConfiguration(configHost =>
+            // {
+            //     configHost.SetBasePath(Directory.GetCurrentDirectory());
+            //     configHost.AddJsonFile("appsettings.json", optional: true);
+            //     configHost.AddCommandLine(args);
+            // })
+            .ConfigureServices((hbContext, services) => {
+                services.AddHostedService<CdnSync.CdnSyncService>();
+                IConfigurationSection section = hbContext.Configuration.GetSection(nameof(CdnSync));
+                string? databaseFilePath = section.GetValue<string>(CdnSync.CdnSyncDb.SETTINGS_KEY_DbFile);
+                if (string.IsNullOrWhiteSpace(databaseFilePath))
+                    databaseFilePath = Path.Combine(hbContext.HostingEnvironment.ContentRootPath, CdnSync.CdnSyncDb.DEFAULT_DbFile);
+                else
+                    databaseFilePath = Path.GetFullPath(Path.IsPathFullyQualified(databaseFilePath) ? databaseFilePath : Path.Combine(hbContext.HostingEnvironment.ContentRootPath, databaseFilePath));
+                services.AddDbContext<CdnSync.CdnSyncDb>(opt =>
+                opt.UseSqlite(new SqliteConnectionStringBuilder
+                {
+                    DataSource = databaseFilePath,
+                    ForeignKeys = true,
+                    Mode = File.Exists(databaseFilePath) ? SqliteOpenMode.ReadWrite : SqliteOpenMode.ReadWriteCreate
+                }.ConnectionString));
+                
+                services.Configure<CdnSync.CdnJsSettings>(section.GetSection(CdnSync.CdnJsSettings.CONFIG_SECTION_NAME));
+                services.AddSingleton<CdnSync.CdnJsSyncService>();
+            })
+            .Build();
+        Host.Run();
     }
 }

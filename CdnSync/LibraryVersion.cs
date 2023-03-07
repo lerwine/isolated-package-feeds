@@ -61,4 +61,16 @@ public class LibraryVersion
         _ = builder.HasIndex(nameof(Name), nameof(LibraryId));
         _ = builder.HasOne(l => l.Library).WithMany(p => p.Versions).HasForeignKey(l => l.LibraryId).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
     }
+
+    internal static async Task<bool> DeleteAsync(CdnSyncDb dbContext, Guid libraryId, CancellationToken stoppingToken)
+    {
+        LibraryVersion[] toDelete = await dbContext.Versions.Where(v => v.LibraryId == libraryId).ToArrayAsync(stoppingToken);
+        if (toDelete.Length == 0)
+            return false;
+        foreach (LibraryVersion lv in toDelete)
+            await LibraryFile.DeleteAsync(dbContext, lv.Id, stoppingToken);
+        dbContext.Versions.RemoveRange(toDelete);
+        await dbContext.SaveChangesAsync(true, stoppingToken);
+        return true;
+    }
 }

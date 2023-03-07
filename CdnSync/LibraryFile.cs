@@ -75,4 +75,14 @@ public class LibraryFile
         _ = builder.HasIndex(nameof(Name), nameof(VersionId));
         _ = builder.HasOne(l => l.Version).WithMany(p => p.Files).HasForeignKey(l => l.VersionId).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
     }
+
+    internal static async Task<bool> DeleteAsync(CdnSyncDb dbContext, Guid versionId, CancellationToken stoppingToken)
+    {
+        LibraryFile[] toDelete = await dbContext.Files.Where(f => f.VersionId == versionId).ToArrayAsync(stoppingToken);
+        if (toDelete.Length == 0)
+            return false;
+        dbContext.Files.RemoveRange(toDelete);
+        await dbContext.SaveChangesAsync(true, stoppingToken);
+        return true;
+    }
 }
