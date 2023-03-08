@@ -27,5 +27,8 @@ public class CdnSyncService : BackgroundService
         {
             _logger.LogError(error, "Error executing {TypeName}", _cdnJsSync.GetType().FullName);
         }
+#pragma warning disable CA2016, CS4014
+        finally { Program.Host.StopAsync(); }
+#pragma warning restore CA2016, CS4014
     }
 }

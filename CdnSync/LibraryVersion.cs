@@ -12,17 +12,17 @@ namespace CdnSync;
 
 public class LibraryVersion
 {
-    private readonly object _syncRoot = new object();
+    private readonly object _syncRoot = new();
 
     public Guid Id { get; set; }
     
     public ushort Order { get; set; }
 
-    private string _name = "";
-    public string Name
+    private string _versionString = "";
+    public string VersionString
     {
-        get { return _name; }
-        set { _name = value.ToWsNormalizedOrEmptyIfNull(); }
+        get { return _versionString; }
+        set { _versionString = value.ToWsNormalizedOrEmptyIfNull(); }
     }
     
     private JsonObject? _providerData;
@@ -56,9 +56,9 @@ public class LibraryVersion
     internal static void OnBuildEntity(EntityTypeBuilder<LibraryVersion> builder)
     {
         _ = builder.HasKey(nameof(Id));
-        _ = builder.Property(c => c.Name).UseCollation("SQL_Latin1_General_CP1_CI_AS");
+        _ = builder.Property(c => c.VersionString).UseCollation("SQL_Latin1_General_CP1_CI_AS");
         _ = builder.HasIndex(nameof(Order), nameof(LibraryId));
-        _ = builder.HasIndex(nameof(Name), nameof(LibraryId));
+        _ = builder.HasIndex(nameof(VersionString), nameof(LibraryId));
         _ = builder.HasOne(l => l.Library).WithMany(p => p.Versions).HasForeignKey(l => l.LibraryId).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
     }
 

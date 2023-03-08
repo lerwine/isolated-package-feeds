@@ -13,18 +13,7 @@ internal class Program
 
     private static void Main(string[] args)
     {
-        IConfiguration config = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json")
-            .AddEnvironmentVariables()
-            .Build();
-        
         Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
-            // .ConfigureHostConfiguration(configHost =>
-            // {
-            //     configHost.SetBasePath(Directory.GetCurrentDirectory());
-            //     configHost.AddJsonFile("appsettings.json", optional: true);
-            //     configHost.AddCommandLine(args);
-            // })
             .ConfigureServices((hbContext, services) => {
                 services.AddHostedService<CdnSync.CdnSyncService>();
                 IConfigurationSection section = hbContext.Configuration.GetSection(nameof(CdnSync));
@@ -41,7 +30,7 @@ internal class Program
                     Mode = File.Exists(databaseFilePath) ? SqliteOpenMode.ReadWrite : SqliteOpenMode.ReadWriteCreate
                 }.ConnectionString));
                 
-                services.Configure<CdnSync.CdnJsSettings>(section.GetSection(CdnSync.CdnJsSettings.CONFIG_SECTION_NAME));
+                services.Configure<CdnSync.SettingsSections.CdnSyncSettings>(section.GetSection(nameof(CdnSync.SettingsSections.CdnSyncSettings)));
                 services.AddSingleton<CdnSync.CdnJsSyncService>();
             })
             .Build();
