@@ -14,7 +14,7 @@ namespace CdnSync.CdnJs
             set => SetPropertyValue(PROPERTYNAME_name, value.ToWsNormalizedOrEmptyIfNull());
         }
 
-        public string Message
+        public string Description
         {
             get => TryGetPropertyValue(PROPERTYNAME_description, out string? name) ? name : "";
             set => SetPropertyValueOrRemoveIfNull(PROPERTYNAME_description, value.ToTrimmedOrNullIfEmpty());
