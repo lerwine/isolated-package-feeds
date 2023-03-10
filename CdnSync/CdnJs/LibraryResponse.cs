@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Threading.Tasks;
 
 namespace CdnSync.CdnJs
 {
@@ -29,8 +24,11 @@ namespace CdnSync.CdnJs
         {
             JsonNode? node = RawJson[PROPERTYNAME_versions];
             if (node is not null && node is JsonArray arr)
-                return arr.OfType<JsonValue>().Select(n => n.TryGetValue(out string? value) ? value.ToWsNormalizedOrEmptyIfNull() : "").Where(s => s.Length > 0).Select(s => new SwVersion(s));
-            return Enumerable.Empty<SwVersion>();
+                foreach (JsonValue j in arr.OfType<JsonValue>())
+                {
+                    if (j.TryGetValue(out string? s) && (s = s.ToWsNormalizedOrNullIfEmpty()) is not null && SwVersion.TryParse(s, out SwVersion? v))
+                        yield return v;
+                }
         }
 
         public void SetVersions(IEnumerable<SwVersion>? versions)
