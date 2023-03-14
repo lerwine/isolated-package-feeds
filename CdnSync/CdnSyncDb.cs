@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -9,9 +5,6 @@ namespace CdnSync;
 
 public class CdnSyncDb : DbContext
 {
-    public const string SETTINGS_KEY_DbFile = "DbFile";
-    public const string DEFAULT_DbFile = $"{nameof(CdnSync)}.db";
-
     private readonly ILogger<CdnSyncDb> _logger;
 
     public CdnSyncDb(DbContextOptions<CdnSyncDb> options, ILogger<CdnSyncDb> logger)
