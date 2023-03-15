@@ -20,28 +20,28 @@ public class LibraryProvider
     private string _name = "";
     public string Name
     {
-        get { return _name; }
-        set { _name = value.ToWsNormalizedOrEmptyIfNull(); }
+        get => _name;
+        set => _name = value.ToWsNormalizedOrEmptyIfNull();
     }
-    
+
     private string _description = "";
     public string Description
     {
-        get { return _description; }
-        set { _description = value.ToTrimmedOrEmptyIfNull(); }
+        get => _description;
+        set => _description = value.ToTrimmedOrEmptyIfNull();
     }
 
     private Collection<ContentLibrary> _libraries = new();
     public Collection<ContentLibrary> Libraries
     {
-        get { return _libraries; }
-        set { _libraries = value ?? new(); }
+        get => _libraries;
+        set => _libraries = value ?? new();
     }
-    
+
     internal static void OnBuildEntity(EntityTypeBuilder<LibraryProvider> builder)
     {
         _ = builder.HasKey(nameof(Id));
         _ = builder.HasIndex(nameof(Name));
-        _ = builder.Property(c => c.Name).UseCollation("SQL_Latin1_General_CP1_CI_AS");
+        _ = builder.Property(c => c.Name).IsRequired().UseCollation("SQL_Latin1_General_CP1_CI_AS");
     }
 }
