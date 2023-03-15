@@ -1,8 +1,3 @@
-using System;
-using System.Net.Http.Json;
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using System.Threading;
 using CdnSync.SettingsSections;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -135,7 +130,7 @@ public class CdnJsSyncService
             if (stoppingToken.IsCancellationRequested)
                 return;
             _logger.LogDebug("Read: {json}", jsonString);
-            if (CdnJs.Response.Error.TryDeserialize<CdnJs.Response.LibraryAllVersions>(jsonString, out CdnJs.Response.LibraryAllVersions? rc, out CdnJs.Response.Error? error))
+            if (CdnJs.Response.Error.TryDeserialize(jsonString, out CdnJs.Response.LibraryAllVersions? rc, out CdnJs.Response.Error? error))
                 foreach (string versionString in rc.versions.TrimmedNotEmptyValues())
                     if (!await _dbContext.Versions.AnyAsync(v => v.LibraryId == id && v.VersionString == versionString, stoppingToken))
                     {
@@ -146,7 +141,7 @@ public class CdnJsSyncService
                     else if (stoppingToken.IsCancellationRequested)
                         return;
             else
-                _logger.LogError("Response code: {ResponseCode}; Status code {StatusCode}; Message: {Message}", statusCode, error.status, error.message.ToTrimmedOrDefaultIfEmpty(() => error.status.ToStatusMessage()));
+                _logger.LogError("Response code: {ResponseCode}; Status code {StatusCode}; Message: {Message}", statusCode, error!.status, error.message.ToTrimmedOrDefaultIfEmpty(() => error.status.ToStatusMessage()));
         }
         else
         {

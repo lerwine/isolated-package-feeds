@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace CdnSync
 {
-    public struct TernaryOption<T1, T2>
+    public readonly struct TernaryOption<T1, T2>
     {
         private readonly bool _isAlternate;
         private readonly T1 _primary;

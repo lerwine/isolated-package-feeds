@@ -1,18 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.ObjectModel;
 
 namespace CdnSync;
 
 public class LibraryFile
 {
-    private readonly object _syncRoot = new object();
+    private readonly object _syncRoot = new();
 
     public Guid Id { get; set; }
     

@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -14,7 +10,7 @@ public class Library
     
     public Guid GroupId { get; set; }
     
-    public LibGroup Group { get; set; }
+    public LibGroup? Group { get; set; }
 
     public string Version { get; set; } = "";
 
@@ -28,7 +24,7 @@ public class Library
 
     public string? License{ get; set; }
 
-    public Collection<LibAuthor> Authors { get; set; }
+    public Collection<LibAuthor> Authors { get; set; } = null!;
     
     internal static void OnBuildEntity(EntityTypeBuilder<Library> builder)
     {

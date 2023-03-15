@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Text.Json.Nodes;
-using System.Threading.Tasks;
 
 namespace CdnSync.CdnJs
 {
@@ -36,8 +32,6 @@ namespace CdnSync.CdnJs
             SetPropertyValue(PROPERTYNAME_status, status);
             SetPropertyValue(PROPERTYNAME_message, message.ToWsNormalizedOrDefaultIfEmpty(() => ToStatusMessage(status)));
         }
-
-        private ErrorResponse(JsonObject rawJson) : base(rawJson) { }
 
         public static TernaryOption<T, ErrorResponse> Create<T>(string? jsonString, Func<JsonNode, T?> load)
             where T : CdnJsObjectResponse
