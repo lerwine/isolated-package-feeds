@@ -21,12 +21,13 @@ internal class Program
                 string databaseFilePath = CdnSync.SettingsSections.CdnSyncSettings.GetDbFile(section.Get<CdnSync.SettingsSections.CdnSyncSettings>());
                 databaseFilePath = Path.GetFullPath(Path.IsPathRooted(databaseFilePath) ? databaseFilePath : Path.Combine(hbContext.HostingEnvironment.ContentRootPath, databaseFilePath));
                 services.AddDbContext<CdnSync.CdnSyncDb>(opt =>
-                opt.UseSqlite(new SqliteConnectionStringBuilder
-                {
-                    DataSource = databaseFilePath,
-                    ForeignKeys = true,
-                    Mode = File.Exists(databaseFilePath) ? SqliteOpenMode.ReadWrite : SqliteOpenMode.ReadWriteCreate
-                }.ConnectionString));
+                    opt.UseSqlite(new SqliteConnectionStringBuilder
+                    {
+                        DataSource = databaseFilePath,
+                        ForeignKeys = true,
+                        Mode = File.Exists(databaseFilePath) ? SqliteOpenMode.ReadWrite : SqliteOpenMode.ReadWriteCreate
+                    }.ConnectionString)
+                );
                 services.AddSingleton<CdnSync.CdnJsSyncService>();
             })
             .Build();
