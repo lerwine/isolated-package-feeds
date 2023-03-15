@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 
 namespace CdnSync
@@ -5,6 +7,27 @@ namespace CdnSync
     public static class ExtensionMethods
     {
         public static readonly Regex NonNormalizedWhiteSpaceRegex = new(@"( |(?! ))[\r\n\s]+", RegexOptions.Compiled);
+
+        public static JsonObject? ToJsonObject(this Dictionary<string, JsonElement>? source)
+        {
+            if (source is null)
+                return null;
+            JsonObject result = new();
+            foreach (KeyValuePair<string, JsonElement> kvp in source)
+                switch (kvp.Value.ValueKind)
+                {
+                    case JsonValueKind.Object:
+                        result.Add(kvp.Key, JsonObject.Create(kvp.Value));
+                        break;
+                    case JsonValueKind.Array:
+                        result.Add(kvp.Key, JsonArray.Create(kvp.Value));
+                        break;
+                    default:
+                        result.Add(kvp.Key, JsonValue.Create(kvp.Value));
+                        break;
+                }
+            return result;
+        }
 
         public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T>? source) { return (source is null) ? Enumerable.Empty<T>() : source; }
 
