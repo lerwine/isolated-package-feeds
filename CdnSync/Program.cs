@@ -17,11 +17,9 @@ internal class Program
             .ConfigureServices((hbContext, services) => {
                 services.AddHostedService<CdnSync.CdnSyncService>();
                 IConfigurationSection section = hbContext.Configuration.GetSection(nameof(CdnSync));
-                string? databaseFilePath = section.GetValue<string>(CdnSync.CdnSyncDb.SETTINGS_KEY_DbFile);
-                if (string.IsNullOrWhiteSpace(databaseFilePath))
-                    databaseFilePath = Path.Combine(hbContext.HostingEnvironment.ContentRootPath, CdnSync.CdnSyncDb.DEFAULT_DbFile);
-                else
-                    databaseFilePath = Path.GetFullPath(Path.IsPathFullyQualified(databaseFilePath) ? databaseFilePath : Path.Combine(hbContext.HostingEnvironment.ContentRootPath, databaseFilePath));
+                services.Configure<CdnSync.SettingsSections.CdnSyncSettings>(section);
+                string databaseFilePath = CdnSync.SettingsSections.CdnSyncSettings.GetDbFile(section.Get<CdnSync.SettingsSections.CdnSyncSettings>());
+                databaseFilePath = Path.GetFullPath(Path.IsPathRooted(databaseFilePath) ? databaseFilePath : Path.Combine(hbContext.HostingEnvironment.ContentRootPath, databaseFilePath));
                 services.AddDbContext<CdnSync.CdnSyncDb>(opt =>
                 opt.UseSqlite(new SqliteConnectionStringBuilder
                 {
@@ -29,8 +27,6 @@ internal class Program
                     ForeignKeys = true,
                     Mode = File.Exists(databaseFilePath) ? SqliteOpenMode.ReadWrite : SqliteOpenMode.ReadWriteCreate
                 }.ConnectionString));
-                
-                services.Configure<CdnSync.SettingsSections.CdnSyncSettings>(section.GetSection(nameof(CdnSync.SettingsSections.CdnSyncSettings)));
                 services.AddSingleton<CdnSync.CdnJsSyncService>();
             })
             .Build();

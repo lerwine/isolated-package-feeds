@@ -132,67 +132,33 @@ public class CdnJsSyncService
         if (response.IsSuccessStatusCode)
         {
             string jsonString  = await response.Content.ReadAsStringAsync(cancellationToken: stoppingToken);
+            if (stoppingToken.IsCancellationRequested)
+                return;
             _logger.LogDebug("Read: {json}", jsonString);
-            JsonNode? responseNode = JsonNode.Parse(jsonString)!;
-            if (responseNode is null)
-                _logger.LogWarning("Response code: {ResponseCode}; Content: {Content}", statusCode, jsonString);
+            if (CdnJs.Response.Error.TryDeserialize<CdnJs.Response.LibraryAllVersions>(jsonString, out CdnJs.Response.LibraryAllVersions? rc, out CdnJs.Response.Error? error))
+                foreach (string versionString in rc.versions.TrimmedNotEmptyValues())
+                    if (!await _dbContext.Versions.AnyAsync(v => v.LibraryId == id && v.VersionString == versionString, stoppingToken))
+                    {
+                        if (stoppingToken.IsCancellationRequested)
+                            return;
+                        // TODO: Download new version
+                    }
+                    else if (stoppingToken.IsCancellationRequested)
+                        return;
             else
-            {
-                JsonNode? propertyNode = responseNode["error"];
-                if (propertyNode is null || !propertyNode.GetValue<bool>())
-                {
-                    if ((propertyNode = responseNode["versions"]) is not null && propertyNode is JsonArray arr)
-                        foreach (JsonNode? node in arr)
-                        {
-                            if (node is not null && node is JsonValue value && value.TryGetValue(out string? remoteVersion) && !await _dbContext.Versions.AnyAsync(v => v.LibraryId == id && v.VersionString == remoteVersion, stoppingToken))
-                            {
-                                if (stoppingToken.IsCancellationRequested)
-                                    return;
-                                // TODO: Download new version
-                            }
-                        }
-
-                }
-                else if ((propertyNode = responseNode["status"]) is not null && propertyNode is JsonValue sv && sv.TryGetValue(out statusValue) && statusValue != (int)statusCode)
-                {
-                    if ((propertyNode = responseNode["error"]) is not null && propertyNode is JsonValue e && e.TryGetValue(out string? errorMessage))
-                        _logger.LogError("Response code: {ResponseCode}; Status code {StatusCode}; Message: {Message}", statusCode, statusValue, errorMessage);
-                    else
-                        _logger.LogError("Response code: {ResponseCode}; Status code {StatusCode}; Message: null", statusCode, statusValue);
-                }
-                else if ((propertyNode = responseNode["error"]) is not null && propertyNode is JsonValue e && e.TryGetValue(out string? errorMessage))
-                    _logger.LogError("Response code: {ResponseCode}; Message: {Message}", statusCode, errorMessage);
-                else
-                    _logger.LogError("Response code: {ResponseCode}; Message: null", statusCode);
-            }
+                _logger.LogError("Response code: {ResponseCode}; Status code {StatusCode}; Message: {Message}", statusCode, error.status, error.message.ToTrimmedOrDefaultIfEmpty(() => error.status.ToStatusMessage()));
         }
         else
         {
             string? jsonString;
-            try { jsonString = await response.Content.ReadAsStringAsync(cancellationToken: stoppingToken); }
+            try { jsonString = (await response.Content.ReadAsStringAsync(cancellationToken: stoppingToken)).ToTrimmedOrNullIfEmpty(); }
             catch { jsonString = null; }
-            JsonNode? responseNode;
             if (jsonString is null)
                 _logger.LogError("Response code: {ResponseCode}", statusCode);
+            else if (CdnJs.Response.Error.TryDeserialize(jsonString, out CdnJs.Response.Error? error))
+                _logger.LogError("Response code: {ResponseCode}; Status code {StatusCode}; Message: {Message}", statusCode, error.status, error.message.ToTrimmedOrDefaultIfEmpty(() => error.status.ToStatusMessage()));
             else
-            {
-                try { responseNode = JsonNode.Parse(jsonString); }
-                catch { responseNode = null; }
-                JsonNode? propertyNode;
-                if (responseNode is null || (propertyNode = responseNode["error"]) is null || !propertyNode.GetValue<bool>())
-                    _logger.LogError("Response code: {ResponseCode}; Content: {Content}", statusCode, jsonString);
-                else if ((propertyNode = responseNode["status"]) is not null && propertyNode is JsonValue sv && sv.TryGetValue(out statusValue) && statusValue != (int)statusCode)
-                {
-                    if ((propertyNode = responseNode["error"]) is not null && propertyNode is JsonValue e && e.TryGetValue(out string? errorMessage))
-                        _logger.LogError("Response code: {ResponseCode}; Status code {StatusCode}; Message: {Message}", statusCode, statusValue, errorMessage);
-                    else
-                        _logger.LogError("Response code: {ResponseCode}; Status code {StatusCode}; Message: null", statusCode, statusValue);
-                }
-                else if ((propertyNode = responseNode["error"]) is not null && propertyNode is JsonValue e && e.TryGetValue(out string? errorMessage))
-                    _logger.LogError("Response code: {ResponseCode}; Message: {Message}", statusCode, errorMessage);
-                else
-                    _logger.LogError("Response code: {ResponseCode}; Message: null", statusCode);
-            }
+                _logger.LogError("Response code: {ResponseCode}; Content: {Content}", statusCode, jsonString);
         }
     }
 }
