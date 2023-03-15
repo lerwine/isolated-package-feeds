@@ -13,7 +13,7 @@ public class CdnSyncDb : DbContext
     //     _logger = logger;
     // }
 
-    public CdnSyncDb(DbContextOptions<CdnSyncDb> options, ILogger<CdnSyncDb> logger) : base(options) { }
+    public CdnSyncDb(DbContextOptions<CdnSyncDb> options) : base(options) { }
 
     public DbSet<LibraryProvider> Providers { get; set; } = null!;
 
