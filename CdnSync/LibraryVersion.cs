@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +21,7 @@ public class LibraryVersion
     }
     
     private JsonObject? _providerData;
+    // BUG: JsonObject can't be serialized to DB
     public JsonObject? ProviderData
     {
         get { return _providerData; }

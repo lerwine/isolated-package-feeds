@@ -26,6 +26,7 @@ public class ContentLibrary
     }
     
     private JsonObject? _providerData;
+    // BUG: JsonObject can't be serialized to DB
     public JsonObject? ProviderData
     {
         get { return _providerData; }
