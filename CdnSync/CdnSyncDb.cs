@@ -5,13 +5,15 @@ namespace CdnSync;
 
 public class CdnSyncDb : DbContext
 {
-    private readonly ILogger<CdnSyncDb> _logger;
+    // private readonly ILogger<CdnSyncDb> _logger;
 
-    public CdnSyncDb(DbContextOptions<CdnSyncDb> options, ILogger<CdnSyncDb> logger)
-        : base(options)
-    {
-        _logger = logger;
-    }
+    // public CdnSyncDb(DbContextOptions<CdnSyncDb> options, ILogger<CdnSyncDb> logger)
+    //     : base(options)
+    // {
+    //     _logger = logger;
+    // }
+
+    public CdnSyncDb(DbContextOptions<CdnSyncDb> options, ILogger<CdnSyncDb> logger) : base(options) { }
 
     public DbSet<LibraryProvider> Providers { get; set; } = null!;
 
