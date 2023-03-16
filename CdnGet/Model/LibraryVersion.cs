@@ -120,4 +120,22 @@ public class LibraryVersion
         _ = builder.Property(f => f.LibraryId)
             .UseCollation("NOCASE");
     }
+
+    internal async Task RemoveAsync(Services.ContentDb dbContext, CancellationToken stoppingToken)
+    {
+        if (stoppingToken.IsCancellationRequested)
+            return;
+        Guid id = Id;
+        LibraryFile[] toRemove = await dbContext.Files.Where(v => v.VersionId == id).ToArrayAsync(stoppingToken);
+        if (stoppingToken.IsCancellationRequested)
+            return;
+        if (toRemove.Length > 0)
+        {
+            dbContext.Files.RemoveRange(toRemove);
+            await dbContext.SaveChangesAsync(true, stoppingToken);
+            if (stoppingToken.IsCancellationRequested)
+                return;
+        }
+        dbContext.Versions.Remove(this);
+    }
 }
