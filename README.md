@@ -4,9 +4,7 @@ The goal of this project is to develop content feed provders for environments th
 
 The initial scope is to create NuGet and NPM Package Feed services as well as content from CDN providers.
 
-## TODO
-
-- [ ] Use [ASP.NET Core Middleware](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/?view=aspnetcore-7.0) for updating libraries.
+[Click here to view project](https://github.com/users/lerwine/projects/4)
 
 ## References
 

@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CdnServer", "CdnServer\CdnS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CdnSync", "CdnSync\CdnSync.csproj", "{ACD6B9F5-1F30-4DED-B18B-FE088E25A849}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CdnGet", "CdnGet\CdnGet.csproj", "{8100E540-96BB-4796-9B99-A8AA3C425171}"
+EndProject
 Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -44,5 +46,17 @@ Global
 		{ACD6B9F5-1F30-4DED-B18B-FE088E25A849}.Release|x64.Build.0 = Release|Any CPU
 		{ACD6B9F5-1F30-4DED-B18B-FE088E25A849}.Release|x86.ActiveCfg = Release|Any CPU
 		{ACD6B9F5-1F30-4DED-B18B-FE088E25A849}.Release|x86.Build.0 = Release|Any CPU
+		{8100E540-96BB-4796-9B99-A8AA3C425171}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8100E540-96BB-4796-9B99-A8AA3C425171}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8100E540-96BB-4796-9B99-A8AA3C425171}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8100E540-96BB-4796-9B99-A8AA3C425171}.Debug|x64.Build.0 = Debug|Any CPU
+		{8100E540-96BB-4796-9B99-A8AA3C425171}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8100E540-96BB-4796-9B99-A8AA3C425171}.Debug|x86.Build.0 = Debug|Any CPU
+		{8100E540-96BB-4796-9B99-A8AA3C425171}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8100E540-96BB-4796-9B99-A8AA3C425171}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8100E540-96BB-4796-9B99-A8AA3C425171}.Release|x64.ActiveCfg = Release|Any CPU
+		{8100E540-96BB-4796-9B99-A8AA3C425171}.Release|x64.Build.0 = Release|Any CPU
+		{8100E540-96BB-4796-9B99-A8AA3C425171}.Release|x86.ActiveCfg = Release|Any CPU
+		{8100E540-96BB-4796-9B99-A8AA3C425171}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
