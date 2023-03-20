@@ -5,18 +5,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.Configure<CdnServer.CdnServerAppSettings>(builder.Configuration.GetSection(nameof(CdnServer)));
+IConfigurationSection section = builder.Configuration.GetSection(nameof(CdnServer));
+builder.Services.Configure<CdnServer.CdnServerAppSettings>(section);
 
-var app = builder.Build();
-
-CdnServer.CdnServerAppSettings settings = app.Configuration.Get<CdnServer.CdnServerAppSettings>();
+CdnServer.CdnServerAppSettings settings = builder.Configuration.Get<CdnServer.CdnServerAppSettings>();
 string? databaseFilePath = settings.DbFile;
 
 if (string.IsNullOrWhiteSpace(databaseFilePath))
     databaseFilePath = Path.Combine(builder.Environment.WebRootPath, $"{nameof(CdnServer)}.db");
 else
     databaseFilePath = Path.IsPathFullyQualified(databaseFilePath) ? Path.GetFullPath(databaseFilePath) : Path.Combine(builder.Environment.WebRootPath, databaseFilePath);
-app.Logger.LogInformation("Using database {databaseFilePath}", databaseFilePath);
+// app.Logger.LogInformation("Using database {databaseFilePath}", databaseFilePath);
 builder.Services.AddDbContext<CdnServer.Services.CdnAppDbContext>(opt =>
     opt.UseSqlite(new SqliteConnectionStringBuilder
     {
@@ -24,6 +23,8 @@ builder.Services.AddDbContext<CdnServer.Services.CdnAppDbContext>(opt =>
         ForeignKeys = true,
         Mode = File.Exists(databaseFilePath) ? SqliteOpenMode.ReadWrite : SqliteOpenMode.ReadWriteCreate
     }.ConnectionString));
+
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

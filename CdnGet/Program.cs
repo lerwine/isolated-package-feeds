@@ -22,7 +22,8 @@ IHost host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
                 Mode = File.Exists(databaseFilePath) ? SqliteOpenMode.ReadWrite : SqliteOpenMode.ReadWriteCreate
             }.ConnectionString)
         );
-        services.AddSingleton<CdnJsRemoteService>();
+        foreach (Type type in RemoteUpdateServiceAttribute.RemoteUpdateServices.Values.Select(t => t.Type))
+            services.AddSingleton(type);
     })
     .Build();
 host.Run();

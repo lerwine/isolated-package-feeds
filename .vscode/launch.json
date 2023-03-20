@@ -10,9 +10,9 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/CdnGet/bin/Debug/net6.0/CdnGet.dll",
+            "program": "${workspaceFolder}/CdnServer/bin/Debug/net6.0/CdnServer.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/CdnGet",
+            "cwd": "${workspaceFolder}/CdnServer",
             "stopAtEntry": false,
             // Enable launching a web browser when ASP.NET Core starts. For more information: https://aka.ms/VSCode-CS-LaunchJson-WebBrowser
             "serverReadyAction": {
@@ -28,9 +28,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/CdnSync/bin/Debug/net6.0/CdnSync.dll",
-            "args": [],
-            "cwd": "${workspaceFolder}/CdnSync",
+            "program": "${workspaceFolder}/CdnGet/bin/Debug/net6.0/CdnGet.dll",
+            "args": ["--CdnGet:ShowRemotes=true"],
+            "cwd": "${workspaceFolder}/CdnGet",
             "stopAtEntry": false,
             "console": "internalConsole"
         },

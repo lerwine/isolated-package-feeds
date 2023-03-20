@@ -6,14 +6,14 @@ namespace CdnGet.Config;
 public enum LibraryAction
 {
     /// <summary>
-    /// Adds a new <see cref="Model.ContentLibrary" /> to the current <see cref="Model.RemoteService" />.
-    /// </summary>
-    Add,
-    
-    /// <summary>
     /// Adds new versions of the <see cref="Model.ContentLibrary" /> that matches the specified <see cref="Model.ContentLibrary.Name" /> of the current <see cref="Model.RemoteService" />.
     /// </summary>
     GetNew,
+    
+    /// <summary>
+    /// Adds a new <see cref="Model.ContentLibrary" /> to the current <see cref="Model.RemoteService" />.
+    /// </summary>
+    Add,
     
     /// <summary>
     /// Reloads all versions of the <see cref="Model.ContentLibrary" /> that matches the specified <see cref="Model.ContentLibrary.Name" /> of the current <see cref="Model.RemoteService" />, including adding new versions from the remote service.

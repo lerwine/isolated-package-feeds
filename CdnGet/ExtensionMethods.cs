@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
@@ -8,6 +9,8 @@ namespace CdnGet;
 public static class ExtensionMethods
 {
     public static readonly Regex NonNormalizedWhiteSpaceRegex = new(@"( |(?! ))[\r\n\s]+", RegexOptions.Compiled);
+
+    public static readonly Regex LineBreakRegex = new(@"\r?\n|\n", RegexOptions.Compiled);
 
     public static readonly ValueConverter<JsonNode?, string?> JsonValueConverter = new(
         v => (v == null) ? null : v.ToJsonString(JsonSerializerOptions.Default),
@@ -226,6 +229,23 @@ public static class ExtensionMethods
         if (source is null)
             return Enumerable.Empty<string>();
         return source.Select(ToTrimmedOrNullIfEmpty).Where(t => t is not null)!;
+    }
+    
+    public static string[] SplitLines(this string? value)
+    {
+        if (value is null)
+            return Array.Empty<string>();
+        return LineBreakRegex.Split(value);
+    }
+
+    public static bool IsWsNormalizedNotEmpty(this string? value, [NotNullWhen(true)] out string? wsNormalized)
+    {
+        return (wsNormalized = value.ToWsNormalizedOrNullIfEmpty()) is not null;
+    }
+    
+    public static bool IsTrimmedNotEmpty(this string? value, [NotNullWhen(true)] out string? wsNormalized)
+    {
+        return (wsNormalized = value.ToTrimmedOrNullIfEmpty()) is not null;
     }
     
     public static string ToWsNormalizedOrEmptyIfNull(this string? value)

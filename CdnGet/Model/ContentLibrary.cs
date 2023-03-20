@@ -124,4 +124,27 @@ public class ContentLibrary
         _ = builder.Property(f => f.RemoteServiceId)
             .UseCollation("NOCASE");
     }
+
+    internal async Task RemoveAsync(Services.ContentDb dbContext, CancellationToken stoppingToken)
+    {
+        if (stoppingToken.IsCancellationRequested)
+            return;
+        Guid id = Id;
+        LibraryVersion[] toRemove = await dbContext.Versions.Where(v => v.LibraryId == id).ToArrayAsync(stoppingToken);
+        if (stoppingToken.IsCancellationRequested)
+            return;
+        if (toRemove.Length > 0)
+        {
+            foreach (LibraryVersion lv in toRemove)
+            {
+                await lv.RemoveAsync(dbContext, stoppingToken);
+                if (stoppingToken.IsCancellationRequested)
+                    return;
+            }
+            await dbContext.SaveChangesAsync(true, stoppingToken);
+            if (stoppingToken.IsCancellationRequested)
+                return;
+        }
+        dbContext.Libraries.Remove(this);
+    }
 }
