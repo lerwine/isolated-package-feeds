@@ -16,19 +16,34 @@ public class ContentDb : DbContext
     public DbSet<RemoteService> RemoteServices { get; set; } = null!;
 
     /// <summary>
+    /// Locally stored content libraries.
+    /// </summary>
+    public DbSet<LocalLibrary> LocalLibraries { get; set; } = null!;
+
+    /// <summary>
     /// Content libraries retrieved from remote content delivery networks.
     /// </summary>
-    public DbSet<ContentLibrary> Libraries { get; set; } = null!;
+    public DbSet<RemoteLibrary> RemoteLibraries { get; set; } = null!;
+
+    /// <summary>
+    /// Lcoally stored library versions.
+    /// </summary>
+    public DbSet<LocalVersion> LocalVersions { get; set; } = null!;
 
     /// <summary>
     /// Specific versions of content libraries retrieved from remote content delivery networks.
     /// </summary>
-    public DbSet<LibraryVersion> Versions { get; set; } = null!;
+    public DbSet<RemoteVersion> RemoteVersions { get; set; } = null!;
+
+    /// <summary>
+    /// Locally stored library files.
+    /// </summary>
+    public DbSet<LocalFile> LocalFiles { get; set; } = null!;
 
     /// <summary>
     /// Files retrieved from remote content delivery networks.
     /// </summary>
-    public DbSet<LibraryFile> Files { get; set; } = null!;
+    public DbSet<RemoteFile> RemoteFiles { get; set; } = null!;
     
     /// <summary>
     /// Configures the data model.
@@ -38,8 +53,11 @@ public class ContentDb : DbContext
     {
         modelBuilder
             .Entity<RemoteService>(RemoteService.OnBuildEntity)
-            .Entity<ContentLibrary>(ContentLibrary.OnBuildEntity)
-            .Entity<LibraryVersion>(LibraryVersion.OnBuildEntity)
-            .Entity<LibraryFile>(LibraryFile.OnBuildEntity);
+            .Entity<LocalLibrary>(LocalLibrary.OnBuildEntity)
+            .Entity<RemoteLibrary>(RemoteLibrary.OnBuildEntity)
+            .Entity<LocalVersion>(LocalVersion.OnBuildEntity)
+            .Entity<RemoteVersion>(RemoteVersion.OnBuildEntity)
+            .Entity<LocalFile>(LocalFile.OnBuildEntity)
+            .Entity<RemoteFile>(RemoteFile.OnBuildEntity);
     }
 }

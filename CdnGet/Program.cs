@@ -22,7 +22,7 @@ IHost host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
                 Mode = File.Exists(databaseFilePath) ? SqliteOpenMode.ReadWrite : SqliteOpenMode.ReadWriteCreate
             }.ConnectionString)
         );
-        foreach (Type type in RemoteUpdateServiceAttribute.RemoteUpdateServices.Values.Select(t => t.Type))
+        foreach (Type type in ContentGetterAttribute.RemoteUpdateServices.Values.Select(t => t.Type))
             services.AddSingleton(type);
     })
     .Build();
