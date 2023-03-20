@@ -72,5 +72,8 @@
             "isWholeLine": false,
             "diagnosticSeverity": "information"
         }
+    ],
+    "githubPullRequests.ignoredPullRequestBranches": [
+        "main"
     ]
 }
