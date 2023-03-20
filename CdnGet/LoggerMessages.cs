@@ -47,12 +47,22 @@ internal static class LoggerMessages
     public static void LogInvalidBaseUrl<T>(this ILogger logger, string remoteSvcName, Exception? error = null) => LogInvalidBaseUrl(logger, typeof(T), remoteSvcName, error);
     
     public static EventId LocalLibraryNotFound = new EventId(0x0009, nameof(LocalLibraryNotFound));
-    private static readonly Action<ILogger, string, string, Exception?> _localLibraryNotFound = LoggerMessage.Define<string, string>(Microsoft.Extensions.Logging.LogLevel.Warning,
-        LocalLibraryNotFound, "No local library named \"{LibraryName}\" exists from remote service \"{RemoteServiceName}\".");
-    public static void LogLocalLibraryNotFound(this ILogger logger, string libraryName, string remoteSvcName) => _invalidBaseUrl(logger, libraryName, remoteSvcName, null);
+    private static readonly Action<ILogger, string, Exception?> _localLibraryNotFound = LoggerMessage.Define<string>(Microsoft.Extensions.Logging.LogLevel.Warning,
+        LocalLibraryNotFound, "Local library named \"{LibraryName}\" not found.");
+    public static void LogLocalLibraryNotFound(this ILogger logger, string libraryName) => _localLibraryNotFound(logger, libraryName, null);
     
-    public static EventId LibraryAlreadyExistsLocal = new EventId(0x000a, nameof(LibraryAlreadyExistsLocal));
-    private static readonly Action<ILogger, string, string, Exception?> _libraryAlreadyExistsLocal = LoggerMessage.Define<string, string>(Microsoft.Extensions.Logging.LogLevel.Warning,
-        LibraryAlreadyExistsLocal, "Library \"{LibraryName}\" has already been retreived from \"{RemoteServiceName}\".");
-    public static void LogLibraryAlreadyExistsLocal(this ILogger logger, string libraryName, string remoteSvcName) => _libraryAlreadyExistsLocal(logger, libraryName, remoteSvcName, null);
+    public static EventId RemoteLibraryNotFound = new EventId(0x0009, nameof(RemoteLibraryNotFound));
+    private static readonly Action<ILogger, string, string, Exception?> _remoteLibraryNotFound = LoggerMessage.Define<string, string>(Microsoft.Extensions.Logging.LogLevel.Warning,
+        RemoteLibraryNotFound, "No local library named \"{LibraryName}\" exists from remote service \"{RemoteServiceName}\".");
+    public static void LogRemoteLibraryNotFound(this ILogger logger, string libraryName, string remoteSvcName) => _remoteLibraryNotFound(logger, libraryName, remoteSvcName, null);
+    
+    public static EventId LocalLibraryAlreadyExists = new EventId(0x000a, nameof(LocalLibraryAlreadyExists));
+    private static readonly Action<ILogger, string, Exception?> _localLibraryAlreadyExists = LoggerMessage.Define<string>(Microsoft.Extensions.Logging.LogLevel.Warning,
+        LocalLibraryAlreadyExists, "Local Library \"{LibraryName}\" has already been retreived.");
+    public static void LogLocalLibraryAlreadyExists(this ILogger logger, string libraryName) => _localLibraryAlreadyExists(logger, libraryName, null);
+    
+    public static EventId RemoteLibraryAlreadyExists = new EventId(0x000a, nameof(RemoteLibraryAlreadyExists));
+    private static readonly Action<ILogger, string, string, Exception?> _remoteLibraryAlreadyExists = LoggerMessage.Define<string, string>(Microsoft.Extensions.Logging.LogLevel.Warning,
+        RemoteLibraryAlreadyExists, "Library \"{LibraryName}\" has already been retreived from \"{RemoteServiceName}\".");
+    public static void LogRemoteLibraryAlreadyExists(this ILogger logger, string libraryName, string remoteSvcName) => _remoteLibraryAlreadyExists(logger, libraryName, remoteSvcName, null);
 }

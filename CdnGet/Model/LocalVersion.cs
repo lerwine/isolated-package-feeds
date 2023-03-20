@@ -1,14 +1,10 @@
 using System.Collections.ObjectModel;
-using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace CdnGet.Model;
 
-/// <summary>
-/// Represents a specific version of a content library.
-/// </summary>
-public class LibraryVersion
+public class LocalVersion
 {
     private readonly object _syncRoot = new();
 
@@ -31,11 +27,6 @@ public class LibraryVersion
     /// The release order for the library version.
     /// </summary>
     public ushort Order { get; set; }
-
-    /// <summary>
-    /// Optional provider-specific data for <see cref="RemoteService" />.
-    /// </summary>
-    public JsonNode? ProviderData { get; set; }
 
     private DateTime? _createdOn;
     /// <summary>
@@ -69,7 +60,7 @@ public class LibraryVersion
 
     private Guid _libraryId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="ContentLibrary" />.
+    /// The unique identifier of the parent <see cref="LocalLibrary" />.
     /// </summary>
     public Guid LibraryId
     {
@@ -77,34 +68,33 @@ public class LibraryVersion
         set => value.SetNavigation(_syncRoot, p => p.Id, ref _libraryId, ref _library);
     }
 
-    private ContentLibrary? _library;
+    private LocalLibrary? _library;
     /// <summary>
     /// The parent content library.
     /// </summary>
-    public ContentLibrary? Library
+    public LocalLibrary? Library
     {
         get => _library;
         set => value.SetNavigation(_syncRoot, p => p.Id, ref _libraryId, ref _library);
     }
 
-    private Collection<LibraryFile> _file = new();
     /// <summary>
     /// The files that belong to the current version of the content library.
     /// </summary>
-    public Collection<LibraryFile> Files
-    {
-        get => _file;
-        set => _file = value ?? new();
-    }
+    public Collection<LocalFile> Files { get; set; } = new();
+    
+    public Collection<RemoteVersion> Remotes { get; set; } = new();
 
     /// <summary>
-    /// Performs configuration of the <see cref="LibraryVersion" /> entity type in the model for the <see cref="Services.ContentDb" />.
+    /// Performs configuration of the <see cref="LocalVersion" /> entity type in the model for the <see cref="Services.ContentDb" />.
     /// </summary>
     /// <param name="builder">The builder being used to configure the current entity type.</param>
-    internal static void OnBuildEntity(EntityTypeBuilder<LibraryVersion> builder)
+    internal static void OnBuildEntity(EntityTypeBuilder<LocalVersion> builder)
     {
         _ = builder.HasKey(nameof(Id));
         _ = builder.Property(v => v.Id)
+            .UseCollation("NOCASE");
+        _ = builder.Property(v => v.LibraryId)
             .UseCollation("NOCASE");
         _ = builder.HasIndex(nameof(Version));
         _ = builder.HasIndex(nameof(Version), nameof(LibraryId)).IsUnique();
@@ -115,27 +105,47 @@ public class LibraryVersion
         _ = builder.Property(c => c.Order).IsRequired();
         _ = builder.HasIndex(nameof(Order));
         _ = builder.HasIndex(nameof(Order), nameof(LibraryId)).IsUnique();
-        _ = builder.Property(v => v.ProviderData).HasConversion(ExtensionMethods.JsonValueConverter);
         _ = builder.HasOne(v => v.Library).WithMany(l => l.Versions).HasForeignKey(l => l.LibraryId).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
-        _ = builder.Property(f => f.LibraryId)
-            .UseCollation("NOCASE");
     }
 
-    internal async Task RemoveAsync(Services.ContentDb dbContext, CancellationToken stoppingToken)
+    internal async Task ClearRemotesAsync(Services.ContentDb dbContext, CancellationToken cancellationToken)
     {
-        if (stoppingToken.IsCancellationRequested)
-            return;
         Guid id = Id;
-        LibraryFile[] toRemove = await dbContext.Files.Where(v => v.VersionId == id).ToArrayAsync(stoppingToken);
-        if (stoppingToken.IsCancellationRequested)
-            return;
-        if (toRemove.Length > 0)
+        foreach (RemoteVersion toRemove in await dbContext.RemoteVersions.Where(r => r.LocalId == id).ToArrayAsync(cancellationToken))
         {
-            dbContext.Files.RemoveRange(toRemove);
-            await dbContext.SaveChangesAsync(true, stoppingToken);
-            if (stoppingToken.IsCancellationRequested)
+            await toRemove.RemoveAsync(dbContext, cancellationToken);
+            if (cancellationToken.IsCancellationRequested)
                 return;
         }
-        dbContext.Versions.Remove(this);
+        Remotes.Clear();
+    }
+
+    internal async Task ClearFilesAsync(Services.ContentDb dbContext, CancellationToken cancellationToken)
+    {
+        Guid id = Id;
+        foreach (LocalFile toRemove in await dbContext.LocalFiles.Where(f => f.VersionId == id).ToArrayAsync(cancellationToken))
+        {
+            await toRemove.RemoveAsync(dbContext, cancellationToken);
+            if (cancellationToken.IsCancellationRequested)
+                return;
+        }
+        Files.Clear();
+    }
+
+    internal async Task RemoveAsync(Services.ContentDb dbContext, CancellationToken cancellationToken)
+    {
+        await ClearRemotesAsync(dbContext, cancellationToken);
+        if (cancellationToken.IsCancellationRequested)
+            return;
+        await ClearFilesAsync(dbContext, cancellationToken);
+        if (cancellationToken.IsCancellationRequested)
+            return;
+        dbContext.LocalVersions.Remove(this);
+        await dbContext.SaveChangesAsync(true, cancellationToken);
+    }
+
+    internal async Task ReloadAsync(Services.ContentDb dbContext, CancellationToken stoppingToken)
+    {
+        throw new NotImplementedException();
     }
 }

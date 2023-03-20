@@ -1,7 +1,11 @@
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace CdnGet;
@@ -215,7 +219,11 @@ public static class ExtensionMethods
         finally { Monitor.Exit(syncRoot); }
     }
 
+    public static T[] EmptyIfNull<T>(this T[]? source) { return (source is null) ? Array.Empty<T>() : source; }
+
     public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T>? source) { return (source is null) ? Enumerable.Empty<T>() : source; }
+
+    public static T[]? NullIfEmpty<T>(this T[]? source) { return (source is null || source.Length == 0) ? null : source; }
 
     public static IEnumerable<T> NonNullValues<T>(this IEnumerable<T?>? source) where T : class
     {
@@ -276,9 +284,8 @@ public static class ExtensionMethods
 
     public static string ToTrimmedOrDefaultIfEmpty(this string? value, string defaultValue) { return (value is not null && (value = value.Trim()).Length > 0) ? value : defaultValue; }
 
-    public static void SetNavigation<TFK, TTarget>(this TFK newValue, object syncRoot, Func<TTarget, TFK> keyAcessor, ref TFK foreignKey, ref TTarget? target)
-        where TFK : struct, IEquatable<TFK>
-        where TTarget : class
+    public static void SetNavigation<T>(this Guid newValue, object syncRoot, Func<T, Guid> keyAcessor, ref Guid foreignKey, ref T? target)
+        where T : class
     {
         Monitor.Enter(syncRoot);
         try
@@ -294,59 +301,107 @@ public static class ExtensionMethods
         finally { Monitor.Exit(syncRoot); }
     }
 
-    public static void SetNavigation<TFK, TTarget>(this TTarget? newValue, object syncRoot, Func<TTarget, TFK> keyAcessor, ref TFK foreignKey, ref TTarget? target)
-        where TFK : struct, IEquatable<TFK>
-        where TTarget : class
-    {
-        if (newValue is null)
-            throw new ArgumentNullException(nameof(newValue));
-        Monitor.Enter(syncRoot);
-        try
-        {
-            if (target is null || !ReferenceEquals(newValue, target))
-                foreignKey = keyAcessor(target = newValue);
-        }
-        finally { Monitor.Exit(syncRoot); }
-    }
-
-    public static void SetNavigation<TFK, TTarget>(this TFK? newValue, object syncRoot, Func<TTarget, TFK> keyAcessor, ref TFK? foreignKey, ref TTarget? target)
-        where TFK : struct, IEquatable<TFK>
-        where TTarget : class
+    public static void SetNavigation<T>(this Guid newValue1, Guid newValue2, object syncRoot, Func<T, (Guid, Guid)> keyAcessor, ref Guid foreignKey1, ref Guid foreignKey2, ref T? target)
+        where T : class
     {
         Monitor.Enter(syncRoot);
         try
         {
             if (target is not null)
             {
-                if (newValue.HasValue && newValue.Value.Equals(keyAcessor(target)))
+                (Guid fk1, Guid fk2) = keyAcessor(target);
+                if (newValue1.Equals(fk1) && newValue2.Equals(fk2))
                     return;
                 target = null;
             }
-            foreignKey = newValue;
+            foreignKey1 = newValue1;
+            foreignKey2 = newValue2;
         }
         finally { Monitor.Exit(syncRoot); }
     }
 
-    public static void SetNavigation<TFK, TTarget>(this TTarget? newValue, object syncRoot, Func<TTarget, TFK> keyAcessor, ref TFK? foreignKey, ref TTarget? target)
-        where TFK : struct, IEquatable<TFK>
-        where TTarget : class
+    public static void SetNavigation<T>(this Guid newValue1, Guid newValue2, Guid newValue3, object syncRoot, Func<T, (Guid, Guid, Guid)> keyAcessor, ref Guid foreignKey1, ref Guid foreignKey2, ref Guid foreignKey3, ref T? target)
+        where T : class
+    {
+        Monitor.Enter(syncRoot);
+        try
+        {
+            if (target is not null)
+            {
+                (Guid fk1, Guid fk2, Guid fk3) = keyAcessor(target);
+                if (newValue1.Equals(fk1) && newValue2.Equals(fk2) && newValue3.Equals(fk3))
+                    return;
+                target = null;
+            }
+            foreignKey1 = newValue1;
+            foreignKey2 = newValue2;
+            foreignKey3 = newValue3;
+        }
+        finally { Monitor.Exit(syncRoot); }
+    }
+
+    public static void SetNavigation<T>(this T? newValue, object syncRoot, Func<T, Guid> keyAcessor, ref Guid foreignKey, ref T? target)
+        where T : class
     {
         Monitor.Enter(syncRoot);
         try
         {
             if (newValue is null)
-                foreignKey = null;
-            else
-            {
-                if (target is not null && ReferenceEquals(target, newValue))
-                    return;
-                foreignKey = keyAcessor(newValue);
-            }
-            target = newValue;
+                target = null;
+            else if (target is null || ReferenceEquals(newValue, target))
+                foreignKey = keyAcessor(target = newValue);
         }
         finally { Monitor.Exit(syncRoot); }
     }
-    
+
+    public static void SetNavigation<T>(this T? newValue, object syncRoot, Func<T, (Guid, Guid)> keyAcessor, ref Guid foreignKey1, ref Guid foreignKey2, ref T? target)
+        where T : class
+    {
+        Monitor.Enter(syncRoot);
+        try
+        {
+            if (newValue is null)
+                target = null;
+            else if (target is null || !ReferenceEquals(newValue, target))
+                (foreignKey1, foreignKey2) = keyAcessor(target = newValue);
+        }
+        finally { Monitor.Exit(syncRoot); }
+    }
+
+    public static void SetNavigation<T>(this T? newValue, object syncRoot, Func<T, (Guid, Guid, Guid)> keyAcessor, ref Guid foreignKey1, ref Guid foreignKey2, ref Guid foreignKey3, ref T? target)
+        where T : class
+    {
+        Monitor.Enter(syncRoot);
+        try
+        {
+            if (newValue is null)
+                target = null;
+            else if (target is null || !ReferenceEquals(newValue, target))
+                (foreignKey1, foreignKey2, foreignKey3) = keyAcessor(target = newValue);
+        }
+        finally { Monitor.Exit(syncRoot); }
+    }
+
+    public static async Task<IEnumerable<TProperty>> EnsureCollectionAsync<TEntity, TProperty>(this EntityEntry<TEntity> entityEntry, Expression<Func<TEntity, IEnumerable<TProperty>>> propertyExpression, CancellationToken cancellationToken)
+         where TEntity : class
+         where TProperty : class
+    {
+        CollectionEntry<TEntity, TProperty> collectionEntry = entityEntry.Collection(propertyExpression);
+        if (!collectionEntry.IsLoaded)
+            await collectionEntry.LoadAsync(cancellationToken);
+        return collectionEntry.CurrentValue ?? Enumerable.Empty<TProperty>();
+    }
+
+    public static async Task<TProperty?> EnsureRelatedAsync<TEntity, TProperty>(this EntityEntry<TEntity> entityEntry, Expression<Func<TEntity, TProperty?>> propertyExpression, CancellationToken cancellationToken)
+         where TEntity : class
+         where TProperty : class
+    {
+        ReferenceEntry<TEntity, TProperty> referenceEntry = entityEntry.Reference(propertyExpression);
+        if (!referenceEntry.IsLoaded)
+            await referenceEntry.LoadAsync(cancellationToken);
+        return referenceEntry.CurrentValue;
+    }
+
     public static string ToStatusMessage(this int statusCode) => statusCode switch
     {
         100 => "Continue",

@@ -1,19 +1,16 @@
-using System.Text.Json.Nodes;
+using System.Collections.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace CdnGet.Model;
 
-/// <summary>
-/// Represents an individual file in a specific version of a content library.
-/// </summary>
-public class LibraryFile
+public class LocalFile
 {
     private readonly object _syncRoot = new();
 
     private Guid? _id;
     /// <summary>
-    /// The unique identifier for the library file.
+    /// The unique identifier for the library version.
     /// </summary>
     public Guid Id
     {
@@ -31,6 +28,16 @@ public class LibraryFile
         set => _name = value.ToWsNormalizedOrEmptyIfNull();
     }
 
+    private string _sri = "";
+    /// <summary>
+    /// The Cryptographic hash.
+    /// </summary>
+    public string SRI
+    {
+        get => _sri;
+        set => _sri = value.ToWsNormalizedOrEmptyIfNull();
+    }
+
     /// <summary>
     /// The display order for the library file.
     /// </summary>
@@ -46,14 +53,14 @@ public class LibraryFile
         set => _contentType = value.ToTrimmedOrDefaultIfEmpty(() => System.Net.Mime.MediaTypeNames.Application.Octet);
     }
 
-    private string? _encoding;
+    private string _encoding = "";
     /// <summary>
-    /// The content encoding for library file or <cref langword="null" /> for binary files.
+    /// The content encoding for library file or <see cref="string.Empty" /> for binary files.
     /// </summary>
-    public string? Encoding
+    public string Encoding
     {
         get => _encoding;
-        set => _encoding = value.ToTrimmedOrNullIfEmpty();
+        set => _encoding = value.ToTrimmedOrEmptyIfNull();
     }
 
     private byte[] _data = Array.Empty<byte>();
@@ -65,11 +72,6 @@ public class LibraryFile
         get => _data;
         set => _data = value ?? Array.Empty<byte>();
     }
-
-    /// <summary>
-    /// Optional provider-specific data for <see cref="RemoteService" />.
-    /// </summary>
-    public JsonNode? ProviderData { get; set; }
 
     private DateTime? _createdOn;
     /// <summary>
@@ -103,7 +105,7 @@ public class LibraryFile
 
     private Guid _versionId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="LibraryVersion" />.
+    /// The unique identifier of the parent <see cref="RemoteVersion" />.
     /// </summary>
     public Guid VersionId
     {
@@ -111,21 +113,23 @@ public class LibraryFile
         set => value.SetNavigation(_syncRoot, p => p.Id, ref _versionId, ref _version);
     }
 
-    private LibraryVersion? _version;
+    private LocalVersion? _version;
     /// <summary>
     /// The content library version that the current file belongs to.
     /// </summary>
-    public LibraryVersion? Version
+    public LocalVersion? Version
     {
         get => _version;
         set => value.SetNavigation(_syncRoot, p => p.Id, ref _versionId, ref _version);
     }
     
+    public Collection<RemoteFile> Remotes { get; set; } = new();
+    
     /// <summary>
-    /// Performs configuration of the <see cref="LibraryFile" /> entity type in the model for the <see cref="Services.ContentDb" />.
+    /// Performs configuration of the <see cref="RemoteFile" /> entity type in the model for the <see cref="Services.ContentDb" />.
     /// </summary>
     /// <param name="builder">The builder being used to configure the current entity type.</param>
-    internal static void OnBuildEntity(EntityTypeBuilder<LibraryFile> builder)
+    internal static void OnBuildEntity(EntityTypeBuilder<LocalFile> builder)
     {
         _ = builder.HasKey(nameof(Id));
         _ = builder.Property(f => f.Id)
@@ -135,14 +139,37 @@ public class LibraryFile
         _ = builder.Property(f => f.Name)
             .IsRequired()
             .UseCollation("NOCASE");
+        _ = builder.Property(f => f.SRI)
+            .IsRequired()
+            .UseCollation("NOCASE");
         _ = builder.Property(c => c.Order).IsRequired();
         _ = builder.Property(c => c.Data).IsRequired();
         _ = builder.Property(c => c.ContentType).IsRequired();
         _ = builder.HasIndex(nameof(Order));
         _ = builder.HasIndex(nameof(Order), nameof(VersionId)).IsUnique();
-        _ = builder.Property(f => f.ProviderData).HasConversion(ExtensionMethods.JsonValueConverter);
         _ = builder.HasOne(f => f.Version).WithMany(v => v.Files).HasForeignKey(f => f.VersionId).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
         _ = builder.Property(f => f.VersionId)
             .UseCollation("NOCASE");
+            // .UseCollation("SQL_Latin1_General_CP1_CI_AS");
+    }
+
+    internal async Task RemoveAsync(Services.ContentDb dbContext, CancellationToken cancellationToken)
+    {
+        Guid id = Id;
+        RemoteFile[] toRemove = await dbContext.RemoteFiles.Where(f => f.LocalId == id).ToArrayAsync(cancellationToken);
+        if (cancellationToken.IsCancellationRequested)
+            return;
+        if (toRemove.Length > 0)
+        {
+            dbContext.RemoteFiles.RemoveRange(toRemove);
+            await dbContext.SaveChangesAsync(true, cancellationToken);
+            if (cancellationToken.IsCancellationRequested)
+                return;
+            Remotes.Clear();
+        }
+        if (cancellationToken.IsCancellationRequested)
+            return;
+        dbContext.LocalFiles.Remove(this);
+        await dbContext.SaveChangesAsync(true, cancellationToken);
     }
 }

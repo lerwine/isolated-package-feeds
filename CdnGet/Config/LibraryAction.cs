@@ -6,27 +6,27 @@ namespace CdnGet.Config;
 public enum LibraryAction
 {
     /// <summary>
-    /// Adds new versions of the <see cref="Model.ContentLibrary" /> that matches the specified <see cref="Model.ContentLibrary.Name" /> of the current <see cref="Model.RemoteService" />.
+    /// Adds new versions of the <see cref="Model.RemoteLibrary" /> that matches the specified <see cref="Model.RemoteLibrary.Name" /> of the current <see cref="Model.RemoteService" />.
     /// </summary>
-    GetNew,
+    GetNewVersions,
     
     /// <summary>
-    /// Adds a new <see cref="Model.ContentLibrary" /> to the current <see cref="Model.RemoteService" />.
+    /// Adds a new <see cref="Model.RemoteLibrary" /> to the current <see cref="Model.RemoteService" />.
     /// </summary>
     Add,
     
     /// <summary>
-    /// Reloads all versions of the <see cref="Model.ContentLibrary" /> that matches the specified <see cref="Model.ContentLibrary.Name" /> of the current <see cref="Model.RemoteService" />, including adding new versions from the remote service.
+    /// Reloads all versions of the <see cref="Model.RemoteLibrary" /> that matches the specified <see cref="Model.RemoteLibrary.Name" /> of the current <see cref="Model.RemoteService" />, including adding new versions from the remote service.
     /// </summary>
     Reload,
     
     /// <summary>
-    /// Reloads existing <see cref="Model.LibraryVersion" /> records for the <see cref="Model.ContentLibrary" /> that matches the specified <see cref="Model.ContentLibrary.Name" /> of the current <see cref="Model.RemoteService" />.
+    /// Reloads existing <see cref="Model.RemoteVersion" /> records for the <see cref="Model.RemoteLibrary" /> that matches the specified <see cref="Model.RemoteLibrary.Name" /> of the current <see cref="Model.RemoteService" />.
     /// </summary>
-    ReloadExisting,
+    ReloadExistingVersions,
     
     /// <summary>
-    /// Removes the <see cref="Model.ContentLibrary" /> from the <see cref="Services.ContentDb" /> that matches the current <see cref="Model.RemoteService" /> and the specified <see cref="Model.ContentLibrary.Name" />.
+    /// Removes the <see cref="Model.RemoteLibrary" /> from the <see cref="Services.ContentDb" /> that matches the current <see cref="Model.RemoteService" /> and the specified <see cref="Model.RemoteLibrary.Name" />.
     /// </summary>
     Remove
 }

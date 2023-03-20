@@ -66,57 +66,5 @@ public class AppSettings
     /// </remarks>
     public string? Show { get; set; }
 
-    public IEnumerable<(LibraryAction Action, string[] Names)> GetLibraryActions()
-    {
-        StringComparer comparer = StringComparer.InvariantCultureIgnoreCase;
-        IEnumerable<string> toReload;
-        
-        IEnumerable<string> toReloadExisting = ReloadExistingVersions?.Select(l => l.ToWsNormalizedOrEmptyIfNull()).Where(l => l.Length > 0).Distinct(comparer).ToArray() ?? Enumerable.Empty<string>();
-        IEnumerable<string> toGetNew = GetNewVersions?.Select(l => l.ToWsNormalizedOrEmptyIfNull()).Where(l => l.Length > 0).Distinct(comparer).ToArray() ?? Enumerable.Empty<string>();
-        if (toGetNew.Any())
-        {
-            if (toReloadExisting.Any(e => toGetNew.Contains(e, comparer)))
-            {
-                string[] r = toReloadExisting.Where(e => toGetNew.Contains(e, comparer)).ToArray();
-                toGetNew = toGetNew.Where(n => !r.Contains(n, comparer));
-                toReloadExisting = toReloadExisting.Where(n => !r.Contains(n, comparer));
-                if (Reload is null || !(toReload = Reload.Select(l => l.ToWsNormalizedOrEmptyIfNull()).Where(l => l.Length > 0)).Any())
-                    toReload = r;
-                else
-                    toReload = toReload.Concat(r).Distinct(comparer);
-            }
-            else if (Reload is null)
-                toReload = Enumerable.Empty<string>();
-            else if ((toReload = Reload.Select(l => l.ToWsNormalizedOrEmptyIfNull()).Where(l => l.Length > 0)).Distinct(comparer).Any())
-            {
-                toReloadExisting = toReloadExisting.Where(r => !toReload.Contains(r, comparer));
-                toGetNew = toGetNew.Where(r => !toReload.Contains(r, comparer));
-            }
-        }
-        else if (Reload is null)
-            toReload = Enumerable.Empty<string>();
-        else if ((toReload = Reload.Select(l => l.ToWsNormalizedOrEmptyIfNull()).Where(l => l.Length > 0)).Distinct(comparer).Any())
-            toReloadExisting = toReloadExisting.Where(r => !toReload.Contains(r, comparer));
-            
-        IEnumerable<string> toAdd = Add?.Select(l => l.ToWsNormalizedOrEmptyIfNull()).Where(l => l.Length > 0).Distinct(comparer) ?? Enumerable.Empty<string>();
-        string[] toRemove;
-        if (Remove is not null && (toRemove = Remove.Select(l => l.ToWsNormalizedOrEmptyIfNull()).Where(l => l.Length > 0).Distinct(comparer).ToArray()).Length > 0)
-        {
-            toAdd = toAdd.Where(a => !toRemove.Contains(a, comparer));
-            toReload = toReload.Where(a => !toRemove.Contains(a, comparer));
-            toReloadExisting = toReloadExisting.Where(a => !toRemove.Contains(a, comparer));
-            toGetNew = toGetNew.Where(a => !toRemove.Contains(a, comparer));
-            yield return (LibraryAction.Remove, toRemove);
-        }
-        if (toReloadExisting.Any())
-            yield return (LibraryAction.ReloadExisting, (toReloadExisting is string[] arr) ? arr : toReloadExisting.ToArray());
-        if (toGetNew.Any())
-            yield return (LibraryAction.GetNew, (toGetNew is string[] arr) ? arr : toGetNew.ToArray());
-        if (toReload.Any())
-            yield return (LibraryAction.Reload, toReload.ToArray());
-        if (toAdd.Any())
-            yield return (LibraryAction.Add, toAdd.ToArray());
-    }
-
     public static string GetDbFileName(AppSettings? settings) { return (settings?.DbFile).ToTrimmedOrDefaultIfEmpty(DEFAULT_DbFile); }
 }
