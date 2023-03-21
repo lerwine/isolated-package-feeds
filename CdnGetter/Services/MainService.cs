@@ -1,12 +1,12 @@
-using CdnGet.Config;
-using CdnGet.Model;
+using CdnGetter.Config;
+using CdnGetter.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace CdnGet.Services;
+namespace CdnGetter.Services;
 
 public class MainService : BackgroundService
 {
@@ -82,7 +82,7 @@ public class MainService : BackgroundService
             }
             else
             {
-                LibraryActionGroup[] actions = LibraryActionGroup.FromSettings(_appSettings).ToArray();
+                Model.LibraryActionGroup[] actions = Model.LibraryActionGroup.FromSettings(_appSettings).ToArray();
                 if (actions.Length > 0)
                     await UpdateLibrariesAsync(actions, stoppingToken);
                 else
@@ -110,12 +110,12 @@ public class MainService : BackgroundService
 #pragma warning restore CA2016, CS4014
     }
 
-    private async Task UpdateLibrariesAsync(LibraryActionGroup[] actions, System.Threading.CancellationToken stoppingToken)
+    private async Task UpdateLibrariesAsync(Model.LibraryActionGroup[] actions, System.Threading.CancellationToken stoppingToken)
     {
-        foreach (LibraryActionGroup g in actions)
+        foreach (Model.LibraryActionGroup g in actions)
             switch (g.Action)
             {
-                case LibraryAction.Remove:
+                case Model.LibraryAction.Remove:
                     foreach (string n in g.LibraryNames)
                     {
                         LocalLibrary? ll = await _dbContext.LocalLibraries.FirstOrDefaultAsync(l => l.Name == n, stoppingToken);
@@ -123,7 +123,7 @@ public class MainService : BackgroundService
                             await ll.RemoveAsync(_dbContext, stoppingToken);
                     }
                     break;
-                case LibraryAction.ReloadExistingVersions:
+                case Model.LibraryAction.ReloadExistingVersions:
                     foreach (string n in g.LibraryNames)
                     {
                         LocalLibrary? ll = await _dbContext.LocalLibraries.Where(l => l.Name == n).Include(l => l.Versions).FirstAsync(stoppingToken);
@@ -134,7 +134,7 @@ public class MainService : BackgroundService
                                 await lv.ReloadAsync(_dbContext, stoppingToken);
                     }
                     break;
-                case LibraryAction.GetNewVersions:
+                case Model.LibraryAction.GetNewVersions:
                     foreach (string n in g.LibraryNames)
                     {
                         LocalLibrary? ll = await _dbContext.LocalLibraries.FirstOrDefaultAsync(l => l.Name == n);
@@ -144,7 +144,7 @@ public class MainService : BackgroundService
                             await ll.GetNewVersionsAsync(_dbContext, stoppingToken);
                     }
                     break;
-                case LibraryAction.Reload:
+                case Model.LibraryAction.Reload:
                     foreach (string n in g.LibraryNames)
                     {
                         LocalLibrary? ll = await _dbContext.LocalLibraries.FirstOrDefaultAsync(l => l.Name == n);

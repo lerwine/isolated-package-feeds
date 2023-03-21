@@ -1,8 +1,8 @@
-namespace CdnGet.Config;
+namespace CdnGetter.Model;
 
 public record LibraryActionGroup(LibraryAction Action, string[] LibraryNames)
 {
-    public static IEnumerable<LibraryActionGroup> FromSettings(AppSettings settings)
+    public static IEnumerable<LibraryActionGroup> FromSettings(Config.AppSettings settings)
     {
         StringComparer comparer = StringComparer.InvariantCultureIgnoreCase;
         IEnumerable<string> toReload;

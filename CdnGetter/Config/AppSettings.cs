@@ -1,4 +1,4 @@
-namespace CdnGet.Config;
+namespace CdnGetter.Config;
 
 /// <summary>
 /// Top-level section for custom app settings.
@@ -8,7 +8,7 @@ public class AppSettings
     /// <summary>
     /// Default name of database file.
     /// </summary>
-    public const string DEFAULT_DbFile = $"{nameof(CdnGet)}.db";
+    public const string DEFAULT_DbFile = $"{nameof(CdnGetter)}.db";
 
     /// <summary>
     /// Specifies path of database file.
@@ -54,7 +54,7 @@ public class AppSettings
     /// <summary>
     /// Displays the names of registered remote content delivery services.
     /// </summary>
-    /// <remarks>Use <c>--CdnGet:ShowRemotes=true</c> from the command line.</remarks>
+    /// <remarks>Use <c>--CdnGetter:ShowRemotes=true</c> from the command line.</remarks>
     public bool? ShowRemotes { get; set; }
 
     /// <summary>

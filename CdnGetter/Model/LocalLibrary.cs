@@ -1,10 +1,12 @@
 using System.Collections.ObjectModel;
-using CdnGet.Config;
+using CdnGetter.Config;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.Extensions.Logging;
+using static CdnGetter.SqlDefinitions;
 
-namespace CdnGet.Model;
+namespace CdnGetter.Model;
 
 public class LocalLibrary
 {
@@ -20,7 +22,8 @@ public class LocalLibrary
         set => _id = value;
     }
     
-    private string _name = "";
+    public const int MAXLENGTH_Name = 1024;
+    private string _name = string.Empty;
     /// <summary>
     /// The name of the content library.
     /// </summary>
@@ -30,7 +33,7 @@ public class LocalLibrary
         set => _name = value.ToWsNormalizedOrEmptyIfNull();
     }
 
-    private string _description = "";
+    private string _description = string.Empty;
     /// <summary>
     /// Verbose description of the content library.
     /// </summary>
@@ -40,35 +43,16 @@ public class LocalLibrary
         set => _description = value.ToTrimmedOrEmptyIfNull();
     }
 
-    private DateTime? _createdOn;
     /// <summary>
     /// The date and time that the record was created.
     /// </summary>
-    public DateTime CreatedOn
-    {
-        get => _createdOn.EnsureCreatedOn(ref _modifiedOn, ref _lastChecked, _syncRoot);
-        set => value.SetCreatedOn(ref _createdOn, ref _modifiedOn, ref _lastChecked, _syncRoot);
-    }
+    public DateTime CreatedOn { get; set; } = DateTime.Now;
 
-    private DateTime? _modifiedOn;
+
     /// <summary>
     /// The date and time that the record was last modified.
     /// </summary>
-    public DateTime ModifiedOn
-    {
-        get => _modifiedOn.EnsureModifiedOn(ref _createdOn, ref _lastChecked, _syncRoot);
-        set => value.SetModifiedOn(ref _createdOn, ref _modifiedOn, ref _lastChecked, _syncRoot);
-    }
-
-    private DateTime? _lastChecked;
-    /// <summary>
-    /// The date and time when the library was last checked for changes.
-    /// </summary>
-    public DateTime LastChecked
-    {
-        get => _lastChecked.EnsureLastChecked(ref _createdOn, ref _modifiedOn, _syncRoot);
-        set => value.SetLastChecked(ref _createdOn, ref _modifiedOn, ref _lastChecked, _syncRoot);
-    }
+    public DateTime ModifiedOn { get; set; } = DateTime.Now;
 
     /// <summary>
     /// Library versions for this content library.
@@ -84,13 +68,38 @@ public class LocalLibrary
     internal static void OnBuildEntity(EntityTypeBuilder<LocalLibrary> builder)
     {
         _ = builder.HasKey(nameof(Id));
-        _ = builder.Property(f => f.Id)
-            .UseCollation("NOCASE");
+        _ = builder.Property(nameof(Id)).UseCollation(COLLATION_NOCASE);
         _ = builder.HasIndex(nameof(Name)).IsUnique();
-        _ = builder.Property(f => f.Name)
-            .IsRequired()
-            .UseCollation("NOCASE");
-            // .UseCollation("SQL_Latin1_General_CP1_CI_AS");
+        _ = builder.Property(nameof(Name)).IsRequired().UseCollation(COLLATION_NOCASE);
+        _ = builder.Property(nameof(Description)).IsRequired();
+    }
+
+    internal static void CreateTable(Action<string> executeNonQuery, ILogger logger)
+    {
+        /*
+        CREATE TABLE IF NOT EXISTS "LocalLibraries" (
+            "Id" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+            "Name" NVARCHAR(1024) NOT NULL CHECK(length(trim("Name"))=length("Name") AND length("Name")>0) COLLATE NOCASE,
+            "Description" TEXT NOT NULL CHECK(length(trim("Description"))=length("Description")),
+            "CreatedOn" DATETIME NOT NULL DEFAULT (datetime('now','localtime')),
+            "ModifiedOn" DATETIME NOT NULL DEFAULT (datetime('now','localtime')),
+            CONSTRAINT "PK_LocalLibraries" PRIMARY KEY("Id"),
+            CONSTRAINT "UK_LocalLibrary_Name" UNIQUE("Name"),
+            CHECK("CreatedOn"<="ModifiedOn")
+        );
+        */
+        executeNonQuery(@$"CREATE TABLE IF NOT EXISTS ""{nameof(Services.ContentDb.LocalLibraries)}"" (
+    {SqlUniqueIdentifier(nameof(Id))},
+    {VarCharTrimmedNotEmptyNoCase(nameof(Name), MAXLENGTH_Name)},
+    {SqlTextTrimmed(nameof(Description))},
+    {SqlDateTime(nameof(CreatedOn))},
+    {SqlDateTime(nameof(ModifiedOn))},
+    {SqlPkConstraint(nameof(Services.ContentDb.LocalLibraries), nameof(Id))},
+    {SqlUniqueConstraint(nameof(LocalLibrary), nameof(Name))},
+    CHECK(""{nameof(CreatedOn)}""<=""{nameof(ModifiedOn)}"")
+)");
+        // CREATE INDEX "IDX_LocalLibraries_Name" ON "LocalLibraries" ("Name" COLLATE NOCASE);
+        executeNonQuery(SqlIndex(nameof(Services.ContentDb.LocalLibraries), nameof(Name)));
     }
 
     internal async Task ClearRemotesAsync(Services.ContentDb dbContext, CancellationToken cancellationToken)

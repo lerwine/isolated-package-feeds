@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CdnServer", "CdnServer\CdnServer.csproj", "{79A53037-EC46-49DA-87B2-2020C5919816}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CdnGet", "CdnGet\CdnGet.csproj", "{8100E540-96BB-4796-9B99-A8AA3C425171}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CdnGetter", "CdnGetter\CdnGetter.csproj", "{8100E540-96BB-4796-9B99-A8AA3C425171}"
 EndProject
 Global
 	GlobalSection(SolutionProperties) = preSolution

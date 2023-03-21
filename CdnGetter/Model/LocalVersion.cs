@@ -1,8 +1,10 @@
 using System.Collections.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.Extensions.Logging;
+using static CdnGetter.SqlDefinitions;
 
-namespace CdnGet.Model;
+namespace CdnGetter.Model;
 
 public class LocalVersion
 {
@@ -18,45 +20,28 @@ public class LocalVersion
         set => _id = value;
     }
     
+    public const int MAXLENGTH_Version = 1024;
     /// <summary>
     /// The library version.
     /// </summary>
     public SwVersion Version { get; set; }
-
+    
+    public const ushort DEFAULTVALUE_Order = ushort.MaxValue;
     /// <summary>
     /// The release order for the library version.
     /// </summary>
-    public ushort Order { get; set; }
+    public ushort Order { get; set; } = DEFAULTVALUE_Order;
 
-    private DateTime? _createdOn;
     /// <summary>
     /// The date and time that the record was created.
     /// </summary>
-    public DateTime CreatedOn
-    {
-        get => _createdOn.EnsureCreatedOn(ref _modifiedOn, ref _lastChecked, _syncRoot);
-        set => value.SetCreatedOn(ref _createdOn, ref _modifiedOn, ref _lastChecked, _syncRoot);
-    }
+    public DateTime CreatedOn { get; set; } = DateTime.Now;
 
-    private DateTime? _modifiedOn;
+
     /// <summary>
     /// The date and time that the record was last modified.
     /// </summary>
-    public DateTime ModifiedOn
-    {
-        get => _modifiedOn.EnsureModifiedOn(ref _createdOn, ref _lastChecked, _syncRoot);
-        set => value.SetModifiedOn(ref _createdOn, ref _modifiedOn, ref _lastChecked, _syncRoot);
-    }
-
-    private DateTime? _lastChecked;
-    /// <summary>
-    /// The date and time when the library version was last checked for changes.
-    /// </summary>
-    public DateTime LastChecked
-    {
-        get => _lastChecked.EnsureLastChecked(ref _createdOn, ref _modifiedOn, _syncRoot);
-        set => value.SetLastChecked(ref _createdOn, ref _modifiedOn, ref _lastChecked, _syncRoot);
-    }
+    public DateTime ModifiedOn { get; set; } = DateTime.Now;
 
     private Guid _libraryId;
     /// <summary>
@@ -92,20 +77,45 @@ public class LocalVersion
     internal static void OnBuildEntity(EntityTypeBuilder<LocalVersion> builder)
     {
         _ = builder.HasKey(nameof(Id));
-        _ = builder.Property(v => v.Id)
-            .UseCollation("NOCASE");
-        _ = builder.Property(v => v.LibraryId)
-            .UseCollation("NOCASE");
+        _ = builder.Property(nameof(Id)).UseCollation(COLLATION_NOCASE);
+        _ = builder.Property(nameof(LibraryId)).UseCollation(COLLATION_NOCASE);
         _ = builder.HasIndex(nameof(Version));
         _ = builder.HasIndex(nameof(Version), nameof(LibraryId)).IsUnique();
-        _ = builder.Property(v => v.Version).HasConversion(SwVersion.Converter)
-            .IsRequired()
-            .UseCollation("NOCASE");
-            // .UseCollation("SQL_Latin1_General_CP1_CI_AS");
-        _ = builder.Property(c => c.Order).IsRequired();
+        _ = builder.Property(nameof(Version)).HasConversion(SwVersion.Converter).HasMaxLength(MAXLENGTH_Version).IsRequired().UseCollation(COLLATION_NOCASE);
+        _ = builder.Property(nameof(Order)).IsRequired();
         _ = builder.HasIndex(nameof(Order));
         _ = builder.HasIndex(nameof(Order), nameof(LibraryId)).IsUnique();
-        _ = builder.HasOne(v => v.Library).WithMany(l => l.Versions).HasForeignKey(l => l.LibraryId).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
+        _ = builder.HasOne(v => v.Library).WithMany(l => l.Versions).HasForeignKey(nameof(LibraryId)).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
+    }
+
+    internal static void CreateTable(Action<string> executeNonQuery, ILogger logger)
+    {
+        /*
+        CREATE TABLE IF NOT EXISTS "LocalVersions" (
+            "Id" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+            "Version" NVARCHAR(1024) NOT NULL CHECK(length(trim("Version"))=length("Version") AND length("Version")>0) COLLATE NOCASE,
+            "Order" UNSIGNED SMALLINT NOT NULL DEFAULT 65535,
+            "CreatedOn" DATETIME NOT NULL DEFAULT (datetime('now','localtime')),
+            "ModifiedOn" DATETIME NOT NULL DEFAULT (datetime('now','localtime')),
+            "LibraryId" UNIQUEIDENTIFIER NOT NULL CONSTRAINT "FK_LocalVersion_LocalLibrary" REFERENCES "LocalLibraries"("Id") ON DELETE RESTRICT COLLATE NOCASE,
+            CONSTRAINT "PK_LocalVersions" PRIMARY KEY("Id"),
+            CHECK("CreatedOn"<="ModifiedOn")
+        );
+        */
+        executeNonQuery(@$"CREATE TABLE IF NOT EXISTS ""{nameof(Services.ContentDb.LocalVersions)}"" (
+    {SqlUniqueIdentifier(nameof(Id))},
+    {VarCharTrimmedNotEmptyNoCase(nameof(Version), MAXLENGTH_Version)},
+    {SqlSmallUInt(nameof(Order), DEFAULTVALUE_Order)},
+    {SqlDateTime(nameof(CreatedOn))},
+    {SqlDateTime(nameof(ModifiedOn))},
+    {SqlReferenceColumn(nameof(LocalVersion), nameof(LibraryId), nameof(LocalLibrary), nameof(LocalLibrary.Id), nameof(Services.ContentDb.LocalLibraries))},
+    {SqlPkConstraint(nameof(Services.ContentDb.LocalVersions), nameof(Id))},
+    CHECK(""{nameof(CreatedOn)}""<=""{nameof(ModifiedOn)}"")
+)");
+        // CREATE INDEX "IDX_LocalVersions_Version" ON "LocalVersions" ("Version" COLLATE NOCASE);
+        executeNonQuery(SqlIndex(nameof(Services.ContentDb.LocalVersions), nameof(Version), true));
+        // CREATE INDEX "IDX_LocalVersions_Order" ON "LocalVersions" ("Order");
+        executeNonQuery(SqlIndex(nameof(Services.ContentDb.LocalVersions), nameof(Order)));
     }
 
     internal async Task ClearRemotesAsync(Services.ContentDb dbContext, CancellationToken cancellationToken)

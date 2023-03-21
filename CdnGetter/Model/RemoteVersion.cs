@@ -2,8 +2,10 @@ using System.Collections.ObjectModel;
 using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.Extensions.Logging;
+using static CdnGetter.SqlDefinitions;
 
-namespace CdnGet.Model;
+namespace CdnGetter.Model;
 
 /// <summary>
 /// Represents a specific version of a content library.
@@ -72,40 +74,26 @@ public class RemoteVersion
     /// </summary>
     public JsonNode? ProviderData { get; set; }
 
-    private DateTime? _createdOn;
     /// <summary>
     /// The date and time that the record was created.
     /// </summary>
-    public DateTime CreatedOn
-    {
-        get => _createdOn.EnsureCreatedOn(ref _modifiedOn, ref _lastChecked, _syncRoot);
-        set => value.SetCreatedOn(ref _createdOn, ref _modifiedOn, ref _lastChecked, _syncRoot);
-    }
+    public DateTime CreatedOn { get; set; } = DateTime.Now;
 
-    private DateTime? _modifiedOn;
+
     /// <summary>
     /// The date and time that the record was last modified.
     /// </summary>
-    public DateTime ModifiedOn
-    {
-        get => _modifiedOn.EnsureModifiedOn(ref _createdOn, ref _lastChecked, _syncRoot);
-        set => value.SetModifiedOn(ref _createdOn, ref _modifiedOn, ref _lastChecked, _syncRoot);
-    }
-
-    private DateTime? _lastChecked;
-    /// <summary>
-    /// The date and time when the library version was last checked for changes.
-    /// </summary>
-    public DateTime LastChecked
-    {
-        get => _lastChecked.EnsureLastChecked(ref _createdOn, ref _modifiedOn, _syncRoot);
-        set => value.SetLastChecked(ref _createdOn, ref _modifiedOn, ref _lastChecked, _syncRoot);
-    }
+    public DateTime ModifiedOn { get; set; } = DateTime.Now;
 
     /// <summary>
     /// The files that belong to the current version of the content library.
     /// </summary>
     public Collection<RemoteFile> Files { get; set; } = new();
+    
+    /// <summary>
+    /// Remote acess logs for this content library version.
+    /// </summary>
+    public Collection<VersionLog> Logs { get; set; } = new();
 
     /// <summary>
     /// Performs configuration of the <see cref="RemoteVersion" /> entity type in the model for the <see cref="Services.ContentDb" />.
@@ -114,19 +102,20 @@ public class RemoteVersion
     internal static void OnBuildEntity(EntityTypeBuilder<RemoteVersion> builder)
     {
         _ = builder.HasKey(nameof(LocalId), nameof(LibraryId), nameof(RemoteServiceId));
-        _ = builder.Property(v => v.LocalId)
-            .UseCollation("NOCASE");
-        _ = builder.Property(v => v.LibraryId)
-            .UseCollation("NOCASE");
-        _ = builder.Property(v => v.RemoteServiceId)
-            .UseCollation("NOCASE");
-            // .UseCollation("SQL_Latin1_General_CP1_CI_AS");
-        _ = builder.Property(v => v.ProviderData).HasConversion(ExtensionMethods.JsonValueConverter);
+        _ = builder.Property(nameof(LocalId)).UseCollation(COLLATION_NOCASE);
+        _ = builder.Property(nameof(LibraryId)).UseCollation(COLLATION_NOCASE);
+        _ = builder.Property(nameof(RemoteServiceId)).UseCollation(COLLATION_NOCASE);
+        _ = builder.Property(nameof(ProviderData)).HasConversion(ExtensionMethods.JsonValueConverter);
         _ = builder.HasOne(f => f.Local).WithMany(f => f.Remotes).HasForeignKey(nameof(LocalId)).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
         _ = builder.HasOne(v => v.Library).WithMany(l => l.Versions)
             .HasForeignKey(nameof(LibraryId), nameof(RemoteServiceId))
             .HasPrincipalKey(nameof(LocalId), nameof(RemoteServiceId))
             .IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
+    }
+
+    internal static void CreateTable(Action<string> executeNonQuery, ILogger logger)
+    {
+        throw new NotImplementedException();
     }
 
     internal async Task ClearFilesAsync(Services.ContentDb dbContext, CancellationToken cancellationToken)

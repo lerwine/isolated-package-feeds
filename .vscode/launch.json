@@ -28,9 +28,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/CdnGet/bin/Debug/net6.0/CdnGet.dll",
-            "args": ["--CdnGet:ShowRemotes=true"],
-            "cwd": "${workspaceFolder}/CdnGet",
+            "program": "${workspaceFolder}/CdnGetter/bin/Debug/net6.0/CdnGetter.dll",
+            "args": ["--CdnGetter:ShowRemotes=true"],
+            "cwd": "${workspaceFolder}/CdnGetter",
             "stopAtEntry": false,
             "console": "internalConsole"
         },

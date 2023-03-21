@@ -12,9 +12,9 @@ public class Library
     
     public LibGroup? Group { get; set; }
 
-    public string Version { get; set; } = "";
+    public string Version { get; set; } = string.Empty;
 
-    public string Description { get; set; } = "";
+    public string Description { get; set; } = string.Empty;
 
     public string? HomePage { get; set; }
 

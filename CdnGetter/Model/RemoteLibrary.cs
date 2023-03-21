@@ -4,8 +4,10 @@ using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.Extensions.Logging;
+using static CdnGetter.SqlDefinitions;
 
-namespace CdnGet.Model;
+namespace CdnGetter.Model;
 
 /// <summary>
 /// Represents a content library.
@@ -71,40 +73,26 @@ public class RemoteLibrary
     /// </summary>
     public JsonNode? ProviderData { get; set; }
 
-    private DateTime? _createdOn;
     /// <summary>
     /// The date and time that the record was created.
     /// </summary>
-    public DateTime CreatedOn
-    {
-        get => _createdOn.EnsureCreatedOn(ref _modifiedOn, ref _lastChecked, _syncRoot);
-        set => value.SetCreatedOn(ref _createdOn, ref _modifiedOn, ref _lastChecked, _syncRoot);
-    }
+    public DateTime CreatedOn { get; set; } = DateTime.Now;
 
-    private DateTime? _modifiedOn;
+
     /// <summary>
     /// The date and time that the record was last modified.
     /// </summary>
-    public DateTime ModifiedOn
-    {
-        get => _modifiedOn.EnsureModifiedOn(ref _createdOn, ref _lastChecked, _syncRoot);
-        set => value.SetModifiedOn(ref _createdOn, ref _modifiedOn, ref _lastChecked, _syncRoot);
-    }
-
-    private DateTime? _lastChecked;
-    /// <summary>
-    /// The date and time when the library was last checked for changes.
-    /// </summary>
-    public DateTime LastChecked
-    {
-        get => _lastChecked.EnsureLastChecked(ref _createdOn, ref _modifiedOn, _syncRoot);
-        set => value.SetLastChecked(ref _createdOn, ref _modifiedOn, ref _lastChecked, _syncRoot);
-    }
+    public DateTime ModifiedOn { get; set; } = DateTime.Now;
 
     /// <summary>
     /// Library versions for this content library.
     /// </summary>
     public Collection<RemoteVersion> Versions { get; set; } = new();
+    
+    /// <summary>
+    /// Remote acess logs for this content library.
+    /// </summary>
+    public Collection<LibraryLog> Logs { get; set; } = new();
     
     /// <summary>
     /// Performs configuration of the <see cref="RemoteLibrary" /> entity type in the model for the <see cref="Services.ContentDb" />.
@@ -113,14 +101,39 @@ public class RemoteLibrary
     internal static void OnBuildEntity(EntityTypeBuilder<RemoteLibrary> builder)
     {
         _ = builder.HasKey(nameof(LocalId), nameof(RemoteServiceId));
-        _ = builder.Property(f => f.LocalId)
-            .UseCollation("NOCASE");
-        _ = builder.Property(f => f.RemoteServiceId)
-            .UseCollation("NOCASE");
-            // .UseCollation("SQL_Latin1_General_CP1_CI_AS");
-        _ = builder.Property(f => f.ProviderData).HasConversion(ExtensionMethods.JsonValueConverter);
+        _ = builder.Property(nameof(LocalId)).UseCollation(COLLATION_NOCASE);
+        _ = builder.Property(nameof(RemoteServiceId)).UseCollation(COLLATION_NOCASE);
+        _ = builder.Property(nameof(ProviderData)).HasConversion(ExtensionMethods.JsonValueConverter);
         _ = builder.HasOne(f => f.RemoteService).WithMany(v => v.Libraries).HasForeignKey(f => f.RemoteServiceId).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
         _ = builder.HasOne(r => r.Local).WithMany(l => l.Remotes).HasForeignKey(r => r.LocalId).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
+    }
+
+    internal static void CreateTable(Action<string> executeNonQuery, ILogger logger)
+    {
+        /*
+        CREATE TABLE IF NOT EXISTS "RemoteLibraries" (
+            "LocalId" UNIQUEIDENTIFIER NOT NULL CONSTRAINT "FK_RemoteLibrary_LocalLibrary" REFERENCES "LocalLibraries"("Id") ON DELETE RESTRICT COLLATE NOCASE,
+            "RemoteServiceId" UNIQUEIDENTIFIER NOT NULL CONSTRAINT "FK_RemoteLibrary_RemoteService" REFERENCES "RemoteServices"("Id") ON DELETE RESTRICT COLLATE NOCASE,
+            "Priority" UNSIGNED SMALLINT DEFAULT NULL,
+            "Description" TEXT NOT NULL CHECK(length(trim("Description"))=length("Description")),
+            "ProviderData" TEXT DEFAULT NULL,
+            "CreatedOn" DATETIME NOT NULL DEFAULT (datetime('now','localtime')),
+            "ModifiedOn" DATETIME NOT NULL DEFAULT (datetime('now','localtime')),
+            CONSTRAINT "PK_RemoteLibraries" PRIMARY KEY("LocalId", "RemoteServiceId"),
+            CHECK("CreatedOn"<="ModifiedOn")
+        );
+        */
+        executeNonQuery(@$"CREATE TABLE IF NOT EXISTS ""{nameof(Services.ContentDb.RemoteLibraries)}"" (
+    {SqlReferenceColumn(nameof(RemoteLibrary), nameof(LocalId), nameof(LocalLibrary), nameof(LocalLibrary.Id), nameof(Services.ContentDb.LocalLibraries))},
+    {SqlReferenceColumn(nameof(RemoteLibrary), nameof(RemoteServiceId), nameof(Model.RemoteService), nameof(Model.RemoteService.Id), nameof(Services.ContentDb.RemoteServices))},
+    {SqlSmallUInt(nameof(Priority), true)},
+    {SqlTextTrimmed(nameof(Description))},
+    {SqlText(nameof(ProviderData), true)}
+    {SqlDateTime(nameof(CreatedOn))},
+    {SqlDateTime(nameof(ModifiedOn))},
+    {SqlPkConstraint(nameof(Services.ContentDb.RemoteLibraries), nameof(LocalId), nameof(RemoteServiceId))},
+    CHECK(""{nameof(CreatedOn)}""<=""{nameof(ModifiedOn)}"")
+)");
     }
 
     internal async Task ClearVersionsAsync(Services.ContentDb dbContext, CancellationToken cancellationToken)

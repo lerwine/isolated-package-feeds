@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace CdnGet;
+namespace CdnGetter;
 
 public static class ExtensionMethods
 {
@@ -19,6 +19,53 @@ public static class ExtensionMethods
     public static readonly ValueConverter<JsonNode?, string?> JsonValueConverter = new(
         v => (v == null) ? null : v.ToJsonString(JsonSerializerOptions.Default),
         s => s.ConvertToJsonNode()
+    );
+
+    public static Uri? ForceCreateUri(string? uriString)
+    {
+        if (uriString is null)
+            return null;
+        if (uriString.Length > 0 && Uri.TryCreate(uriString, UriKind.Absolute, out Uri? uri))
+            return uri;
+        if (Uri.IsWellFormedUriString(uriString, UriKind.Relative))
+            return new Uri(uriString, UriKind.Relative);
+        try
+        {
+            int i = uriString.IndexOf('#');
+            UriBuilder ub = new() { Host = null, Scheme = null };
+            if (i > 0)
+            {
+                ub.Fragment = uriString.Substring(i + 1);
+                string path = uriString.Substring(0, i);
+                if ((i = path.IndexOf('?')) > 0)
+                {
+                    ub.Query = path.Substring(i + 1);
+                    ub.Path = path.Substring(0, i);
+                }
+                else
+                    ub.Path = path;
+            }
+            else if ((i = uriString.IndexOf('?')) > 0)
+            {
+                ub.Query = uriString.Substring(i + 1);
+                ub.Path = uriString.Substring(0, i);
+            }
+            else
+                ub.Path = uriString;
+            return new Uri(ub.ToString(), UriKind.Relative);
+        }
+        catch { return new Uri(Uri.EscapeDataString(uriString), UriKind.Relative); }
+    }
+    
+    public static readonly ValueConverter<Uri?, string?> UriConverter = new(
+        u => (u == null) ? null : u.IsAbsoluteUri ? u.AbsoluteUri : u.OriginalString,
+        s => ForceCreateUri(s)
+    );
+
+    private static readonly Model.LibraryAction[] _allLibraryActions = Enum.GetValues<Model.LibraryAction>();
+    public static readonly ValueConverter<Model.LibraryAction, byte> LibraryActionConverter = new(
+        a => (byte)a,
+        b => _allLibraryActions.FirstOrDefault(a => (byte)a == b)
     );
 
     public static string? ConvertFromJsonNode(this JsonNode? value) => value is null ? null : value.ToJsonString(JsonSerializerOptions.Default);
@@ -79,6 +126,7 @@ public static class ExtensionMethods
         return result;
     }
 
+
     public static Guid EnsureGuid(this ref Guid? target, object syncRoot)
     {
         Guid? guid;
@@ -93,6 +141,7 @@ public static class ExtensionMethods
         return guid.Value;
     }
 
+    [Obsolete("Doesn't need to be this complicated")]
     public static DateTime EnsureCreatedOn(this ref DateTime? createdOn, ref DateTime? modifiedOn, ref DateTime? lastChecked, object syncRoot)
     {
         DateTime? value;
@@ -118,6 +167,7 @@ public static class ExtensionMethods
         return value.Value;
     }
 
+    [Obsolete("Doesn't need to be this complicated")]
     public static void SetCreatedOn(this DateTime value, ref DateTime? createdOn, ref DateTime? modifiedOn, ref DateTime? lastChecked, object syncRoot)
     {
         Monitor.Enter(syncRoot);
@@ -134,6 +184,7 @@ public static class ExtensionMethods
         finally { Monitor.Exit(syncRoot); }
     }
 
+    [Obsolete("Doesn't need to be this complicated")]
     public static DateTime EnsureModifiedOn(this ref DateTime? modifiedOn, ref DateTime? createdOn, ref DateTime? lastChecked, object syncRoot)
     {
         DateTime? value;
@@ -159,6 +210,7 @@ public static class ExtensionMethods
         return value.Value;
     }
 
+    [Obsolete("Doesn't need to be this complicated")]
     public static void SetModifiedOn(this DateTime value, ref DateTime? createdOn, ref DateTime? modifiedOn, ref DateTime? lastChecked, object syncRoot)
     {
         Monitor.Enter(syncRoot);
@@ -179,6 +231,7 @@ public static class ExtensionMethods
         finally { Monitor.Exit(syncRoot); }
     }
 
+    [Obsolete("Doesn't need to be this complicated")]
     public static DateTime EnsureLastChecked(this ref DateTime? lastChecked, ref DateTime? createdOn, ref DateTime? modifiedOn, object syncRoot)
     {
         DateTime? value;
@@ -203,6 +256,7 @@ public static class ExtensionMethods
         return value.Value;
     }
 
+    [Obsolete("Doesn't need to be this complicated")]
     public static void SetLastChecked(this DateTime value, ref DateTime? createdOn, ref DateTime? modifiedOn, ref DateTime? lastChecked, object syncRoot)
     {
         Monitor.Enter(syncRoot);
@@ -340,6 +394,27 @@ public static class ExtensionMethods
         finally { Monitor.Exit(syncRoot); }
     }
 
+    public static void SetNavigation<T>(this Guid newValue1, Guid newValue2, Guid newValue3, Guid newValue4, object syncRoot, Func<T, (Guid, Guid, Guid, Guid)> keyAcessor, ref Guid foreignKey1, ref Guid foreignKey2, ref Guid foreignKey3, ref Guid foreignKey4, ref T? target)
+        where T : class
+    {
+        Monitor.Enter(syncRoot);
+        try
+        {
+            if (target is not null)
+            {
+                (Guid fk1, Guid fk2, Guid fk3, Guid fk4) = keyAcessor(target);
+                if (newValue1.Equals(fk1) && newValue2.Equals(fk2) && newValue3.Equals(fk3) && newValue4.Equals(fk4))
+                    return;
+                target = null;
+            }
+            foreignKey1 = newValue1;
+            foreignKey2 = newValue2;
+            foreignKey3 = newValue3;
+            foreignKey4 = newValue4;
+        }
+        finally { Monitor.Exit(syncRoot); }
+    }
+
     public static void SetNavigation<T>(this T? newValue, object syncRoot, Func<T, Guid> keyAcessor, ref Guid foreignKey, ref T? target)
         where T : class
     {
@@ -378,6 +453,20 @@ public static class ExtensionMethods
                 target = null;
             else if (target is null || !ReferenceEquals(newValue, target))
                 (foreignKey1, foreignKey2, foreignKey3) = keyAcessor(target = newValue);
+        }
+        finally { Monitor.Exit(syncRoot); }
+    }
+
+    public static void SetNavigation<T>(this T? newValue, object syncRoot, Func<T, (Guid, Guid, Guid, Guid)> keyAcessor, ref Guid foreignKey1, ref Guid foreignKey2, ref Guid foreignKey3, ref Guid foreignKey4, ref T? target)
+        where T : class
+    {
+        Monitor.Enter(syncRoot);
+        try
+        {
+            if (newValue is null)
+                target = null;
+            else if (target is null || !ReferenceEquals(newValue, target))
+                (foreignKey1, foreignKey2, foreignKey3, foreignKey4) = keyAcessor(target = newValue);
         }
         finally { Monitor.Exit(syncRoot); }
     }
