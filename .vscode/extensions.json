@@ -55,6 +55,7 @@
         "ms-dotnettools.csharp",
         "ms-vscode.vscode-typescript-next",
         "mtxr.sqltools",
+        "mtxr.sqltools-driver-sqlite",
         "ohutsulyak.angularjs-component-generator",
         "oouo-diogo-perdigao.docthis",
         "patcx.vscode-nuget-gallery",
