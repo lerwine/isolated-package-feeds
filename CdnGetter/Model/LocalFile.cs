@@ -1,8 +1,10 @@
 using System.Collections.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.Extensions.Logging;
+using static CdnGetter.SqlDefinitions;
 
-namespace CdnGet.Model;
+namespace CdnGetter.Model;
 
 public class LocalFile
 {
@@ -18,7 +20,8 @@ public class LocalFile
         set => _id = value;
     }
     
-    private string _name = "";
+    public const int MAXLENGTH_Name = 1024;
+    private string _name = string.Empty;
     /// <summary>
     /// The name of the library file.
     /// </summary>
@@ -28,7 +31,8 @@ public class LocalFile
         set => _name = value.ToWsNormalizedOrEmptyIfNull();
     }
 
-    private string _sri = "";
+    public const int MAXLENGTH_SRI = 256;
+    private string _sri = string.Empty;
     /// <summary>
     /// The Cryptographic hash.
     /// </summary>
@@ -38,11 +42,13 @@ public class LocalFile
         set => _sri = value.ToWsNormalizedOrEmptyIfNull();
     }
 
+    public const ushort DEFAULTVALUE_Order = ushort.MaxValue;
     /// <summary>
     /// The display order for the library file.
     /// </summary>
-    public ushort Order { get; set; }
+    public ushort Order { get; set; } = DEFAULTVALUE_Order;
 
+    public const int MAXLENGTH_ContentType = 512;
     private string _contentType = System.Net.Mime.MediaTypeNames.Application.Octet;
     /// <summary>
     /// The library file MIME content type.
@@ -53,7 +59,8 @@ public class LocalFile
         set => _contentType = value.ToTrimmedOrDefaultIfEmpty(() => System.Net.Mime.MediaTypeNames.Application.Octet);
     }
 
-    private string _encoding = "";
+    public const int MAXLENGTH_Encoding = 32;
+    private string _encoding = string.Empty;
     /// <summary>
     /// The content encoding for library file or <see cref="string.Empty" /> for binary files.
     /// </summary>
@@ -73,35 +80,15 @@ public class LocalFile
         set => _data = value ?? Array.Empty<byte>();
     }
 
-    private DateTime? _createdOn;
     /// <summary>
     /// The date and time that the record was created.
     /// </summary>
-    public DateTime CreatedOn
-    {
-        get => _createdOn.EnsureCreatedOn(ref _modifiedOn, ref _lastChecked, _syncRoot);
-        set => value.SetCreatedOn(ref _createdOn, ref _modifiedOn, ref _lastChecked, _syncRoot);
-    }
+    public DateTime CreatedOn { get; set; } = DateTime.Now;
 
-    private DateTime? _modifiedOn;
     /// <summary>
     /// The date and time that the record was last modified.
     /// </summary>
-    public DateTime ModifiedOn
-    {
-        get => _modifiedOn.EnsureModifiedOn(ref _createdOn, ref _lastChecked, _syncRoot);
-        set => value.SetModifiedOn(ref _createdOn, ref _modifiedOn, ref _lastChecked, _syncRoot);
-    }
-
-    private DateTime? _lastChecked;
-    /// <summary>
-    /// The date and time when the library file was last checked for changes.
-    /// </summary>
-    public DateTime LastChecked
-    {
-        get => _lastChecked.EnsureLastChecked(ref _createdOn, ref _modifiedOn, _syncRoot);
-        set => value.SetLastChecked(ref _createdOn, ref _modifiedOn, ref _lastChecked, _syncRoot);
-    }
+    public DateTime ModifiedOn { get; set; } = DateTime.Now;
 
     private Guid _versionId;
     /// <summary>
@@ -132,25 +119,18 @@ public class LocalFile
     internal static void OnBuildEntity(EntityTypeBuilder<LocalFile> builder)
     {
         _ = builder.HasKey(nameof(Id));
-        _ = builder.Property(f => f.Id)
-            .UseCollation("NOCASE");
+        _ = builder.Property(nameof(Id)).UseCollation(COLLATION_NOCASE);
         _ = builder.HasIndex(nameof(Name));
         _ = builder.HasIndex(nameof(Name), nameof(VersionId)).IsUnique();
-        _ = builder.Property(f => f.Name)
-            .IsRequired()
-            .UseCollation("NOCASE");
-        _ = builder.Property(f => f.SRI)
-            .IsRequired()
-            .UseCollation("NOCASE");
-        _ = builder.Property(c => c.Order).IsRequired();
-        _ = builder.Property(c => c.Data).IsRequired();
-        _ = builder.Property(c => c.ContentType).IsRequired();
+        _ = builder.Property(nameof(Name)).HasMaxLength(MAXLENGTH_Name).IsRequired().UseCollation(COLLATION_NOCASE);
+        _ = builder.Property(nameof(SRI)).HasMaxLength(MAXLENGTH_SRI).IsRequired().UseCollation(COLLATION_NOCASE);
+        _ = builder.Property(nameof(Order)).IsRequired();
+        _ = builder.Property(nameof(Data)).IsRequired();
+        _ = builder.Property(nameof(ContentType)).HasMaxLength(MAXLENGTH_ContentType).IsRequired();
         _ = builder.HasIndex(nameof(Order));
         _ = builder.HasIndex(nameof(Order), nameof(VersionId)).IsUnique();
-        _ = builder.HasOne(f => f.Version).WithMany(v => v.Files).HasForeignKey(f => f.VersionId).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
-        _ = builder.Property(f => f.VersionId)
-            .UseCollation("NOCASE");
-            // .UseCollation("SQL_Latin1_General_CP1_CI_AS");
+        _ = builder.HasOne(f => f.Version).WithMany(v => v.Files).HasForeignKey(nameof(VersionId)).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
+        _ = builder.Property(nameof(VersionId)).UseCollation(COLLATION_NOCASE);
     }
 
     internal async Task RemoveAsync(Services.ContentDb dbContext, CancellationToken cancellationToken)
@@ -171,5 +151,10 @@ public class LocalFile
             return;
         dbContext.LocalFiles.Remove(this);
         await dbContext.SaveChangesAsync(true, cancellationToken);
+    }
+
+    internal static void CreateTable(Action<string> executeNonQuery, ILogger logger)
+    {
+        throw new NotImplementedException();
     }
 }

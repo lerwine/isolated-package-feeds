@@ -9,6 +9,8 @@ The initial scope is to create NuGet and NPM Package Feed services as well as co
 ## References
 
 - [SQLite Data Types](https://learn.microsoft.com/en-us/dotnet/standard/data/sqlite/types)
+- [SQLite Syntax](https://www.sqlite.org/lang.html)
+- [SQLite Database Provider - EF Core](https://learn.microsoft.com/en-us/ef/core/providers/sqlite/?tabs=dotnet-core-cli)
 - [EF Core](https://learn.microsoft.com/en-us/ef/core/)
 - [.NET Generic Host](https://learn.microsoft.com/en-us/dotnet/core/extensions/generic-host)
 - [Configuration in .NET](https://learn.microsoft.com/en-us/dotnet/core/extensions/configuration)

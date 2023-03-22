@@ -1,16 +1,20 @@
 ﻿// See https://aka.ms/new-console-template for more information
-using CdnGet.Config;
-using CdnGet.Services;
+using CdnGetter.Config;
+using CdnGetter.Services;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyModel;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 IHost host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
     .ConfigureServices((hbContext, services) => {
         services.AddHostedService<MainService>();
-        IConfigurationSection section = hbContext.Configuration.GetSection(nameof(CdnGet));
+        IConfigurationSection section = hbContext.Configuration.GetSection(nameof(CdnGetter));
         services.Configure<AppSettings>(section);
         string databaseFilePath = AppSettings.GetDbFileName(section.Get<AppSettings>());
         databaseFilePath = Path.GetFullPath(Path.IsPathRooted(databaseFilePath) ? databaseFilePath : Path.Combine(hbContext.HostingEnvironment.ContentRootPath, databaseFilePath));

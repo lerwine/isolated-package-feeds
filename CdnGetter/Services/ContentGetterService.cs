@@ -1,10 +1,10 @@
-using CdnGet.Config;
-using CdnGet.Model;
+using CdnGetter.Config;
+using CdnGetter.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace CdnGet.Services;
+namespace CdnGetter.Services;
 
 public abstract class ContentGetterService
 {
@@ -106,21 +106,21 @@ public abstract class ContentGetterService
 
     internal async Task UpdateLibrariesAsync(RemoteService rsvc, ContentDb dbContext, Config.AppSettings appSettings, ILogger logger, CancellationToken cancellationToken)
     {
-        LibraryActionGroup[] actions = LibraryActionGroup.FromSettings(appSettings).ToArray();
+        Model.LibraryActionGroup[] actions = Model.LibraryActionGroup.FromSettings(appSettings).ToArray();
         if (actions.Length > 0)
-            foreach (LibraryActionGroup g in actions)
+            foreach (Model.LibraryActionGroup g in actions)
                 switch (g.Action)
                 {
-                    case LibraryAction.Remove:
+                    case Model.LibraryAction.Remove:
                         await RemoveAsync(rsvc, dbContext, g.LibraryNames, cancellationToken);
                         break;
-                    case LibraryAction.ReloadExistingVersions:
+                    case Model.LibraryAction.ReloadExistingVersions:
                         await ReloadExistingAsync(rsvc, dbContext, appSettings, g.LibraryNames, cancellationToken);
                         break;
-                    case LibraryAction.GetNewVersions:
+                    case Model.LibraryAction.GetNewVersions:
                         await GetNewVersionsAsync(rsvc, dbContext, appSettings, g.LibraryNames, cancellationToken);
                         break;
-                    case LibraryAction.Reload:
+                    case Model.LibraryAction.Reload:
                         await ReloadAsync(rsvc, dbContext, appSettings, g.LibraryNames, cancellationToken);
                         break;
                     default:

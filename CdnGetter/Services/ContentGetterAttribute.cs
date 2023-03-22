@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
 
-namespace CdnGet.Services;
+namespace CdnGetter.Services;
 
 [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
 /// <summary>

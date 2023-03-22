@@ -11,7 +11,7 @@ public class FileContent
 
     public byte[] Content { get; set; } = Array.Empty<byte>();
 
-    public string ContentType { get; set; } = "";
+    public string ContentType { get; set; } = string.Empty;
 
     public Encoding? Encoding { get; set; }
 

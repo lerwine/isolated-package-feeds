@@ -1,4 +1,4 @@
-namespace CdnGet.Config;
+namespace CdnGetter.Config;
 
 public class CdnJsSettings
 {

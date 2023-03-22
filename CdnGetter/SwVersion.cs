@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace CdnGet;
+namespace CdnGetter;
 
 public readonly struct SwVersion : IEquatable<SwVersion>, IComparable<SwVersion>
 {

@@ -1,4 +1,4 @@
-# CdnGet Project
+# CdnGetter Project
 
 ## Database Entities
 

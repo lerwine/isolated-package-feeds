@@ -1,8 +1,11 @@
+using System.Collections.ObjectModel;
 using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.Extensions.Logging;
+using static CdnGetter.SqlDefinitions;
 
-namespace CdnGet.Model;
+namespace CdnGetter.Model;
 
 /// <summary>
 /// Represents an individual file in a specific version of a content library.
@@ -111,36 +114,22 @@ public class RemoteFile
     /// </summary>
     public JsonNode? ProviderData { get; set; }
 
-    private DateTime? _createdOn;
     /// <summary>
     /// The date and time that the record was created.
     /// </summary>
-    public DateTime CreatedOn
-    {
-        get => _createdOn.EnsureCreatedOn(ref _modifiedOn, ref _lastChecked, _syncRoot);
-        set => value.SetCreatedOn(ref _createdOn, ref _modifiedOn, ref _lastChecked, _syncRoot);
-    }
+    public DateTime CreatedOn { get; set; } = DateTime.Now;
 
-    private DateTime? _modifiedOn;
+
     /// <summary>
     /// The date and time that the record was last modified.
     /// </summary>
-    public DateTime ModifiedOn
-    {
-        get => _modifiedOn.EnsureModifiedOn(ref _createdOn, ref _lastChecked, _syncRoot);
-        set => value.SetModifiedOn(ref _createdOn, ref _modifiedOn, ref _lastChecked, _syncRoot);
-    }
-
-    private DateTime? _lastChecked;
-    /// <summary>
-    /// The date and time when the library file was last checked for changes.
-    /// </summary>
-    public DateTime LastChecked
-    {
-        get => _lastChecked.EnsureLastChecked(ref _createdOn, ref _modifiedOn, _syncRoot);
-        set => value.SetLastChecked(ref _createdOn, ref _modifiedOn, ref _lastChecked, _syncRoot);
-    }
+    public DateTime ModifiedOn { get; set; } = DateTime.Now;
     
+    /// <summary>
+    /// Remote acess logs for this content library file.
+    /// </summary>
+    public Collection<FileLog> Logs { get; set; } = new();
+
     /// <summary>
     /// Performs configuration of the <see cref="RemoteFile" /> entity type in the model for the <see cref="Services.ContentDb" />.
     /// </summary>
@@ -148,20 +137,22 @@ public class RemoteFile
     internal static void OnBuildEntity(EntityTypeBuilder<RemoteFile> builder)
     {
         _ = builder.HasKey(nameof(LocalId), nameof(VersionId), nameof(LibraryId), nameof(RemoteServiceId));
-        _ = builder.Property(f => f.LocalId)
-            .UseCollation("NOCASE");
-        _ = builder.Property(f => f.VersionId)
-            .UseCollation("NOCASE");
-        _ = builder.Property(f => f.LibraryId)
-            .UseCollation("NOCASE");
-        _ = builder.Property(f => f.RemoteServiceId)
-            .UseCollation("NOCASE");
-            // .UseCollation("SQL_Latin1_General_CP1_CI_AS");
-        _ = builder.Property(f => f.ProviderData).HasConversion(ExtensionMethods.JsonValueConverter);
+        _ = builder.Property(nameof(LocalId)).UseCollation(COLLATION_NOCASE);
+        _ = builder.Property(nameof(VersionId)).UseCollation(COLLATION_NOCASE);
+        _ = builder.Property(nameof(LibraryId)).UseCollation(COLLATION_NOCASE);
+        _ = builder.Property(nameof(RemoteServiceId)).UseCollation(COLLATION_NOCASE);
+        _ = builder.Property(nameof(SRI)).HasMaxLength(LocalFile.MAXLENGTH_SRI).UseCollation(COLLATION_NOCASE);
+        _ = builder.Property(nameof(Encoding)).HasMaxLength(LocalFile.MAXLENGTH_Encoding).IsRequired();
+        _ = builder.Property(nameof(ProviderData)).HasConversion(ExtensionMethods.JsonValueConverter);
         _ = builder.HasOne(f => f.Local).WithMany(f => f.Remotes).HasForeignKey(nameof(LocalId)).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
         _ = builder.HasOne(f => f.Version).WithMany(v => v.Files)
             .HasForeignKey(nameof(VersionId), nameof(LibraryId), nameof(RemoteServiceId))
             .HasPrincipalKey(nameof(RemoteVersion.LocalId), nameof(RemoteVersion.LibraryId), nameof(RemoteVersion.RemoteServiceId))
             .IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
+    }
+
+    internal static void CreateTable(Action<string> executeNonQuery, ILogger logger)
+    {
+        throw new NotImplementedException();
     }
 }

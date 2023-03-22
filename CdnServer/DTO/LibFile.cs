@@ -12,9 +12,9 @@ public class LibFile
     
     public Library? Library { get; set; }
 
-    public string Name { get; set; } = "";
+    public string Name { get; set; } = string.Empty;
 
-    public string SriHash { get; set; } = "";
+    public string SriHash { get; set; } = string.Empty;
 
     public bool NotAvailable { get; set; }
 
