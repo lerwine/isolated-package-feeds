@@ -31,7 +31,6 @@ public class LocalFile
         set => _name = value.ToWsNormalizedOrEmptyIfNull();
     }
 
-    public const int MAXLENGTH_SRI = 256;
     private string _sri = string.Empty;
     /// <summary>
     /// The Cryptographic hash.
@@ -48,7 +47,6 @@ public class LocalFile
     /// </summary>
     public ushort Order { get; set; } = DEFAULTVALUE_Order;
 
-    public const int MAXLENGTH_ContentType = 512;
     private string _contentType = System.Net.Mime.MediaTypeNames.Application.Octet;
     /// <summary>
     /// The library file MIME content type.
@@ -59,7 +57,6 @@ public class LocalFile
         set => _contentType = value.ToTrimmedOrDefaultIfEmpty(() => System.Net.Mime.MediaTypeNames.Application.Octet);
     }
 
-    public const int MAXLENGTH_Encoding = 32;
     private string _encoding = string.Empty;
     /// <summary>
     /// The content encoding for library file or <see cref="string.Empty" /> for binary files.
@@ -124,13 +121,37 @@ public class LocalFile
         _ = builder.HasIndex(nameof(Name), nameof(VersionId)).IsUnique();
         _ = builder.Property(nameof(Name)).HasMaxLength(MAXLENGTH_Name).IsRequired().UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(SRI)).HasMaxLength(MAXLENGTH_SRI).IsRequired().UseCollation(COLLATION_NOCASE);
-        _ = builder.Property(nameof(Order)).IsRequired();
+        _ = builder.Property(nameof(Order)).IsRequired().HasDefaultValue(DEFAULTVALUE_Order);
         _ = builder.Property(nameof(Data)).IsRequired();
         _ = builder.Property(nameof(ContentType)).HasMaxLength(MAXLENGTH_ContentType).IsRequired();
+        _ = builder.Property(nameof(Encoding)).HasMaxLength(MAXLENGTH_Encoding).IsRequired();
         _ = builder.HasIndex(nameof(Order));
         _ = builder.HasIndex(nameof(Order), nameof(VersionId)).IsUnique();
+        _ = builder.Property(nameof(CreatedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
+        _ = builder.Property(nameof(ModifiedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
         _ = builder.HasOne(f => f.Version).WithMany(v => v.Files).HasForeignKey(nameof(VersionId)).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
         _ = builder.Property(nameof(VersionId)).UseCollation(COLLATION_NOCASE);
+    }
+
+    internal static void CreateTable(Action<string> executeNonQuery, ILogger logger)
+    {
+        executeNonQuery(@$"CREATE TABLE ""{nameof(Services.ContentDb.LocalFiles)}"" (
+    ""{nameof(Id)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+    ""{nameof(Name)}"" NVARCHAR({MAXLENGTH_Name}) NOT NULL CHECK(length(trim(""{nameof(Name)}""))=length(""{nameof(Name)}"") AND length(""{nameof(Name)}"")>0) COLLATE NOCASE,
+    ""{nameof(SRI)}"" NVARCHAR({MAXLENGTH_SRI}) NOT NULL CHECK(length(trim(""{nameof(SRI)}""))=length(""{nameof(SRI)}"") AND length(""{nameof(SRI)}"")>0) COLLATE NOCASE,
+    ""{nameof(Order)}"" UNSIGNED SMALLINT NOT NULL DEFAULT {DEFAULTVALUE_Order},
+    ""{nameof(ContentType)}"" NVARCHAR({MAXLENGTH_ContentType}) NOT NULL CHECK(length(trim(""{nameof(ContentType)}""))=length(""{nameof(ContentType)}"") AND length(""{nameof(ContentType)}"")>0),
+    ""{nameof(Encoding)}"" NVARCHAR({MAXLENGTH_Encoding}) NOT NULL CHECK(length(trim(""{nameof(Encoding)}""))=length(""{nameof(Encoding)}"")),
+    ""{nameof(Data)}"" BLOB NOT NULL,
+    ""{nameof(CreatedOn)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},
+    ""{nameof(ModifiedOn)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},
+    ""{nameof(VersionId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+    FOREIGN KEY(""{nameof(VersionId)}"") REFERENCES ""{nameof(Services.ContentDb.LocalVersions)}""(""{nameof(LocalVersion.Id)}"") ON DELETE RESTRICT,
+    PRIMARY KEY(""{nameof(Id)}""),
+    CHECK(""{nameof(CreatedOn)}""<=""{nameof(ModifiedOn)}"")
+)");
+        executeNonQuery($"CREATE INDEX \"IDX_LocalFiles_Name\" ON \"{nameof(Services.ContentDb.LocalFiles)}\" (\"{nameof(Name)}\" COLLATE NOCASE ASC)");
+        executeNonQuery($"CREATE INDEX \"IDX_LocalFiles_Order\" ON \"{nameof(Services.ContentDb.LocalFiles)}\" (\"{nameof(Order)}\" ASC)");
     }
 
     internal async Task RemoveAsync(Services.ContentDb dbContext, CancellationToken cancellationToken)
@@ -151,10 +172,5 @@ public class LocalFile
             return;
         dbContext.LocalFiles.Remove(this);
         await dbContext.SaveChangesAsync(true, cancellationToken);
-    }
-
-    internal static void CreateTable(Action<string> executeNonQuery, ILogger logger)
-    {
-        throw new NotImplementedException();
     }
 }

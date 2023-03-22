@@ -87,13 +87,27 @@ public class LibraryLog : ILibraryLog
         _ = builder.Property(nameof(RemoteServiceId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(c => c.Message).IsRequired();
         _ = builder.Property(nameof(Action)).HasConversion(ExtensionMethods.LibraryActionConverter);
-        _ = builder.Property(nameof(Url)).HasConversion(ExtensionMethods.UriConverter);
+        _ = builder.Property(nameof(Url)).HasConversion(ExtensionMethods.UriConverter).HasMaxLength(MAX_LENGTH_Url);
         _ = builder.Property(nameof(ProviderData)).HasConversion(ExtensionMethods.JsonValueConverter);
+        _ = builder.Property(nameof(Timestamp)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
         _ = builder.HasOne(f => f.Library).WithMany(f => f.Logs).HasForeignKey(nameof(LibraryId), nameof(RemoteServiceId)).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
     }
 
     internal static void CreateTable(Action<string> executeNonQuery, ILogger logger)
     {
-        throw new NotImplementedException();
+        executeNonQuery(@$"CREATE TABLE ""{nameof(Services.ContentDb.LibraryLogs)}"" (
+    ""{nameof(Id)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+    ""{nameof(Message)}"" TEXT NOT NULL DEFAULT '' CHECK(length(trim(""{nameof(Message)}""))=length(""{nameof(Message)}"")),
+    ""{nameof(Action)}"" UNSIGNED TINYINT NOT NULL DEFAULT {(byte)default(LibraryAction)},
+    ""{nameof(EventId)}"" INTEGER DEFAULT NULL,
+    ""{nameof(Url)}"" NVARCHAR({MAX_LENGTH_Url}) DEFAULT NULL,
+    ""{nameof(ProviderData)}"" TEXT DEFAULT NULL,
+    ""{nameof(Timestamp)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},
+    ""{nameof(LibraryId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+    ""{nameof(RemoteServiceId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+    FOREIGN KEY(""{nameof(LibraryId)}"",""{nameof(RemoteServiceId)}"") REFERENCES ""{nameof(Services.ContentDb.RemoteLibraries)}""(""{nameof(RemoteLibrary.LocalId)}"",""{nameof(RemoteLibrary.RemoteServiceId)}"") ON DELETE RESTRICT,
+    PRIMARY KEY(""{nameof(Id)}"")
+)");
+        executeNonQuery($"CREATE INDEX \"IDX_LibraryLogs_Timestamp\" ON \"{nameof(Services.ContentDb.LibraryLogs)}\" (\"{nameof(Timestamp)}\" DESC)");
     }
 }

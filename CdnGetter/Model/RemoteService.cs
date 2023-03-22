@@ -74,45 +74,29 @@ public class RemoteService
     {
         _ = builder.HasKey(nameof(Id));
         _ = builder.Property(nameof(Id)).UseCollation(COLLATION_NOCASE);
-        _ = builder.Property(nameof(Priority)).IsRequired().HasDefaultValue(ushort.MaxValue);
+        _ = builder.Property(nameof(Priority)).IsRequired().HasDefaultValue(DEFAULTVALUE_Priority);
         _ = builder.HasIndex(nameof(Priority));
         _ = builder.Property(nameof(Name)).IsRequired().HasMaxLength(MAXLENGTH_Name).UseCollation(COLLATION_NOCASE);
         _ = builder.HasIndex(nameof(Name)).IsUnique();
         _ = builder.Property(nameof(Description)).IsRequired();
-        _ = builder.Property(nameof(CreatedOn)).HasDefaultValueSql("(datetime('now','localtime'))");
-        _ = builder.Property(nameof(ModifiedOn)).HasDefaultValueSql("(datetime('now','localtime'))");
+        _ = builder.Property(nameof(CreatedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
+        _ = builder.Property(nameof(ModifiedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
     }
     
     internal static void CreateTable(Action<string> executeNonQuery, ILogger logger)
     {
-        /*
-        CREATE TABLE IF NOT EXISTS "RemoteServices" (
-            "Id" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
-            "Name" NVARCHAR(1024) NOT NULL CHECK(length(trim("Name"))=length("Name") AND length("Name")>0) COLLATE NOCASE,
-            "Priority" UNSIGNED SMALLINT NOT NULL DEFAULT 65535,
-            "Description" TEXT NOT NULL CHECK(length(trim("Description"))=length("Description")),
-            "CreatedOn" DATETIME NOT NULL DEFAULT (datetime('now','localtime')),
-            "ModifiedOn" DATETIME NOT NULL DEFAULT (datetime('now','localtime')),
-            CONSTRAINT "PK_RemoteServices" PRIMARY KEY("Id"),
-            CONSTRAINT "UK_RemoteService_Name" UNIQUE("Name"),
-            CHECK("CreatedOn"<="ModifiedOn")
-        );
-        */
-        executeNonQuery(@$"CREATE TABLE IF NOT EXISTS ""{nameof(Services.ContentDb.RemoteServices)}"" (
-    {SqlUniqueIdentifier(nameof(Id))},
-    {VarCharTrimmedNotEmptyNoCase(nameof(Name), MAXLENGTH_Name)},
-    {SqlSmallUInt(nameof(Priority), DEFAULTVALUE_Priority)},
-    {SqlTextTrimmed(nameof(Description))},
-    {SqlDateTime(nameof(CreatedOn))},
-    {SqlDateTime(nameof(ModifiedOn))},
-    {SqlPkConstraint(nameof(Services.ContentDb.RemoteServices), nameof(Id))},
-    {SqlUniqueConstraint(nameof(RemoteService), nameof(Name))},
+        executeNonQuery(@$"CREATE TABLE ""{nameof(Services.ContentDb.RemoteServices)}"" (
+    ""{nameof(Id)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+    ""{nameof(Name)}"" NVARCHAR({MAXLENGTH_Name}) NOT NULL CHECK(length(trim(""{nameof(Name)}""))=length(""{nameof(Name)}"") AND length(""{nameof(Name)}"")>0) UNIQUE COLLATE NOCASE,
+    ""{nameof(Priority)}"" UNSIGNED SMALLINT NOT NULL DEFAULT {DEFAULTVALUE_Priority},
+    ""{nameof(Description)}"" TEXT NOT NULL CHECK(length(trim(""{nameof(Description)}""))=length(""{nameof(Description)}"")),
+    ""{nameof(CreatedOn)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},
+    ""{nameof(ModifiedOn)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},
+    PRIMARY KEY(""{nameof(Id)}""),
     CHECK(""{nameof(CreatedOn)}""<=""{nameof(ModifiedOn)}"")
 )");
-        // CREATE INDEX "IDX_RemoteServices_Priority" ON "RemoteServices" ("Priority");
-        executeNonQuery(SqlIndex(nameof(Services.ContentDb.RemoteServices), nameof(Priority)));
-        // CREATE INDEX "IDX_RemoteServices_Name" ON "RemoteServices" ("Name" COLLATE NOCASE);
-        executeNonQuery(SqlIndex(nameof(Services.ContentDb.RemoteServices), nameof(Name), true));
+        executeNonQuery($"CREATE INDEX \"IDX_RemoteServices_Priority\" ON \"{nameof(Services.ContentDb.RemoteServices)}\" (\"{nameof(Priority)}\" ASC)");
+        executeNonQuery($"CREATE UNIQUE INDEX \"IDX_RemoteServices_Name\" ON \"{nameof(Services.ContentDb.RemoteServices)}\" (\"{nameof(Name)}\" COLLATE NOCASE ASC)");
     }
 
     internal async static Task ShowRemotesAsync(Services.ContentDb dbContext, ILogger logger, IServiceScopeFactory scopeFactory, CancellationToken cancellationToken)

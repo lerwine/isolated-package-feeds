@@ -104,34 +104,25 @@ public class RemoteLibrary
         _ = builder.Property(nameof(LocalId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(RemoteServiceId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(ProviderData)).HasConversion(ExtensionMethods.JsonValueConverter);
+        _ = builder.Property(nameof(CreatedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
+        _ = builder.Property(nameof(ModifiedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
         _ = builder.HasOne(f => f.RemoteService).WithMany(v => v.Libraries).HasForeignKey(f => f.RemoteServiceId).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
         _ = builder.HasOne(r => r.Local).WithMany(l => l.Remotes).HasForeignKey(r => r.LocalId).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
     }
 
     internal static void CreateTable(Action<string> executeNonQuery, ILogger logger)
     {
-        /*
-        CREATE TABLE IF NOT EXISTS "RemoteLibraries" (
-            "LocalId" UNIQUEIDENTIFIER NOT NULL CONSTRAINT "FK_RemoteLibrary_LocalLibrary" REFERENCES "LocalLibraries"("Id") ON DELETE RESTRICT COLLATE NOCASE,
-            "RemoteServiceId" UNIQUEIDENTIFIER NOT NULL CONSTRAINT "FK_RemoteLibrary_RemoteService" REFERENCES "RemoteServices"("Id") ON DELETE RESTRICT COLLATE NOCASE,
-            "Priority" UNSIGNED SMALLINT DEFAULT NULL,
-            "Description" TEXT NOT NULL CHECK(length(trim("Description"))=length("Description")),
-            "ProviderData" TEXT DEFAULT NULL,
-            "CreatedOn" DATETIME NOT NULL DEFAULT (datetime('now','localtime')),
-            "ModifiedOn" DATETIME NOT NULL DEFAULT (datetime('now','localtime')),
-            CONSTRAINT "PK_RemoteLibraries" PRIMARY KEY("LocalId", "RemoteServiceId"),
-            CHECK("CreatedOn"<="ModifiedOn")
-        );
-        */
-        executeNonQuery(@$"CREATE TABLE IF NOT EXISTS ""{nameof(Services.ContentDb.RemoteLibraries)}"" (
-    {SqlReferenceColumn(nameof(RemoteLibrary), nameof(LocalId), nameof(LocalLibrary), nameof(LocalLibrary.Id), nameof(Services.ContentDb.LocalLibraries))},
-    {SqlReferenceColumn(nameof(RemoteLibrary), nameof(RemoteServiceId), nameof(Model.RemoteService), nameof(Model.RemoteService.Id), nameof(Services.ContentDb.RemoteServices))},
-    {SqlSmallUInt(nameof(Priority), true)},
-    {SqlTextTrimmed(nameof(Description))},
-    {SqlText(nameof(ProviderData), true)}
-    {SqlDateTime(nameof(CreatedOn))},
-    {SqlDateTime(nameof(ModifiedOn))},
-    {SqlPkConstraint(nameof(Services.ContentDb.RemoteLibraries), nameof(LocalId), nameof(RemoteServiceId))},
+        executeNonQuery(@$"CREATE TABLE ""{nameof(Services.ContentDb.RemoteLibraries)}"" (
+    ""{nameof(LocalId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+    ""{nameof(RemoteServiceId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+    ""{nameof(Priority)}"" UNSIGNED SMALLINT DEFAULT NULL,
+    ""{nameof(Description)}"" TEXT DEFAULT NULL CHECK(""{nameof(Description)}"" IS NULL OR length(trim(""{nameof(Description)}""))=length(""{nameof(Description)}"")),
+    ""{nameof(ProviderData)}"" TEXT DEFAULT NULL,
+    ""{nameof(CreatedOn)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},
+    ""{nameof(ModifiedOn)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},
+    PRIMARY KEY(""{nameof(LocalId)}"",""{nameof(RemoteServiceId)}""),
+    FOREIGN KEY(""{nameof(RemoteServiceId)}"") REFERENCES ""{nameof(Services.ContentDb.RemoteServices)}""(""{nameof(Model.RemoteService.Id)}"") ON DELETE RESTRICT,
+    FOREIGN KEY(""{nameof(LocalId)}"") REFERENCES ""{nameof(Services.ContentDb.LocalLibraries)}""(""{nameof(LocalLibrary.Id)}"") ON DELETE RESTRICT,
     CHECK(""{nameof(CreatedOn)}""<=""{nameof(ModifiedOn)}"")
 )");
     }

@@ -8,6 +8,12 @@ namespace CdnGetter;
 public class SqlDefinitions
 {
     public const string COLLATION_NOCASE = "NOCASE";
+    public const string DEFAULT_SQL_NOW = "(datetime('now','localtime'))";
+    public const int MAX_LENGTH_Url = 4096;
+    public const int MAXLENGTH_SRI = 256;
+    public const int MAXLENGTH_ContentType = 512;
+    public const int MAXLENGTH_Encoding = 32;
+    public const byte DEFAULT_VALUE_Action = 0;
     
     public static string SqlUniqueIdentifier(string colName, bool allowNull = false)
     {

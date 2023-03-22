@@ -106,6 +106,8 @@ public class RemoteVersion
         _ = builder.Property(nameof(LibraryId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(RemoteServiceId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(ProviderData)).HasConversion(ExtensionMethods.JsonValueConverter);
+        _ = builder.Property(nameof(CreatedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
+        _ = builder.Property(nameof(ModifiedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
         _ = builder.HasOne(f => f.Local).WithMany(f => f.Remotes).HasForeignKey(nameof(LocalId)).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
         _ = builder.HasOne(v => v.Library).WithMany(l => l.Versions)
             .HasForeignKey(nameof(LibraryId), nameof(RemoteServiceId))
@@ -115,7 +117,19 @@ public class RemoteVersion
 
     internal static void CreateTable(Action<string> executeNonQuery, ILogger logger)
     {
-        throw new NotImplementedException();
+        executeNonQuery(@$"CREATE TABLE ""{nameof(Services.ContentDb.RemoteVersions)}"" (
+    ""{nameof(LocalId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+    ""{nameof(LibraryId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+    ""{nameof(RemoteServiceId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+    ""{nameof(Priority)}"" UNSIGNED SMALLINT DEFAULT NULL,
+    ""{nameof(ProviderData)}"" TEXT DEFAULT NULL,
+    ""{nameof(CreatedOn)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},
+    ""{nameof(ModifiedOn)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},
+    FOREIGN KEY(""{nameof(LocalId)}"") REFERENCES ""{nameof(Services.ContentDb.LocalVersions)}""(""{nameof(LocalVersion.Id)}"") ON DELETE RESTRICT,
+    FOREIGN KEY(""{nameof(LibraryId)}"",""{nameof(RemoteServiceId)}"") REFERENCES ""{nameof(Services.ContentDb.RemoteLibraries)}""(""{nameof(RemoteLibrary.LocalId)}"",""{nameof(RemoteLibrary.RemoteServiceId)}"") ON DELETE RESTRICT,
+    PRIMARY KEY(""{nameof(LocalId)}"", ""{nameof(LibraryId)}"", ""{nameof(RemoteServiceId)}""),
+    CHECK(""{nameof(CreatedOn)}""<=""{nameof(ModifiedOn)}"")
+)");
     }
 
     internal async Task ClearFilesAsync(Services.ContentDb dbContext, CancellationToken cancellationToken)

@@ -34,7 +34,7 @@ public class VersionLog
 
     public int? EventId { get; set; }
 
-    public string? Url { get; set; }
+    public Uri? Url { get; set; }
 
     /// <summary>
     /// Optional provider-specific data for <see cref="RemoteService" />.
@@ -98,13 +98,29 @@ public class VersionLog
         _ = builder.Property(nameof(RemoteServiceId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(c => c.Message).IsRequired();
         _ = builder.Property(nameof(Action)).HasConversion(ExtensionMethods.LibraryActionConverter);
-        _ = builder.Property(nameof(Url)).HasConversion(ExtensionMethods.UriConverter);
+        _ = builder.Property(nameof(Url)).HasConversion(ExtensionMethods.UriConverter).HasMaxLength(MAX_LENGTH_Url);
         _ = builder.Property(nameof(ProviderData)).HasConversion(ExtensionMethods.JsonValueConverter);
+        _ = builder.Property(nameof(Timestamp)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
         _ = builder.HasOne(f => f.Version).WithMany(f => f.Logs).HasForeignKey(nameof(VersionId), nameof(LibraryId), nameof(RemoteServiceId)).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
     }
 
     internal static void CreateTable(Action<string> executeNonQuery, ILogger logger)
     {
+        executeNonQuery(@$"CREATE TABLE ""{nameof(Services.ContentDb.VersionLogs)}"" (
+    ""{nameof(Id)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+    ""{nameof(Message)}"" TEXT NOT NULL DEFAULT '' CHECK(length(trim(""{nameof(Message)}""))=length(""{nameof(Message)}"")),
+    ""{nameof(Action)}"" UNSIGNED TINYINT NOT NULL DEFAULT {(byte)default(LibraryAction)},
+    ""{nameof(EventId)}"" INTEGER DEFAULT NULL,
+    ""{nameof(Url)}"" NVARCHAR({MAX_LENGTH_Url}) DEFAULT NULL,
+    ""{nameof(ProviderData)}"" TEXT DEFAULT NULL,
+    ""{nameof(Timestamp)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},
+    ""{nameof(VersionId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+    ""{nameof(LibraryId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+    ""{nameof(RemoteServiceId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+    FOREIGN KEY(""{nameof(VersionId)}"",""{nameof(LibraryId)}"",""{nameof(RemoteServiceId)}"") REFERENCES ""{nameof(Services.ContentDb.RemoteVersions)}""(""{nameof(RemoteVersion.LocalId)}"",""{nameof(RemoteVersion.LibraryId)}"",""{nameof(RemoteVersion.RemoteServiceId)}"") ON DELETE RESTRICT,
+    PRIMARY KEY(""{nameof(Id)}"")
+)");
+        executeNonQuery($"CREATE INDEX \"IDX_VersionLogs_Timestamp\" ON \"{nameof(Services.ContentDb.VersionLogs)}\" (\"{nameof(Timestamp)}\" DESC)");
         throw new NotImplementedException();
     }
 }

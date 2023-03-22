@@ -141,9 +141,11 @@ public class RemoteFile
         _ = builder.Property(nameof(VersionId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(LibraryId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(RemoteServiceId)).UseCollation(COLLATION_NOCASE);
-        _ = builder.Property(nameof(SRI)).HasMaxLength(LocalFile.MAXLENGTH_SRI).UseCollation(COLLATION_NOCASE);
-        _ = builder.Property(nameof(Encoding)).HasMaxLength(LocalFile.MAXLENGTH_Encoding).IsRequired();
+        _ = builder.Property(nameof(SRI)).HasMaxLength(MAXLENGTH_SRI).UseCollation(COLLATION_NOCASE);
+        _ = builder.Property(nameof(Encoding)).HasMaxLength(MAXLENGTH_Encoding).IsRequired();
         _ = builder.Property(nameof(ProviderData)).HasConversion(ExtensionMethods.JsonValueConverter);
+        _ = builder.Property(nameof(CreatedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
+        _ = builder.Property(nameof(ModifiedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
         _ = builder.HasOne(f => f.Local).WithMany(f => f.Remotes).HasForeignKey(nameof(LocalId)).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
         _ = builder.HasOne(f => f.Version).WithMany(v => v.Files)
             .HasForeignKey(nameof(VersionId), nameof(LibraryId), nameof(RemoteServiceId))
@@ -153,6 +155,22 @@ public class RemoteFile
 
     internal static void CreateTable(Action<string> executeNonQuery, ILogger logger)
     {
-        throw new NotImplementedException();
+        executeNonQuery(@$"CREATE TABLE ""{nameof(Services.ContentDb.RemoteFiles)}"" (
+    ""{nameof(LocalId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+    ""{nameof(VersionId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+    ""{nameof(LibraryId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+    ""{nameof(RemoteServiceId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+    ""{nameof(Encoding)}"" NVARCHAR({MAXLENGTH_Encoding}) DEFAULT NULL CHECK(""{nameof(Encoding)}"" IS NULL OR (length(trim(""{nameof(Encoding)}""))=length(""{nameof(Encoding)}""))),
+    ""{nameof(SRI)}"" NVARCHAR({MAXLENGTH_SRI}) DEFAULT NULL CHECK(""{nameof(SRI)}"" IS NULL OR (length(trim(""{nameof(SRI)}""))=length(""{nameof(SRI)}"") AND length(""{nameof(SRI)}"")>0)) COLLATE NOCASE,
+    ""{nameof(Data)}"" BLOB DEFAULT NULL,
+    ""{nameof(Priority)}"" UNSIGNED SMALLINT DEFAULT NULL,
+    ""{nameof(ProviderData)}"" TEXT DEFAULT NULL,
+    ""{nameof(CreatedOn)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},
+    ""{nameof(ModifiedOn)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},
+    FOREIGN KEY(""{nameof(LocalId)}"") REFERENCES ""{nameof(Services.ContentDb.LocalFiles)}""(""{nameof(LocalFile.Id)}"") ON DELETE RESTRICT,
+    PRIMARY KEY(""{nameof(LocalId)}"",""{nameof(VersionId)}"",""{nameof(LibraryId)}"",""{nameof(RemoteServiceId)}""),
+    FOREIGN KEY(""{nameof(VersionId)}"",""{nameof(LibraryId)}"",""{nameof(RemoteServiceId)}"") REFERENCES ""{nameof(Services.ContentDb.RemoteVersions)}""(""{nameof(RemoteVersion.LocalId)}"",""{nameof(RemoteVersion.LibraryId)}"",""{nameof(RemoteVersion.RemoteServiceId)}""),
+    CHECK(""{nameof(CreatedOn)}""<=""{nameof(ModifiedOn)}"")
+)");
     }
 }

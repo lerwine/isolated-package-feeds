@@ -82,40 +82,29 @@ public class LocalVersion
         _ = builder.HasIndex(nameof(Version));
         _ = builder.HasIndex(nameof(Version), nameof(LibraryId)).IsUnique();
         _ = builder.Property(nameof(Version)).HasConversion(SwVersion.Converter).HasMaxLength(MAXLENGTH_Version).IsRequired().UseCollation(COLLATION_NOCASE);
-        _ = builder.Property(nameof(Order)).IsRequired();
+        _ = builder.Property(nameof(Order)).IsRequired().HasDefaultValue(DEFAULTVALUE_Order);
         _ = builder.HasIndex(nameof(Order));
         _ = builder.HasIndex(nameof(Order), nameof(LibraryId)).IsUnique();
-        _ = builder.HasOne(v => v.Library).WithMany(l => l.Versions).HasForeignKey(nameof(LibraryId)).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
+        _ = builder.Property(nameof(CreatedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
+        _ = builder.Property(nameof(ModifiedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
+        _ = builder.HasOne(v => v.Library).WithMany(l => l.Versions).HasForeignKey(nameof(LibraryId)).IsRequired().OnDelete(DeleteBehavior.Restrict);
     }
 
     internal static void CreateTable(Action<string> executeNonQuery, ILogger logger)
     {
-        /*
-        CREATE TABLE IF NOT EXISTS "LocalVersions" (
-            "Id" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
-            "Version" NVARCHAR(1024) NOT NULL CHECK(length(trim("Version"))=length("Version") AND length("Version")>0) COLLATE NOCASE,
-            "Order" UNSIGNED SMALLINT NOT NULL DEFAULT 65535,
-            "CreatedOn" DATETIME NOT NULL DEFAULT (datetime('now','localtime')),
-            "ModifiedOn" DATETIME NOT NULL DEFAULT (datetime('now','localtime')),
-            "LibraryId" UNIQUEIDENTIFIER NOT NULL CONSTRAINT "FK_LocalVersion_LocalLibrary" REFERENCES "LocalLibraries"("Id") ON DELETE RESTRICT COLLATE NOCASE,
-            CONSTRAINT "PK_LocalVersions" PRIMARY KEY("Id"),
-            CHECK("CreatedOn"<="ModifiedOn")
-        );
-        */
-        executeNonQuery(@$"CREATE TABLE IF NOT EXISTS ""{nameof(Services.ContentDb.LocalVersions)}"" (
-    {SqlUniqueIdentifier(nameof(Id))},
-    {VarCharTrimmedNotEmptyNoCase(nameof(Version), MAXLENGTH_Version)},
-    {SqlSmallUInt(nameof(Order), DEFAULTVALUE_Order)},
-    {SqlDateTime(nameof(CreatedOn))},
-    {SqlDateTime(nameof(ModifiedOn))},
-    {SqlReferenceColumn(nameof(LocalVersion), nameof(LibraryId), nameof(LocalLibrary), nameof(LocalLibrary.Id), nameof(Services.ContentDb.LocalLibraries))},
-    {SqlPkConstraint(nameof(Services.ContentDb.LocalVersions), nameof(Id))},
+        executeNonQuery(@$"CREATE TABLE ""{nameof(Services.ContentDb.LocalVersions)}"" (
+    ""{nameof(Id)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+    ""{nameof(Version)}"" NVARCHAR({MAXLENGTH_Version}) NOT NULL CHECK(length(trim(""{nameof(Version)}""))=length(""{nameof(Version)}"") AND length(""{nameof(Version)}"")>0) COLLATE NOCASE,
+    ""{nameof(Order)}"" UNSIGNED SMALLINT NOT NULL DEFAULT {DEFAULTVALUE_Order},
+    ""{nameof(CreatedOn)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},
+    ""{nameof(ModifiedOn)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},
+    ""{nameof(LibraryId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+    FOREIGN KEY(""{nameof(LibraryId)}"") REFERENCES ""{nameof(Services.ContentDb.LocalLibraries)}""(""{nameof(LocalLibrary.Id)}"") ON DELETE RESTRICT,
+    PRIMARY KEY(""{nameof(Id)}""),
     CHECK(""{nameof(CreatedOn)}""<=""{nameof(ModifiedOn)}"")
 )");
-        // CREATE INDEX "IDX_LocalVersions_Version" ON "LocalVersions" ("Version" COLLATE NOCASE);
-        executeNonQuery(SqlIndex(nameof(Services.ContentDb.LocalVersions), nameof(Version), true));
-        // CREATE INDEX "IDX_LocalVersions_Order" ON "LocalVersions" ("Order");
-        executeNonQuery(SqlIndex(nameof(Services.ContentDb.LocalVersions), nameof(Order)));
+        executeNonQuery($"CREATE INDEX \"IDX_LocalVersions_Version\" ON \"{nameof(Services.ContentDb.LocalVersions)}\" (\"{nameof(Version)}\" COLLATE NOCASE DESC)");
+        executeNonQuery($"CREATE INDEX \"IDX_LocalVersions_Order\" ON \"{nameof(Services.ContentDb.LocalVersions)}\" (\"{nameof(Order)}\" ASC)");
     }
 
     internal async Task ClearRemotesAsync(Services.ContentDb dbContext, CancellationToken cancellationToken)
