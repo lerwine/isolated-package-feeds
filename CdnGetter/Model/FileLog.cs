@@ -32,6 +32,8 @@ public class FileLog
 
     public LibraryAction Action { get; set; }
 
+    public ErrorLevel Level { get; set; }
+
     public int? EventId { get; set; }
 
     public Uri? Url { get; set; }
@@ -109,6 +111,7 @@ public class FileLog
         _ = builder.Property(nameof(RemoteServiceId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(c => c.Message).IsRequired();
         _ = builder.Property(nameof(Action)).HasConversion(ExtensionMethods.LibraryActionConverter);
+        _ = builder.Property(nameof(Level)).HasConversion(ExtensionMethods.ErrorLevelConverter);
         _ = builder.Property(nameof(Url)).HasConversion(ExtensionMethods.UriConverter).HasMaxLength(MAX_LENGTH_Url);
         _ = builder.Property(nameof(ProviderData)).HasConversion(ExtensionMethods.JsonValueConverter);
         _ = builder.Property(nameof(Timestamp)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
@@ -120,7 +123,8 @@ public class FileLog
         executeNonQuery(@$"CREATE TABLE ""{nameof(Services.ContentDb.FileLogs)}"" (
     ""{nameof(Id)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
     ""{nameof(Message)}"" TEXT NOT NULL DEFAULT '' CHECK(length(trim(""{nameof(Message)}""))=length(""{nameof(Message)}"")),
-    ""{nameof(Action)}"" UNSIGNED TINYINT NOT NULL DEFAULT {(byte)default(LibraryAction)},
+    ""{nameof(Action)}"" UNSIGNED TINYINT NOT NULL DEFAULT 0,
+    ""{nameof(Level)}"" UNSIGNED INT NOT NULL DEFAULT 0,
     ""{nameof(EventId)}"" INTEGER DEFAULT NULL,
     ""{nameof(Url)}"" NVARCHAR({MAX_LENGTH_Url}) DEFAULT NULL,
     ""{nameof(ProviderData)}"" TEXT DEFAULT NULL,

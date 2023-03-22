@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.Extensions.Logging;
 using static CdnGetter.SqlDefinitions;
 
 namespace CdnGetter.Model;

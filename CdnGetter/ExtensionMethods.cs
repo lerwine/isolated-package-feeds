@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Microsoft.Extensions.Logging;
 
 namespace CdnGetter;
 
@@ -60,6 +61,20 @@ public static class ExtensionMethods
     public static readonly ValueConverter<Uri?, string?> UriConverter = new(
         u => (u == null) ? null : u.IsAbsoluteUri ? u.AbsoluteUri : u.OriginalString,
         s => ForceCreateUri(s)
+    );
+
+    public static Model.ErrorLevel ToErrorLevel(this LogLevel level) => level switch
+    {
+        LogLevel.Warning => Model.ErrorLevel.Warning,
+        LogLevel.Error => Model.ErrorLevel.Error,
+        LogLevel.Critical => Model.ErrorLevel.Critical,
+        _ => Model.ErrorLevel.Information,
+    };
+    
+    private static readonly Model.ErrorLevel[] _allErrorLevels = Enum.GetValues<Model.ErrorLevel>();
+    public static readonly ValueConverter<Model.ErrorLevel, int> ErrorLevelConverter = new(
+        a => (byte)a,
+        b => _allErrorLevels.FirstOrDefault(a => (int)a == b)
     );
 
     private static readonly Model.LibraryAction[] _allLibraryActions = Enum.GetValues<Model.LibraryAction>();
