@@ -1,7 +1,6 @@
 using CdnGetter.Config;
 using CdnGetter.Model;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace CdnGetter.Services;
