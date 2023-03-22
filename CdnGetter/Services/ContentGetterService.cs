@@ -97,7 +97,7 @@ public abstract class ContentGetterService
         return result;
     }
 
-    protected async Task<RemoteLibrary?> GetMatchingLibraryAsync(Guid remoteServiceId, ContentDb dbContext, string libraryName, CancellationToken cancellationToken)
+    protected static async Task<RemoteLibrary?> GetMatchingLibraryAsync(Guid remoteServiceId, ContentDb dbContext, string libraryName, CancellationToken cancellationToken)
     {
         if (cancellationToken.IsCancellationRequested)
             return null;

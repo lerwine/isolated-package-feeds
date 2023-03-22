@@ -106,7 +106,7 @@ public class RemoteService
             foreach (KeyValuePair<Guid, (Type Type, string Name, string Description)> item in Services.ContentGetterAttribute.RemoteUpdateServices)
             {
                 Guid id = item.Key;
-                RemoteService? rsvc = await dbContext.RemoteServices.FirstOrDefaultAsync(r => r.Id == id);
+                RemoteService? rsvc = await dbContext.RemoteServices.FirstOrDefaultAsync(r => r.Id == id, cancellationToken: cancellationToken);
                 (Type type, string name, string description) = item.Value;
                 if (scope.ServiceProvider.GetService(type) is Services.ContentGetterService)
                 {

@@ -153,7 +153,7 @@ public class RemoteLibrary
         if (local is not null)
         {
             Guid id = local.Id;
-            if (!(await dbContext.RemoteLibraries.AnyAsync(r => r.LocalId == id)))
+            if (!await dbContext.RemoteLibraries.AnyAsync(r => r.LocalId == id, cancellationToken: cancellationToken))
                 await local.RemoveAsync(dbContext, cancellationToken);
         }
     }

@@ -36,20 +36,20 @@ public static class ExtensionMethods
             UriBuilder ub = new() { Host = null, Scheme = null };
             if (i > 0)
             {
-                ub.Fragment = uriString.Substring(i + 1);
-                string path = uriString.Substring(0, i);
+                ub.Fragment = uriString[(i + 1)..];
+                string path = uriString[..i];
                 if ((i = path.IndexOf('?')) > 0)
                 {
-                    ub.Query = path.Substring(i + 1);
-                    ub.Path = path.Substring(0, i);
+                    ub.Query = path[(i + 1)..];
+                    ub.Path = path[..i];
                 }
                 else
                     ub.Path = path;
             }
             else if ((i = uriString.IndexOf('?')) > 0)
             {
-                ub.Query = uriString.Substring(i + 1);
-                ub.Path = uriString.Substring(0, i);
+                ub.Query = uriString[(i + 1)..];
+                ub.Path = uriString[..i];
             }
             else
                 ub.Path = uriString;
@@ -83,7 +83,7 @@ public static class ExtensionMethods
         b => _allLibraryActions.FirstOrDefault(a => (byte)a == b)
     );
 
-    public static string? ConvertFromJsonNode(this JsonNode? value) => value is null ? null : value.ToJsonString(JsonSerializerOptions.Default);
+    public static string? ConvertFromJsonNode(this JsonNode? value) => value?.ToJsonString(JsonSerializerOptions.Default);
 
     public static JsonNode? ConvertToJsonNode(this string? value)
     {
@@ -154,138 +154,6 @@ public static class ExtensionMethods
         }
         finally { Monitor.Exit(syncRoot); }
         return guid.Value;
-    }
-
-    [Obsolete("Doesn't need to be this complicated")]
-    public static DateTime EnsureCreatedOn(this ref DateTime? createdOn, ref DateTime? modifiedOn, ref DateTime? lastChecked, object syncRoot)
-    {
-        DateTime? value;
-        Monitor.Enter(syncRoot);
-        try
-        {
-            if (!(value = createdOn).HasValue)
-            {
-                if (modifiedOn.HasValue)
-                {
-                    if (lastChecked.HasValue)
-                        createdOn = value = (lastChecked.Value < modifiedOn.Value) ? lastChecked : modifiedOn;
-                    else
-                        createdOn = lastChecked = value = modifiedOn;
-                }
-                else if (lastChecked.HasValue)
-                    createdOn = modifiedOn = value = lastChecked;
-                else
-                    createdOn = modifiedOn = lastChecked = value = DateTime.Now;
-            }
-        }
-        finally { Monitor.Exit(syncRoot); }
-        return value.Value;
-    }
-
-    [Obsolete("Doesn't need to be this complicated")]
-    public static void SetCreatedOn(this DateTime value, ref DateTime? createdOn, ref DateTime? modifiedOn, ref DateTime? lastChecked, object syncRoot)
-    {
-        Monitor.Enter(syncRoot);
-        try
-        {
-            if (createdOn.HasValue && createdOn.Value == value)
-                return;
-            createdOn = value;
-            if (!modifiedOn.HasValue || modifiedOn.Value < value)
-                modifiedOn = value;
-            if (!lastChecked.HasValue || lastChecked.Value < value)
-                lastChecked = value;
-        }
-        finally { Monitor.Exit(syncRoot); }
-    }
-
-    [Obsolete("Doesn't need to be this complicated")]
-    public static DateTime EnsureModifiedOn(this ref DateTime? modifiedOn, ref DateTime? createdOn, ref DateTime? lastChecked, object syncRoot)
-    {
-        DateTime? value;
-        Monitor.Enter(syncRoot);
-        try
-        {
-            if (!(value = modifiedOn).HasValue)
-            {
-                if (createdOn.HasValue)
-                {
-                    if ((value = DateTime.Now) > createdOn)
-                        value = createdOn;
-                    if (!lastChecked.HasValue)
-                        lastChecked = createdOn;
-                }
-                else if (lastChecked.HasValue)
-                    createdOn = modifiedOn = value = lastChecked;
-                else
-                    createdOn = modifiedOn = lastChecked = value = DateTime.Now;
-            }
-        }
-        finally { Monitor.Exit(syncRoot); }
-        return value.Value;
-    }
-
-    [Obsolete("Doesn't need to be this complicated")]
-    public static void SetModifiedOn(this DateTime value, ref DateTime? createdOn, ref DateTime? modifiedOn, ref DateTime? lastChecked, object syncRoot)
-    {
-        Monitor.Enter(syncRoot);
-        try
-        {
-            if (modifiedOn.HasValue && modifiedOn.Value == value)
-                return;
-            modifiedOn = value;
-            if (!createdOn.HasValue || createdOn.Value > value)
-            {
-                createdOn = value;
-                if (!lastChecked.HasValue || lastChecked.Value < value)
-                    lastChecked = value;
-            }
-            else if (!lastChecked.HasValue || lastChecked.Value > value)
-                lastChecked = value;
-        }
-        finally { Monitor.Exit(syncRoot); }
-    }
-
-    [Obsolete("Doesn't need to be this complicated")]
-    public static DateTime EnsureLastChecked(this ref DateTime? lastChecked, ref DateTime? createdOn, ref DateTime? modifiedOn, object syncRoot)
-    {
-        DateTime? value;
-        Monitor.Enter(syncRoot);
-        try
-        {
-            if (!(value = lastChecked).HasValue)
-            {
-                if (createdOn.HasValue)
-                {
-                    value = createdOn;
-                    if (!modifiedOn.HasValue)
-                        modifiedOn = createdOn;
-                }
-                if (modifiedOn.HasValue)
-                    lastChecked = createdOn = value = modifiedOn;
-                else
-                    createdOn = modifiedOn = lastChecked = value = DateTime.Now;
-            }
-        }
-        finally { Monitor.Exit(syncRoot); }
-        return value.Value;
-    }
-
-    [Obsolete("Doesn't need to be this complicated")]
-    public static void SetLastChecked(this DateTime value, ref DateTime? createdOn, ref DateTime? modifiedOn, ref DateTime? lastChecked, object syncRoot)
-    {
-        Monitor.Enter(syncRoot);
-        try
-        {
-            if (lastChecked.HasValue && lastChecked.Value == value)
-                return;
-            lastChecked = value;
-            if (createdOn.HasValue && createdOn.Value > value)
-                createdOn = value;
-            if (modifiedOn.HasValue && modifiedOn.Value < value)
-                modifiedOn = value;
-        }
-        finally { Monitor.Exit(syncRoot); }
     }
 
     public static T[] EmptyIfNull<T>(this T[]? source) { return (source is null) ? Array.Empty<T>() : source; }
