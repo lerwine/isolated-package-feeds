@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.Extensions.Logging;
 using static CdnGetter.SqlDefinitions;
 
 namespace CdnGetter.Model;

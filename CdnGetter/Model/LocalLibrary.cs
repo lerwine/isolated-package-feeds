@@ -1,9 +1,7 @@
 using System.Collections.ObjectModel;
 using CdnGetter.Config;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.Extensions.Logging;
 using static CdnGetter.SqlDefinitions;
 
 namespace CdnGetter.Model;
