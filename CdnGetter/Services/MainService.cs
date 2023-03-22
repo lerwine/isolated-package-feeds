@@ -1,4 +1,3 @@
-using CdnGetter.Config;
 using CdnGetter.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,24 +12,22 @@ public class MainService : BackgroundService
     internal static readonly StringComparer NameComparer = StringComparer.InvariantCultureIgnoreCase;
     private readonly ILogger<MainService> _logger;
     private readonly ContentDb _dbContext;
-    private readonly CdnJsGetterService _cdnJs;
     private readonly IHostApplicationLifetime _applicationLifetime;
     private readonly Config.AppSettings _appSettings;
     private readonly IServiceScopeFactory _scopeFactory;
 
-    public MainService(ILogger<MainService> logger, ContentDb dbContext, IOptions<Config.AppSettings> options, CdnJsGetterService cdnJs, IHostApplicationLifetime applicationLifetime, IServiceScopeFactory scopeFactory)
+    public MainService(ILogger<MainService> logger, ContentDb dbContext, IOptions<Config.AppSettings> options, IHostApplicationLifetime applicationLifetime, IServiceScopeFactory scopeFactory)
     {
         _logger = logger;
         _dbContext = dbContext;
         _appSettings = options.Value ?? new();
-        _cdnJs = cdnJs;
         _applicationLifetime = applicationLifetime;
         _scopeFactory = scopeFactory;
     }
 
     private async Task<(RemoteService?, Type)> GetRemoteServiceAsync(string remoteName, System.Threading.CancellationToken stoppingToken)
     {
-        RemoteService? rsvc = await _dbContext.RemoteServices.FirstOrDefaultAsync(r => r.Name == remoteName);
+        RemoteService? rsvc = await _dbContext.RemoteServices.FirstOrDefaultAsync(r => r.Name == remoteName, cancellationToken: stoppingToken);
         if (rsvc is null)
         {
             using IEnumerator<KeyValuePair<Guid, (Type Type, string Name, string Description)>> enumerator = ContentGetterAttribute.RemoteUpdateServices
@@ -41,7 +38,7 @@ public class MainService : BackgroundService
                 return (null, null!);
             }
             Guid id = enumerator.Current.Key;
-            if ((rsvc = await _dbContext.RemoteServices.FirstOrDefaultAsync(r => r.Id == id)) is null)
+            if ((rsvc = await _dbContext.RemoteServices.FirstOrDefaultAsync(r => r.Id == id, cancellationToken: stoppingToken)) is null)
             {
                 (Type type, string? name, string? description) = enumerator.Current.Value;
                 rsvc = new()
@@ -74,11 +71,10 @@ public class MainService : BackgroundService
                 if (rsvc is null)
                     return;
                 using IServiceScope scope = _scopeFactory.CreateScope();
-                ContentGetterService? svc = scope.ServiceProvider.GetService(type) as ContentGetterService;
-                if (svc is null)
-                    _logger.LogRemoteServiceNotSupported(remoteName);
-                else
+                if (scope.ServiceProvider.GetService(type) is ContentGetterService svc)
                     await svc.UpdateLibrariesAsync(rsvc, _dbContext, _appSettings, _logger, stoppingToken);
+                else
+                    _logger.LogRemoteServiceNotSupported(remoteName);
             }
             else
             {
@@ -137,7 +133,7 @@ public class MainService : BackgroundService
                 case Model.LibraryAction.GetNewVersions:
                     foreach (string n in g.LibraryNames)
                     {
-                        LocalLibrary? ll = await _dbContext.LocalLibraries.FirstOrDefaultAsync(l => l.Name == n);
+                        LocalLibrary? ll = await _dbContext.LocalLibraries.FirstOrDefaultAsync(l => l.Name == n, cancellationToken: stoppingToken);
                         if (ll is null)
                             _logger.LogLocalLibraryNotFound(n);
                         else
@@ -147,7 +143,7 @@ public class MainService : BackgroundService
                 case Model.LibraryAction.Reload:
                     foreach (string n in g.LibraryNames)
                     {
-                        LocalLibrary? ll = await _dbContext.LocalLibraries.FirstOrDefaultAsync(l => l.Name == n);
+                        LocalLibrary? ll = await _dbContext.LocalLibraries.FirstOrDefaultAsync(l => l.Name == n, cancellationToken: stoppingToken);
                         if (ll is null)
                             _logger.LogLocalLibraryNotFound(n);
                         else
@@ -157,10 +153,10 @@ public class MainService : BackgroundService
                 default:
                     foreach (string n in g.LibraryNames)
                     {
-                        if (await _dbContext.LocalLibraries.AnyAsync(l => l.Name == n))
+                        if (await _dbContext.LocalLibraries.AnyAsync(l => l.Name == n, cancellationToken: stoppingToken))
                             _logger.LogLocalLibraryAlreadyExists(n);
                         else
-                        await LocalLibrary.AddAsync(n, _dbContext, _appSettings, stoppingToken);
+                            await LocalLibrary.AddAsync(n, _dbContext, _appSettings, stoppingToken);
                     }
                     break;
             }
