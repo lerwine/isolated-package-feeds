@@ -45,16 +45,16 @@ public class ContentDb : DbContext
 #pragma warning restore CA2201 // Exception type System.Exception is not sufficiently specific
                         }
                     }
-                    RemoteService.CreateTable(executeNonQuery, (ILogger)logger);
-                    LocalLibrary.CreateTable(executeNonQuery, (ILogger)logger);
-                    RemoteLibrary.CreateTable(executeNonQuery, (ILogger)logger);
-                    LibraryLog.CreateTable(executeNonQuery, (ILogger)logger);
-                    LocalVersion.CreateTable(executeNonQuery, (ILogger)logger);
-                    RemoteVersion.CreateTable(executeNonQuery, (ILogger)logger);
-                    VersionLog.CreateTable(executeNonQuery, (ILogger)logger);
-                    LocalFile.CreateTable(executeNonQuery, (ILogger)logger);
-                    RemoteFile.CreateTable(executeNonQuery, (ILogger)logger);
-                    FileLog.CreateTable(executeNonQuery, (ILogger)logger);
+                    RemoteService.CreateTable(executeNonQuery);
+                    LocalLibrary.CreateTable(executeNonQuery);
+                    RemoteLibrary.CreateTable(executeNonQuery);
+                    LibraryLog.CreateTable(executeNonQuery);
+                    LocalVersion.CreateTable(executeNonQuery);
+                    RemoteVersion.CreateTable(executeNonQuery);
+                    VersionLog.CreateTable(executeNonQuery);
+                    LocalFile.CreateTable(executeNonQuery);
+                    RemoteFile.CreateTable(executeNonQuery);
+                    FileLog.CreateTable(executeNonQuery);
                 }
             }
         }

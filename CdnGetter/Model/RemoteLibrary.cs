@@ -110,7 +110,7 @@ public class RemoteLibrary
         _ = builder.HasOne(r => r.Local).WithMany(l => l.Remotes).HasForeignKey(r => r.LocalId).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
     }
 
-    internal static void CreateTable(Action<string> executeNonQuery, ILogger logger)
+    internal static void CreateTable(Action<string> executeNonQuery)
     {
         executeNonQuery(@$"CREATE TABLE ""{nameof(Services.ContentDb.RemoteLibraries)}"" (
     ""{nameof(LocalId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,

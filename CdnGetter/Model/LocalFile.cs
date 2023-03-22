@@ -133,7 +133,7 @@ public class LocalFile
         _ = builder.Property(nameof(VersionId)).UseCollation(COLLATION_NOCASE);
     }
 
-    internal static void CreateTable(Action<string> executeNonQuery, ILogger logger)
+    internal static void CreateTable(Action<string> executeNonQuery)
     {
         executeNonQuery(@$"CREATE TABLE ""{nameof(Services.ContentDb.LocalFiles)}"" (
     ""{nameof(Id)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,

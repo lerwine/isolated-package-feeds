@@ -153,7 +153,7 @@ public class RemoteFile
             .IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
     }
 
-    internal static void CreateTable(Action<string> executeNonQuery, ILogger logger)
+    internal static void CreateTable(Action<string> executeNonQuery)
     {
         executeNonQuery(@$"CREATE TABLE ""{nameof(Services.ContentDb.RemoteFiles)}"" (
     ""{nameof(LocalId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,

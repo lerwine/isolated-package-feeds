@@ -104,7 +104,7 @@ public class VersionLog
         _ = builder.HasOne(f => f.Version).WithMany(f => f.Logs).HasForeignKey(nameof(VersionId), nameof(LibraryId), nameof(RemoteServiceId)).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
     }
 
-    internal static void CreateTable(Action<string> executeNonQuery, ILogger logger)
+    internal static void CreateTable(Action<string> executeNonQuery)
     {
         executeNonQuery(@$"CREATE TABLE ""{nameof(Services.ContentDb.VersionLogs)}"" (
     ""{nameof(Id)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
