@@ -24,8 +24,7 @@ public class ContentDb : DbContext
                 _connectionStringValidated = true;
                 SqliteConnectionStringBuilder builder = new(Database.GetConnectionString());
                 string connectionString = builder.ConnectionString;
-                _logger.LogInformation($"Using {nameof(SqliteConnectionStringBuilder.ConnectionString)} {{{nameof(SqliteConnectionStringBuilder.ConnectionString)}}}",
-                    connectionString);
+                _logger.LogInformation($"Using {nameof(SqliteConnectionStringBuilder.ConnectionString)} {{{nameof(SqliteConnectionStringBuilder.ConnectionString)}}}", connectionString);
                 if (!File.Exists(builder.DataSource))
                 {
                     builder.Mode = SqliteOpenMode.ReadWriteCreate;
