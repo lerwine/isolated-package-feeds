@@ -70,11 +70,11 @@ public static class ExtensionMethods
         LogLevel.Critical => Model.ErrorLevel.Critical,
         _ => Model.ErrorLevel.Information,
     };
-    
+
     private static readonly Model.ErrorLevel[] _allErrorLevels = Enum.GetValues<Model.ErrorLevel>();
-    public static readonly ValueConverter<Model.ErrorLevel, int> ErrorLevelConverter = new(
+    public static readonly ValueConverter<Model.ErrorLevel, byte> ErrorLevelConverter = new(
         a => (byte)a,
-        b => _allErrorLevels.FirstOrDefault(a => (int)a == b)
+        b => _allErrorLevels.FirstOrDefault(a => (byte)a == b)
     );
 
     private static readonly Model.LibraryAction[] _allLibraryActions = Enum.GetValues<Model.LibraryAction>();

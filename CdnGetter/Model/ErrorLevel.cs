@@ -1,6 +1,6 @@
 namespace CdnGetter.Model
 {
-    public enum ErrorLevel
+    public enum ErrorLevel : byte
     {
         /// <summary>
         /// Logs that track the general flow of the application.

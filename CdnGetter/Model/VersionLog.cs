@@ -113,7 +113,7 @@ public class VersionLog : ILibraryLog
     ""{nameof(Id)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
     ""{nameof(Message)}"" TEXT NOT NULL DEFAULT '' CHECK(length(trim(""{nameof(Message)}""))=length(""{nameof(Message)}"")),
     ""{nameof(Action)}"" UNSIGNED TINYINT NOT NULL DEFAULT 0,
-    ""{nameof(Level)}"" UNSIGNED INT NOT NULL DEFAULT 0,
+    ""{nameof(Level)}"" UNSIGNED TINYINT NOT NULL DEFAULT 0,
     ""{nameof(EventId)}"" INTEGER DEFAULT NULL,
     ""{nameof(Url)}"" NVARCHAR({MAX_LENGTH_Url}) DEFAULT NULL,
     ""{nameof(ProviderData)}"" TEXT DEFAULT NULL,
