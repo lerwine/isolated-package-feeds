@@ -102,40 +102,4 @@ public abstract class ContentGetterService
             return null;
         return await dbContext.CdnLibraries.Include(r => r.Local).FirstOrDefaultAsync(l => l.Local!.Name == libraryName && l.UpstreamCdnId == upstreamCdnId, cancellationToken);
     }
-
-    [Obsolete("Do not use")]
-    internal async Task UpdateLibrariesAsync(UpstreamCdn rsvc, ContentDb dbContext, Config.AppSettings appSettings, ILogger logger, CancellationToken cancellationToken)
-    {
-        Model.LibraryActionGroup[] actions = Model.LibraryActionGroup.FromSettings(appSettings).ToArray();
-        if (actions.Length > 0)
-            foreach (Model.LibraryActionGroup g in actions)
-                switch (g.Action)
-                {
-                    case Model.LibraryAction.Remove:
-                        await RemoveAsync(rsvc, dbContext, g.LibraryNames, cancellationToken);
-                        break;
-                    case Model.LibraryAction.ReloadExistingVersions:
-                        await ReloadExistingAsync(rsvc, dbContext, appSettings, g.LibraryNames, cancellationToken);
-                        break;
-                    case Model.LibraryAction.GetNewVersions:
-                        await GetNewVersionsAsync(rsvc, dbContext, appSettings, g.LibraryNames, cancellationToken);
-                        break;
-                    case Model.LibraryAction.Reload:
-                        await ReloadAsync(rsvc, dbContext, appSettings, g.LibraryNames, cancellationToken);
-                        break;
-                    default:
-                        await AddAsync(rsvc, dbContext, appSettings, g.LibraryNames, cancellationToken);
-                        break;
-                }
-        else
-        {
-            Guid id = rsvc.Id;
-            CdnLibrary[] rl = await dbContext.CdnLibraries.Where(r => r.UpstreamCdnId == id).ToArrayAsync(cancellationToken);
-            if (rl.Length == 0)
-                logger.LogNothingToDo();
-            else
-                foreach (CdnLibrary r in rl)
-                    await GetNewVersionsAsync(r, dbContext, appSettings, cancellationToken);
-        }
-    }
 }
