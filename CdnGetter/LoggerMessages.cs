@@ -77,4 +77,29 @@ internal static class LoggerMessages
     private static readonly Action<ILogger, string, string, Exception?> _remoteLibraryAlreadyExists = LoggerMessage.Define<string, string>(LogLevel.Warning,
         RemoteLibraryAlreadyExists, "Library \"{LibraryName}\" has already been retreived from \"{RemoteServiceName}\".");
     public static void LogRemoteLibraryAlreadyExists(this ILogger logger, string libraryName, string remoteSvcName) => _remoteLibraryAlreadyExists(logger, libraryName, remoteSvcName, null);
+    
+    public const int EVENT_ID_MutuallyExclusiveSwitchError = 0x000d;
+    public static readonly EventId MutuallyExclusiveSwitchError = new(EVENT_ID_MutuallyExclusiveSwitchError, nameof(MutuallyExclusiveSwitchError));
+    private static readonly Action<ILogger, string, string, Exception?> _mutuallyExclusiveSwitchError = LoggerMessage.Define<string, string>(LogLevel.Warning,
+        MutuallyExclusiveSwitchError, "The --{SwitchName} switch cannot be used with the --{MutuallyExclusive} switch.");
+    public static void LogMutuallyExclusiveSwitchError(this ILogger logger, string switchName, string mutuallyExclusiveSwitch) => _mutuallyExclusiveSwitchError(logger, switchName, mutuallyExclusiveSwitch, null);
+
+    public const int EVENT_ID_RequiredDependentParameter1 = 0x000e;
+    public static readonly EventId RequiredDependentParameter1 = new(EVENT_ID_RequiredDependentParameter1, nameof(RequiredDependentParameter1));
+    private static readonly Action<ILogger, string, string, Exception?> _requiredDependentParameter1 = LoggerMessage.Define<string, string>(LogLevel.Warning,
+        RequiredDependentParameter1, "The --{DependentSwitch} switch is required when the --{SwitchName} switch is present.");
+    public static void LogRequiredDependentParameter1(this ILogger logger, string dependentSwitch, string switchName) => _requiredDependentParameter1(logger, dependentSwitch, switchName, null);
+
+    public const int EVENT_ID_RequiredAltDependentParameter = 0x000f;
+    public static readonly EventId RequiredAltDependentParameter = new(EVENT_ID_RequiredAltDependentParameter, nameof(RequiredAltDependentParameter));
+    private static readonly Action<ILogger, string, string, string, Exception?> _requiredAltDependentParameter = LoggerMessage.Define<string, string, string>(LogLevel.Warning,
+        RequiredDependentParameter1, "The --{DependentSwitch1} or --{DependentSwitch2} switch is required when the --{DependentSwitch} switch is present.");
+    public static void LogRequiredAltDependentParameter(this ILogger logger, string dependentSwitch1, string dependentSwitch2, string switchName) => _requiredAltDependentParameter(logger, dependentSwitch1, dependentSwitch2, switchName, null);
+
+
+    public const int EVENT_ID_InvalidParameterValue = 0x0010;
+    public static readonly EventId InvalidParameterValue = new(EVENT_ID_InvalidParameterValue, nameof(InvalidParameterValue));
+    private static readonly Action<ILogger, string, string, Exception?> _invalidParameterValue = LoggerMessage.Define<string, string>(LogLevel.Warning,
+        RequiredDependentParameter1, "Invalid value for the --{SwitchName} switch ({Value}).");
+    public static void LogInvalidParameterValue(this ILogger logger, string switchName, string value) => _invalidParameterValue(logger, switchName, value, null);
 }
