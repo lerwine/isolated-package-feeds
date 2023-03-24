@@ -25,37 +25,51 @@ public class MainService : BackgroundService
         _scopeFactory = scopeFactory;
     }
 
-    private async Task<(UpstreamCdn?, Type)> GetUpstreamCdnAsync(string remoteName, System.Threading.CancellationToken stoppingToken)
+    private async Task<LinkedList<UpstreamCdn>> GetUpstreamCdns(IEnumerable<string> names, CancellationToken stoppingToken)
     {
-        UpstreamCdn? rsvc = await _dbContext.UpstreamCdns.FirstOrDefaultAsync(r => r.Name == remoteName, cancellationToken: stoppingToken);
-        if (rsvc is null)
+        LinkedList<UpstreamCdn> result = new();
+        foreach (string n in names.Distinct(NameComparer))
+        {
+            UpstreamCdn? cdn = await _dbContext.UpstreamCdns.FirstOrDefaultAsync(r => r.Name == n, cancellationToken: stoppingToken);
+            if (cdn is null)
+                _logger.LogUpstreamCdnNotFound(n);
+            else
+                result.AddLast(cdn);
+        }
+        return result;
+    }
+
+    private async Task<(UpstreamCdn?, Type)> GetUpstreamCdnAsync(string cdnName, CancellationToken stoppingToken)
+    {
+        UpstreamCdn? cdn = await _dbContext.UpstreamCdns.FirstOrDefaultAsync(r => r.Name == cdnName, cancellationToken: stoppingToken);
+        if (cdn is null)
         {
             using IEnumerator<KeyValuePair<Guid, (Type Type, string Name, string Description)>> enumerator = ContentGetterAttribute.UpstreamCdnServices
-                .Where(kvp => kvp.Value.Name.Length > 0 && NameComparer.Equals(remoteName, kvp.Value.Name)).GetEnumerator();
+                .Where(kvp => kvp.Value.Name.Length > 0 && NameComparer.Equals(cdnName, kvp.Value.Name)).GetEnumerator();
             if (!enumerator.MoveNext())
             {
-                _logger.LogUpstreamCdnNotFound(remoteName);
+                _logger.LogUpstreamCdnNotFound(cdnName);
                 return (null, null!);
             }
             Guid id = enumerator.Current.Key;
-            if ((rsvc = await _dbContext.UpstreamCdns.FirstOrDefaultAsync(r => r.Id == id, cancellationToken: stoppingToken)) is null)
+            if ((cdn = await _dbContext.UpstreamCdns.FirstOrDefaultAsync(r => r.Id == id, cancellationToken: stoppingToken)) is null)
             {
                 (Type type, string? name, string? description) = enumerator.Current.Value;
-                rsvc = new()
+                cdn = new()
                 {
                     Id = id,
                     Name = name!,
                     Description = description
                 };
-                await _dbContext.UpstreamCdns.AddAsync(rsvc, stoppingToken);
+                await _dbContext.UpstreamCdns.AddAsync(cdn, stoppingToken);
                 await _dbContext.SaveChangesAsync(stoppingToken);
-                return (rsvc, type);
+                return (cdn, type);
             }
-            return (rsvc, enumerator.Current.Value.Type);
+            return (cdn, enumerator.Current.Value.Type);
         }
-        if (ContentGetterAttribute.UpstreamCdnServices.TryGetValue(rsvc.Id, out (Type Type, string Name, string Description) result))
-            return (rsvc, result.Type);
-        _logger.LogUpstreamCdnNotSupported(remoteName);
+        if (ContentGetterAttribute.UpstreamCdnServices.TryGetValue(cdn.Id, out (Type Type, string Name, string Description) result))
+            return (cdn, result.Type);
+        _logger.LogUpstreamCdnNotSupported(cdnName);
         return (null, null!);
     }
 
@@ -94,15 +108,25 @@ public class MainService : BackgroundService
                         _logger.LogMutuallyExclusiveSwitchError($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Version)}");
                     else
                     {
-                        IEnumerable<string> upstream = _appSettings.Upstream.TrimmedNotEmptyValues();
-                        if (upstream.Any())
+                        IEnumerable<string> cdnNames = _appSettings.Upstream.TrimmedNotEmptyValues();
+                        if (cdnNames.Any())
                         {
-                            // TODO: Show libraries for upstream CDN(s)
+                            LinkedList<UpstreamCdn> cdns = await GetUpstreamCdns(cdnNames, stoppingToken);
+                            if (cdns.Count == 1)
+                            {
+                                Guid id = cdns.First!.Value.Id;
+                                await _dbContext.CdnLibraries.Where(l => l.LocalId == id).Include(l => l.Local).Select(l => l.Local!.Name).ForEachAsync(n => Console.WriteLine(n), stoppingToken);
+                            }
+                            else
+                                foreach (UpstreamCdn cdn in cdns)
+                                {
+                                    Console.WriteLine(cdn.Name);
+                                    Guid id = cdn.Id;
+                                    await _dbContext.CdnLibraries.Where(l => l.LocalId == id).Include(l => l.Local).Select(l => l.Local!.Name).ForEachAsync(ln => Console.WriteLine($"\t{ln}"), stoppingToken);
+                                }
                         }
                         else
-                        {
-                            // TODO: Show libraries
-                        }
+                            await _dbContext.LocalLibraries.ForEachAsync(l => Console.WriteLine(l.Name), stoppingToken);
                     }
                 }
                 else if (sv.Equals(Config.AppSettings.SHOW_Versions, StringComparison.InvariantCultureIgnoreCase))
@@ -152,8 +176,8 @@ public class MainService : BackgroundService
                         _logger.LogMutuallyExclusiveSwitchError($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.AddLibrary)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Library)}");
                     else
                     {
-                        IEnumerable<string> upstreams = _appSettings.Upstream.TrimmedNotEmptyValues();
-                        if (upstreams.Any())
+                        IEnumerable<string> cdns = _appSettings.Upstream.TrimmedNotEmptyValues();
+                        if (cdns.Any())
                         {
                             IEnumerable<string> versions = _appSettings.Version.TrimmedNotEmptyValues();
                             // TODO: Add libraries
@@ -203,9 +227,9 @@ public class MainService : BackgroundService
                         _logger.LogMutuallyExclusiveSwitchError($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.ReloadLibrary)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Library)}");
                     else
                     {
-                        IEnumerable<string> upstreams = _appSettings.Upstream.TrimmedNotEmptyValues();
+                        IEnumerable<string> cdns = _appSettings.Upstream.TrimmedNotEmptyValues();
                         IEnumerable<string> versions = _appSettings.Version.TrimmedNotEmptyValues();
-                        if (upstreams.Any())
+                        if (cdns.Any())
                         {
                             // TODO: Reload libraries
                         }
@@ -226,9 +250,9 @@ public class MainService : BackgroundService
                         _logger.LogMutuallyExclusiveSwitchError($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.ReloadExistingVersions)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Version)}");
                     else
                     {
-                        IEnumerable<string> upstreams = _appSettings.Upstream.TrimmedNotEmptyValues();
+                        IEnumerable<string> cdns = _appSettings.Upstream.TrimmedNotEmptyValues();
                         IEnumerable<string> versions = _appSettings.Version.TrimmedNotEmptyValues();
-                        if (upstreams.Any())
+                        if (cdns.Any())
                         {
                             // TODO: Reload libraries
                         }
