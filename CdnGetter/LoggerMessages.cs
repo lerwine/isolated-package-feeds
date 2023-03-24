@@ -32,13 +32,13 @@ internal static class LoggerMessages
     public const int EVENT_ID_NoUpstreamCdnsFound = 0x0005;
     public static readonly EventId NoUpstreamCdnsFound = new(EVENT_ID_NoUpstreamCdnsFound, nameof(NoUpstreamCdnsFound));
     private static readonly Action<ILogger, Exception?> _noUpstreamCdnsFound = LoggerMessage.Define(LogLevel.Warning,
-        NoUpstreamCdnsFound, "No remotes found.");
+        NoUpstreamCdnsFound, "No CDNs found.");
     public static void LogNoUpstreamCdnsFound(this ILogger logger) => _noUpstreamCdnsFound(logger, null);
     
     public const int EVENT_ID_UpstreamCdnNoActions = 0x0006;
     public static readonly EventId UpstreamCdnNoActions = new(EVENT_ID_UpstreamCdnNoActions, nameof(UpstreamCdnNoActions));
     private static readonly Action<ILogger, string, Exception?> _upstreamCdnNoActions = LoggerMessage.Define<string>(LogLevel.Warning,
-        UpstreamCdnNoActions, "Nothing to do with remote service \"{UpstreamCdnName}\".");
+        UpstreamCdnNoActions, "Nothing to do with upstream CDN service \"{UpstreamCdnName}\".");
     public static void LogUpstreamCdnNoActions(this ILogger logger, string name) => _upstreamCdnNoActions(logger, name, null);
     
     public const int EVENT_ID_NothingToDo = 0x0007;
@@ -51,8 +51,8 @@ internal static class LoggerMessages
     public static readonly EventId InvalidBaseUrl = new(EVENT_ID_InvalidBaseUrl, nameof(InvalidBaseUrl));
     private static readonly Action<ILogger, string, string, Exception?> _invalidBaseUrl = LoggerMessage.Define<string, string>(LogLevel.Error,
         InvalidBaseUrl, "Invalid base URL for {UpstreamCdnType} ({UpstreamCdnName}).");
-    public static void LogInvalidBaseUrl(this ILogger logger, Type remoteSvcType, string remoteSvcName, Exception? error = null) => _invalidBaseUrl(logger, remoteSvcType.FullName ?? remoteSvcType.Name, remoteSvcName, error);
-    public static void LogInvalidBaseUrl<T>(this ILogger logger, string remoteSvcName, Exception? error = null) => LogInvalidBaseUrl(logger, typeof(T), remoteSvcName, error);
+    public static void LogInvalidBaseUrl(this ILogger logger, Type cdnSvcType, string cdnSvcName, Exception? error = null) => _invalidBaseUrl(logger, cdnSvcType.FullName ?? cdnSvcType.Name, cdnSvcName, error);
+    public static void LogInvalidBaseUrl<T>(this ILogger logger, string cdnSvcName, Exception? error = null) => LogInvalidBaseUrl(logger, typeof(T), cdnSvcName, error);
     
     public const int EVENT_ID_LocalLibraryNotFound = 0x0009;
     public static readonly EventId LocalLibraryNotFound = new(EVENT_ID_LocalLibraryNotFound, nameof(LocalLibraryNotFound));
@@ -63,8 +63,8 @@ internal static class LoggerMessages
     public const int EVENT_ID_CdnLibraryNotFound = 0x000a;
     public static readonly EventId CdnLibraryNotFound = new(EVENT_ID_CdnLibraryNotFound, nameof(CdnLibraryNotFound));
     private static readonly Action<ILogger, string, string, Exception?> _cdnLibraryNotFound = LoggerMessage.Define<string, string>(LogLevel.Warning,
-        CdnLibraryNotFound, "No local library named \"{LibraryName}\" exists from remote service \"{UpstreamCdnName}\".");
-    public static void LogCdnLibraryNotFound(this ILogger logger, string libraryName, string remoteSvcName) => _cdnLibraryNotFound(logger, libraryName, remoteSvcName, null);
+        CdnLibraryNotFound, "No local library named \"{LibraryName}\" exists from upstream CDN service \"{UpstreamCdnName}\".");
+    public static void LogCdnLibraryNotFound(this ILogger logger, string libraryName, string cdnSvcName) => _cdnLibraryNotFound(logger, libraryName, cdnSvcName, null);
     
     public const int EVENT_ID_LocalLibraryAlreadyExists = 0x000b;
     public static readonly EventId LocalLibraryAlreadyExists = new(EVENT_ID_LocalLibraryAlreadyExists, nameof(LocalLibraryAlreadyExists));
@@ -76,7 +76,7 @@ internal static class LoggerMessages
     public static readonly EventId CdnLibraryAlreadyExists = new(EVENT_ID_CdnLibraryAlreadyExists, nameof(CdnLibraryAlreadyExists));
     private static readonly Action<ILogger, string, string, Exception?> _cdnLibraryAlreadyExists = LoggerMessage.Define<string, string>(LogLevel.Warning,
         CdnLibraryAlreadyExists, "Library \"{LibraryName}\" has already been retreived from \"{UpstreamCdnName}\".");
-    public static void LogCdnLibraryAlreadyExists(this ILogger logger, string libraryName, string remoteSvcName) => _cdnLibraryAlreadyExists(logger, libraryName, remoteSvcName, null);
+    public static void LogCdnLibraryAlreadyExists(this ILogger logger, string libraryName, string cdnSvcName) => _cdnLibraryAlreadyExists(logger, libraryName, cdnSvcName, null);
     
     public const int EVENT_ID_MutuallyExclusiveSwitchError = 0x000d;
     public static readonly EventId MutuallyExclusiveSwitchError = new(EVENT_ID_MutuallyExclusiveSwitchError, nameof(MutuallyExclusiveSwitchError));

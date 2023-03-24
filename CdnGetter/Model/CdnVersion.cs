@@ -64,7 +64,7 @@ public class CdnVersion
     }
     
     /// <summary>
-    /// The preferential order override for the remote CDN or <see langword="null" /> to use <see cref="CdnLibrary.Priority" /> or <see cref="UpstreamCdn.Priority" />.
+    /// The preferential order override for the upstream CDN or <see langword="null" /> to use <see cref="CdnLibrary.Priority" /> or <see cref="UpstreamCdn.Priority" />.
     /// </summary>
     public ushort? Priority { get; set; }
 

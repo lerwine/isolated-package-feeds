@@ -8,7 +8,7 @@ using static CdnGetter.SqlDefinitions;
 namespace CdnGetter.Model;
 
 /// <summary>
-/// Represents a registered remote content delivery service.
+/// Represents a registered upstream content delivery service.
 /// </summary>
 public class UpstreamCdn
 {
@@ -16,7 +16,7 @@ public class UpstreamCdn
 
     private Guid? _id;
     /// <summary>
-    /// The unique identifier of the registered remote service.
+    /// The unique identifier of the registered upstream service.
     /// </summary>
     public Guid Id
     {
@@ -27,7 +27,7 @@ public class UpstreamCdn
     public const int MAXLENGTH_Name = 1024;
     private string _name = string.Empty;
     /// <summary>
-    /// The display name of the registered registered remote content delivery service.
+    /// The display name of the registered registered upstream content delivery service.
     /// </summary>
     public string Name
     {
@@ -37,13 +37,13 @@ public class UpstreamCdn
 
     public const ushort DEFAULTVALUE_Priority = ushort.MaxValue;
     /// <summary>
-    /// The preferential order for the remote CDN.
+    /// The preferential order for the upstream CDN.
     /// </summary>
     public ushort Priority { get; set; } = DEFAULTVALUE_Priority;
 
     private string _description = string.Empty;
     /// <summary>
-    /// The verbose description of the remote content delivery service.
+    /// The verbose description of the upstream content delivery service.
     /// </summary>
     public string Description
     {
@@ -62,7 +62,7 @@ public class UpstreamCdn
     public DateTime ModifiedOn { get; set; } = DateTime.Now;
 
     /// <summary>
-    /// The content libraries that have been retrieved from the remote content delivery service.
+    /// The content libraries that have been retrieved from the upstream content delivery service.
     /// </summary>
     public Collection<CdnLibrary> Libraries { get; set; } = new();
 
@@ -130,7 +130,7 @@ public class UpstreamCdn
             if (count > 0)
             {
                 Console.WriteLine("");
-                Console.WriteLine("{0:d} remotes total.", count);
+                Console.WriteLine("{0:d} CDNs total.", count);
             }
             else
                 logger.LogNoUpstreamCdnsFound();

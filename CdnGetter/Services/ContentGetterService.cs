@@ -42,9 +42,9 @@ public abstract class ContentGetterService
     }
     
     /// <summary>
-    /// Reloads libraries by name for the current remote service.
+    /// Reloads libraries by name for the current upstream CDN service.
     /// </summary>
-    /// <param name="upstreamCdn">The remote service to remove libraries from.</param>
+    /// <param name="upstreamCdn">The upstream service to remove libraries from.</param>
     /// <param name="dbContext">The database context.</param>
     /// <param name="appSettings">Application settings.</param>
     /// <param name="libraryNames">The names of libraries to reload.</param>
@@ -58,9 +58,9 @@ public abstract class ContentGetterService
     }
     
     /// <summary>
-    /// Removes libararies by name for the current remote service.
+    /// Removes libararies by name for the current upstream CDN service.
     /// </summary>
-    /// <param name="upstreamCdn">The remote service to remove libraries from.</param>
+    /// <param name="upstreamCdn">The upstream CDN service to remove libraries from.</param>
     /// <param name="dbContext">The database context.</param>
     /// <param name="libraryNames">The names of the libraries to remove.</param>
     /// <param name="cancellationToken">Triggered when <see cref="Microsoft.Extensions.Hosting.IHostedService.StopAsync(CancellationToken)"/> is called.</param>
@@ -80,7 +80,7 @@ public abstract class ContentGetterService
         await dbContext.SaveChangesAsync(true, cancellationToken);
     }
 
-    protected async Task<LinkedList<CdnLibrary>> GetMatchingLibrariesAsync(string remoteName, Guid upstreamCdnId, ContentDb dbContext, IEnumerable<string> libraryNames, CancellationToken cancellationToken)
+    protected async Task<LinkedList<CdnLibrary>> GetMatchingLibrariesAsync(string cdnName, Guid upstreamCdnId, ContentDb dbContext, IEnumerable<string> libraryNames, CancellationToken cancellationToken)
     {
         LinkedList<CdnLibrary> result = new();
         foreach (string name in libraryNames)
@@ -89,7 +89,7 @@ public abstract class ContentGetterService
                 return result;
             CdnLibrary? library = await dbContext.CdnLibraries.Include(r => r.Local).FirstOrDefaultAsync(l => l.Local!.Name == name && l.UpstreamCdnId == upstreamCdnId, cancellationToken);
             if (library is null)
-                GetLogger().LogCdnLibraryNotFound(name, remoteName);
+                GetLogger().LogCdnLibraryNotFound(name, cdnName);
             else
                 result.AddLast(library);
         }

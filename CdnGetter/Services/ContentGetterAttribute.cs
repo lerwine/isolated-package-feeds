@@ -4,7 +4,7 @@ namespace CdnGetter.Services;
 
 [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
 /// <summary>
-/// Marks a class as a service for retrieving content from a remote CDN.
+/// Marks a class as a service for retrieving content from an upstream CDN.
 /// </summary>
 sealed class ContentGetterAttribute : Attribute
 {
@@ -18,10 +18,10 @@ sealed class ContentGetterAttribute : Attribute
     public static ReadOnlyDictionary<Guid, (Type Type, string Name, string Description)> UpstreamCdnServices { get; }
 
     /// <summary>
-    /// Creates an attribute that identifies a class as a service for retrieving content from a remote CDN.
+    /// Creates an attribute that identifies a class as a service for retrieving content from a upstream CDN.
     /// </summary>
     /// <param name="guid">The <see cref="Guid" /> string which is the unique identifier for the corresponding <see cref="Model.UpstreamCdn" /> database entity.</param>
-    /// <param name="name">The display name that identifies the remote CDN.</param>
+    /// <param name="name">The display name that identifies the upstream CDN.</param>
     public ContentGetterAttribute(string guid, string name)
     {
         if ((guid = guid.ToTrimmedOrNullIfEmpty()!) is not null && Guid.TryParse(guid, out Guid id))
@@ -35,12 +35,12 @@ sealed class ContentGetterAttribute : Attribute
     public Guid? Id { get { return _id; } }
 
     /// <summary>
-    /// Gets the display name that identifies the remote CDN.
+    /// Gets the display name that identifies the upstream CDN.
     /// </summary>
     public string Name { get { return _name; } }
 
     /// <summary>
-    /// Gets or sets the verbose description of the remote CDN.
+    /// Gets or sets the verbose description of the upstream CDN.
     /// </summary>
     public string? Description { get; set; }
 

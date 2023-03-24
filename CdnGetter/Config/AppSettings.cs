@@ -39,7 +39,7 @@ public class AppSettings
     ///     <list type="bullet">
     ///         <item>
     ///             <term>--CdnGetter:AddLibrary=<c>name[,name,...]</c></term>
-    ///             <description>The library name(s) on the remote CDN to be added to the database.</description>
+    ///             <description>The library name(s) on the upstream CDN to be added to the database.</description>
     ///         </item>
     ///         <item>
     ///             <term>--CdnGetter:Upstream=<c>name[,name,...]</c></term>
@@ -57,14 +57,14 @@ public class AppSettings
     public List<string>? AddLibrary { get; set; }
 
     /// <summary>
-    /// Gets names of libraries in the database that are to be checked for new versions on the remote CDN.
+    /// Gets names of libraries in the database that are to be checked for new versions on the upstream CDN.
     /// </summary>
     /// <remarks>
     ///     Mandatory Switches
     ///     <list type="bullet">
     ///         <item>
     ///             <term>--CdnGetter:GetNewVersions=<c>library_name[,library_name,...]</c></term>
-    ///             <description>The library name(s) on the remote CDN to be added to the database.</description>
+    ///             <description>The library name(s) on the upstream CDN to be added to the database.</description>
     ///         </item>
     ///     </list>
     ///     Optional Switch
@@ -103,14 +103,14 @@ public class AppSettings
     public List<string>? RemoveLibrary { get; set; }
 
     /// <summary>
-    /// Gets names of libraries in the database that are to be reloaded from the remote CDN.
+    /// Gets names of libraries in the database that are to be reloaded from the upstream CDN.
     /// </summary>
     /// <remarks>
     ///     Parameter Set #1: Mandatory Switches
     ///     <list type="bullet">
     ///         <item>
     ///             <term>--RCdnGetter:eloadLibrary=<c>name[,name,...]</c></term>
-    ///             <description>The library name(s) on the remote CDN to be reloaded.</description>
+    ///             <description>The library name(s) on the upstream CDN to be reloaded.</description>
     ///         </item>
     ///         <item>
     ///             <term>--CdnGetter:Upstream=<c>name[,name,...]</c></term>
@@ -141,14 +141,14 @@ public class AppSettings
     public List<string>? ReloadLibrary { get; set; }
 
     /// <summary>
-    /// Gets names of libraries in the database whose existing library versions are to be reloaded from the remote CDN.
+    /// Gets names of libraries in the database whose existing library versions are to be reloaded from the upstream CDN.
     /// </summary>
     /// <remarks>
     ///     Parameter Set #1: Mandatory Switches
     ///     <list type="bullet">
     ///         <item>
     ///             <term>--CdnGetter:ReloadLibrary=<c>name[,name,...]</c></term>
-    ///             <description>The library name(s) on the remote CDN to be reloaded.</description>
+    ///             <description>The library name(s) on the upstream CDN to be reloaded.</description>
     ///         </item>
     ///         <item>
     ///             <term>--CdnGetter:Upstream=<c>name[,name,...]</c></term>
@@ -199,7 +199,7 @@ public class AppSettings
     ///     <list type="bullet">
     ///         <item>
     ///             <term>--CdnGetter:Show=CDNs</term>
-    ///             <description>Show the remote CDN names in the database.</description>
+    ///             <description>Show the upstream CDN names in the database.</description>
     ///         </item>
     ///     </list>
     ///     <para>
@@ -207,7 +207,7 @@ public class AppSettings
     ///         <list type="bullet">
     ///             <item>
     ///                 <term>--CdnGetter:Show=Libraries</term>
-    ///                 <description>Show the remote CDN names in the database.</description>
+    ///                 <description>Show the upstream CDN names in the database.</description>
     ///             </item>
     ///         </list>
     ///         Optional Parameter
@@ -223,7 +223,7 @@ public class AppSettings
     ///         <list type="bullet">
     ///             <item>
     ///                 <term>--CdnGetter:Show=Versions</term>
-    ///                 <description>Show the remote CDN names in the database.</description>
+    ///                 <description>Show the upstream CDN names in the database.</description>
     ///             </item>
     ///             <item>
     ///                 <term>--CdnGetter:Library=<c>name[,name,...]</c></term>
@@ -243,7 +243,7 @@ public class AppSettings
     ///         <list type="bullet">
     ///             <item>
     ///                 <term>--CdnGetter:Show=Files</term>
-    ///                 <description>Show the remote CDN file names in the database.</description>
+    ///                 <description>Show the upstream CDN file names in the database.</description>
     ///             </item>
     ///             <item>
     ///                 <term>--CdnGetter:Library=<c>name[,name,...]</c></term>

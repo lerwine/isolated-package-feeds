@@ -6,7 +6,7 @@ using Microsoft.Data.Sqlite;
 namespace CdnGetter.Services;
 
 /// <summary>
-/// Database context for content retrieved from remote content delivery networks.
+/// Database context for content retrieved from upstream content delivery networks.
 /// </summary>
 public class ContentDb : DbContext
 {
@@ -60,7 +60,7 @@ public class ContentDb : DbContext
     }
 
     /// <summary>
-    /// Registered remote content delivery services.
+    /// Registered upstream content delivery services.
     /// </summary>
     public DbSet<UpstreamCdn> UpstreamCdns { get; set; } = null!;
 
@@ -70,12 +70,12 @@ public class ContentDb : DbContext
     public DbSet<LocalLibrary> LocalLibraries { get; set; } = null!;
 
     /// <summary>
-    /// Content libraries retrieved from remote content delivery networks.
+    /// Content libraries retrieved from upstream content delivery networks.
     /// </summary>
     public DbSet<CdnLibrary> CdnLibraries { get; set; } = null!;
 
     /// <summary>
-    /// Activity logs for libraries retrieved from remote content delivery networks.
+    /// Activity logs for libraries retrieved from upstream content delivery networks.
     /// </summary>
     public DbSet<LibraryLog> LibraryLogs { get; set; } = null!;
 
@@ -85,12 +85,12 @@ public class ContentDb : DbContext
     public DbSet<LocalVersion> LocalVersions { get; set; } = null!;
 
     /// <summary>
-    /// Specific versions of content libraries retrieved from remote content delivery networks.
+    /// Specific versions of content libraries retrieved from upstream content delivery networks.
     /// </summary>
     public DbSet<CdnVersion> CdnVersions { get; set; } = null!;
 
     /// <summary>
-    /// Activity logs for specific versions of content libraries retrieved from remote content delivery networks.
+    /// Activity logs for specific versions of content libraries retrieved from upstream content delivery networks.
     /// </summary>
     public DbSet<VersionLog> VersionLogs { get; set; } = null!;
 
@@ -100,12 +100,12 @@ public class ContentDb : DbContext
     public DbSet<LocalFile> LocalFiles { get; set; } = null!;
 
     /// <summary>
-    /// Files retrieved from remote content delivery networks.
+    /// Files retrieved from upstream content delivery networks.
     /// </summary>
     public DbSet<CdnFile> CdnFiles { get; set; } = null!;
     
     /// <summary>
-    /// Activity logs for files retrieved from remote content delivery networks.
+    /// Activity logs for files retrieved from upstream content delivery networks.
     /// </summary>
     public DbSet<FileLog> FileLogs { get; set; } = null!;
 

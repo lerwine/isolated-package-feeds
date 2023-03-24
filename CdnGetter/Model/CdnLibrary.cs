@@ -25,7 +25,7 @@ public class CdnLibrary
 
     private LocalLibrary? _local;
     /// <summary>
-    /// The remote service for this content library.
+    /// The upstream service for this content library.
     /// </summary>
     public LocalLibrary? Local
     {
@@ -45,7 +45,7 @@ public class CdnLibrary
 
     private UpstreamCdn? _upstreamCdn;
     /// <summary>
-    /// The remote service for this content library.
+    /// The upstream service for this content library.
     /// </summary>
     public UpstreamCdn? UpstreamCdn
     {
@@ -54,7 +54,7 @@ public class CdnLibrary
     }
     
     /// <summary>
-    /// The preferential order override for the remote CDN or <see langword="null" /> to use <see cref="UpstreamCdn.Priority" />.
+    /// The preferential order override for the upstream CDN or <see langword="null" /> to use <see cref="UpstreamCdn.Priority" />.
     /// </summary>
     public ushort? Priority { get; set; }
 

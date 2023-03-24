@@ -7,12 +7,12 @@ public class CdnJsSettings
     public const string DEFAULT_BaseUrl = "https://api.cdnjs.com";
 
     /// <summary>
-    /// Specifies the base url for the cdnjs remote service.
+    /// Specifies the base url for the cdnjs upstream CDN service.
     /// </summary>
     public string? BaseUrl { get; set; }
 
     /// <summary>
-    /// Attempts to contruct the absolute base URL of the cdnjs remote.
+    /// Attempts to contruct the absolute base URL of the upstream cdnjs service.
     /// </summary>
     /// <param name="result">The constructed URI.</param>
     /// <returns><see langword="true" /> if <paramref name="result" /> contains an absolute URI; otherwise <see langword="true" /> if <paramref name="result" /> contains a relative URI,
