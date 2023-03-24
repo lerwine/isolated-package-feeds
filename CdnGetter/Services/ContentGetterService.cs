@@ -103,6 +103,7 @@ public abstract class ContentGetterService
         return await dbContext.RemoteLibraries.Include(r => r.Local).FirstOrDefaultAsync(l => l.Local!.Name == libraryName && l.RemoteServiceId == remoteServiceId, cancellationToken);
     }
 
+    [Obsolete("Do not use")]
     internal async Task UpdateLibrariesAsync(RemoteService rsvc, ContentDb dbContext, Config.AppSettings appSettings, ILogger logger, CancellationToken cancellationToken)
     {
         Model.LibraryActionGroup[] actions = Model.LibraryActionGroup.FromSettings(appSettings).ToArray();

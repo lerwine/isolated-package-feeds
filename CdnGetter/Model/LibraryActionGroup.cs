@@ -1,7 +1,9 @@
 namespace CdnGetter.Model;
 
+[Obsolete("Do not use")]
 public record LibraryActionGroup(LibraryAction Action, string[] LibraryNames)
 {
+    [Obsolete("Do not use")]
     public static IEnumerable<LibraryActionGroup> FromSettings(Config.AppSettings settings)
     {
         StringComparer comparer = StringComparer.InvariantCultureIgnoreCase;
@@ -16,27 +18,27 @@ public record LibraryActionGroup(LibraryAction Action, string[] LibraryNames)
                 string[] r = toReloadExisting.Where(e => toGetNew.Contains(e, comparer)).ToArray();
                 toGetNew = toGetNew.Where(n => !r.Contains(n, comparer));
                 toReloadExisting = toReloadExisting.Where(n => !r.Contains(n, comparer));
-                if (settings.Reload is null || !(toReload = settings.Reload.Select(l => l.ToWsNormalizedOrEmptyIfNull()).Where(l => l.Length > 0)).Any())
+                if (settings.ReloadLibrary is null || !(toReload = settings.ReloadLibrary.Select(l => l.ToWsNormalizedOrEmptyIfNull()).Where(l => l.Length > 0)).Any())
                     toReload = r;
                 else
                     toReload = toReload.Concat(r).Distinct(comparer);
             }
-            else if (settings.Reload is null)
+            else if (settings.ReloadLibrary is null)
                 toReload = Enumerable.Empty<string>();
-            else if ((toReload = settings.Reload.Select(l => l.ToWsNormalizedOrEmptyIfNull()).Where(l => l.Length > 0)).Distinct(comparer).Any())
+            else if ((toReload = settings.ReloadLibrary.Select(l => l.ToWsNormalizedOrEmptyIfNull()).Where(l => l.Length > 0)).Distinct(comparer).Any())
             {
                 toReloadExisting = toReloadExisting.Where(r => !toReload.Contains(r, comparer));
                 toGetNew = toGetNew.Where(r => !toReload.Contains(r, comparer));
             }
         }
-        else if (settings.Reload is null)
+        else if (settings.ReloadLibrary is null)
             toReload = Enumerable.Empty<string>();
-        else if ((toReload = settings.Reload.Select(l => l.ToWsNormalizedOrEmptyIfNull()).Where(l => l.Length > 0)).Distinct(comparer).Any())
+        else if ((toReload = settings.ReloadLibrary.Select(l => l.ToWsNormalizedOrEmptyIfNull()).Where(l => l.Length > 0)).Distinct(comparer).Any())
             toReloadExisting = toReloadExisting.Where(r => !toReload.Contains(r, comparer));
             
-        IEnumerable<string> toAdd = settings.Add?.Select(l => l.ToWsNormalizedOrEmptyIfNull()).Where(l => l.Length > 0).Distinct(comparer) ?? Enumerable.Empty<string>();
+        IEnumerable<string> toAdd = settings.AddLibrary?.Select(l => l.ToWsNormalizedOrEmptyIfNull()).Where(l => l.Length > 0).Distinct(comparer) ?? Enumerable.Empty<string>();
         string[] toRemove;
-        if (settings.Remove is not null && (toRemove = settings.Remove.Select(l => l.ToWsNormalizedOrEmptyIfNull()).Where(l => l.Length > 0).Distinct(comparer).ToArray()).Length > 0)
+        if (settings.RemoveLibrary is not null && (toRemove = settings.RemoveLibrary.Select(l => l.ToWsNormalizedOrEmptyIfNull()).Where(l => l.Length > 0).Distinct(comparer).ToArray()).Length > 0)
         {
             toAdd = toAdd.Where(a => !toRemove.Contains(a, comparer));
             toReload = toReload.Where(a => !toRemove.Contains(a, comparer));
