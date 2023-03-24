@@ -9,33 +9,33 @@ public abstract class ContentGetterService
 {
     protected abstract ILogger GetLogger();
 
-    protected abstract Task ReloadAsync(RemoteLibrary library, ContentDb dbContext, AppSettings appSettings, CancellationToken cancellationToken);
+    protected abstract Task ReloadAsync(CdnLibrary library, ContentDb dbContext, AppSettings appSettings, CancellationToken cancellationToken);
 
-    protected abstract Task AddNewVersionsAsync(RemoteService remoteService, string libraryName, ContentDb dbContext, AppSettings appSettings, CancellationToken cancellationToken);
+    protected abstract Task AddNewVersionsAsync(UpstreamCdn upstreamCdn, string libraryName, ContentDb dbContext, AppSettings appSettings, CancellationToken cancellationToken);
 
-    public abstract Task GetNewVersionsAsync(RemoteLibrary remoteLibrary, ContentDb dbContext, AppSettings appSettings, CancellationToken cancellationToken);
+    public abstract Task GetNewVersionsAsync(CdnLibrary cdnLibrary, ContentDb dbContext, AppSettings appSettings, CancellationToken cancellationToken);
     
-    public async Task GetNewVersionsAsync(RemoteService remoteService, ContentDb dbContext, AppSettings appSettings, IEnumerable<string> libraryNames, CancellationToken cancellationToken)
+    public async Task GetNewVersionsAsync(UpstreamCdn upstreamCdn, ContentDb dbContext, AppSettings appSettings, IEnumerable<string> libraryNames, CancellationToken cancellationToken)
     {
         foreach (string n in libraryNames)
         {
-            RemoteLibrary? existing = await GetMatchingLibraryAsync(remoteService.Id, dbContext, n, cancellationToken);
+            CdnLibrary? existing = await GetMatchingLibraryAsync(upstreamCdn.Id, dbContext, n, cancellationToken);
             if (existing is null)
-                await AddNewVersionsAsync(remoteService, n, dbContext, appSettings, cancellationToken);
+                await AddNewVersionsAsync(upstreamCdn, n, dbContext, appSettings, cancellationToken);
             else
                 await ReloadAsync(existing, dbContext, appSettings, cancellationToken);
         }
     }
     
-    public abstract Task AddAsync(RemoteService remoteService, ContentDb dbContext, AppSettings appSettings, IEnumerable<string> libraryNames, CancellationToken cancellationToken);
+    public abstract Task AddAsync(UpstreamCdn upstreamCdn, ContentDb dbContext, AppSettings appSettings, IEnumerable<string> libraryNames, CancellationToken cancellationToken);
     
-    public async Task ReloadAsync(RemoteService remoteService, ContentDb dbContext, AppSettings appSettings, IEnumerable<string> libraryNames, CancellationToken cancellationToken)
+    public async Task ReloadAsync(UpstreamCdn upstreamCdn, ContentDb dbContext, AppSettings appSettings, IEnumerable<string> libraryNames, CancellationToken cancellationToken)
     {
         foreach (string n in libraryNames)
         {
-            RemoteLibrary? existing = await GetMatchingLibraryAsync(remoteService.Id, dbContext, n, cancellationToken);
+            CdnLibrary? existing = await GetMatchingLibraryAsync(upstreamCdn.Id, dbContext, n, cancellationToken);
             if (existing is null)
-                await AddNewVersionsAsync(remoteService, n, dbContext, appSettings, cancellationToken);
+                await AddNewVersionsAsync(upstreamCdn, n, dbContext, appSettings, cancellationToken);
             else
                 await ReloadAsync(existing, dbContext, appSettings, cancellationToken);
         }
@@ -44,34 +44,34 @@ public abstract class ContentGetterService
     /// <summary>
     /// Reloads libraries by name for the current remote service.
     /// </summary>
-    /// <param name="remoteService">The remote service to remove libraries from.</param>
+    /// <param name="upstreamCdn">The remote service to remove libraries from.</param>
     /// <param name="dbContext">The database context.</param>
     /// <param name="appSettings">Application settings.</param>
     /// <param name="libraryNames">The names of libraries to reload.</param>
     /// <param name="cancellationToken">Triggered when <see cref="Microsoft.Extensions.Hosting.IHostedService.StopAsync(CancellationToken)"/> is called.</param>
-    public async Task ReloadExistingAsync(RemoteService remoteService, ContentDb dbContext, AppSettings appSettings, IEnumerable<string> libraryNames, CancellationToken cancellationToken)
+    public async Task ReloadExistingAsync(UpstreamCdn upstreamCdn, ContentDb dbContext, AppSettings appSettings, IEnumerable<string> libraryNames, CancellationToken cancellationToken)
     {
-        LinkedList<RemoteLibrary> toReload = await GetMatchingLibrariesAsync(remoteService.Name, remoteService.Id, dbContext, libraryNames, cancellationToken);
+        LinkedList<CdnLibrary> toReload = await GetMatchingLibrariesAsync(upstreamCdn.Name, upstreamCdn.Id, dbContext, libraryNames, cancellationToken);
         if (cancellationToken.IsCancellationRequested)
-            foreach (RemoteLibrary r in toReload)
+            foreach (CdnLibrary r in toReload)
                 await ReloadAsync(r, dbContext, appSettings, cancellationToken);
     }
     
     /// <summary>
     /// Removes libararies by name for the current remote service.
     /// </summary>
-    /// <param name="remoteService">The remote service to remove libraries from.</param>
+    /// <param name="upstreamCdn">The remote service to remove libraries from.</param>
     /// <param name="dbContext">The database context.</param>
     /// <param name="libraryNames">The names of the libraries to remove.</param>
     /// <param name="cancellationToken">Triggered when <see cref="Microsoft.Extensions.Hosting.IHostedService.StopAsync(CancellationToken)"/> is called.</param>
-    public async Task RemoveAsync(RemoteService remoteService, ContentDb dbContext, IEnumerable<string> libraryNames, CancellationToken cancellationToken)
+    public async Task RemoveAsync(UpstreamCdn upstreamCdn, ContentDb dbContext, IEnumerable<string> libraryNames, CancellationToken cancellationToken)
     {
         if (cancellationToken.IsCancellationRequested)
             return;
-        LinkedList<RemoteLibrary> toRemove = await GetMatchingLibrariesAsync(remoteService.Name, remoteService.Id, dbContext, libraryNames, cancellationToken);
+        LinkedList<CdnLibrary> toRemove = await GetMatchingLibrariesAsync(upstreamCdn.Name, upstreamCdn.Id, dbContext, libraryNames, cancellationToken);
         if (cancellationToken.IsCancellationRequested || toRemove.First is null)
             return;
-        foreach (RemoteLibrary library in toRemove)
+        foreach (CdnLibrary library in toRemove)
         {
             await library.RemoveAsync(dbContext, cancellationToken);
             if (cancellationToken.IsCancellationRequested)
@@ -80,31 +80,31 @@ public abstract class ContentGetterService
         await dbContext.SaveChangesAsync(true, cancellationToken);
     }
 
-    protected async Task<LinkedList<RemoteLibrary>> GetMatchingLibrariesAsync(string remoteName, Guid remoteServiceId, ContentDb dbContext, IEnumerable<string> libraryNames, CancellationToken cancellationToken)
+    protected async Task<LinkedList<CdnLibrary>> GetMatchingLibrariesAsync(string remoteName, Guid upstreamCdnId, ContentDb dbContext, IEnumerable<string> libraryNames, CancellationToken cancellationToken)
     {
-        LinkedList<RemoteLibrary> result = new();
+        LinkedList<CdnLibrary> result = new();
         foreach (string name in libraryNames)
         {
             if (cancellationToken.IsCancellationRequested)
                 return result;
-            RemoteLibrary? library = await dbContext.RemoteLibraries.Include(r => r.Local).FirstOrDefaultAsync(l => l.Local!.Name == name && l.RemoteServiceId == remoteServiceId, cancellationToken);
+            CdnLibrary? library = await dbContext.CdnLibraries.Include(r => r.Local).FirstOrDefaultAsync(l => l.Local!.Name == name && l.UpstreamCdnId == upstreamCdnId, cancellationToken);
             if (library is null)
-                GetLogger().LogRemoteLibraryNotFound(name, remoteName);
+                GetLogger().LogCdnLibraryNotFound(name, remoteName);
             else
                 result.AddLast(library);
         }
         return result;
     }
 
-    protected static async Task<RemoteLibrary?> GetMatchingLibraryAsync(Guid remoteServiceId, ContentDb dbContext, string libraryName, CancellationToken cancellationToken)
+    protected static async Task<CdnLibrary?> GetMatchingLibraryAsync(Guid upstreamCdnId, ContentDb dbContext, string libraryName, CancellationToken cancellationToken)
     {
         if (cancellationToken.IsCancellationRequested)
             return null;
-        return await dbContext.RemoteLibraries.Include(r => r.Local).FirstOrDefaultAsync(l => l.Local!.Name == libraryName && l.RemoteServiceId == remoteServiceId, cancellationToken);
+        return await dbContext.CdnLibraries.Include(r => r.Local).FirstOrDefaultAsync(l => l.Local!.Name == libraryName && l.UpstreamCdnId == upstreamCdnId, cancellationToken);
     }
 
     [Obsolete("Do not use")]
-    internal async Task UpdateLibrariesAsync(RemoteService rsvc, ContentDb dbContext, Config.AppSettings appSettings, ILogger logger, CancellationToken cancellationToken)
+    internal async Task UpdateLibrariesAsync(UpstreamCdn rsvc, ContentDb dbContext, Config.AppSettings appSettings, ILogger logger, CancellationToken cancellationToken)
     {
         Model.LibraryActionGroup[] actions = Model.LibraryActionGroup.FromSettings(appSettings).ToArray();
         if (actions.Length > 0)
@@ -130,11 +130,11 @@ public abstract class ContentGetterService
         else
         {
             Guid id = rsvc.Id;
-            RemoteLibrary[] rl = await dbContext.RemoteLibraries.Where(r => r.RemoteServiceId == id).ToArrayAsync(cancellationToken);
+            CdnLibrary[] rl = await dbContext.CdnLibraries.Where(r => r.UpstreamCdnId == id).ToArrayAsync(cancellationToken);
             if (rl.Length == 0)
                 logger.LogNothingToDo();
             else
-                foreach (RemoteLibrary r in rl)
+                foreach (CdnLibrary r in rl)
                     await GetNewVersionsAsync(r, dbContext, appSettings, cancellationToken);
         }
     }

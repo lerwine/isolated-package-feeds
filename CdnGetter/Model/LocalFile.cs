@@ -88,7 +88,7 @@ public class LocalFile
 
     private Guid _versionId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="RemoteVersion" />.
+    /// The unique identifier of the parent <see cref="CdnVersion" />.
     /// </summary>
     public Guid VersionId
     {
@@ -106,10 +106,10 @@ public class LocalFile
         set => value.SetNavigation(_syncRoot, p => p.Id, ref _versionId, ref _version);
     }
     
-    public Collection<RemoteFile> Remotes { get; set; } = new();
+    public Collection<CdnFile> CDNs { get; set; } = new();
     
     /// <summary>
-    /// Performs configuration of the <see cref="RemoteFile" /> entity type in the model for the <see cref="Services.ContentDb" />.
+    /// Performs configuration of the <see cref="CdnFile" /> entity type in the model for the <see cref="Services.ContentDb" />.
     /// </summary>
     /// <param name="builder">The builder being used to configure the current entity type.</param>
     internal static void OnBuildEntity(EntityTypeBuilder<LocalFile> builder)
@@ -156,16 +156,16 @@ public class LocalFile
     internal async Task RemoveAsync(Services.ContentDb dbContext, CancellationToken cancellationToken)
     {
         Guid id = Id;
-        RemoteFile[] toRemove = await dbContext.RemoteFiles.Where(f => f.LocalId == id).ToArrayAsync(cancellationToken);
+        CdnFile[] toRemove = await dbContext.CdnFiles.Where(f => f.LocalId == id).ToArrayAsync(cancellationToken);
         if (cancellationToken.IsCancellationRequested)
             return;
         if (toRemove.Length > 0)
         {
-            dbContext.RemoteFiles.RemoveRange(toRemove);
+            dbContext.CdnFiles.RemoveRange(toRemove);
             await dbContext.SaveChangesAsync(true, cancellationToken);
             if (cancellationToken.IsCancellationRequested)
                 return;
-            Remotes.Clear();
+            CDNs.Clear();
         }
         if (cancellationToken.IsCancellationRequested)
             return;

@@ -38,7 +38,7 @@ public class FileLog
     public Uri? Url { get; set; }
 
     /// <summary>
-    /// Optional provider-specific data for <see cref="RemoteService" />.
+    /// Optional provider-specific data for <see cref="UpstreamCdn" />.
     /// </summary>
     public JsonNode? ProviderData { get; set; }
 
@@ -49,52 +49,52 @@ public class FileLog
 
     private Guid _fileId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="RemoteVersion" />.
+    /// The unique identifier of the parent <see cref="CdnVersion" />.
     /// </summary>
     public Guid FileId
     {
         get => _fileId;
-        set => value.SetNavigation(_versionId, _libraryId, _remoteServiceId, _syncRoot, p => (p.LocalId, p.VersionId, p.LibraryId, p.RemoteServiceId), ref _fileId, ref _versionId, ref _libraryId, ref _remoteServiceId, ref _file);
+        set => value.SetNavigation(_versionId, _libraryId, _upstreamCdnId, _syncRoot, p => (p.LocalId, p.VersionId, p.LibraryId, p.UpstreamCdnId), ref _fileId, ref _versionId, ref _libraryId, ref _upstreamCdnId, ref _file);
     }
 
     private Guid _versionId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="RemoteVersion" />.
+    /// The unique identifier of the parent <see cref="CdnVersion" />.
     /// </summary>
     public Guid VersionId
     {
         get => _versionId;
-        set => _fileId.SetNavigation(value, _libraryId, _remoteServiceId, _syncRoot, p => (p.LocalId, p.VersionId, p.LibraryId, p.RemoteServiceId), ref _fileId, ref _versionId, ref _libraryId, ref _remoteServiceId, ref _file);
+        set => _fileId.SetNavigation(value, _libraryId, _upstreamCdnId, _syncRoot, p => (p.LocalId, p.VersionId, p.LibraryId, p.UpstreamCdnId), ref _fileId, ref _versionId, ref _libraryId, ref _upstreamCdnId, ref _file);
     }
 
     private Guid _libraryId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="RemoteLibrary" />.
+    /// The unique identifier of the parent <see cref="CdnLibrary" />.
     /// </summary>
     public Guid LibraryId
     {
         get => _libraryId;
-        set => _fileId.SetNavigation(_versionId, value, _remoteServiceId, _syncRoot, p => (p.LocalId, p.VersionId, p.LibraryId, p.RemoteServiceId), ref _fileId, ref _versionId, ref _libraryId, ref _remoteServiceId, ref _file);
+        set => _fileId.SetNavigation(_versionId, value, _upstreamCdnId, _syncRoot, p => (p.LocalId, p.VersionId, p.LibraryId, p.UpstreamCdnId), ref _fileId, ref _versionId, ref _libraryId, ref _upstreamCdnId, ref _file);
     }
 
-    private Guid _remoteServiceId;
+    private Guid _upstreamCdnId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="RemoteService" />.
+    /// The unique identifier of the parent <see cref="UpstreamCdn" />.
     /// </summary>
-    public Guid RemoteServiceId
+    public Guid UpstreamCdnId
     {
-        get => _remoteServiceId;
-        set => _fileId.SetNavigation(_versionId, _libraryId, value, _syncRoot, p => (p.LocalId, p.VersionId, p.LibraryId, p.RemoteServiceId), ref _fileId, ref _versionId, ref _libraryId, ref _remoteServiceId, ref _file);
+        get => _upstreamCdnId;
+        set => _fileId.SetNavigation(_versionId, _libraryId, value, _syncRoot, p => (p.LocalId, p.VersionId, p.LibraryId, p.UpstreamCdnId), ref _fileId, ref _versionId, ref _libraryId, ref _upstreamCdnId, ref _file);
     }
 
-    private RemoteFile? _file;
+    private CdnFile? _file;
     /// <summary>
     /// The content library version that the current file belongs to.
     /// </summary>
-    public RemoteFile? File
+    public CdnFile? File
     {
         get => _file;
-        set => value.SetNavigation(_syncRoot, p => (p.LocalId, p.VersionId, p.LibraryId, p.RemoteServiceId), ref _fileId, ref _versionId, ref _libraryId, ref _remoteServiceId, ref _file);
+        set => value.SetNavigation(_syncRoot, p => (p.LocalId, p.VersionId, p.LibraryId, p.UpstreamCdnId), ref _fileId, ref _versionId, ref _libraryId, ref _upstreamCdnId, ref _file);
     }
 
     /// <summary>
@@ -107,14 +107,14 @@ public class FileLog
         _ = builder.Property(nameof(FileId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(VersionId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(LibraryId)).UseCollation(COLLATION_NOCASE);
-        _ = builder.Property(nameof(RemoteServiceId)).UseCollation(COLLATION_NOCASE);
+        _ = builder.Property(nameof(UpstreamCdnId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(c => c.Message).IsRequired();
         _ = builder.Property(nameof(Action)).HasConversion(ExtensionMethods.LibraryActionConverter);
         _ = builder.Property(nameof(Level)).HasConversion(ExtensionMethods.ErrorLevelConverter);
         _ = builder.Property(nameof(Url)).HasConversion(ExtensionMethods.UriConverter).HasMaxLength(MAX_LENGTH_Url);
         _ = builder.Property(nameof(ProviderData)).HasConversion(ExtensionMethods.JsonValueConverter);
         _ = builder.Property(nameof(Timestamp)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
-        _ = builder.HasOne(f => f.File).WithMany(f => f.Logs).HasForeignKey(nameof(FileId), nameof(VersionId), nameof(LibraryId), nameof(RemoteServiceId)).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
+        _ = builder.HasOne(f => f.File).WithMany(f => f.Logs).HasForeignKey(nameof(FileId), nameof(VersionId), nameof(LibraryId), nameof(UpstreamCdnId)).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
     }
 
     internal static void CreateTable(Action<string> executeNonQuery)
@@ -131,8 +131,8 @@ public class FileLog
     ""{nameof(FileId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
     ""{nameof(VersionId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
     ""{nameof(LibraryId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
-    ""{nameof(RemoteServiceId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
-    FOREIGN KEY(""{nameof(FileId)}"",""{nameof(VersionId)}"",""{nameof(LibraryId)}"",""{nameof(RemoteServiceId)}"") REFERENCES ""{nameof(Services.ContentDb.RemoteFiles)}""(""{nameof(RemoteFile.LocalId)}"",""{nameof(RemoteFile.VersionId)}"",""{nameof(RemoteFile.LibraryId)}"",""{nameof(RemoteFile.RemoteServiceId)}"") ON DELETE RESTRICT,
+    ""{nameof(UpstreamCdnId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+    FOREIGN KEY(""{nameof(FileId)}"",""{nameof(VersionId)}"",""{nameof(LibraryId)}"",""{nameof(UpstreamCdnId)}"") REFERENCES ""{nameof(Services.ContentDb.CdnFiles)}""(""{nameof(CdnFile.LocalId)}"",""{nameof(CdnFile.VersionId)}"",""{nameof(CdnFile.LibraryId)}"",""{nameof(CdnFile.UpstreamCdnId)}"") ON DELETE RESTRICT,
     PRIMARY KEY(""{nameof(Id)}"")
 )");
         executeNonQuery($"CREATE INDEX \"IDX_FileLogs_Timestamp\" ON \"{nameof(Services.ContentDb.FileLogs)}\" (\"{nameof(Timestamp)}\" DESC)");

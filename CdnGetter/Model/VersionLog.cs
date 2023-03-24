@@ -38,7 +38,7 @@ public class VersionLog : ILibraryLog
     public Uri? Url { get; set; }
 
     /// <summary>
-    /// Optional provider-specific data for <see cref="RemoteService" />.
+    /// Optional provider-specific data for <see cref="UpstreamCdn" />.
     /// </summary>
     public JsonNode? ProviderData { get; set; }
 
@@ -49,42 +49,42 @@ public class VersionLog : ILibraryLog
 
     private Guid _versionId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="RemoteVersion" />.
+    /// The unique identifier of the parent <see cref="CdnVersion" />.
     /// </summary>
     public Guid VersionId
     {
         get => _versionId;
-        set => value.SetNavigation(_libraryId, _remoteServiceId, _syncRoot, p => (p.LocalId, p.LibraryId, p.RemoteServiceId), ref _versionId, ref _libraryId, ref _remoteServiceId, ref _version);
+        set => value.SetNavigation(_libraryId, _upstreamCdnId, _syncRoot, p => (p.LocalId, p.LibraryId, p.UpstreamCdnId), ref _versionId, ref _libraryId, ref _upstreamCdnId, ref _version);
     }
 
     private Guid _libraryId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="RemoteLibrary" />.
+    /// The unique identifier of the parent <see cref="CdnLibrary" />.
     /// </summary>
     public Guid LibraryId
     {
         get => _libraryId;
-        set => _versionId.SetNavigation(value, _remoteServiceId, _syncRoot, p => (p.LocalId, p.LibraryId, p.RemoteServiceId), ref _versionId, ref _libraryId, ref _remoteServiceId, ref _version);
+        set => _versionId.SetNavigation(value, _upstreamCdnId, _syncRoot, p => (p.LocalId, p.LibraryId, p.UpstreamCdnId), ref _versionId, ref _libraryId, ref _upstreamCdnId, ref _version);
     }
 
-    private Guid _remoteServiceId;
+    private Guid _upstreamCdnId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="RemoteService" />.
+    /// The unique identifier of the parent <see cref="UpstreamCdn" />.
     /// </summary>
-    public Guid RemoteServiceId
+    public Guid UpstreamCdnId
     {
-        get => _remoteServiceId;
-        set => _versionId.SetNavigation(_libraryId, value, _syncRoot, p => (p.LocalId, p.LibraryId, p.RemoteServiceId), ref _versionId, ref _libraryId, ref _remoteServiceId, ref _version);
+        get => _upstreamCdnId;
+        set => _versionId.SetNavigation(_libraryId, value, _syncRoot, p => (p.LocalId, p.LibraryId, p.UpstreamCdnId), ref _versionId, ref _libraryId, ref _upstreamCdnId, ref _version);
     }
 
-    private RemoteVersion? _version;
+    private CdnVersion? _version;
     /// <summary>
     /// The content library version that the current file belongs to.
     /// </summary>
-    public RemoteVersion? Version
+    public CdnVersion? Version
     {
         get => _version;
-        set => value.SetNavigation(_syncRoot, p => (p.LocalId, p.LibraryId, p.RemoteServiceId), ref _versionId, ref _libraryId, ref _remoteServiceId, ref _version);
+        set => value.SetNavigation(_syncRoot, p => (p.LocalId, p.LibraryId, p.UpstreamCdnId), ref _versionId, ref _libraryId, ref _upstreamCdnId, ref _version);
     }
 
     /// <summary>
@@ -96,14 +96,14 @@ public class VersionLog : ILibraryLog
         _ = builder.HasKey(nameof(Id));
         _ = builder.Property(nameof(VersionId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(LibraryId)).UseCollation(COLLATION_NOCASE);
-        _ = builder.Property(nameof(RemoteServiceId)).UseCollation(COLLATION_NOCASE);
+        _ = builder.Property(nameof(UpstreamCdnId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(c => c.Message).IsRequired();
         _ = builder.Property(nameof(Action)).HasConversion(ExtensionMethods.LibraryActionConverter);
         _ = builder.Property(nameof(Level)).HasConversion(ExtensionMethods.ErrorLevelConverter);
         _ = builder.Property(nameof(Url)).HasConversion(ExtensionMethods.UriConverter).HasMaxLength(MAX_LENGTH_Url);
         _ = builder.Property(nameof(ProviderData)).HasConversion(ExtensionMethods.JsonValueConverter);
         _ = builder.Property(nameof(Timestamp)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
-        _ = builder.HasOne(f => f.Version).WithMany(f => f.Logs).HasForeignKey(nameof(VersionId), nameof(LibraryId), nameof(RemoteServiceId)).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
+        _ = builder.HasOne(f => f.Version).WithMany(f => f.Logs).HasForeignKey(nameof(VersionId), nameof(LibraryId), nameof(UpstreamCdnId)).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
     }
 
     internal static void CreateTable(Action<string> executeNonQuery)
@@ -119,8 +119,8 @@ public class VersionLog : ILibraryLog
     ""{nameof(Timestamp)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},
     ""{nameof(VersionId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
     ""{nameof(LibraryId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
-    ""{nameof(RemoteServiceId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
-    FOREIGN KEY(""{nameof(VersionId)}"",""{nameof(LibraryId)}"",""{nameof(RemoteServiceId)}"") REFERENCES ""{nameof(Services.ContentDb.RemoteVersions)}""(""{nameof(RemoteVersion.LocalId)}"",""{nameof(RemoteVersion.LibraryId)}"",""{nameof(RemoteVersion.RemoteServiceId)}"") ON DELETE RESTRICT,
+    ""{nameof(UpstreamCdnId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+    FOREIGN KEY(""{nameof(VersionId)}"",""{nameof(LibraryId)}"",""{nameof(UpstreamCdnId)}"") REFERENCES ""{nameof(Services.ContentDb.CdnVersions)}""(""{nameof(CdnVersion.LocalId)}"",""{nameof(CdnVersion.LibraryId)}"",""{nameof(CdnVersion.UpstreamCdnId)}"") ON DELETE RESTRICT,
     PRIMARY KEY(""{nameof(Id)}"")
 )");
         executeNonQuery($"CREATE INDEX \"IDX_VersionLogs_Timestamp\" ON \"{nameof(Services.ContentDb.VersionLogs)}\" (\"{nameof(Timestamp)}\" DESC)");

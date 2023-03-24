@@ -67,7 +67,7 @@ public class LocalVersion
     /// </summary>
     public Collection<LocalFile> Files { get; set; } = new();
     
-    public Collection<RemoteVersion> Remotes { get; set; } = new();
+    public Collection<CdnVersion> CDNs { get; set; } = new();
 
     /// <summary>
     /// Performs configuration of the <see cref="LocalVersion" /> entity type in the model for the <see cref="Services.ContentDb" />.
@@ -106,16 +106,16 @@ public class LocalVersion
         executeNonQuery($"CREATE INDEX \"IDX_LocalVersions_Order\" ON \"{nameof(Services.ContentDb.LocalVersions)}\" (\"{nameof(Order)}\" ASC)");
     }
 
-    internal async Task ClearRemotesAsync(Services.ContentDb dbContext, CancellationToken cancellationToken)
+    internal async Task ClearCDNsAsync(Services.ContentDb dbContext, CancellationToken cancellationToken)
     {
         Guid id = Id;
-        foreach (RemoteVersion toRemove in await dbContext.RemoteVersions.Where(r => r.LocalId == id).ToArrayAsync(cancellationToken))
+        foreach (CdnVersion toRemove in await dbContext.CdnVersions.Where(r => r.LocalId == id).ToArrayAsync(cancellationToken))
         {
             await toRemove.RemoveAsync(dbContext, cancellationToken);
             if (cancellationToken.IsCancellationRequested)
                 return;
         }
-        Remotes.Clear();
+        CDNs.Clear();
     }
 
     internal async Task ClearFilesAsync(Services.ContentDb dbContext, CancellationToken cancellationToken)
@@ -132,7 +132,7 @@ public class LocalVersion
 
     internal async Task RemoveAsync(Services.ContentDb dbContext, CancellationToken cancellationToken)
     {
-        await ClearRemotesAsync(dbContext, cancellationToken);
+        await ClearCDNsAsync(dbContext, cancellationToken);
         if (cancellationToken.IsCancellationRequested)
             return;
         await ClearFilesAsync(dbContext, cancellationToken);

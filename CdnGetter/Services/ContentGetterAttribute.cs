@@ -14,13 +14,13 @@ sealed class ContentGetterAttribute : Attribute
     /// <summary>
     /// Gets the <see cref="ContentGetterService" /> types that are marked with the <c>ContentGetterAttribute</c> attribute, which should be added to the <see cref="Microsoft.Extensions.DependencyInjection.IServiceCollection" />.
     /// </summary>
-    /// <remarks>The key is the unique identifier of the service for the corresponding <see cref="Model.RemoteService" /> database entity.</remarks>
-    public static ReadOnlyDictionary<Guid, (Type Type, string Name, string Description)> RemoteUpdateServices { get; }
+    /// <remarks>The key is the unique identifier of the service for the corresponding <see cref="Model.UpstreamCdn" /> database entity.</remarks>
+    public static ReadOnlyDictionary<Guid, (Type Type, string Name, string Description)> UpstreamCdnServices { get; }
 
     /// <summary>
     /// Creates an attribute that identifies a class as a service for retrieving content from a remote CDN.
     /// </summary>
-    /// <param name="guid">The <see cref="Guid" /> string which is the unique identifier for the corresponding <see cref="Model.RemoteService" /> database entity.</param>
+    /// <param name="guid">The <see cref="Guid" /> string which is the unique identifier for the corresponding <see cref="Model.UpstreamCdn" /> database entity.</param>
     /// <param name="name">The display name that identifies the remote CDN.</param>
     public ContentGetterAttribute(string guid, string name)
     {
@@ -30,7 +30,7 @@ sealed class ContentGetterAttribute : Attribute
     }
 
     /// <summary>
-    /// Gets the unique identifier for the  corresponding <see cref="Model.RemoteService" /> database entity.
+    /// Gets the unique identifier for the  corresponding <see cref="Model.UpstreamCdn" /> database entity.
     /// </summary>
     public Guid? Id { get { return _id; } }
 
@@ -47,7 +47,7 @@ sealed class ContentGetterAttribute : Attribute
     static ContentGetterAttribute()
     {
         Type it = typeof(ContentGetterService);
-        RemoteUpdateServices = new(it.Assembly.GetTypes().SelectMany<Type, (Type Type, ContentGetterAttribute Attribute)>(t =>
+        UpstreamCdnServices = new(it.Assembly.GetTypes().SelectMany<Type, (Type Type, ContentGetterAttribute Attribute)>(t =>
         {
             if (!(t.IsPublic && t.IsClass && it.IsAssignableFrom(t)) || t.IsAbstract || t == it)
                 return Enumerable.Empty<(Type, ContentGetterAttribute)>();

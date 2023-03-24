@@ -10,7 +10,7 @@ namespace CdnGetter.Model;
 /// <summary>
 /// Represents a registered remote content delivery service.
 /// </summary>
-public class RemoteService
+public class UpstreamCdn
 {
     private readonly object _syncRoot = new();
 
@@ -64,13 +64,13 @@ public class RemoteService
     /// <summary>
     /// The content libraries that have been retrieved from the remote content delivery service.
     /// </summary>
-    public Collection<RemoteLibrary> Libraries { get; set; } = new();
+    public Collection<CdnLibrary> Libraries { get; set; } = new();
 
     /// <summary>
-    /// Performs configuration of the <see cref="RemoteService" /> entity type in the model for the <see cref="Services.ContentDb" />.
+    /// Performs configuration of the <see cref="UpstreamCdn" /> entity type in the model for the <see cref="Services.ContentDb" />.
     /// </summary>
     /// <param name="builder">The builder being used to configure the current entity type.</param>
-    internal static void OnBuildEntity(EntityTypeBuilder<RemoteService> builder)
+    internal static void OnBuildEntity(EntityTypeBuilder<UpstreamCdn> builder)
     {
         _ = builder.HasKey(nameof(Id));
         _ = builder.Property(nameof(Id)).UseCollation(COLLATION_NOCASE);
@@ -85,7 +85,7 @@ public class RemoteService
     
     internal static void CreateTable(Action<string> executeNonQuery)
     {
-        executeNonQuery(@$"CREATE TABLE ""{nameof(Services.ContentDb.RemoteServices)}"" (
+        executeNonQuery(@$"CREATE TABLE ""{nameof(Services.ContentDb.UpstreamCdns)}"" (
     ""{nameof(Id)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
     ""{nameof(Name)}"" NVARCHAR({MAXLENGTH_Name}) NOT NULL CHECK(length(trim(""{nameof(Name)}""))=length(""{nameof(Name)}"") AND length(""{nameof(Name)}"")>0) UNIQUE COLLATE NOCASE,
     ""{nameof(Priority)}"" UNSIGNED SMALLINT NOT NULL DEFAULT {DEFAULTVALUE_Priority},
@@ -95,18 +95,18 @@ public class RemoteService
     PRIMARY KEY(""{nameof(Id)}""),
     CHECK(""{nameof(CreatedOn)}""<=""{nameof(ModifiedOn)}"")
 )");
-        executeNonQuery($"CREATE INDEX \"IDX_RemoteServices_Priority\" ON \"{nameof(Services.ContentDb.RemoteServices)}\" (\"{nameof(Priority)}\" ASC)");
-        executeNonQuery($"CREATE UNIQUE INDEX \"IDX_RemoteServices_Name\" ON \"{nameof(Services.ContentDb.RemoteServices)}\" (\"{nameof(Name)}\" COLLATE NOCASE ASC)");
+        executeNonQuery($"CREATE INDEX \"IDX_UpstreamCdns_Priority\" ON \"{nameof(Services.ContentDb.UpstreamCdns)}\" (\"{nameof(Priority)}\" ASC)");
+        executeNonQuery($"CREATE UNIQUE INDEX \"IDX_UpstreamCdns_Name\" ON \"{nameof(Services.ContentDb.UpstreamCdns)}\" (\"{nameof(Name)}\" COLLATE NOCASE ASC)");
     }
 
-    internal async static Task ShowRemotesAsync(Services.ContentDb dbContext, ILogger logger, IServiceScopeFactory scopeFactory, CancellationToken cancellationToken)
+    internal async static Task ShowCDNsAsync(Services.ContentDb dbContext, ILogger logger, IServiceScopeFactory scopeFactory, CancellationToken cancellationToken)
     {
             using IServiceScope scope = scopeFactory.CreateScope();
             int count = 0;
-            foreach (KeyValuePair<Guid, (Type Type, string Name, string Description)> item in Services.ContentGetterAttribute.RemoteUpdateServices)
+            foreach (KeyValuePair<Guid, (Type Type, string Name, string Description)> item in Services.ContentGetterAttribute.UpstreamCdnServices)
             {
                 Guid id = item.Key;
-                RemoteService? rsvc = await dbContext.RemoteServices.FirstOrDefaultAsync(r => r.Id == id, cancellationToken: cancellationToken);
+                UpstreamCdn? rsvc = await dbContext.UpstreamCdns.FirstOrDefaultAsync(r => r.Id == id, cancellationToken: cancellationToken);
                 (Type type, string name, string description) = item.Value;
                 if (scope.ServiceProvider.GetService(type) is Services.ContentGetterService)
                 {
@@ -133,6 +133,6 @@ public class RemoteService
                 Console.WriteLine("{0:d} remotes total.", count);
             }
             else
-                logger.LogNoRemotesFound();
+                logger.LogNoUpstreamCdnsFound();
     }
 }

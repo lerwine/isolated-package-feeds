@@ -11,17 +11,17 @@ internal static class LoggerMessages
     public static void LogUnexpectedServiceError(this ILogger logger, Type type, Exception error) => _unexpectedServiceError(logger, type.FullName ?? type.Name, error);
     public static void LogUnexpectedServiceError<T>(this ILogger logger, Exception error) => LogUnexpectedServiceError(logger, typeof(T), error);
     
-    public const int EVENT_ID_RemoteServiceNotFound = 0x0002;
-    public static readonly EventId RemoteServiceNotFound = new(EVENT_ID_RemoteServiceNotFound, nameof(RemoteServiceNotFound));
-    private static readonly Action<ILogger, string, Exception?> _remoteServiceNotFound = LoggerMessage.Define<string>(LogLevel.Error,
-        RemoteServiceNotFound, "Remote service with the name \"{RemoteServiceName}\" was not found.");
-    public static void LogRemoteServiceNotFound(this ILogger logger, string name, Exception? error = null) => _remoteServiceNotFound(logger, name, error);
+    public const int EVENT_ID_UpstreamCdnNotFound = 0x0002;
+    public static readonly EventId UpstreamCdnNotFound = new(EVENT_ID_UpstreamCdnNotFound, nameof(UpstreamCdnNotFound));
+    private static readonly Action<ILogger, string, Exception?> _upstreamCdnNotFound = LoggerMessage.Define<string>(LogLevel.Error,
+        UpstreamCdnNotFound, "Upstream CDN Service with the name \"{UpstreamCdnName}\" was not found.");
+    public static void LogUpstreamCdnNotFound(this ILogger logger, string name, Exception? error = null) => _upstreamCdnNotFound(logger, name, error);
     
-    public const int EVENT_ID_RemoteServiceNotSupported = 0x0003;
-    public static readonly EventId RemoteServiceNotSupported = new(EVENT_ID_RemoteServiceNotSupported, nameof(RemoteServiceNotSupported));
-    private static readonly Action<ILogger, string, Exception?> _remoteServiceNotSupported = LoggerMessage.Define<string>(LogLevel.Error,
-        RemoteServiceNotSupported, "Remote service with the name \"{RemoteServiceName}\" is not supported.");
-    public static void LogRemoteServiceNotSupported(this ILogger logger, string name, Exception? error = null) => _remoteServiceNotSupported(logger, name, error);
+    public const int EVENT_ID_UpstreamCdnNotSupported = 0x0003;
+    public static readonly EventId UpstreamCdnNotSupported = new(EVENT_ID_UpstreamCdnNotSupported, nameof(UpstreamCdnNotSupported));
+    private static readonly Action<ILogger, string, Exception?> _upstreamCdnNotSupported = LoggerMessage.Define<string>(LogLevel.Error,
+        UpstreamCdnNotSupported, "Upstream CDN Service with the name \"{UpstreamCdnName}\" is not supported.");
+    public static void LogUpstreamCdnNotSupported(this ILogger logger, string name, Exception? error = null) => _upstreamCdnNotSupported(logger, name, error);
     
     public const int EVENT_ID_ServiceTypeNotFound = 0x0004;
     public static readonly EventId ServiceTypeNotFound = new(EVENT_ID_ServiceTypeNotFound, nameof(ServiceTypeNotFound));
@@ -29,17 +29,17 @@ internal static class LoggerMessages
         ServiceTypeNotFound, "Could not find service for {TypeFullName}.");
     public static void LogServiceTypeNotFound(this ILogger logger, Type type, Exception? error = null) => _serviceTypeNotFound(logger, type.FullName ?? type.Name, error);
     
-    public const int EVENT_ID_NoRemotesFound = 0x0005;
-    public static readonly EventId NoRemotesFound = new(EVENT_ID_NoRemotesFound, nameof(NoRemotesFound));
-    private static readonly Action<ILogger, Exception?> _noRemotesFound = LoggerMessage.Define(LogLevel.Warning,
-        NoRemotesFound, "No remotes found.");
-    public static void LogNoRemotesFound(this ILogger logger) => _noRemotesFound(logger, null);
+    public const int EVENT_ID_NoUpstreamCdnsFound = 0x0005;
+    public static readonly EventId NoUpstreamCdnsFound = new(EVENT_ID_NoUpstreamCdnsFound, nameof(NoUpstreamCdnsFound));
+    private static readonly Action<ILogger, Exception?> _noUpstreamCdnsFound = LoggerMessage.Define(LogLevel.Warning,
+        NoUpstreamCdnsFound, "No remotes found.");
+    public static void LogNoUpstreamCdnsFound(this ILogger logger) => _noUpstreamCdnsFound(logger, null);
     
-    public const int EVENT_ID_RemoteServiceNoActions = 0x0006;
-    public static readonly EventId RemoteServiceNoActions = new(EVENT_ID_RemoteServiceNoActions, nameof(RemoteServiceNoActions));
-    private static readonly Action<ILogger, string, Exception?> _remoteServiceNoActions = LoggerMessage.Define<string>(LogLevel.Warning,
-        RemoteServiceNoActions, "Nothing to do with remote service \"{RemoteServiceName}\".");
-    public static void LogRemoteServiceNoActions(this ILogger logger, string name) => _remoteServiceNoActions(logger, name, null);
+    public const int EVENT_ID_UpstreamCdnNoActions = 0x0006;
+    public static readonly EventId UpstreamCdnNoActions = new(EVENT_ID_UpstreamCdnNoActions, nameof(UpstreamCdnNoActions));
+    private static readonly Action<ILogger, string, Exception?> _upstreamCdnNoActions = LoggerMessage.Define<string>(LogLevel.Warning,
+        UpstreamCdnNoActions, "Nothing to do with remote service \"{UpstreamCdnName}\".");
+    public static void LogUpstreamCdnNoActions(this ILogger logger, string name) => _upstreamCdnNoActions(logger, name, null);
     
     public const int EVENT_ID_NothingToDo = 0x0007;
     public static readonly EventId NothingToDo = new(EVENT_ID_NothingToDo, nameof(NothingToDo));
@@ -50,7 +50,7 @@ internal static class LoggerMessages
     public const int EVENT_ID_InvalidBaseUrl = 0x0008;
     public static readonly EventId InvalidBaseUrl = new(EVENT_ID_InvalidBaseUrl, nameof(InvalidBaseUrl));
     private static readonly Action<ILogger, string, string, Exception?> _invalidBaseUrl = LoggerMessage.Define<string, string>(LogLevel.Error,
-        InvalidBaseUrl, "Invalid base URL for {RemoteServiceType} ({RemoteServiceName}).");
+        InvalidBaseUrl, "Invalid base URL for {UpstreamCdnType} ({UpstreamCdnName}).");
     public static void LogInvalidBaseUrl(this ILogger logger, Type remoteSvcType, string remoteSvcName, Exception? error = null) => _invalidBaseUrl(logger, remoteSvcType.FullName ?? remoteSvcType.Name, remoteSvcName, error);
     public static void LogInvalidBaseUrl<T>(this ILogger logger, string remoteSvcName, Exception? error = null) => LogInvalidBaseUrl(logger, typeof(T), remoteSvcName, error);
     
@@ -60,11 +60,11 @@ internal static class LoggerMessages
         LocalLibraryNotFound, "Local library named \"{LibraryName}\" not found.");
     public static void LogLocalLibraryNotFound(this ILogger logger, string libraryName) => _localLibraryNotFound(logger, libraryName, null);
     
-    public const int EVENT_ID_RemoteLibraryNotFound = 0x000a;
-    public static readonly EventId RemoteLibraryNotFound = new(EVENT_ID_RemoteLibraryNotFound, nameof(RemoteLibraryNotFound));
-    private static readonly Action<ILogger, string, string, Exception?> _remoteLibraryNotFound = LoggerMessage.Define<string, string>(LogLevel.Warning,
-        RemoteLibraryNotFound, "No local library named \"{LibraryName}\" exists from remote service \"{RemoteServiceName}\".");
-    public static void LogRemoteLibraryNotFound(this ILogger logger, string libraryName, string remoteSvcName) => _remoteLibraryNotFound(logger, libraryName, remoteSvcName, null);
+    public const int EVENT_ID_CdnLibraryNotFound = 0x000a;
+    public static readonly EventId CdnLibraryNotFound = new(EVENT_ID_CdnLibraryNotFound, nameof(CdnLibraryNotFound));
+    private static readonly Action<ILogger, string, string, Exception?> _cdnLibraryNotFound = LoggerMessage.Define<string, string>(LogLevel.Warning,
+        CdnLibraryNotFound, "No local library named \"{LibraryName}\" exists from remote service \"{UpstreamCdnName}\".");
+    public static void LogCdnLibraryNotFound(this ILogger logger, string libraryName, string remoteSvcName) => _cdnLibraryNotFound(logger, libraryName, remoteSvcName, null);
     
     public const int EVENT_ID_LocalLibraryAlreadyExists = 0x000b;
     public static readonly EventId LocalLibraryAlreadyExists = new(EVENT_ID_LocalLibraryAlreadyExists, nameof(LocalLibraryAlreadyExists));
@@ -72,11 +72,11 @@ internal static class LoggerMessages
         LocalLibraryAlreadyExists, "Local Library \"{LibraryName}\" has already been retreived.");
     public static void LogLocalLibraryAlreadyExists(this ILogger logger, string libraryName) => _localLibraryAlreadyExists(logger, libraryName, null);
     
-    public const int EVENT_ID_RemoteLibraryAlreadyExists = 0x000c;
-    public static readonly EventId RemoteLibraryAlreadyExists = new(EVENT_ID_RemoteLibraryAlreadyExists, nameof(RemoteLibraryAlreadyExists));
-    private static readonly Action<ILogger, string, string, Exception?> _remoteLibraryAlreadyExists = LoggerMessage.Define<string, string>(LogLevel.Warning,
-        RemoteLibraryAlreadyExists, "Library \"{LibraryName}\" has already been retreived from \"{RemoteServiceName}\".");
-    public static void LogRemoteLibraryAlreadyExists(this ILogger logger, string libraryName, string remoteSvcName) => _remoteLibraryAlreadyExists(logger, libraryName, remoteSvcName, null);
+    public const int EVENT_ID_CdnLibraryAlreadyExists = 0x000c;
+    public static readonly EventId CdnLibraryAlreadyExists = new(EVENT_ID_CdnLibraryAlreadyExists, nameof(CdnLibraryAlreadyExists));
+    private static readonly Action<ILogger, string, string, Exception?> _cdnLibraryAlreadyExists = LoggerMessage.Define<string, string>(LogLevel.Warning,
+        CdnLibraryAlreadyExists, "Library \"{LibraryName}\" has already been retreived from \"{UpstreamCdnName}\".");
+    public static void LogCdnLibraryAlreadyExists(this ILogger logger, string libraryName, string remoteSvcName) => _cdnLibraryAlreadyExists(logger, libraryName, remoteSvcName, null);
     
     public const int EVENT_ID_MutuallyExclusiveSwitchError = 0x000d;
     public static readonly EventId MutuallyExclusiveSwitchError = new(EVENT_ID_MutuallyExclusiveSwitchError, nameof(MutuallyExclusiveSwitchError));

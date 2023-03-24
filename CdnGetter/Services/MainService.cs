@@ -25,20 +25,20 @@ public class MainService : BackgroundService
         _scopeFactory = scopeFactory;
     }
 
-    private async Task<(RemoteService?, Type)> GetRemoteServiceAsync(string remoteName, System.Threading.CancellationToken stoppingToken)
+    private async Task<(UpstreamCdn?, Type)> GetUpstreamCdnAsync(string remoteName, System.Threading.CancellationToken stoppingToken)
     {
-        RemoteService? rsvc = await _dbContext.RemoteServices.FirstOrDefaultAsync(r => r.Name == remoteName, cancellationToken: stoppingToken);
+        UpstreamCdn? rsvc = await _dbContext.UpstreamCdns.FirstOrDefaultAsync(r => r.Name == remoteName, cancellationToken: stoppingToken);
         if (rsvc is null)
         {
-            using IEnumerator<KeyValuePair<Guid, (Type Type, string Name, string Description)>> enumerator = ContentGetterAttribute.RemoteUpdateServices
+            using IEnumerator<KeyValuePair<Guid, (Type Type, string Name, string Description)>> enumerator = ContentGetterAttribute.UpstreamCdnServices
                 .Where(kvp => kvp.Value.Name.Length > 0 && NameComparer.Equals(remoteName, kvp.Value.Name)).GetEnumerator();
             if (!enumerator.MoveNext())
             {
-                _logger.LogRemoteServiceNotFound(remoteName);
+                _logger.LogUpstreamCdnNotFound(remoteName);
                 return (null, null!);
             }
             Guid id = enumerator.Current.Key;
-            if ((rsvc = await _dbContext.RemoteServices.FirstOrDefaultAsync(r => r.Id == id, cancellationToken: stoppingToken)) is null)
+            if ((rsvc = await _dbContext.UpstreamCdns.FirstOrDefaultAsync(r => r.Id == id, cancellationToken: stoppingToken)) is null)
             {
                 (Type type, string? name, string? description) = enumerator.Current.Value;
                 rsvc = new()
@@ -47,15 +47,15 @@ public class MainService : BackgroundService
                     Name = name!,
                     Description = description
                 };
-                await _dbContext.RemoteServices.AddAsync(rsvc, stoppingToken);
+                await _dbContext.UpstreamCdns.AddAsync(rsvc, stoppingToken);
                 await _dbContext.SaveChangesAsync(stoppingToken);
                 return (rsvc, type);
             }
             return (rsvc, enumerator.Current.Value.Type);
         }
-        if (ContentGetterAttribute.RemoteUpdateServices.TryGetValue(rsvc.Id, out (Type Type, string Name, string Description) result))
+        if (ContentGetterAttribute.UpstreamCdnServices.TryGetValue(rsvc.Id, out (Type Type, string Name, string Description) result))
             return (rsvc, result.Type);
-        _logger.LogRemoteServiceNotSupported(remoteName);
+        _logger.LogUpstreamCdnNotSupported(remoteName);
         return (null, null!);
     }
 
@@ -75,7 +75,7 @@ public class MainService : BackgroundService
                     _logger.LogMutuallyExclusiveSwitchError($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.ReloadLibrary)}");
                 else if (_appSettings.ReloadExistingVersions.TrimmedNotEmptyValues().Any())
                     _logger.LogMutuallyExclusiveSwitchError($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.ReloadExistingVersions)}");
-                else if (sv.Equals(Config.AppSettings.SHOW_Remotes, StringComparison.InvariantCultureIgnoreCase))
+                else if (sv.Equals(Config.AppSettings.SHOW_CDNs, StringComparison.InvariantCultureIgnoreCase))
                 {
                     if (_appSettings.Library.TrimmedNotEmptyValues().Any())
                         _logger.LogMutuallyExclusiveSwitchError($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Library)}");
@@ -84,7 +84,7 @@ public class MainService : BackgroundService
                     else if (_appSettings.Upstream.TrimmedNotEmptyValues().Any())
                         _logger.LogMutuallyExclusiveSwitchError($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Upstream)}");
                     else
-                        await RemoteService.ShowRemotesAsync(_dbContext, _logger, _scopeFactory, stoppingToken);
+                        await UpstreamCdn.ShowCDNsAsync(_dbContext, _logger, _scopeFactory, stoppingToken);
                 }
                 else if (sv.Equals(Config.AppSettings.SHOW_Libraries, StringComparison.InvariantCultureIgnoreCase))
                 {

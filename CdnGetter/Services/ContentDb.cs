@@ -44,15 +44,15 @@ public class ContentDb : DbContext
 #pragma warning restore CA2201 // Exception type System.Exception is not sufficiently specific
                         }
                     }
-                    RemoteService.CreateTable(executeNonQuery);
+                    UpstreamCdn.CreateTable(executeNonQuery);
                     LocalLibrary.CreateTable(executeNonQuery);
-                    RemoteLibrary.CreateTable(executeNonQuery);
+                    CdnLibrary.CreateTable(executeNonQuery);
                     LibraryLog.CreateTable(executeNonQuery);
                     LocalVersion.CreateTable(executeNonQuery);
-                    RemoteVersion.CreateTable(executeNonQuery);
+                    CdnVersion.CreateTable(executeNonQuery);
                     VersionLog.CreateTable(executeNonQuery);
                     LocalFile.CreateTable(executeNonQuery);
-                    RemoteFile.CreateTable(executeNonQuery);
+                    CdnFile.CreateTable(executeNonQuery);
                     FileLog.CreateTable(executeNonQuery);
                 }
             }
@@ -62,7 +62,7 @@ public class ContentDb : DbContext
     /// <summary>
     /// Registered remote content delivery services.
     /// </summary>
-    public DbSet<RemoteService> RemoteServices { get; set; } = null!;
+    public DbSet<UpstreamCdn> UpstreamCdns { get; set; } = null!;
 
     /// <summary>
     /// Locally stored content libraries.
@@ -72,7 +72,7 @@ public class ContentDb : DbContext
     /// <summary>
     /// Content libraries retrieved from remote content delivery networks.
     /// </summary>
-    public DbSet<RemoteLibrary> RemoteLibraries { get; set; } = null!;
+    public DbSet<CdnLibrary> CdnLibraries { get; set; } = null!;
 
     /// <summary>
     /// Activity logs for libraries retrieved from remote content delivery networks.
@@ -87,7 +87,7 @@ public class ContentDb : DbContext
     /// <summary>
     /// Specific versions of content libraries retrieved from remote content delivery networks.
     /// </summary>
-    public DbSet<RemoteVersion> RemoteVersions { get; set; } = null!;
+    public DbSet<CdnVersion> CdnVersions { get; set; } = null!;
 
     /// <summary>
     /// Activity logs for specific versions of content libraries retrieved from remote content delivery networks.
@@ -102,7 +102,7 @@ public class ContentDb : DbContext
     /// <summary>
     /// Files retrieved from remote content delivery networks.
     /// </summary>
-    public DbSet<RemoteFile> RemoteFiles { get; set; } = null!;
+    public DbSet<CdnFile> CdnFiles { get; set; } = null!;
     
     /// <summary>
     /// Activity logs for files retrieved from remote content delivery networks.
@@ -116,15 +116,15 @@ public class ContentDb : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
-            .Entity<RemoteService>(RemoteService.OnBuildEntity)
+            .Entity<UpstreamCdn>(UpstreamCdn.OnBuildEntity)
             .Entity<LocalLibrary>(LocalLibrary.OnBuildEntity)
-            .Entity<RemoteLibrary>(RemoteLibrary.OnBuildEntity)
+            .Entity<CdnLibrary>(CdnLibrary.OnBuildEntity)
             .Entity<LibraryLog>(LibraryLog.OnBuildEntity)
             .Entity<LocalVersion>(LocalVersion.OnBuildEntity)
-            .Entity<RemoteVersion>(RemoteVersion.OnBuildEntity)
+            .Entity<CdnVersion>(CdnVersion.OnBuildEntity)
             .Entity<VersionLog>(VersionLog.OnBuildEntity)
             .Entity<LocalFile>(LocalFile.OnBuildEntity)
-            .Entity<RemoteFile>(RemoteFile.OnBuildEntity)
+            .Entity<CdnFile>(CdnFile.OnBuildEntity)
             .Entity<FileLog>(FileLog.OnBuildEntity);
     }
 }

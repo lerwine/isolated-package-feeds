@@ -17,12 +17,12 @@ public class AppSettings
     public string? DbFile  { get; set; }
     
     /// <summary>
-    /// Configuration settings for the <see cref="CdnJsRemoteService" />.
+    /// Configuration settings for the <see cref="CdnJsUpstreamCdn" />.
     /// </summary>
     public CdnJsSettings? CdnJs { get; set; }
 
     /// <summary>
-    /// The <see cref="Model.RemoteService.Name" /> of the upstream content delivery service.
+    /// The <see cref="Model.UpstreamCdn.Name" /> of the upstream content delivery service.
     /// </summary>
     public List<string>? Upstream { get; set; }
 
@@ -183,7 +183,7 @@ public class AppSettings
     /// </summary>
     public List<string>? Library { get; set; }
 
-    public const string SHOW_Remotes = "Remotes";
+    public const string SHOW_CDNs = "CDNs";
     
     public const string SHOW_Libraries = "Libraries";
     
@@ -195,10 +195,10 @@ public class AppSettings
     /// Display information.
     /// </summary>
     /// <remarks>
-    ///     Show Remotes
+    ///     Show CDNs
     ///     <list type="bullet">
     ///         <item>
-    ///             <term>--CdnGetter:Show=Remotes</term>
+    ///             <term>--CdnGetter:Show=CDNs</term>
     ///             <description>Show the remote CDN names in the database.</description>
     ///         </item>
     ///     </list>

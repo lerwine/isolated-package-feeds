@@ -38,7 +38,7 @@ public class LibraryLog : ILibraryLog
     public Uri? Url { get; set; }
 
     /// <summary>
-    /// Optional provider-specific data for <see cref="RemoteService" />.
+    /// Optional provider-specific data for <see cref="UpstreamCdn" />.
     /// </summary>
     public JsonNode? ProviderData { get; set; }
 
@@ -49,32 +49,32 @@ public class LibraryLog : ILibraryLog
 
     private Guid _libraryId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="RemoteLibrary" />.
+    /// The unique identifier of the parent <see cref="CdnLibrary" />.
     /// </summary>
     public Guid LibraryId
     {
         get => _libraryId;
-        set => value.SetNavigation(_remoteServiceId, _syncRoot, p => (p.LocalId, p.RemoteServiceId), ref _libraryId, ref _remoteServiceId, ref _library);
+        set => value.SetNavigation(_upstreamCdnId, _syncRoot, p => (p.LocalId, p.UpstreamCdnId), ref _libraryId, ref _upstreamCdnId, ref _library);
     }
 
-    private Guid _remoteServiceId;
+    private Guid _upstreamCdnId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="RemoteService" />.
+    /// The unique identifier of the parent <see cref="UpstreamCdn" />.
     /// </summary>
-    public Guid RemoteServiceId
+    public Guid UpstreamCdnId
     {
-        get => _remoteServiceId;
-        set => _libraryId.SetNavigation(value, _syncRoot, p => (p.LocalId, p.RemoteServiceId), ref _libraryId, ref _remoteServiceId, ref _library);
+        get => _upstreamCdnId;
+        set => _libraryId.SetNavigation(value, _syncRoot, p => (p.LocalId, p.UpstreamCdnId), ref _libraryId, ref _upstreamCdnId, ref _library);
     }
 
-    private RemoteLibrary? _library;
+    private CdnLibrary? _library;
     /// <summary>
     /// The parent content library.
     /// </summary>
-    public RemoteLibrary? Library
+    public CdnLibrary? Library
     {
         get => _library;
-        set => value.SetNavigation(_syncRoot, p => (p.LocalId, p.RemoteServiceId), ref _libraryId, ref _remoteServiceId, ref _library);
+        set => value.SetNavigation(_syncRoot, p => (p.LocalId, p.UpstreamCdnId), ref _libraryId, ref _upstreamCdnId, ref _library);
     }
 
     /// <summary>
@@ -85,14 +85,14 @@ public class LibraryLog : ILibraryLog
     {
         _ = builder.HasKey(nameof(Id));
         _ = builder.Property(nameof(LibraryId)).UseCollation(COLLATION_NOCASE);
-        _ = builder.Property(nameof(RemoteServiceId)).UseCollation(COLLATION_NOCASE);
+        _ = builder.Property(nameof(UpstreamCdnId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(c => c.Message).IsRequired();
         _ = builder.Property(nameof(Action)).HasConversion(ExtensionMethods.LibraryActionConverter);
         _ = builder.Property(nameof(Level)).HasConversion(ExtensionMethods.ErrorLevelConverter);
         _ = builder.Property(nameof(Url)).HasConversion(ExtensionMethods.UriConverter).HasMaxLength(MAX_LENGTH_Url);
         _ = builder.Property(nameof(ProviderData)).HasConversion(ExtensionMethods.JsonValueConverter);
         _ = builder.Property(nameof(Timestamp)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
-        _ = builder.HasOne(f => f.Library).WithMany(f => f.Logs).HasForeignKey(nameof(LibraryId), nameof(RemoteServiceId)).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
+        _ = builder.HasOne(f => f.Library).WithMany(f => f.Logs).HasForeignKey(nameof(LibraryId), nameof(UpstreamCdnId)).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
     }
 
     internal static void CreateTable(Action<string> executeNonQuery)
@@ -107,8 +107,8 @@ public class LibraryLog : ILibraryLog
     ""{nameof(ProviderData)}"" TEXT DEFAULT NULL,
     ""{nameof(Timestamp)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},
     ""{nameof(LibraryId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
-    ""{nameof(RemoteServiceId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
-    FOREIGN KEY(""{nameof(LibraryId)}"",""{nameof(RemoteServiceId)}"") REFERENCES ""{nameof(Services.ContentDb.RemoteLibraries)}""(""{nameof(RemoteLibrary.LocalId)}"",""{nameof(RemoteLibrary.RemoteServiceId)}"") ON DELETE RESTRICT,
+    ""{nameof(UpstreamCdnId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+    FOREIGN KEY(""{nameof(LibraryId)}"",""{nameof(UpstreamCdnId)}"") REFERENCES ""{nameof(Services.ContentDb.CdnLibraries)}""(""{nameof(CdnLibrary.LocalId)}"",""{nameof(CdnLibrary.UpstreamCdnId)}"") ON DELETE RESTRICT,
     PRIMARY KEY(""{nameof(Id)}"")
 )");
         executeNonQuery($"CREATE INDEX \"IDX_LibraryLogs_Timestamp\" ON \"{nameof(Services.ContentDb.LibraryLogs)}\" (\"{nameof(Timestamp)}\" DESC)");

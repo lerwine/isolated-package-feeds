@@ -57,7 +57,7 @@ public class LocalLibrary
     /// </summary>
     public Collection<LocalVersion> Versions { get; set; } = new();
     
-    public Collection<RemoteLibrary> Remotes { get; set; } = new();
+    public Collection<CdnLibrary> CDNs { get; set; } = new();
     
     /// <summary>
     /// Performs configuration of the <see cref="LocalLibrary" /> entity type in the model for the <see cref="Services.ContentDb" />.
@@ -88,16 +88,16 @@ public class LocalLibrary
         executeNonQuery($"CREATE UNIQUE INDEX \"IDX_LocalLibraries_Name\" ON \"{nameof(Services.ContentDb.LocalLibraries)}\" (\"{nameof(Name)}\" COLLATE NOCASE ASC)");
     }
 
-    internal async Task ClearRemotesAsync(Services.ContentDb dbContext, CancellationToken cancellationToken)
+    internal async Task ClearCDNsAsync(Services.ContentDb dbContext, CancellationToken cancellationToken)
     {
         Guid id = Id;
-        foreach (RemoteLibrary toRemove in await dbContext.RemoteLibraries.Where(l => l.LocalId == id).ToArrayAsync(cancellationToken))
+        foreach (CdnLibrary toRemove in await dbContext.CdnLibraries.Where(l => l.LocalId == id).ToArrayAsync(cancellationToken))
         {
             await toRemove.RemoveAsync(dbContext, cancellationToken);
             if (cancellationToken.IsCancellationRequested)
                 return;
         }
-        Remotes.Clear();
+        CDNs.Clear();
     }
 
     internal async Task ClearVersionsAsync(Services.ContentDb dbContext, CancellationToken cancellationToken)
@@ -114,7 +114,7 @@ public class LocalLibrary
 
     internal async Task RemoveAsync(Services.ContentDb dbContext, CancellationToken cancellationToken)
     {
-        await ClearRemotesAsync(dbContext, cancellationToken);
+        await ClearCDNsAsync(dbContext, cancellationToken);
         if (cancellationToken.IsCancellationRequested)
             return;
         await ClearVersionsAsync(dbContext, cancellationToken);

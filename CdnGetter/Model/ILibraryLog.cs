@@ -11,5 +11,5 @@ public interface ILibraryLog
     System.Text.Json.Nodes.JsonNode? ProviderData { get; }
     DateTime Timestamp { get; }
     Guid LibraryId { get; }
-    Guid RemoteServiceId { get; }
+    Guid UpstreamCdnId { get; }
 }

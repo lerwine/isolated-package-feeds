@@ -29,7 +29,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/CdnGetter/bin/Debug/net6.0/CdnGetter.dll",
-            "args": ["--CdnGetter:ShowRemotes=true"],
+            "args": ["--CdnGetter:Show=CDNs"],
             "cwd": "${workspaceFolder}/CdnGetter",
             "stopAtEntry": false,
             "console": "internalConsole"
