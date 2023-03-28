@@ -7,7 +7,7 @@ using static CdnGetter.SqlDefinitions;
 namespace CdnGetter.Model;
 
 /// <summary>
-/// Represents an individual file in a specific version of a content library.
+/// Represents an individual file in a specific version of an upstream content library.
 /// </summary>
 public class CdnFile
 {

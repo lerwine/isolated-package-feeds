@@ -66,10 +66,22 @@ public class LocalFile
         set => _encoding = value.ToTrimmedOrEmptyIfNull();
     }
 
+    private string _fileName = string.Empty;
+    /// <summary>
+    /// The name of the local file where the content is stored.
+    /// </summary>
+    public string FileName
+    {
+        get => _fileName;
+        set => _fileName = value.ToTrimmedOrEmptyIfNull();
+    }
+
+    [Obsolete("Use _fileName, instead")]
     private byte[] _data = Array.Empty<byte>();
     /// <summary>
     /// The contents of the library file.
     /// </summary>
+    [Obsolete("Use FileName, instead")]
     public byte[] Data
     {
         get => _data;
@@ -121,6 +133,7 @@ public class LocalFile
         _ = builder.Property(nameof(Name)).HasMaxLength(MAXLENGTH_Name).IsRequired().UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(SRI)).HasMaxLength(MAXLENGTH_SRI).IsRequired().UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(Order)).IsRequired().HasDefaultValue(DEFAULTVALUE_Order);
+        // TODO: Remove Data and add FileName
         _ = builder.Property(nameof(Data)).IsRequired();
         _ = builder.Property(nameof(ContentType)).HasMaxLength(MAXLENGTH_ContentType).IsRequired();
         _ = builder.Property(nameof(Encoding)).HasMaxLength(MAXLENGTH_Encoding).IsRequired();
@@ -134,6 +147,7 @@ public class LocalFile
 
     internal static void CreateTable(Action<string> executeNonQuery)
     {
+        // TODO: Remove Data and add FileName
         executeNonQuery(@$"CREATE TABLE ""{nameof(Services.ContentDb.LocalFiles)}"" (
     ""{nameof(Id)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
     ""{nameof(Name)}"" NVARCHAR({MAXLENGTH_Name}) NOT NULL CHECK(length(trim(""{nameof(Name)}""))=length(""{nameof(Name)}"") AND length(""{nameof(Name)}"")>0) COLLATE NOCASE,

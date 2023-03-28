@@ -5,13 +5,16 @@ using static CdnGetter.SqlDefinitions;
 
 namespace CdnGetter.Model;
 
-public class LibraryLog : ILibraryLog
+/// <summary>
+/// Log entry for a request relating to an existing <see cref="CdnLibrary" /> that does not correspond to an existing <see cref="CdnVersion" />.
+/// </summary>
+public class LibraryLog : ICdnLog
 {
     private readonly object _syncRoot = new();
 
     private Guid? _id;
     /// <summary>
-    /// The unique identifier for the library version.
+    /// The unique identifier for the log entry.
     /// </summary>
     public Guid Id
     {
@@ -29,12 +32,24 @@ public class LibraryLog : ILibraryLog
         set => _message = value.ToTrimmedOrEmptyIfNull();
     }
 
+    /// <summary>
+    /// The action being performed, which precipitated the log entry.
+    /// </summary>
     public LibraryAction Action { get; set; }
 
+    /// <summary>
+    /// The severity level of the log entry.
+    /// </summary>
     public ErrorLevel Level { get; set; }
 
+    /// <summary>
+    /// The numerical log event ID which corresponds to an event defined in <see cref="LoggerMessages" />.
+    /// </summary>
     public int? EventId { get; set; }
 
+    /// <summary>
+    /// The URL of the upstream request associated with the event log entry.
+    /// </summary>
     public Uri? Url { get; set; }
 
     /// <summary>

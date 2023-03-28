@@ -7,7 +7,7 @@ using static CdnGetter.SqlDefinitions;
 namespace CdnGetter.Model;
 
 /// <summary>
-/// Represents a content library.
+/// Represents an upstream content library.
 /// </summary>
 public class CdnLibrary
 {

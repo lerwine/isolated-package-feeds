@@ -9,6 +9,19 @@ CREATE TABLE "UpstreamCdns" (
     CHECK("CreatedOn"<="ModifiedOn")
 );
 
+CREATE TABLE "CdnLogs" (
+	"Id"	UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+	"Message"	TEXT NOT NULL DEFAULT '' CHECK(length(trim("Message"))=length("Message")),
+	"Action"	UNSIGNED TINYINT NOT NULL DEFAULT 0,
+	"EventId"	INTEGER DEFAULT NULL,
+	"Url"	NVARCHAR(4096) DEFAULT NULL,
+	"ProviderData"	TEXT DEFAULT NULL,
+	"Timestamp"	DATETIME NOT NULL DEFAULT (datetime('now','localtime')),
+	"UpstreamCdnId"	UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+	FOREIGN KEY("UpstreamCdnId") REFERENCES "UpstreamCdns"("Id") ON DELETE RESTRICT,
+	PRIMARY KEY("Id")
+);
+
 CREATE INDEX "IDX_UpstreamCdns_Priority" ON "UpstreamCdns" ("Priority" ASC);
 
 CREATE UNIQUE INDEX "IDX_UpstreamCdns_Name" ON "UpstreamCdns" ("Name" COLLATE NOCASE ASC);

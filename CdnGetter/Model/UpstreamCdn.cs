@@ -65,6 +65,11 @@ public class UpstreamCdn
     /// The content libraries that have been retrieved from the upstream content delivery service.
     /// </summary>
     public Collection<CdnLibrary> Libraries { get; set; } = new();
+    
+    /// <summary>
+    /// CDN acess logs for this content library.
+    /// </summary>
+    public Collection<CdnLog> Logs { get; set; } = new();
 
     /// <summary>
     /// Performs configuration of the <see cref="UpstreamCdn" /> entity type in the model for the <see cref="Services.ContentDb" />.
