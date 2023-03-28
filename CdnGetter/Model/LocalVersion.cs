@@ -77,7 +77,7 @@ public class LocalVersion
     /// </summary>
     public Collection<LocalFile> Files { get; set; } = new();
     
-    public Collection<CdnVersion> CDNs { get; set; } = new();
+    public Collection<CdnVersion> Upstream { get; set; } = new();
 
     /// <summary>
     /// Performs configuration of the <see cref="LocalVersion" /> entity type in the model for the <see cref="Services.ContentDb" />.
@@ -127,7 +127,7 @@ public class LocalVersion
             if (cancellationToken.IsCancellationRequested)
                 return;
         }
-        CDNs.Clear();
+        Upstream.Clear();
     }
 
     internal async Task ClearFilesAsync(Services.ContentDb dbContext, CancellationToken cancellationToken)

@@ -72,10 +72,9 @@ public class CdnFile
         get => _version;
         set => value.SetNavigation(_syncRoot, p => (p.LocalId, p.LibraryId, p.UpstreamCdnId), ref _versionId, ref _libraryId, ref _upstreamCdnId, ref _version);
     }
-
     private string? _encoding;
     /// <summary>
-    /// The content encoding override for the library file or <see langword="null" /> for no override.
+    /// The content encoding override for <see cref="LocalFile.Encoding" /> or <see langword="null" /> for no override.
     /// </summary>
     public string? Encoding
     {
@@ -85,7 +84,7 @@ public class CdnFile
 
     private string? _sri;
     /// <summary>
-    /// The cryptographic hash override or <see langword="null" /> for no override.
+    /// The cryptographic hash override for <see cref="LocalFile.SRI" /> or <see langword="null" /> for no override.
     /// </summary>
     public string? SRI
     {
@@ -93,10 +92,22 @@ public class CdnFile
         set => _sri = value.ToTrimmedOrNullIfEmpty();
     }
 
+    private string? _fileName = string.Empty;
+    /// <summary>
+    /// The local file name override for <see cref="LocalFile.FileName" /> or <see langword="null" /> for no override.
+    /// </summary>
+    public string? FileName
+    {
+        get => _fileName;
+        set => _fileName = value.ToTrimmedOrNullIfEmpty();
+    }
+
+
     private byte[]? _data;
     /// <summary>
     /// The library file content override or <see langword="null" /> for no override.
     /// </summary>
+    [Obsolete("Use FileName, instead")]
     public byte[]? Data
     {
         get => _data;
@@ -142,10 +153,11 @@ public class CdnFile
         _ = builder.Property(nameof(UpstreamCdnId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(SRI)).HasMaxLength(MAXLENGTH_SRI).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(Encoding)).HasMaxLength(MAXLENGTH_Encoding).IsRequired();
+        // TODO: Remove Data and add FileName
         _ = builder.Property(nameof(ProviderData)).HasConversion(ExtensionMethods.JsonValueConverter);
         _ = builder.Property(nameof(CreatedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
         _ = builder.Property(nameof(ModifiedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
-        _ = builder.HasOne(f => f.Local).WithMany(f => f.CDNs).HasForeignKey(nameof(LocalId)).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
+        _ = builder.HasOne(f => f.Local).WithMany(f => f.Upstream).HasForeignKey(nameof(LocalId)).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
         _ = builder.HasOne(f => f.Version).WithMany(v => v.Files)
             .HasForeignKey(nameof(VersionId), nameof(LibraryId), nameof(UpstreamCdnId))
             .HasPrincipalKey(nameof(CdnVersion.LocalId), nameof(CdnVersion.LibraryId), nameof(CdnVersion.UpstreamCdnId))
@@ -154,6 +166,7 @@ public class CdnFile
 
     internal static void CreateTable(Action<string> executeNonQuery)
     {
+        // TODO: Remove Data and add FileName
         executeNonQuery(@$"CREATE TABLE ""{nameof(Services.ContentDb.CdnFiles)}"" (
     ""{nameof(LocalId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
     ""{nameof(VersionId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,

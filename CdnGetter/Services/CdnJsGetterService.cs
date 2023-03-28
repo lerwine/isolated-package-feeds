@@ -16,36 +16,33 @@ namespace CdnGetter.Services;
 [ContentGetter(CdnJsSettings.PROVIDER_ID, CdnJsSettings.PROVIDER_NAME, Description = "api.cdnjs.com")]
 public class CdnJsGetterService : ContentGetterService
 {
-    // private readonly ContentDb _dbContext;
     private readonly ILogger<CdnJsGetterService> _logger;
-    // private readonly CdnJsSettings _settings;
 
     // public CdnJsUpstreamCdn(ContentDb dbContext, IOptions<AppSettings> options, ILogger<CdnJsUpstreamCdn> logger)
-    public CdnJsGetterService(ILogger<CdnJsGetterService> logger)
+    public CdnJsGetterService(ContentDb dbContext, IOptions<AppSettings> options, ILogger<CdnJsGetterService> logger, IHostEnvironment hostEnvironment)
+        : base(dbContext, options, hostEnvironment)
     {
-        // _dbContext = dbContext;
         _logger = logger;
-        // _settings = options.Value.CdnJs ?? new();
     }
 
-    public override async Task AddAsync(UpstreamCdn upstreamCdn, ContentDb dbContext, AppSettings appSettings, IEnumerable<string> libraryNames, CancellationToken cancellationToken)
+    public override async Task AddAsync(UpstreamCdn upstreamCdn, IEnumerable<string> libraryNames, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
-    public override async Task GetNewVersionsAsync(CdnLibrary cdnLibrary, ContentDb dbContext, AppSettings appSettings, CancellationToken cancellationToken)
+    public override async Task GetNewVersionsAsync(CdnLibrary cdnLibrary, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
-    protected override async Task AddNewVersionsAsync(UpstreamCdn upstreamCdn, string libraryName, ContentDb dbContext, AppSettings appSettings, CancellationToken cancellationToken)
+    protected override async Task AddNewVersionsAsync(UpstreamCdn upstreamCdn, string libraryName, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
     protected override ILogger GetLogger() => _logger;
 
-    protected override async Task ReloadAsync(CdnLibrary library, ContentDb dbContext, AppSettings appSettings, CancellationToken cancellationToken)
+    protected override async Task ReloadAsync(CdnLibrary library, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }

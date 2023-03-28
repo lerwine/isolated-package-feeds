@@ -118,7 +118,7 @@ public class LocalFile
         set => value.SetNavigation(_syncRoot, p => p.Id, ref _versionId, ref _version);
     }
     
-    public Collection<CdnFile> CDNs { get; set; } = new();
+    public Collection<CdnFile> Upstream { get; set; } = new();
     
     /// <summary>
     /// Performs configuration of the <see cref="CdnFile" /> entity type in the model for the <see cref="Services.ContentDb" />.
@@ -179,7 +179,7 @@ public class LocalFile
             await dbContext.SaveChangesAsync(true, cancellationToken);
             if (cancellationToken.IsCancellationRequested)
                 return;
-            CDNs.Clear();
+            Upstream.Clear();
         }
         if (cancellationToken.IsCancellationRequested)
             return;

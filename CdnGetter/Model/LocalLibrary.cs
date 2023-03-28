@@ -69,7 +69,7 @@ public class LocalLibrary
     /// </summary>
     public Collection<LocalVersion> Versions { get; set; } = new();
     
-    public Collection<CdnLibrary> CDNs { get; set; } = new();
+    public Collection<CdnLibrary> Upstream { get; set; } = new();
     
     /// <summary>
     /// Performs configuration of the <see cref="LocalLibrary" /> entity type in the model for the <see cref="Services.ContentDb" />.
@@ -111,7 +111,7 @@ public class LocalLibrary
             if (cancellationToken.IsCancellationRequested)
                 return;
         }
-        CDNs.Clear();
+        Upstream.Clear();
     }
 
     internal async Task ClearVersionsAsync(Services.ContentDb dbContext, CancellationToken cancellationToken)

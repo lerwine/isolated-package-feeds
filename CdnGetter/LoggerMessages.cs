@@ -11,6 +11,18 @@ internal static class LoggerMessages
     public static void LogUnexpectedServiceError(this ILogger logger, Type type, Exception error) => _unexpectedServiceError(logger, type.FullName ?? type.Name, error);
     public static void LogUnexpectedServiceError<T>(this ILogger logger, Exception error) => LogUnexpectedServiceError(logger, typeof(T), error);
     
+    public const int EVENT_ID_InvalidCdnContentRoot = 0x0002;
+    public static readonly EventId InvalidCdnContentRoot = new(EVENT_ID_InvalidCdnContentRoot, nameof(InvalidCdnContentRoot));
+    private static readonly Action<ILogger, string, Exception?> _invalidCdnContentRoot = LoggerMessage.Define<string>(LogLevel.Error,
+        InvalidCdnContentRoot, "Invalid path for CDN Content root: {Path}.");
+    public static void LogInvalidCdnContentRoot(this ILogger logger, string path, Exception error) => _invalidCdnContentRoot(logger, path, error);
+    
+    public const int EVENT_ID_CannotCreateCdnContentRoot = 0x0002;
+    public static readonly EventId CannotCreateCdnContentRoot = new(EVENT_ID_CannotCreateCdnContentRoot, nameof(CannotCreateCdnContentRoot));
+    private static readonly Action<ILogger, string, Exception?> _cannotCreateCdnContentRoot = LoggerMessage.Define<string>(LogLevel.Error,
+        CannotCreateCdnContentRoot, "Invalid path for CDN Content root: {Path}.");
+    public static void LogCannotCreateCdnContentRoot(this ILogger logger, string path, Exception? error = null) => _cannotCreateCdnContentRoot(logger, path, error);
+    
     public const int EVENT_ID_UpstreamCdnNotFound = 0x0002;
     public static readonly EventId UpstreamCdnNotFound = new(EVENT_ID_UpstreamCdnNotFound, nameof(UpstreamCdnNotFound));
     private static readonly Action<ILogger, string, Exception?> _upstreamCdnNotFound = LoggerMessage.Define<string>(LogLevel.Error,
