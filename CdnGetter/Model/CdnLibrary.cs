@@ -1,13 +1,14 @@
 using System.Collections.ObjectModel;
 using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using static CdnGetter.SqlDefinitions;
 
 namespace CdnGetter.Model;
 
 /// <summary>
-/// Represents a content library.
+/// Represents an upstream content library.
 /// </summary>
 public class CdnLibrary
 {
@@ -104,7 +105,7 @@ public class CdnLibrary
         _ = builder.Property(nameof(CreatedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
         _ = builder.Property(nameof(ModifiedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
         _ = builder.HasOne(f => f.UpstreamCdn).WithMany(v => v.Libraries).HasForeignKey(f => f.UpstreamCdnId).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
-        _ = builder.HasOne(r => r.Local).WithMany(l => l.CDNs).HasForeignKey(r => r.LocalId).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
+        _ = builder.HasOne(r => r.Local).WithMany(l => l.Upstream).HasForeignKey(r => r.LocalId).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
     }
 
     internal static void CreateTable(Action<string> executeNonQuery)
@@ -146,7 +147,7 @@ public class CdnLibrary
         await dbContext.SaveChangesAsync(true, cancellationToken);
         if (cancellationToken.IsCancellationRequested)
             return;
-        LocalLibrary? local = await dbContext.CdnLibraries.Entry(this).EnsureRelatedAsync(l => l.Local, cancellationToken);
+        LocalLibrary? local = await this.GetReferencedEntityAsync(dbContext.CdnLibraries, l => l.Local, cancellationToken);
         if (local is not null)
         {
             Guid id = local.Id;

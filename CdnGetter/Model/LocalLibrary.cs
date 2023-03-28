@@ -31,6 +31,18 @@ public class LocalLibrary
         set => _name = value.ToWsNormalizedOrEmptyIfNull();
     }
 
+    private string _dirName = string.Empty;
+    /// <summary>
+    /// The name of the local subdirectory where the content for this library is stored.
+    /// </summary>
+    /// <remarks>The 
+    /// </remarks>
+    public string DirName
+    {
+        get => _dirName;
+        set => _dirName = value.ToTrimmedOrEmptyIfNull();
+    }
+
     private string _description = string.Empty;
     /// <summary>
     /// Verbose description of the content library.
@@ -57,7 +69,7 @@ public class LocalLibrary
     /// </summary>
     public Collection<LocalVersion> Versions { get; set; } = new();
     
-    public Collection<CdnLibrary> CDNs { get; set; } = new();
+    public Collection<CdnLibrary> Upstream { get; set; } = new();
     
     /// <summary>
     /// Performs configuration of the <see cref="LocalLibrary" /> entity type in the model for the <see cref="Services.ContentDb" />.
@@ -69,6 +81,7 @@ public class LocalLibrary
         _ = builder.Property(nameof(Id)).UseCollation(COLLATION_NOCASE);
         _ = builder.HasIndex(nameof(Name)).IsUnique();
         _ = builder.Property(nameof(Name)).IsRequired().UseCollation(COLLATION_NOCASE);
+        // TODO: Add DirName
         _ = builder.Property(nameof(Description)).IsRequired();
         _ = builder.Property(nameof(CreatedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
         _ = builder.Property(nameof(ModifiedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
@@ -76,6 +89,7 @@ public class LocalLibrary
 
     internal static void CreateTable(Action<string> executeNonQuery)
     {
+        // TODO: Add DirName
         executeNonQuery(@$"CREATE TABLE ""{nameof(Services.ContentDb.LocalLibraries)}"" (
     ""{nameof(Id)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
     ""{nameof(Name)}"" NVARCHAR({MAXLENGTH_Name}) NOT NULL CHECK(length(trim(""{nameof(Name)}""))=length(""{nameof(Name)}"") AND length(""{nameof(Name)}"")>0) UNIQUE COLLATE NOCASE,
@@ -97,7 +111,7 @@ public class LocalLibrary
             if (cancellationToken.IsCancellationRequested)
                 return;
         }
-        CDNs.Clear();
+        Upstream.Clear();
     }
 
     internal async Task ClearVersionsAsync(Services.ContentDb dbContext, CancellationToken cancellationToken)

@@ -45,6 +45,7 @@ public class ContentDb : DbContext
                         }
                     }
                     UpstreamCdn.CreateTable(executeNonQuery);
+                    CdnLog.CreateTable(executeNonQuery);
                     LocalLibrary.CreateTable(executeNonQuery);
                     CdnLibrary.CreateTable(executeNonQuery);
                     LibraryLog.CreateTable(executeNonQuery);
@@ -63,6 +64,11 @@ public class ContentDb : DbContext
     /// Registered upstream content delivery services.
     /// </summary>
     public DbSet<UpstreamCdn> UpstreamCdns { get; set; } = null!;
+
+    /// <summary>
+    /// Activity logs for libraries retrieved from upstream content delivery networks.
+    /// </summary>
+    public DbSet<CdnLog> CdnLogs { get; set; } = null!;
 
     /// <summary>
     /// Locally stored content libraries.
@@ -117,6 +123,7 @@ public class ContentDb : DbContext
     {
         modelBuilder
             .Entity<UpstreamCdn>(UpstreamCdn.OnBuildEntity)
+            .Entity<CdnLog>(CdnLog.OnBuildEntity)
             .Entity<LocalLibrary>(LocalLibrary.OnBuildEntity)
             .Entity<CdnLibrary>(CdnLibrary.OnBuildEntity)
             .Entity<LibraryLog>(LibraryLog.OnBuildEntity)

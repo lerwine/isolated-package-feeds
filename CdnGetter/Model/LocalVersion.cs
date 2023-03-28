@@ -52,6 +52,16 @@ public class LocalVersion
         set => value.SetNavigation(_syncRoot, p => p.Id, ref _libraryId, ref _library);
     }
 
+    private string _dirName = string.Empty;
+    /// <summary>
+    /// The name of the local subdirectory where the content for this version is stored.
+    /// </summary>
+    public string DirName
+    {
+        get => _dirName;
+        set => _dirName = value.ToTrimmedOrEmptyIfNull();
+    }
+
     private LocalLibrary? _library;
     /// <summary>
     /// The parent content library.
@@ -67,7 +77,7 @@ public class LocalVersion
     /// </summary>
     public Collection<LocalFile> Files { get; set; } = new();
     
-    public Collection<CdnVersion> CDNs { get; set; } = new();
+    public Collection<CdnVersion> Upstream { get; set; } = new();
 
     /// <summary>
     /// Performs configuration of the <see cref="LocalVersion" /> entity type in the model for the <see cref="Services.ContentDb" />.
@@ -84,6 +94,7 @@ public class LocalVersion
         _ = builder.Property(nameof(Order)).IsRequired().HasDefaultValue(DEFAULTVALUE_Order);
         _ = builder.HasIndex(nameof(Order));
         _ = builder.HasIndex(nameof(Order), nameof(LibraryId)).IsUnique();
+        // TODO: Add DirName
         _ = builder.Property(nameof(CreatedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
         _ = builder.Property(nameof(ModifiedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
         _ = builder.HasOne(v => v.Library).WithMany(l => l.Versions).HasForeignKey(nameof(LibraryId)).IsRequired().OnDelete(DeleteBehavior.Restrict);
@@ -91,6 +102,7 @@ public class LocalVersion
 
     internal static void CreateTable(Action<string> executeNonQuery)
     {
+        // TODO: Add DirName
         executeNonQuery(@$"CREATE TABLE ""{nameof(Services.ContentDb.LocalVersions)}"" (
     ""{nameof(Id)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
     ""{nameof(Version)}"" NVARCHAR({MAXLENGTH_Version}) NOT NULL CHECK(length(trim(""{nameof(Version)}""))=length(""{nameof(Version)}"") AND length(""{nameof(Version)}"")>0) COLLATE NOCASE,
@@ -115,7 +127,7 @@ public class LocalVersion
             if (cancellationToken.IsCancellationRequested)
                 return;
         }
-        CDNs.Clear();
+        Upstream.Clear();
     }
 
     internal async Task ClearFilesAsync(Services.ContentDb dbContext, CancellationToken cancellationToken)
