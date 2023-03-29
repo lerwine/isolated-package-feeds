@@ -11,15 +11,10 @@ public abstract class CdnLogBase : ICdnLog, IValidatableObject
 {
     private readonly object _syncRoot = new();
 
-    private Guid? _id;
     /// <summary>
     /// The unique identifier for the library version.
     /// </summary>
-    public Guid Id
-    {
-        get => _id.EnsureGuid(_syncRoot);
-        set => _id = value;
-    }
+    public Guid Id { get; set; }
 
     private string _message = string.Empty;
     /// <summary>
@@ -76,6 +71,8 @@ public abstract class CdnLogBase : ICdnLog, IValidatableObject
 
     protected virtual void Validate(ValidationContext validationContext, EntityState state, List<ValidationResult> results)
     {
+        if (validationContext.GetService(typeof(EntityEntry)) is EntityEntry entry)
+            entry.EnsurePrimaryKey(nameof(Id));
         switch (state)
         {
             case EntityState.Added:

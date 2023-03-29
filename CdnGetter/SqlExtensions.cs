@@ -16,6 +16,17 @@ public static class SqlExtensions
     public const int MAXLENGTH_Encoding = 32;
     public const byte DEFAULT_VALUE_Action = 0;
     
+    public static void EnsurePrimaryKey(this EntityEntry entry, string propertyName)
+    {
+        PropertyEntry propertyEntry = entry.Property(propertyName);
+        if (typeof(Guid).Equals(propertyEntry.Metadata.ClrType) && entry.State == EntityState.Added)
+        {
+            Guid? pk = propertyEntry.CurrentValue as Guid?;
+            if (!pk.HasValue || pk.Value.Equals(Guid.Empty))
+                propertyEntry.CurrentValue = Guid.NewGuid();
+        }
+    }
+
     /// <summary>
     /// Indicates whether the entry exists in the target database.
     /// </summary>

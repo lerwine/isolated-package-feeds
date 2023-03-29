@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -15,15 +16,10 @@ public class UpstreamCdn : ModificationTrackingModelBase
 {
     private readonly object _syncRoot = new();
 
-    private Guid? _id;
     /// <summary>
     /// The unique identifier of the registered upstream service.
     /// </summary>
-    public Guid Id
-    {
-        get => _id.EnsureGuid(_syncRoot);
-        set => _id = value;
-    }
+    public Guid Id { get; set; }
     
     public const int MAXLENGTH_Name = 1024;
     private string _name = string.Empty;
@@ -78,6 +74,8 @@ public class UpstreamCdn : ModificationTrackingModelBase
 
     protected override void Validate(ValidationContext validationContext, EntityState state, List<ValidationResult> results)
     {
+        if (validationContext.GetService(typeof(EntityEntry)) is EntityEntry entry)
+            entry.EnsurePrimaryKey(nameof(Id));
         Validator.TryValidateProperty(Name, new ValidationContext(this, null, null) { MemberName = nameof(Name) }, results);
         Validator.TryValidateProperty(DirName, new ValidationContext(this, null, null) { MemberName = nameof(DirName) }, results);
         base.Validate(validationContext, state, results);
