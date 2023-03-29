@@ -77,6 +77,8 @@ public class CdnFile : ModificationTrackingModelBase
     /// <summary>
     /// The content encoding override for <see cref="LocalFile.Encoding" /> or <see langword="null" /> for no override.
     /// </summary>
+    [MaxLength(MAXLENGTH_Encoding)]
+    [MinLength(1)]
     public string? Encoding
     {
         get => _encoding;
@@ -87,6 +89,8 @@ public class CdnFile : ModificationTrackingModelBase
     /// <summary>
     /// The cryptographic hash override for <see cref="LocalFile.SRI" /> or <see langword="null" /> for no override.
     /// </summary>
+    [MaxLength(MAXLENGTH_SRI)]
+    [MinLength(1)]
     public string? SRI
     {
         get => _sri;
@@ -97,21 +101,12 @@ public class CdnFile : ModificationTrackingModelBase
     /// <summary>
     /// The local file name override for <see cref="LocalFile.FileName" /> or <see langword="null" /> for no override.
     /// </summary>
+    [MaxLength(MAXLENGTH_FileName)]
+    [MinLength(1)]
     public string? FileName
     {
         get => _fileName;
         set => _fileName = value.ToTrimmedOrNullIfEmpty();
-    }
-
-    private byte[]? _data;
-    /// <summary>
-    /// The library file content override or <see langword="null" /> for no override.
-    /// </summary>
-    [Obsolete("Use FileName, instead")]
-    public byte[]? Data
-    {
-        get => _data;
-        set => _data = (value is null || value.Length == 0) ? null : value;
     }
 
     /// <summary>
@@ -134,15 +129,15 @@ public class CdnFile : ModificationTrackingModelBase
         if (FileName is null)
         {
             if (SRI is not null)
-                results.Add(new ValidationResult("{nameof(SRI)} must be null if {nameof(FileName)} is null", new[] { nameof(SRI) }));
+                results.Add(new ValidationResult($"{nameof(SRI)} must be null if {nameof(FileName)} is null", new[] { nameof(SRI) }));
             if (Encoding is not null)
-                results.Add(new ValidationResult("{nameof(Encoding)} must be null if {nameof(FileName)} is null", new[] { nameof(Encoding) }));
+                results.Add(new ValidationResult($"{nameof(Encoding)} must be null if {nameof(FileName)} is null", new[] { nameof(Encoding) }));
         }
         else
         {
             Validator.TryValidateProperty(FileName, new ValidationContext(this, null, null) { MemberName = nameof(FileName) }, results);
             if (SRI is null)
-                results.Add(new ValidationResult("{nameof(SRI)} cannot be null if {nameof(FileName)} is not null", new[] { nameof(SRI) }));
+                results.Add(new ValidationResult($"{nameof(SRI)} cannot be null if {nameof(FileName)} is not null", new[] { nameof(SRI) }));
             else
                 Validator.TryValidateProperty(SRI, new ValidationContext(this, null, null) { MemberName = nameof(SRI) }, results);
             if (Encoding is not null)
@@ -164,7 +159,7 @@ public class CdnFile : ModificationTrackingModelBase
         _ = builder.Property(nameof(UpstreamCdnId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(SRI)).HasMaxLength(MAXLENGTH_SRI).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(Encoding)).HasMaxLength(MAXLENGTH_Encoding);
-        _ = builder.Property(nameof(FileName)).HasMaxLength(MAX_LENGTH_FileName);
+        _ = builder.Property(nameof(FileName)).HasMaxLength(MAXLENGTH_FileName);
         _ = builder.Property(nameof(ProviderData)).HasConversion(ValueConverters.JsonValueConverter);
         ModificationTrackingModelBase.OnBuildModificationTrackingModel(builder);
         _ = builder.HasOne(f => f.Local).WithMany(f => f.Upstream).HasForeignKey(nameof(LocalId)).IsRequired().OnDelete(DeleteBehavior.Restrict);
@@ -180,7 +175,7 @@ public class CdnFile : ModificationTrackingModelBase
     ""{nameof(UpstreamCdnId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
     ""{nameof(Encoding)}"" NVARCHAR({MAXLENGTH_Encoding}) DEFAULT NULL CHECK(""{nameof(Encoding)}"" IS NULL OR (length(trim(""{nameof(Encoding)}""))=length(""{nameof(Encoding)}""))),
     ""{nameof(SRI)}"" NVARCHAR({MAXLENGTH_SRI}) DEFAULT NULL CHECK(""{nameof(SRI)}"" IS NULL OR (length(trim(""{nameof(SRI)}""))=length(""{nameof(SRI)}"") AND length(""{nameof(SRI)}"")>0)) COLLATE NOCASE,
-    ""{nameof(FileName)}"" NVARCHAR({MAX_LENGTH_FileName}) DEFAULT NULL CHECK(""{nameof(FileName)}"" IS NULL OR (length(trim(""{nameof(FileName)}""))=length(""{nameof(FileName)}"") AND length(""{nameof(FileName)}"")>0)) COLLATE NOCASE,
+    ""{nameof(FileName)}"" NVARCHAR({MAXLENGTH_FileName}) DEFAULT NULL CHECK(""{nameof(FileName)}"" IS NULL OR (length(trim(""{nameof(FileName)}""))=length(""{nameof(FileName)}"") AND length(""{nameof(FileName)}"")>0)) COLLATE NOCASE,
     ""{nameof(Priority)}"" UNSIGNED SMALLINT DEFAULT NULL,
     ""{nameof(ProviderData)}"" TEXT DEFAULT NULL,
     ""{nameof(CreatedOn)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},

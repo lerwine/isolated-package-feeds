@@ -1,11 +1,12 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using static CdnGetter.SqlExtensions;
 
 namespace CdnGetter.Model;
 
-public class LocalFile
+public class LocalFile : ModificationTrackingModelBase
 {
     private readonly object _syncRoot = new();
 
@@ -24,6 +25,8 @@ public class LocalFile
     /// <summary>
     /// The name of the library file.
     /// </summary>
+    [MaxLength(MAXLENGTH_Name)]
+    [MinLength(1)]
     public string Name
     {
         get => _name;
@@ -34,6 +37,8 @@ public class LocalFile
     /// <summary>
     /// The Cryptographic hash.
     /// </summary>
+    [MaxLength(MAXLENGTH_SRI)]
+    [MinLength(1)]
     public string SRI
     {
         get => _sri;
@@ -50,6 +55,8 @@ public class LocalFile
     /// <summary>
     /// The library file MIME content type.
     /// </summary>
+    [MaxLength(MAXLENGTH_ContentType)]
+    [MinLength(MINLENGTH_ContentType)]
     public string ContentType
     {
         get => _contentType;
@@ -60,6 +67,7 @@ public class LocalFile
     /// <summary>
     /// The content encoding for library file or <see cref="string.Empty" /> for binary files.
     /// </summary>
+    [MaxLength(MAXLENGTH_Encoding)]
     public string Encoding
     {
         get => _encoding;
@@ -70,33 +78,13 @@ public class LocalFile
     /// <summary>
     /// The name of the local file where the content is stored.
     /// </summary>
+    [MaxLength(MAXLENGTH_FileName)]
+    [MinLength(1)]
     public string FileName
     {
         get => _fileName;
         set => _fileName = value.ToTrimmedOrEmptyIfNull();
     }
-
-    [Obsolete("Use _fileName, instead")]
-    private byte[] _data = Array.Empty<byte>();
-    /// <summary>
-    /// The contents of the library file.
-    /// </summary>
-    [Obsolete("Use FileName, instead")]
-    public byte[] Data
-    {
-        get => _data;
-        set => _data = value ?? Array.Empty<byte>();
-    }
-
-    /// <summary>
-    /// The date and time that the record was created.
-    /// </summary>
-    public DateTime CreatedOn { get; set; } = DateTime.Now;
-
-    /// <summary>
-    /// The date and time that the record was last modified.
-    /// </summary>
-    public DateTime ModifiedOn { get; set; } = DateTime.Now;
 
     private Guid _versionId;
     /// <summary>
@@ -120,6 +108,16 @@ public class LocalFile
     
     public Collection<CdnFile> Upstream { get; set; } = new();
     
+    protected override void Validate(ValidationContext validationContext, EntityState state, List<ValidationResult> results)
+    {
+        Validator.TryValidateProperty(Name, new ValidationContext(this, null, null) { MemberName = nameof(Name) }, results);
+        Validator.TryValidateProperty(SRI, new ValidationContext(this, null, null) { MemberName = nameof(SRI) }, results);
+        Validator.TryValidateProperty(FileName, new ValidationContext(this, null, null) { MemberName = nameof(FileName) }, results);
+        Validator.TryValidateProperty(ContentType, new ValidationContext(this, null, null) { MemberName = nameof(ContentType) }, results);
+        Validator.TryValidateProperty(Encoding, new ValidationContext(this, null, null) { MemberName = nameof(Encoding) }, results);
+        base.Validate(validationContext, state, results);
+    }
+
     /// <summary>
     /// Performs configuration of the <see cref="CdnFile" /> entity type in the model for the <see cref="Services.ContentDb" />.
     /// </summary>
@@ -133,13 +131,12 @@ public class LocalFile
         _ = builder.Property(nameof(Name)).HasMaxLength(MAXLENGTH_Name).IsRequired().UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(SRI)).HasMaxLength(MAXLENGTH_SRI).IsRequired().UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(Order)).IsRequired().HasDefaultValue(DEFAULTVALUE_Order);
-        _ = builder.Property(nameof(FileName)).HasMaxLength(MAX_LENGTH_FileName).IsRequired();
+        _ = builder.Property(nameof(FileName)).HasMaxLength(MAXLENGTH_FileName).IsRequired();
         _ = builder.Property(nameof(ContentType)).HasMaxLength(MAXLENGTH_ContentType).IsRequired();
         _ = builder.Property(nameof(Encoding)).HasMaxLength(MAXLENGTH_Encoding).IsRequired();
         _ = builder.HasIndex(nameof(Order));
         _ = builder.HasIndex(nameof(Order), nameof(VersionId)).IsUnique();
-        _ = builder.Property(nameof(CreatedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
-        _ = builder.Property(nameof(ModifiedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
+        ModificationTrackingModelBase.OnBuildModificationTrackingModel(builder);
         _ = builder.HasOne(f => f.Version).WithMany(v => v.Files).HasForeignKey(nameof(VersionId)).IsRequired().OnDelete(DeleteBehavior.Restrict);
         _ = builder.Property(nameof(VersionId)).UseCollation(COLLATION_NOCASE);
     }
@@ -150,7 +147,7 @@ public class LocalFile
     ""{nameof(Id)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
     ""{nameof(Name)}"" NVARCHAR({MAXLENGTH_Name}) NOT NULL CHECK(length(trim(""{nameof(Name)}""))=length(""{nameof(Name)}"") AND length(""{nameof(Name)}"")>0) COLLATE NOCASE,
     ""{nameof(SRI)}"" NVARCHAR({MAXLENGTH_SRI}) NOT NULL CHECK(length(trim(""{nameof(SRI)}""))=length(""{nameof(SRI)}"") AND length(""{nameof(SRI)}"")>0) COLLATE NOCASE,
-    ""{nameof(FileName)}"" NVARCHAR({MAX_LENGTH_FileName}) NOT NULL CHECK(length(trim(""{nameof(FileName)}""))=length(""{nameof(FileName)}"") AND length(""{nameof(FileName)}"")>0) COLLATE NOCASE,
+    ""{nameof(FileName)}"" NVARCHAR({MAXLENGTH_FileName}) NOT NULL CHECK(length(trim(""{nameof(FileName)}""))=length(""{nameof(FileName)}"") AND length(""{nameof(FileName)}"")>0) COLLATE NOCASE,
     ""{nameof(Order)}"" UNSIGNED SMALLINT NOT NULL DEFAULT {DEFAULTVALUE_Order},
     ""{nameof(ContentType)}"" NVARCHAR({MAXLENGTH_ContentType}) NOT NULL CHECK(length(trim(""{nameof(ContentType)}""))=length(""{nameof(ContentType)}"") AND length(""{nameof(ContentType)}"")>0),
     ""{nameof(Encoding)}"" NVARCHAR({MAXLENGTH_Encoding}) NOT NULL CHECK(length(trim(""{nameof(Encoding)}""))=length(""{nameof(Encoding)}"")),

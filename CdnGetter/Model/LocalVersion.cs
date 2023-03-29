@@ -1,11 +1,12 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using static CdnGetter.SqlExtensions;
 
 namespace CdnGetter.Model;
 
-public class LocalVersion
+public class LocalVersion : ModificationTrackingModelBase
 {
     private readonly object _syncRoot = new();
 
@@ -30,16 +31,6 @@ public class LocalVersion
     /// The release order for the library version.
     /// </summary>
     public ushort Order { get; set; } = DEFAULTVALUE_Order;
-
-    /// <summary>
-    /// The date and time that the record was created.
-    /// </summary>
-    public DateTime CreatedOn { get; set; } = DateTime.Now;
-
-    /// <summary>
-    /// The date and time that the record was last modified.
-    /// </summary>
-    public DateTime ModifiedOn { get; set; } = DateTime.Now;
 
     private Guid _libraryId;
     /// <summary>
@@ -78,6 +69,14 @@ public class LocalVersion
     
     public Collection<CdnVersion> Upstream { get; set; } = new();
 
+    protected override void Validate(ValidationContext validationContext, EntityState state, List<ValidationResult> results)
+    {
+        Validator.TryValidateProperty(DirName, new ValidationContext(this, null, null) { MemberName = nameof(DirName) }, results);
+        if (Version.ToString().Length > MAXLENGTH_Version)
+            results.Add(new ValidationResult($"{nameof(Version)} cannot be greater than {MAXLENGTH_Version} characters", new[] { nameof(Version) }));
+        base.Validate(validationContext, state, results);
+    }
+
     /// <summary>
     /// Performs configuration of the <see cref="LocalVersion" /> entity type in the model for the <see cref="Services.ContentDb" />.
     /// </summary>
@@ -93,9 +92,8 @@ public class LocalVersion
         _ = builder.Property(nameof(Order)).IsRequired().HasDefaultValue(DEFAULTVALUE_Order);
         _ = builder.HasIndex(nameof(Order));
         _ = builder.HasIndex(nameof(Order), nameof(LibraryId)).IsUnique();
-        _ = builder.Property(nameof(DirName)).HasMaxLength(MAX_LENGTH_FileName).IsRequired().UseCollation(COLLATION_NOCASE);
-        _ = builder.Property(nameof(CreatedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
-        _ = builder.Property(nameof(ModifiedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
+        _ = builder.Property(nameof(DirName)).HasMaxLength(MAXLENGTH_FileName).IsRequired().UseCollation(COLLATION_NOCASE);
+        ModificationTrackingModelBase.OnBuildModificationTrackingModel(builder);
         _ = builder.HasOne(v => v.Library).WithMany(l => l.Versions).HasForeignKey(nameof(LibraryId)).IsRequired().OnDelete(DeleteBehavior.Restrict);
     }
 
@@ -104,7 +102,7 @@ public class LocalVersion
         executeNonQuery(@$"CREATE TABLE ""{nameof(Services.ContentDb.LocalVersions)}"" (
     ""{nameof(Id)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
     ""{nameof(Version)}"" NVARCHAR({MAXLENGTH_Version}) NOT NULL CHECK(length(trim(""{nameof(Version)}""))=length(""{nameof(Version)}"") AND length(""{nameof(Version)}"")>0) COLLATE NOCASE,
-    ""{nameof(DirName)}"" NVARCHAR({MAX_LENGTH_FileName}) NOT NULL CHECK(length(trim(""{nameof(DirName)}""))=length(""{nameof(DirName)}"") AND length(""{nameof(DirName)}"")>0) UNIQUE COLLATE NOCASE,
+    ""{nameof(DirName)}"" NVARCHAR({MAXLENGTH_FileName}) NOT NULL CHECK(length(trim(""{nameof(DirName)}""))=length(""{nameof(DirName)}"") AND length(""{nameof(DirName)}"")>0) UNIQUE COLLATE NOCASE,
     ""{nameof(Order)}"" UNSIGNED SMALLINT NOT NULL DEFAULT {DEFAULTVALUE_Order},
     ""{nameof(CreatedOn)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},
     ""{nameof(ModifiedOn)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},
@@ -151,10 +149,5 @@ public class LocalVersion
             return;
         dbContext.LocalVersions.Remove(this);
         await dbContext.SaveChangesAsync(true, cancellationToken);
-    }
-
-    internal async Task ReloadAsync(Services.ContentDb dbContext, CancellationToken stoppingToken)
-    {
-        throw new NotImplementedException();
     }
 }

@@ -1,4 +1,3 @@
-using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using static CdnGetter.SqlExtensions;
@@ -8,59 +7,9 @@ namespace CdnGetter.Model;
 /// <summary>
 /// Log entry for a request relating to an existing <see cref="CdnLibrary" /> that does not correspond to an existing <see cref="CdnVersion" />.
 /// </summary>
-public class LibraryLog : ICdnLog
+public class LibraryLog : CdnLogBase
 {
     private readonly object _syncRoot = new();
-
-    private Guid? _id;
-    /// <summary>
-    /// The unique identifier for the log entry.
-    /// </summary>
-    public Guid Id
-    {
-        get => _id.EnsureGuid(_syncRoot);
-        set => _id = value;
-    }
-
-    private string _message = string.Empty;
-    /// <summary>
-    /// The verbose log message.
-    /// </summary>
-    public string Message
-    {
-        get => _message;
-        set => _message = value.ToTrimmedOrEmptyIfNull();
-    }
-
-    /// <summary>
-    /// The action being performed, which precipitated the log entry.
-    /// </summary>
-    public LibraryAction Action { get; set; }
-
-    /// <summary>
-    /// The severity level of the log entry.
-    /// </summary>
-    public ErrorLevel Level { get; set; }
-
-    /// <summary>
-    /// The numerical log event ID which corresponds to an event defined in <see cref="LoggerMessages" />.
-    /// </summary>
-    public int? EventId { get; set; }
-
-    /// <summary>
-    /// The URL of the upstream request associated with the event log entry.
-    /// </summary>
-    public Uri? Url { get; set; }
-
-    /// <summary>
-    /// Optional provider-specific data for <see cref="UpstreamCdn" />.
-    /// </summary>
-    public JsonNode? ProviderData { get; set; }
-
-    /// <summary>
-    /// The date and time that the log event happened.
-    /// </summary>
-    public DateTime Timestamp { get; set; } = DateTime.Now;
 
     private Guid _libraryId;
     /// <summary>
@@ -76,7 +25,7 @@ public class LibraryLog : ICdnLog
     /// <summary>
     /// The unique identifier of the parent <see cref="UpstreamCdn" />.
     /// </summary>
-    public Guid UpstreamCdnId
+    public override Guid UpstreamCdnId
     {
         get => _upstreamCdnId;
         set => _libraryId.SetNavigation(value, _syncRoot, p => (p.LocalId, p.CdnId), ref _libraryId, ref _upstreamCdnId, ref _library);
@@ -98,15 +47,8 @@ public class LibraryLog : ICdnLog
     /// <param name="builder">The builder being used to configure the current entity type.</param>
     internal static void OnBuildEntity(EntityTypeBuilder<LibraryLog> builder)
     {
-        _ = builder.HasKey(nameof(Id));
         _ = builder.Property(nameof(LibraryId)).UseCollation(COLLATION_NOCASE);
-        _ = builder.Property(nameof(UpstreamCdnId)).UseCollation(COLLATION_NOCASE);
-        _ = builder.Property(c => c.Message).IsRequired();
-        _ = builder.Property(nameof(Action)).HasConversion(ValueConverters.LibraryActionConverter);
-        _ = builder.Property(nameof(Level)).HasConversion(ValueConverters.ErrorLevelConverter);
-        _ = builder.Property(nameof(Url)).HasConversion(ValueConverters.UriConverter).HasMaxLength(MAX_LENGTH_Url);
-        _ = builder.Property(nameof(ProviderData)).HasConversion(ValueConverters.JsonValueConverter);
-        _ = builder.Property(nameof(Timestamp)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
+        CdnLogBase.OnBuildCdnLogModel(builder);
         _ = builder.HasOne(f => f.Library).WithMany(f => f.Logs).HasForeignKey(nameof(LibraryId), nameof(UpstreamCdnId)).IsRequired().OnDelete(DeleteBehavior.Restrict);
     }
 

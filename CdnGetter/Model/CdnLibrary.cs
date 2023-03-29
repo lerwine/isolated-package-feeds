@@ -9,7 +9,7 @@ namespace CdnGetter.Model;
 /// <summary>
 /// Represents an upstream content library.
 /// </summary>
-public class CdnLibrary
+public class CdnLibrary : ModificationTrackingModelBase
 {
     private readonly object _syncRoot = new();
 
@@ -71,16 +71,6 @@ public class CdnLibrary
     public JsonNode? ProviderData { get; set; }
 
     /// <summary>
-    /// The date and time that the record was created.
-    /// </summary>
-    public DateTime CreatedOn { get; set; } = DateTime.Now;
-
-    /// <summary>
-    /// The date and time that the record was last modified.
-    /// </summary>
-    public DateTime ModifiedOn { get; set; } = DateTime.Now;
-
-    /// <summary>
     /// Library versions for this content library.
     /// </summary>
     public Collection<CdnVersion> Versions { get; set; } = new();
@@ -100,8 +90,7 @@ public class CdnLibrary
         _ = builder.Property(nameof(LocalId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(CdnId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(ProviderData)).HasConversion(ValueConverters.JsonValueConverter);
-        _ = builder.Property(nameof(CreatedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
-        _ = builder.Property(nameof(ModifiedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
+        ModificationTrackingModelBase.OnBuildModificationTrackingModel(builder);
         _ = builder.HasOne(f => f.Cdn).WithMany(v => v.Libraries).HasForeignKey(f => f.CdnId).IsRequired().OnDelete(DeleteBehavior.Restrict);
         _ = builder.HasOne(r => r.Local).WithMany(l => l.Upstream).HasForeignKey(r => r.LocalId).IsRequired().OnDelete(DeleteBehavior.Restrict);
     }

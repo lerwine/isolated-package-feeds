@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +11,7 @@ namespace CdnGetter.Model;
 /// <summary>
 /// Represents a registered upstream content delivery service.
 /// </summary>
-public class UpstreamCdn
+public class UpstreamCdn : ModificationTrackingModelBase
 {
     private readonly object _syncRoot = new();
 
@@ -29,6 +30,8 @@ public class UpstreamCdn
     /// <summary>
     /// The display name of the registered registered upstream content delivery service.
     /// </summary>
+    [MaxLength(MAXLENGTH_Name)]
+    [MinLength(1)]
     public string Name
     {
         get => _name;
@@ -39,8 +42,8 @@ public class UpstreamCdn
     /// <summary>
     /// The name of the local subdirectory where the content for this library is stored.
     /// </summary>
-    /// <remarks>The 
-    /// </remarks>
+    [MaxLength(MAXLENGTH_FileName)]
+    [MinLength(1)]
     public string DirName
     {
         get => _dirName;
@@ -64,16 +67,6 @@ public class UpstreamCdn
     }
 
     /// <summary>
-    /// The date and time that the record was created.
-    /// </summary>
-    public DateTime CreatedOn { get; set; } = DateTime.Now;
-
-    /// <summary>
-    /// The date and time that the record was last modified.
-    /// </summary>
-    public DateTime ModifiedOn { get; set; } = DateTime.Now;
-
-    /// <summary>
     /// The content libraries that have been retrieved from the upstream content delivery service.
     /// </summary>
     public Collection<CdnLibrary> Libraries { get; set; } = new();
@@ -82,6 +75,13 @@ public class UpstreamCdn
     /// CDN acess logs for this content library.
     /// </summary>
     public Collection<CdnLog> Logs { get; set; } = new();
+
+    protected override void Validate(ValidationContext validationContext, EntityState state, List<ValidationResult> results)
+    {
+        Validator.TryValidateProperty(Name, new ValidationContext(this, null, null) { MemberName = nameof(Name) }, results);
+        Validator.TryValidateProperty(DirName, new ValidationContext(this, null, null) { MemberName = nameof(DirName) }, results);
+        base.Validate(validationContext, state, results);
+    }
 
     /// <summary>
     /// Performs configuration of the <see cref="UpstreamCdn" /> entity type in the model for the <see cref="Services.ContentDb" />.
@@ -95,10 +95,9 @@ public class UpstreamCdn
         _ = builder.HasIndex(nameof(Priority));
         _ = builder.Property(nameof(Name)).IsRequired().HasMaxLength(MAXLENGTH_Name).UseCollation(COLLATION_NOCASE);
         _ = builder.HasIndex(nameof(Name)).IsUnique();
-        _ = builder.Property(nameof(DirName)).HasMaxLength(MAX_LENGTH_FileName).IsRequired().UseCollation(COLLATION_NOCASE);
+        _ = builder.Property(nameof(DirName)).HasMaxLength(MAXLENGTH_FileName).IsRequired().UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(Description)).IsRequired();
-        _ = builder.Property(nameof(CreatedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
-        _ = builder.Property(nameof(ModifiedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
+        ModificationTrackingModelBase.OnBuildModificationTrackingModel(builder);
     }
     
     internal static void CreateTable(Action<string> executeNonQuery)
@@ -106,7 +105,7 @@ public class UpstreamCdn
         executeNonQuery(@$"CREATE TABLE ""{nameof(Services.ContentDb.UpstreamCdns)}"" (
     ""{nameof(Id)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
     ""{nameof(Name)}"" NVARCHAR({MAXLENGTH_Name}) NOT NULL CHECK(length(trim(""{nameof(Name)}""))=length(""{nameof(Name)}"") AND length(""{nameof(Name)}"")>0) UNIQUE COLLATE NOCASE,
-    ""{nameof(DirName)}"" NVARCHAR({MAX_LENGTH_FileName}) NOT NULL CHECK(length(trim(""{nameof(DirName)}""))=length(""{nameof(DirName)}"") AND length(""{nameof(DirName)}"")>0) UNIQUE COLLATE NOCASE,
+    ""{nameof(DirName)}"" NVARCHAR({MAXLENGTH_FileName}) NOT NULL CHECK(length(trim(""{nameof(DirName)}""))=length(""{nameof(DirName)}"") AND length(""{nameof(DirName)}"")>0) UNIQUE COLLATE NOCASE,
     ""{nameof(Priority)}"" UNSIGNED SMALLINT NOT NULL DEFAULT {DEFAULTVALUE_Priority},
     ""{nameof(Description)}"" TEXT NOT NULL CHECK(length(trim(""{nameof(Description)}""))=length(""{nameof(Description)}"")),
     ""{nameof(CreatedOn)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},
