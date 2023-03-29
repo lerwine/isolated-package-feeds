@@ -1,17 +1,42 @@
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Text.RegularExpressions;
 
 namespace CdnGetter;
 
 public static class ValueConverters
 {
+    /// <summary>
+    /// Defines conversions to and from <c>string</c> and <see cref="JsonNode" /> types.
+    /// </summary>
     public static readonly ValueConverter<JsonNode?, string?> JsonValueConverter = new(
         v => (v == null) ? null : v.ToJsonString(JsonSerializerOptions.Default),
         s => s.ConvertToJsonNode()
     );
 
+    private static readonly Regex PathEncodeRegex = new(@"([^!\$&'\(\)\*\+,;=@\[\]/%\\]+|\\|%(?![a-fA-F\d]{2}))+", RegexOptions.Compiled);
+    private static string EncodeUrlPath(string uriString)
+    {
+        return PathEncodeRegex.IsMatch(uriString) ? PathEncodeRegex.Replace(uriString, match => (match.Length == 1 && match.Value[0] == '\\') ? "/" : Uri.EscapeDataString(match.Value)) : uriString;
+    }
+    
+    private static readonly Regex QueryEncodeRegex = new(@"([^!\$&'\(\)\*\+,;=\?@\[\]/%]+|%(?![a-fA-F\d]{2}))+", RegexOptions.Compiled);
+    private static string EncodeUrlQuery(string uriString)
+    {
+        return QueryEncodeRegex.IsMatch(uriString) ? QueryEncodeRegex.Replace(uriString, match => Uri.EscapeDataString(match.Value)) : uriString;
+    }
+    
+    /// <summary>
+    /// Creates a <see cref="Uri" /> from a string value.
+    /// </summary>
+    /// <param name="uriString">The input <c>string</c> value.</param>
+    /// <returns>An <see cref="UriKind.Absolute" /> or <see cref="UriKind.Relative" /> <see cref="Uri" /> or <see langword="null" /> if <paramref name="uriString" /> was <see langword="null" /.</returns>
+    /// <remarks>This will first attempt to parse <paramref name="uriString" /> as an <see cref="UriKind.Absolute" />. If it could not be parsed as either an <see cref="UriKind.Absolute" /> or <see cref="UriKind.Relative" /> <see cref="Uri" />,
+    /// then <paramref name="uriString" /> will be treated as a <see cref="UriKind.Relative" /> <see cref="Uri" />. The path component will be URI encoded, and the query and fragment components will be encoded separately.
     public static Uri? ForceCreateUri(string? uriString)
     {
         if (uriString is null)
@@ -22,6 +47,7 @@ public static class ValueConverters
             return new Uri(uriString, UriKind.Relative);
         try
         {
+            
             int i = uriString.IndexOf('#');
             UriBuilder ub = new() { Host = null, Scheme = null };
             if (i > 0)
@@ -30,19 +56,19 @@ public static class ValueConverters
                 string path = uriString[..i];
                 if ((i = path.IndexOf('?')) > 0)
                 {
-                    ub.Query = path[(i + 1)..];
-                    ub.Path = path[..i];
+                    ub.Query = EncodeUrlQuery(path[(i + 1)..]);
+                    ub.Path = EncodeUrlPath(path[..i]);
                 }
                 else
-                    ub.Path = path;
+                    ub.Path = EncodeUrlPath(path);
             }
             else if ((i = uriString.IndexOf('?')) > 0)
             {
-                ub.Query = uriString[(i + 1)..];
-                ub.Path = uriString[..i];
+                ub.Query = EncodeUrlQuery(uriString[(i + 1)..]);
+                ub.Path = EncodeUrlPath(uriString[..i]);
             }
             else
-                ub.Path = uriString;
+                ub.Path = EncodeUrlPath(uriString);
             return new Uri(ub.ToString(), UriKind.Relative);
         }
         catch { return new Uri(Uri.EscapeDataString(uriString), UriKind.Relative); }
