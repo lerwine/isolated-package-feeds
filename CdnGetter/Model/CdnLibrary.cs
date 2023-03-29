@@ -101,7 +101,7 @@ public class CdnLibrary
         _ = builder.HasKey(nameof(LocalId), nameof(CdnId));
         _ = builder.Property(nameof(LocalId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(CdnId)).UseCollation(COLLATION_NOCASE);
-        _ = builder.Property(nameof(ProviderData)).HasConversion(ExtensionMethods.JsonValueConverter);
+        _ = builder.Property(nameof(ProviderData)).HasConversion(ValueConverters.JsonValueConverter);
         _ = builder.Property(nameof(CreatedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
         _ = builder.Property(nameof(ModifiedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
         _ = builder.HasOne(f => f.Cdn).WithMany(v => v.Libraries).HasForeignKey(f => f.CdnId).IsRequired().OnDelete(DeleteBehavior.Restrict);
