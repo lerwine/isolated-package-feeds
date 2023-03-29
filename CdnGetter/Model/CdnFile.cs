@@ -2,7 +2,7 @@ using System.Collections.ObjectModel;
 using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using static CdnGetter.SqlDefinitions;
+using static CdnGetter.SqlExtensions;
 
 namespace CdnGetter.Model;
 
@@ -102,7 +102,6 @@ public class CdnFile
         set => _fileName = value.ToTrimmedOrNullIfEmpty();
     }
 
-
     private byte[]? _data;
     /// <summary>
     /// The library file content override or <see langword="null" /> for no override.
@@ -129,7 +128,6 @@ public class CdnFile
     /// </summary>
     public DateTime CreatedOn { get; set; } = DateTime.Now;
 
-
     /// <summary>
     /// The date and time that the record was last modified.
     /// </summary>
@@ -154,7 +152,7 @@ public class CdnFile
         _ = builder.Property(nameof(SRI)).HasMaxLength(MAXLENGTH_SRI).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(Encoding)).HasMaxLength(MAXLENGTH_Encoding);
         _ = builder.Property(nameof(FileName)).HasMaxLength(MAX_LENGTH_FileName);
-        _ = builder.Property(nameof(ProviderData)).HasConversion(ExtensionMethods.JsonValueConverter);
+        _ = builder.Property(nameof(ProviderData)).HasConversion(ValueConverters.JsonValueConverter);
         _ = builder.Property(nameof(CreatedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
         _ = builder.Property(nameof(ModifiedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
         _ = builder.HasOne(f => f.Local).WithMany(f => f.Upstream).HasForeignKey(nameof(LocalId)).IsRequired().OnDelete(DeleteBehavior.Restrict);

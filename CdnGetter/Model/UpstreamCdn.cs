@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using static CdnGetter.SqlDefinitions;
+using static CdnGetter.SqlExtensions;
 
 namespace CdnGetter.Model;
 

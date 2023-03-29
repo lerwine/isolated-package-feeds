@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using static CdnGetter.SqlDefinitions;
+using static CdnGetter.SqlExtensions;
 
 namespace CdnGetter.Model;
 

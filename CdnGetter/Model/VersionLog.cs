@@ -1,7 +1,7 @@
 using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using static CdnGetter.SqlDefinitions;
+using static CdnGetter.SqlExtensions;
 
 namespace CdnGetter.Model;
 
@@ -113,10 +113,10 @@ public class VersionLog : ICdnLog
         _ = builder.Property(nameof(LibraryId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(UpstreamCdnId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(c => c.Message).IsRequired();
-        _ = builder.Property(nameof(Action)).HasConversion(ExtensionMethods.LibraryActionConverter);
-        _ = builder.Property(nameof(Level)).HasConversion(ExtensionMethods.ErrorLevelConverter);
-        _ = builder.Property(nameof(Url)).HasConversion(ExtensionMethods.UriConverter).HasMaxLength(MAX_LENGTH_Url);
-        _ = builder.Property(nameof(ProviderData)).HasConversion(ExtensionMethods.JsonValueConverter);
+        _ = builder.Property(nameof(Action)).HasConversion(ValueConverters.LibraryActionConverter);
+        _ = builder.Property(nameof(Level)).HasConversion(ValueConverters.ErrorLevelConverter);
+        _ = builder.Property(nameof(Url)).HasConversion(ValueConverters.UriConverter).HasMaxLength(MAX_LENGTH_Url);
+        _ = builder.Property(nameof(ProviderData)).HasConversion(ValueConverters.JsonValueConverter);
         _ = builder.Property(nameof(Timestamp)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
         _ = builder.HasOne(f => f.Version).WithMany(f => f.Logs).HasForeignKey(nameof(VersionId), nameof(LibraryId), nameof(UpstreamCdnId)).IsRequired().OnDelete(DeleteBehavior.Restrict);
     }

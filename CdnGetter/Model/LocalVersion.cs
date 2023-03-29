@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using static CdnGetter.SqlDefinitions;
+using static CdnGetter.SqlExtensions;
 
 namespace CdnGetter.Model;
 
@@ -35,7 +35,6 @@ public class LocalVersion
     /// The date and time that the record was created.
     /// </summary>
     public DateTime CreatedOn { get; set; } = DateTime.Now;
-
 
     /// <summary>
     /// The date and time that the record was last modified.

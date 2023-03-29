@@ -2,7 +2,7 @@ using System.Collections.ObjectModel;
 using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using static CdnGetter.SqlDefinitions;
+using static CdnGetter.SqlExtensions;
 
 namespace CdnGetter.Model;
 
@@ -78,7 +78,6 @@ public class CdnVersion
     /// </summary>
     public DateTime CreatedOn { get; set; } = DateTime.Now;
 
-
     /// <summary>
     /// The date and time that the record was last modified.
     /// </summary>
@@ -104,7 +103,7 @@ public class CdnVersion
         _ = builder.Property(nameof(LocalId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(LibraryId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(UpstreamCdnId)).UseCollation(COLLATION_NOCASE);
-        _ = builder.Property(nameof(ProviderData)).HasConversion(ExtensionMethods.JsonValueConverter);
+        _ = builder.Property(nameof(ProviderData)).HasConversion(ValueConverters.JsonValueConverter);
         _ = builder.Property(nameof(CreatedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
         _ = builder.Property(nameof(ModifiedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
         _ = builder.HasOne(f => f.Local).WithMany(f => f.Upstream).HasForeignKey(nameof(LocalId)).IsRequired().OnDelete(DeleteBehavior.Restrict);

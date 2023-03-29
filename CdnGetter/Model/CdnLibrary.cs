@@ -1,9 +1,8 @@
 using System.Collections.ObjectModel;
 using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using static CdnGetter.SqlDefinitions;
+using static CdnGetter.SqlExtensions;
 
 namespace CdnGetter.Model;
 
@@ -76,7 +75,6 @@ public class CdnLibrary
     /// </summary>
     public DateTime CreatedOn { get; set; } = DateTime.Now;
 
-
     /// <summary>
     /// The date and time that the record was last modified.
     /// </summary>
@@ -101,7 +99,7 @@ public class CdnLibrary
         _ = builder.HasKey(nameof(LocalId), nameof(CdnId));
         _ = builder.Property(nameof(LocalId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(CdnId)).UseCollation(COLLATION_NOCASE);
-        _ = builder.Property(nameof(ProviderData)).HasConversion(ExtensionMethods.JsonValueConverter);
+        _ = builder.Property(nameof(ProviderData)).HasConversion(ValueConverters.JsonValueConverter);
         _ = builder.Property(nameof(CreatedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
         _ = builder.Property(nameof(ModifiedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
         _ = builder.HasOne(f => f.Cdn).WithMany(v => v.Libraries).HasForeignKey(f => f.CdnId).IsRequired().OnDelete(DeleteBehavior.Restrict);
