@@ -1,3 +1,6 @@
+using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
 
 namespace CdnGetter;
@@ -105,12 +108,53 @@ internal static class LoggerMessages
     public const int EVENT_ID_RequiredAltDependentParameter = 0x0011;
     public static readonly EventId RequiredAltDependentParameter = new(EVENT_ID_RequiredAltDependentParameter, nameof(RequiredAltDependentParameter));
     private static readonly Action<ILogger, string, string, string, Exception?> _requiredAltDependentParameter = LoggerMessage.Define<string, string, string>(LogLevel.Warning,
-        RequiredDependentParameter1, "The --{DependentSwitch1} or --{DependentSwitch2} switch is required when the --{DependentSwitch} switch is present.");
+        RequiredAltDependentParameter, "The --{DependentSwitch1} or --{DependentSwitch2} switch is required when the --{DependentSwitch} switch is present.");
     public static void LogRequiredAltDependentParameter(this ILogger logger, string dependentSwitch1, string dependentSwitch2, string switchName) => _requiredAltDependentParameter(logger, dependentSwitch1, dependentSwitch2, switchName, null);
 
     public const int EVENT_ID_InvalidParameterValue = 0x0012;
     public static readonly EventId InvalidParameterValue = new(EVENT_ID_InvalidParameterValue, nameof(InvalidParameterValue));
     private static readonly Action<ILogger, string, string, Exception?> _invalidParameterValue = LoggerMessage.Define<string, string>(LogLevel.Warning,
-        RequiredDependentParameter1, "Invalid value for the --{SwitchName} switch ({Value}).");
+        InvalidParameterValue, "Invalid value for the --{SwitchName} switch ({Value}).");
     public static void LogInvalidParameterValue(this ILogger logger, string switchName, string value) => _invalidParameterValue(logger, switchName, value, null);
+
+    public const int EVENT_ID_ValidatingEntity = 0x0013;
+    public static readonly EventId ValidatingEntity = new(EVENT_ID_ValidatingEntity, nameof(ValidatingEntity));
+    private static readonly Action<ILogger, EntityState, string, object, Exception?> _validatingEntity = LoggerMessage.Define<EntityState, string, object>(LogLevel.Trace,
+        ValidatingEntity, "Validating {Mode} {Name}. {Entity}");
+    public static void LogValidatingEntity(this ILogger logger, EntityState state, IEntityType metadata, object entity) => _validatingEntity(logger, state,
+        metadata.DisplayName().ToTrimmedOrDefaultIfEmpty(() => metadata.Name.ToTrimmedOrDefaultIfEmpty(() => entity.GetType().FullName!)), entity, null);
+
+    public const int EVENT_ID_ValidationFailed = 0x0014;
+    public static readonly EventId ValidationFailed = new(EVENT_ID_ValidationFailed, nameof(ValidationFailed));
+    private static readonly Action<ILogger, string, string, object, Exception?> _validationFailed1 = LoggerMessage.Define<string, string, object>(LogLevel.Error,
+        ValidationFailed, "Error Validating {Name} ({ValidationMessage}) {Entity}");
+    private static readonly Action<ILogger, string, string, string, object, Exception?> _validationFailed2 = LoggerMessage.Define<string, string, string, object>(LogLevel.Error,
+        ValidationFailed, "Error Validating {Name} [{Properties}] ({ValidationMessage}) {Entity}");
+    public static void LogValidationFailed(this ILogger logger, ValidationException validationException, IEntityType metadata, object entity)
+    {
+        IEnumerable<string> memberNames = validationException.ValidationResult.MemberNames.TrimmedNotEmptyValues();
+        string name = metadata.DisplayName().ToTrimmedOrDefaultIfEmpty(() => metadata.Name.ToTrimmedOrDefaultIfEmpty(() => entity.GetType().FullName!));
+        string message = validationException.ValidationResult.ErrorMessage.ToTrimmedOrDefaultIfEmpty(() => validationException.Message.ToTrimmedOrEmptyIfNull());
+        if (message.Length == 0)
+            _validationFailed1(logger, name, memberNames.Any() ? $"Validation error on {string.Join(", ", memberNames)}" : "Validation Failure", entity, validationException);
+        else if (memberNames.Any())
+            _validationFailed1(logger, name, message, entity, validationException);
+        else
+            _validationFailed2(logger, name, string.Join(", ", memberNames), message, entity, validationException);
+    }
+
+    public const int EVENT_ID_ValidationSucceeded = 0x0015;
+    public static readonly EventId ValidationSucceeded = new(EVENT_ID_ValidationSucceeded, nameof(ValidationSucceeded));
+    private static readonly Action<ILogger, EntityState, string, object, Exception?> _ValidationSucceeded = LoggerMessage.Define<EntityState, string, object>(LogLevel.Trace,
+        ValidationSucceeded, "Validation for {Mode} {Name} succeeded. {Entity}");
+    public static void LogValidationSucceeded(this ILogger logger, EntityState state, IEntityType metadata, object entity) => _ValidationSucceeded(logger, state,
+        metadata.DisplayName().ToTrimmedOrDefaultIfEmpty(() => metadata.Name.ToTrimmedOrDefaultIfEmpty(() => entity.GetType().FullName!)), entity, null);
+
+    public const int EVENT_ID_DbSaveChangeCompleted = 0x0016;
+    public static readonly EventId DbSaveChangeCompleted = new(EVENT_ID_DbSaveChangeCompleted, nameof(DbSaveChangeCompleted));
+    private static readonly Action<ILogger, string, int, Exception?> _dbSaveChangeCompleted = LoggerMessage.Define<string, int>(LogLevel.Trace,
+        DbSaveChangeCompleted, "{MethodSignature} completed. Returning {ReturnValue}.");
+    public static void LogDbSaveChangeCompleted(this ILogger logger, bool isAsync, bool? acceptAllChangesOnSuccess, int returnValue) => _dbSaveChangeCompleted(logger,
+        isAsync ? (acceptAllChangesOnSuccess.HasValue ? $"SaveChangesAsync({acceptAllChangesOnSuccess.Value})" : "SaveChangesAsync()") :
+        acceptAllChangesOnSuccess.HasValue ? $"SaveChangesAsync({acceptAllChangesOnSuccess.Value})" : "SaveChangesAsync()", returnValue, null);
 }

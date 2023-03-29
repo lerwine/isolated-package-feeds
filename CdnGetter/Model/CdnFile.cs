@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -9,7 +10,7 @@ namespace CdnGetter.Model;
 /// <summary>
 /// Represents an individual file in a specific version of an upstream content library.
 /// </summary>
-public class CdnFile
+public class CdnFile : ModificationTrackingModelBase
 {
     private readonly object _syncRoot = new();
 
@@ -124,19 +125,31 @@ public class CdnFile
     public JsonNode? ProviderData { get; set; }
 
     /// <summary>
-    /// The date and time that the record was created.
-    /// </summary>
-    public DateTime CreatedOn { get; set; } = DateTime.Now;
-
-    /// <summary>
-    /// The date and time that the record was last modified.
-    /// </summary>
-    public DateTime ModifiedOn { get; set; } = DateTime.Now;
-    
-    /// <summary>
     /// CDN acess logs for this content library file.
     /// </summary>
     public Collection<FileLog> Logs { get; set; } = new();
+
+    protected override void Validate(ValidationContext validationContext, EntityState state, List<ValidationResult> results)
+    {
+        if (FileName is null)
+        {
+            if (SRI is not null)
+                results.Add(new ValidationResult("{nameof(SRI)} must be null if {nameof(FileName)} is null", new[] { nameof(SRI) }));
+            if (Encoding is not null)
+                results.Add(new ValidationResult("{nameof(Encoding)} must be null if {nameof(FileName)} is null", new[] { nameof(Encoding) }));
+        }
+        else
+        {
+            Validator.TryValidateProperty(FileName, new ValidationContext(this, null, null) { MemberName = nameof(FileName) }, results);
+            if (SRI is null)
+                results.Add(new ValidationResult("{nameof(SRI)} cannot be null if {nameof(FileName)} is not null", new[] { nameof(SRI) }));
+            else
+                Validator.TryValidateProperty(SRI, new ValidationContext(this, null, null) { MemberName = nameof(SRI) }, results);
+            if (Encoding is not null)
+                Validator.TryValidateProperty(Encoding, new ValidationContext(this, null, null) { MemberName = nameof(Encoding) }, results);
+        }
+        base.Validate(validationContext, state, results);
+    }
 
     /// <summary>
     /// Performs configuration of the <see cref="CdnFile" /> entity type in the model for the <see cref="Services.ContentDb" />.
@@ -153,8 +166,7 @@ public class CdnFile
         _ = builder.Property(nameof(Encoding)).HasMaxLength(MAXLENGTH_Encoding);
         _ = builder.Property(nameof(FileName)).HasMaxLength(MAX_LENGTH_FileName);
         _ = builder.Property(nameof(ProviderData)).HasConversion(ValueConverters.JsonValueConverter);
-        _ = builder.Property(nameof(CreatedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
-        _ = builder.Property(nameof(ModifiedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
+        ModificationTrackingModelBase.OnBuildModificationTrackingModel(builder);
         _ = builder.HasOne(f => f.Local).WithMany(f => f.Upstream).HasForeignKey(nameof(LocalId)).IsRequired().OnDelete(DeleteBehavior.Restrict);
         _ = builder.HasOne(f => f.Version).WithMany(v => v.Files).HasForeignKey(nameof(VersionId), nameof(LibraryId), nameof(UpstreamCdnId)).HasPrincipalKey(nameof(CdnVersion.LocalId), nameof(CdnVersion.LibraryId), nameof(CdnVersion.UpstreamCdnId)).IsRequired().OnDelete(DeleteBehavior.Restrict);
     }

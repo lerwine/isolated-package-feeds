@@ -8,6 +8,13 @@ public static class ExtensionMethods
     public static readonly Regex NonNormalizedWhiteSpaceRegex = new(@"( |(?! ))[\r\n\s]+", RegexOptions.Compiled);
 
     public static readonly Regex LineBreakRegex = new(@"\r?\n|\n", RegexOptions.Compiled);
+    
+    public static DateTime AsLocalDateTime(this DateTime value) => value.Kind switch
+    {
+        DateTimeKind.Unspecified => value,
+        DateTimeKind.Utc => value,
+        _ => value
+    };
 
     public static Guid EnsureGuid(this ref Guid? target, object syncRoot)
     {

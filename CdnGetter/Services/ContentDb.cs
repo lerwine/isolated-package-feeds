@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using CdnGetter.Model;
 using Microsoft.Extensions.Logging;
 using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System.ComponentModel.DataAnnotations;
 
 namespace CdnGetter.Services;
 
@@ -115,6 +117,88 @@ public class ContentDb : DbContext
     /// </summary>
     public DbSet<FileLog> FileLogs { get; set; } = null!;
 
+    private async Task OnBeforeSaveAsync(CancellationToken cancellationToken = default)
+{
+        if (cancellationToken.IsCancellationRequested)
+            return;
+        using IDisposable? scope = _logger.BeginScope(nameof(OnBeforeSaveAsync));
+        foreach (EntityEntry e in ChangeTracker.Entries())
+        {
+            if (cancellationToken.IsCancellationRequested)
+                break;
+            if (e.Entity is IValidatableObject entity)
+                switch (e.State)
+                {
+                    case EntityState.Added:
+                    case EntityState.Modified:
+                        await ValidateEntryAsync(e, entity);
+                        break;
+                }
+        }
+    }
+
+    internal async Task ValidateEntryAsync(EntityEntry e, IValidatableObject entity)
+    {
+        DbContextServiceProvider serviceProvider = new(this, e);
+        ValidationContext validationContext = new(entity, serviceProvider, null);
+        if (entity is INotifyValidatingAsync notifyValidatingAsync)
+            await notifyValidatingAsync.OnValidatingAsync(validationContext, e.State, serviceProvider);
+        _logger.LogValidatingEntity(e.State, e.Metadata, entity);
+        try { Validator.ValidateObject(entity, validationContext, true); }
+        catch (ValidationException validationException)
+        {
+            _logger.LogValidationFailed(validationException, e.Metadata, entity);
+            throw;
+        }
+        _logger.LogValidationSucceeded(e.State, e.Metadata, entity);
+    }
+
+    public override int SaveChanges()
+    {
+        using (_logger.BeginScope("{MethodName}()", nameof(SaveChanges)))
+        {
+            OnBeforeSaveAsync().Wait();
+            int returnValue = base.SaveChanges();
+            _logger.LogDbSaveChangeCompleted(false, null, returnValue);
+            return returnValue;
+        }
+    }
+
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        using (_logger.BeginScope($"{{MethodName}}({nameof(acceptAllChangesOnSuccess)}: {{{nameof(acceptAllChangesOnSuccess)}}})", nameof(SaveChanges),
+            acceptAllChangesOnSuccess))
+        {
+            OnBeforeSaveAsync().Wait();;
+            int returnValue = base.SaveChanges(acceptAllChangesOnSuccess);
+            _logger.LogDbSaveChangeCompleted(false, acceptAllChangesOnSuccess, returnValue);
+            return returnValue;
+        }
+    }
+
+    public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        using (_logger.BeginScope($"{{MethodName}}({nameof(acceptAllChangesOnSuccess)}: {{{nameof(acceptAllChangesOnSuccess)}}})", nameof(SaveChangesAsync),
+            acceptAllChangesOnSuccess))
+        {
+            await OnBeforeSaveAsync(cancellationToken);
+            int returnValue = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+            _logger.LogDbSaveChangeCompleted(true, acceptAllChangesOnSuccess, returnValue);
+            return returnValue;
+        }
+    }
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        using (_logger.BeginScope("{MethodName}()", nameof(SaveChangesAsync)))
+        {
+            await OnBeforeSaveAsync(cancellationToken);
+            int returnValue = await base.SaveChangesAsync(cancellationToken);
+            _logger.LogDbSaveChangeCompleted(true, null, returnValue);
+            return returnValue;
+        }
+    }
+
     /// <summary>
     /// Configures the data model.
     /// </summary>
@@ -133,5 +217,31 @@ public class ContentDb : DbContext
             .Entity<LocalFile>(LocalFile.OnBuildEntity)
             .Entity<CdnFile>(CdnFile.OnBuildEntity)
             .Entity<FileLog>(FileLog.OnBuildEntity);
+    }
+
+    internal class DbContextServiceProvider : IServiceProvider
+    {
+        private readonly object _entity;
+        private readonly ContentDb _dbContext;
+
+        internal DbContextServiceProvider(ContentDb dbContext, object entity)
+        {
+            _dbContext = dbContext;
+            _entity = entity;
+        }
+
+        public object? GetService(Type serviceType)
+        {
+            if (serviceType is not null)
+            {
+                if (serviceType.IsInstanceOfType(_dbContext))
+                    return _dbContext;
+                if (serviceType.IsInstanceOfType(_entity))
+                    return _entity;
+                if (serviceType.IsInstanceOfType(_dbContext._logger))
+                    return _dbContext._logger;
+            }
+            return null;
+        }
     }
 }
