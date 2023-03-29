@@ -8,7 +8,7 @@ public static class SqlExtensions
 {
     public const string COLLATION_NOCASE = "NOCASE";
     public const string DEFAULT_SQL_NOW = "(datetime('now','localtime'))";
-    public const int MAX_LENGTH_Url = 4096;
+    public const int MAXLENGTH_Url = 4096;
     public const int MAXLENGTH_FileName = 256;
     public const int MAXLENGTH_SRI = 256;
     public const int MAXLENGTH_ContentType = 512;

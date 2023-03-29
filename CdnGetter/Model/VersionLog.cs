@@ -71,7 +71,7 @@ public class VersionLog : CdnLogBase
     ""{nameof(Action)}"" UNSIGNED TINYINT NOT NULL DEFAULT 0,
     ""{nameof(Level)}"" UNSIGNED TINYINT NOT NULL DEFAULT 0,
     ""{nameof(EventId)}"" INTEGER DEFAULT NULL,
-    ""{nameof(Url)}"" NVARCHAR({MAX_LENGTH_Url}) DEFAULT NULL,
+    ""{nameof(Url)}"" NVARCHAR({MAXLENGTH_Url}) DEFAULT NULL,
     ""{nameof(ProviderData)}"" TEXT DEFAULT NULL,
     ""{nameof(Timestamp)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},
     ""{nameof(VersionId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,

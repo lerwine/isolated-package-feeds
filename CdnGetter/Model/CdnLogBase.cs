@@ -82,8 +82,8 @@ public abstract class CdnLogBase : ICdnLog, IValidatableObject
                 Timestamp = Timestamp.AsLocalDateTime();
                 break;
         }
-        if (Url is not null && (Url.IsAbsoluteUri ? Url.AbsoluteUri : Url.OriginalString).Length > MAX_LENGTH_Url)
-            results.Add(new ValidationResult($"{nameof(Url)} cannot be greater than {MAX_LENGTH_Url} characters", new[] { nameof(Version) }));
+        if (Url is not null && (Url.IsAbsoluteUri ? Url.AbsoluteUri : Url.OriginalString).Length > MAXLENGTH_Url)
+            results.Add(new ValidationResult($"{nameof(Url)} cannot be greater than {MAXLENGTH_Url} characters", new[] { nameof(Version) }));
     }
     
     protected static void OnBuildCdnLogModel<TEntity>(EntityTypeBuilder<TEntity> builder)
@@ -94,7 +94,7 @@ public abstract class CdnLogBase : ICdnLog, IValidatableObject
         _ = builder.Property(c => c.Message).IsRequired();
         _ = builder.Property(nameof(Action)).HasConversion(ValueConverters.LibraryActionConverter);
         _ = builder.Property(nameof(Level)).HasConversion(ValueConverters.ErrorLevelConverter);
-        _ = builder.Property(nameof(Url)).HasConversion(ValueConverters.UriConverter).HasMaxLength(MAX_LENGTH_Url);
+        _ = builder.Property(nameof(Url)).HasConversion(ValueConverters.UriConverter).HasMaxLength(MAXLENGTH_Url);
         _ = builder.Property(nameof(ProviderData)).HasConversion(ValueConverters.JsonValueConverter);
         _ = builder.Property(nameof(Timestamp)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
     }
