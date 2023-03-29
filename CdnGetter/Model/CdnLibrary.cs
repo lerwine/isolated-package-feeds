@@ -20,8 +20,8 @@ public class CdnLibrary
     /// </summary>
     public Guid LocalId
     {
-        get => _upstreamCdnId;
-        set => value.SetNavigation(_syncRoot, p => p.Id, ref _upstreamCdnId, ref _upstreamCdn);
+        get => _cdnId;
+        set => value.SetNavigation(_syncRoot, p => p.Id, ref _cdnId, ref _cdn);
     }
 
     private LocalLibrary? _local;
@@ -34,24 +34,24 @@ public class CdnLibrary
         set => value.SetNavigation(_syncRoot, p => p.Id, ref _localId, ref _local);
     }
 
-    private Guid _upstreamCdnId;
+    private Guid _cdnId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="UpstreamCdn" />.
+    /// The unique identifier of the parent <see cref="Cdn" />.
     /// </summary>
-    public Guid UpstreamCdnId
+    public Guid CdnId
     {
-        get => _upstreamCdnId;
-        set => value.SetNavigation(_syncRoot, p => p.Id, ref _upstreamCdnId, ref _upstreamCdn);
+        get => _cdnId;
+        set => value.SetNavigation(_syncRoot, p => p.Id, ref _cdnId, ref _cdn);
     }
 
-    private UpstreamCdn? _upstreamCdn;
+    private UpstreamCdn? _cdn;
     /// <summary>
     /// The upstream service for this content library.
     /// </summary>
-    public UpstreamCdn? UpstreamCdn
+    public UpstreamCdn? Cdn
     {
-        get => _upstreamCdn;
-        set => value.SetNavigation(_syncRoot, p => p.Id, ref _upstreamCdnId, ref _upstreamCdn);
+        get => _cdn;
+        set => value.SetNavigation(_syncRoot, p => p.Id, ref _cdnId, ref _cdn);
     }
     
     /// <summary>
@@ -67,7 +67,7 @@ public class CdnLibrary
     }
 
     /// <summary>
-    /// Optional provider-specific data for <see cref="UpstreamCdn" />.
+    /// Optional provider-specific data for <see cref="Cdn" />.
     /// </summary>
     public JsonNode? ProviderData { get; set; }
 
@@ -98,28 +98,28 @@ public class CdnLibrary
     /// <param name="builder">The builder being used to configure the current entity type.</param>
     internal static void OnBuildEntity(EntityTypeBuilder<CdnLibrary> builder)
     {
-        _ = builder.HasKey(nameof(LocalId), nameof(UpstreamCdnId));
+        _ = builder.HasKey(nameof(LocalId), nameof(CdnId));
         _ = builder.Property(nameof(LocalId)).UseCollation(COLLATION_NOCASE);
-        _ = builder.Property(nameof(UpstreamCdnId)).UseCollation(COLLATION_NOCASE);
+        _ = builder.Property(nameof(CdnId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(ProviderData)).HasConversion(ExtensionMethods.JsonValueConverter);
         _ = builder.Property(nameof(CreatedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
         _ = builder.Property(nameof(ModifiedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
-        _ = builder.HasOne(f => f.UpstreamCdn).WithMany(v => v.Libraries).HasForeignKey(f => f.UpstreamCdnId).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
-        _ = builder.HasOne(r => r.Local).WithMany(l => l.Upstream).HasForeignKey(r => r.LocalId).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
+        _ = builder.HasOne(f => f.Cdn).WithMany(v => v.Libraries).HasForeignKey(f => f.CdnId).IsRequired().OnDelete(DeleteBehavior.Restrict);
+        _ = builder.HasOne(r => r.Local).WithMany(l => l.Upstream).HasForeignKey(r => r.LocalId).IsRequired().OnDelete(DeleteBehavior.Restrict);
     }
 
     internal static void CreateTable(Action<string> executeNonQuery)
     {
         executeNonQuery(@$"CREATE TABLE ""{nameof(Services.ContentDb.CdnLibraries)}"" (
     ""{nameof(LocalId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
-    ""{nameof(UpstreamCdnId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
+    ""{nameof(CdnId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
     ""{nameof(Priority)}"" UNSIGNED SMALLINT DEFAULT NULL,
     ""{nameof(Description)}"" TEXT DEFAULT NULL CHECK(""{nameof(Description)}"" IS NULL OR length(trim(""{nameof(Description)}""))=length(""{nameof(Description)}"")),
     ""{nameof(ProviderData)}"" TEXT DEFAULT NULL,
     ""{nameof(CreatedOn)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},
     ""{nameof(ModifiedOn)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},
-    PRIMARY KEY(""{nameof(LocalId)}"",""{nameof(UpstreamCdnId)}""),
-    FOREIGN KEY(""{nameof(UpstreamCdnId)}"") REFERENCES ""{nameof(Services.ContentDb.UpstreamCdns)}""(""{nameof(Model.UpstreamCdn.Id)}"") ON DELETE RESTRICT,
+    PRIMARY KEY(""{nameof(LocalId)}"",""{nameof(CdnId)}""),
+    FOREIGN KEY(""{nameof(CdnId)}"") REFERENCES ""{nameof(Services.ContentDb.UpstreamCdns)}""(""{nameof(Model.UpstreamCdn.Id)}"") ON DELETE RESTRICT,
     FOREIGN KEY(""{nameof(LocalId)}"") REFERENCES ""{nameof(Services.ContentDb.LocalLibraries)}""(""{nameof(LocalLibrary.Id)}"") ON DELETE RESTRICT,
     CHECK(""{nameof(CreatedOn)}""<=""{nameof(ModifiedOn)}"")
 )");
@@ -128,7 +128,7 @@ public class CdnLibrary
     internal async Task ClearVersionsAsync(Services.ContentDb dbContext, CancellationToken cancellationToken)
     {
         Guid id = _localId;
-        Guid upstreamCdnId = _upstreamCdnId;
+        Guid upstreamCdnId = _cdnId;
         foreach (CdnVersion toRemove in await dbContext.CdnVersions.Where(l => l.LibraryId == id && l.UpstreamCdnId == upstreamCdnId).ToArrayAsync(cancellationToken))
         {
             await toRemove.RemoveAsync(dbContext, cancellationToken);

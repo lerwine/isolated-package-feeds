@@ -172,7 +172,7 @@ public abstract class ContentGetterService
         {
             if (cancellationToken.IsCancellationRequested)
                 return result;
-            CdnLibrary? library = await this.DbContext.CdnLibraries.Include(r => r.Local).FirstOrDefaultAsync(l => l.Local!.Name == name && l.UpstreamCdnId == upstreamCdnId, cancellationToken);
+            CdnLibrary? library = await this.DbContext.CdnLibraries.Include(r => r.Local).FirstOrDefaultAsync(l => l.Local!.Name == name && l.CdnId == upstreamCdnId, cancellationToken);
             if (library is null)
                 GetLogger().LogCdnLibraryNotFound(name, cdnName);
             else
@@ -185,6 +185,6 @@ public abstract class ContentGetterService
     {
         if (cancellationToken.IsCancellationRequested)
             return null;
-        return await this.DbContext.CdnLibraries.Include(r => r.Local).FirstOrDefaultAsync(l => l.Local!.Name == libraryName && l.UpstreamCdnId == upstreamCdnId, cancellationToken);
+        return await this.DbContext.CdnLibraries.Include(r => r.Local).FirstOrDefaultAsync(l => l.Local!.Name == libraryName && l.CdnId == upstreamCdnId, cancellationToken);
     }
 }

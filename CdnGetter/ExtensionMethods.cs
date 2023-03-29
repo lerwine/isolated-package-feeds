@@ -531,6 +531,142 @@ public static class ExtensionMethods
     }
 
     /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.UpstreamCdn" /> for the specified <see cref="Model.CdnLog" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.CdnLog" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.CdnLog.Cdn" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.UpstreamCdn" />.</returns>
+    public static async Task<Model.UpstreamCdn?> GetCdnAsync(this Model.CdnLog? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntityAsync(dbContext.CdnLogs, l => l.Cdn, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.UpstreamCdn" /> for the specified <see cref="Model.CdnLog" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.CdnLog" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnLog.Cdn" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.UpstreamCdn" />.</returns>
+    public static async Task<EntityEntry<Model.UpstreamCdn>?> GetCdnEntryAsync(this Model.CdnLog? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntryAsync(dbContext.CdnLogs, l => l.Cdn, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.UpstreamCdn" /> for the specified <see cref="Model.CdnLog" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnLog" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.CdnLog.Cdn" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.UpstreamCdn" />.</returns>
+    public static async Task<Model.UpstreamCdn?> GetCdnAsync(this EntityEntry<Model.CdnLog>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntityAsync(l => l.Cdn, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.UpstreamCdn" /> for the specified <see cref="Model.CdnLog" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnLog" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnLog.Cdn" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.UpstreamCdn" />.</returns>
+    public static async Task<EntityEntry<Model.UpstreamCdn>?> GetCdnEntryAsync(this EntityEntry<Model.CdnLog>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntryAsync(l => l.Cdn, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.UpstreamCdn" /> for the specified <see cref="Model.CdnVersion" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.CdnVersion" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the nested loaded <see cref="Model.CdnVersion.Library" /> <c>=&gt;</c> <see cref="Model.CdnLibrary.Cdn" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.UpstreamCdn" />.</returns>
+    public static async Task<Model.UpstreamCdn?> GetCdnAsync(this Model.CdnVersion? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await (await entity.GetLibraryEntryAsync(dbContext, cancellationToken)).GetCdnAsync(cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.UpstreamCdn" /> for the specified <see cref="Model.CdnVersion" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.CdnVersion" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnVersion.Library" /> <c>=&gt;</c> <see cref="Model.CdnLibrary.Cdn" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.UpstreamCdn" />.</returns>
+    public static async Task<EntityEntry<Model.UpstreamCdn>?> GetCdnEntryAsync(this Model.CdnVersion? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await (await entity.GetLibraryEntryAsync(dbContext, cancellationToken)).GetCdnEntryAsync(cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.UpstreamCdn" /> for the specified <see cref="Model.CdnVersion" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnVersion" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.CdnVersion.Library" /> <c>=&gt;</c> <see cref="Model.CdnLibrary.Cdn" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.UpstreamCdn" />.</returns>
+    public static async Task<Model.UpstreamCdn?> GetCdnAsync(this EntityEntry<Model.CdnVersion>? entry, CancellationToken cancellationToken) => await (await entry.GetLibraryEntryAsync(cancellationToken)).GetCdnAsync(cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.UpstreamCdn" /> for the specified <see cref="Model.CdnVersion" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnVersion" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnVersion.Library" /> <c>=&gt;</c> <see cref="Model.CdnLibrary.Cdn" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.UpstreamCdn" />.</returns>
+    public static async Task<EntityEntry<Model.UpstreamCdn>?> GetCdnEntryAsync(this EntityEntry<Model.CdnVersion>? entry, CancellationToken cancellationToken) => await (await entry.GetLibraryEntryAsync(cancellationToken)).GetCdnEntryAsync(cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.UpstreamCdn" /> for the specified <see cref="Model.CdnFile" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.CdnFile" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.CdnFile.Version" /> <c>=&gt;</c> <see cref="Model.CdnVersion.Library" /> <c>=&gt;</c> <see cref="Model.CdnLibrary.Cdn" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.UpstreamCdn" />.</returns>
+    public static async Task<Model.UpstreamCdn?> GetCdnAsync(this Model.CdnFile? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await (await entity.GetLibraryEntryAsync(dbContext, cancellationToken)).GetCdnAsync(cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.UpstreamCdn" /> for the specified <see cref="Model.CdnFile" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.CdnFile" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnFile.Version" /> <c>=&gt;</c> <see cref="Model.CdnVersion.Library" /> <c>=&gt;</c> <see cref="Model.CdnLibrary.Cdn" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.UpstreamCdn" />.</returns>
+    public static async Task<EntityEntry<Model.UpstreamCdn>?> GetCdnEntryAsync(this Model.CdnFile? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await (await entity.GetLibraryEntryAsync(dbContext, cancellationToken)).GetCdnEntryAsync(cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.UpstreamCdn" /> for the specified <see cref="Model.CdnFile" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnFile" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.CdnFile.Version" /> <c>=&gt;</c> <see cref="Model.CdnVersion.Library" /> <c>=&gt;</c> <see cref="Model.CdnLibrary.Cdn" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.UpstreamCdn" />.</returns>
+    public static async Task<Model.UpstreamCdn?> GetCdnAsync(this EntityEntry<Model.CdnFile>? entry, CancellationToken cancellationToken) => await (await entry.GetLibraryEntryAsync(cancellationToken)).GetCdnAsync(cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.UpstreamCdn" /> for the specified <see cref="Model.CdnFile" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnFile" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnFile.Version" /> <c>=&gt;</c> <see cref="Model.CdnVersion.Library" /> <c>=&gt;</c> <see cref="Model.CdnLibrary.Cdn" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.UpstreamCdn" />.</returns>
+    public static async Task<EntityEntry<Model.UpstreamCdn>?> GetCdnEntryAsync(this EntityEntry<Model.CdnFile>? entry, CancellationToken cancellationToken) => await (await entry.GetLibraryEntryAsync(cancellationToken)).GetCdnEntryAsync(cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.UpstreamCdn" /> for the specified <see cref="Model.CdnLibrary" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.CdnLibrary" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.CdnLibrary.Cdn" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.UpstreamCdn" />.</returns>
+    public static async Task<Model.UpstreamCdn?> GetCdnAsync(this Model.CdnLibrary? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntityAsync(dbContext.CdnLibraries, l => l.Cdn, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.UpstreamCdn" /> for the specified <see cref="Model.CdnLibrary" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.CdnLibrary" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnLibrary.Cdn" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.UpstreamCdn" />.</returns>
+    public static async Task<EntityEntry<Model.UpstreamCdn>?> GetCdnEntryAsync(this Model.CdnLibrary? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntryAsync(dbContext.CdnLibraries, l => l.Cdn, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.UpstreamCdn" /> for the specified <see cref="Model.CdnLibrary" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnLibrary" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.CdnLibrary.Cdn" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.UpstreamCdn" />.</returns>
+    public static async Task<Model.UpstreamCdn?> GetCdnAsync(this EntityEntry<Model.CdnLibrary>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntityAsync(l => l.Cdn, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.UpstreamCdn" /> for the specified <see cref="Model.CdnLibrary" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnLibrary" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnLibrary.Cdn" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.UpstreamCdn" />.</returns>
+    public static async Task<EntityEntry<Model.UpstreamCdn>?> GetCdnEntryAsync(this EntityEntry<Model.CdnLibrary>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntryAsync(l => l.Cdn, cancellationToken);
+
+    /// <summary>
     /// Asyncrhonously loads and gets the related <see cref="Model.LocalLibrary" /> for the specified <see cref="Model.CdnLibrary" /> entity.
     /// </summary>
     /// <param name="entity">The target <see cref="Model.CdnLibrary" /> entity.</param>
@@ -545,200 +681,92 @@ public static class ExtensionMethods
     /// <param name="entity">The target <see cref="Model.CdnLibrary" /> entity.</param>
     /// <param name="dbContext">The current database context object.</param>
     /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
-    /// <returns>The <see cref="EntityEntry{TEntity}" /> for the loaded <see cref="Model.CdnLibrary.Local" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalLibrary" />.</returns>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnLibrary.Local" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalLibrary" />.</returns>
     public static async Task<EntityEntry<Model.LocalLibrary>?> GetLocalEntryAsync(this Model.CdnLibrary? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntryAsync(dbContext.CdnLibraries, l => l.Local, cancellationToken);
 
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.LocalLibrary" /> for the specified <see cref="Model.CdnLibrary" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnLibrary" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.CdnLibrary.Local" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalLibrary" />.</returns>
     public static async Task<Model.LocalLibrary?> GetLocalAsync(this EntityEntry<Model.CdnLibrary>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntityAsync(l => l.Local, cancellationToken);
-    
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.LocalLibrary" /> for the specified <see cref="Model.CdnLibrary" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnLibrary" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnLibrary.Local" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalLibrary" />.</returns>
     public static async Task<EntityEntry<Model.LocalLibrary>?> GetLocalEntryAsync(this EntityEntry<Model.CdnLibrary>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntryAsync(l => l.Local, cancellationToken);
 
-    public static async Task<Model.LocalLibrary?> GetLocalLibraryAsync(this Model.CdnVersion? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await (await entity.GetLibraryEntryAsync(dbContext, cancellationToken)).GetLocalAsync(cancellationToken);
-
-    public static async Task<EntityEntry<Model.LocalLibrary>?> GetLocalLibraryEntryAsync(this Model.CdnVersion? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await (await entity.GetLibraryEntryAsync(dbContext, cancellationToken)).GetLocalEntryAsync(cancellationToken);
-
-    public static async Task<Model.LocalLibrary?> GetLocalLibraryAsync(this EntityEntry<Model.CdnVersion>? entry, CancellationToken cancellationToken) => await (await entry.GetLibraryEntryAsync(cancellationToken)).GetLocalAsync(cancellationToken);
-
-    public static async Task<EntityEntry<Model.LocalLibrary>?> GetLocalLibraryEntrAsync(this EntityEntry<Model.CdnVersion>? entry, CancellationToken cancellationToken) => await (await entry.GetLibraryEntryAsync(cancellationToken)).GetLocalEntryAsync(cancellationToken);
-
-    public static async Task<Model.LocalLibrary?> GetLocalLibraryAsync(this Model.CdnFile? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await (await entity.GetLibraryEntryAsync(dbContext, cancellationToken)).GetLocalAsync(cancellationToken);
-
-    public static async Task<EntityEntry<Model.LocalLibrary>?> GetLocalLibraryEntryAsync(this Model.CdnFile? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await (await entity.GetLibraryEntryAsync(dbContext, cancellationToken)).GetLocalEntryAsync(cancellationToken);
-
-    public static async Task<Model.LocalLibrary?> GetLocalLibraryAsync(this EntityEntry<Model.CdnFile>? entry, CancellationToken cancellationToken) => await (await entry.GetLibraryEntryAsync(cancellationToken)).GetLocalAsync(cancellationToken);
-
-    public static async Task<EntityEntry<Model.LocalLibrary>?> GetLocalLibraryEntryAsync(this EntityEntry<Model.CdnFile>? entry, CancellationToken cancellationToken) => await (await entry.GetLibraryEntryAsync(cancellationToken)).GetLocalEntryAsync(cancellationToken);
-
     /// <summary>
-    /// Asyncrhonously loads and gets the related <see cref="Model.UpstreamCdn" /> for the specified <see cref="Model.CdnLibrary" /> entity.
-    /// </summary>
-    /// <param name="entity">The target <see cref="Model.CdnLibrary" /> entity.</param>
-    /// <param name="dbContext">The current database context object.</param>
-    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
-    /// <returns>The value of the loaded <see cref="Model.CdnLibrary.UpstreamCdn" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.UpstreamCdn" />.</returns>
-    public static async Task<Model.UpstreamCdn?> GetUpstreamCdnAsync(this Model.CdnLibrary? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntityAsync(dbContext.CdnLibraries, l => l.UpstreamCdn, cancellationToken);
-
-    /// <summary>
-    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.UpstreamCdn" /> for the specified <see cref="Model.CdnLibrary" /> entity.
-    /// </summary>
-    /// <param name="entity">The target <see cref="Model.CdnLibrary" /> entity.</param>
-    /// <param name="dbContext">The current database context object.</param>
-    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
-    /// <returns>The <see cref="EntityEntry{TEntity}" /> for the loaded <see cref="Model.CdnLibrary.UpstreamCdn" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.UpstreamCdn" />.</returns>
-    public static async Task<EntityEntry<Model.UpstreamCdn>?> GetUpstreamCdnEntryAsync(this Model.CdnLibrary? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntryAsync(dbContext.CdnLibraries, l => l.UpstreamCdn, cancellationToken);
-
-    /// <summary>
-    /// Asyncrhonously loads and gets the related <see cref="Model.UpstreamCdn" /> for the specified <see cref="Model.CdnLibrary" /> <see cref="EntityEntry{TEntity}" />.
-    /// </summary>
-    /// <param name="entry">The <see cref="EntityEntry{TEntity}" /> for the target <see cref="Model.CdnLibrary" />.</param>
-    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
-    /// <returns>The value of the loaded <see cref="Model.CdnLibrary.UpstreamCdn" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.UpstreamCdn" />.</returns>
-    public static async Task<Model.UpstreamCdn?> GetUpstreamCdnAsync(this EntityEntry<Model.CdnLibrary>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntityAsync(l => l.UpstreamCdn, cancellationToken);
-
-    public static async Task<EntityEntry<Model.UpstreamCdn>?> GetUpstreamCdnEntryAsync(this EntityEntry<Model.CdnLibrary>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntryAsync(l => l.UpstreamCdn, cancellationToken);
-
-    public static async Task<Model.UpstreamCdn?> GetUpstreamCdnAsync(this Model.CdnVersion? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await (await entity.GetLibraryEntryAsync(dbContext, cancellationToken)).GetUpstreamCdnAsync(cancellationToken);
-
-    public static async Task<EntityEntry<Model.UpstreamCdn>?> GetUpstreamCdnEntryAsync(this Model.CdnVersion? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await (await entity.GetLibraryEntryAsync(dbContext, cancellationToken)).GetUpstreamCdnEntryAsync(cancellationToken);
-
-    public static async Task<Model.UpstreamCdn?> GetUpstreamCdnAsync(this EntityEntry<Model.CdnVersion>? entry, CancellationToken cancellationToken) => await (await entry.GetLibraryEntryAsync(cancellationToken)).GetUpstreamCdnAsync(cancellationToken);
-
-    public static async Task<EntityEntry<Model.UpstreamCdn>?> GetUpstreamCdnEntryAsync(this EntityEntry<Model.CdnVersion>? entry, CancellationToken cancellationToken) => await (await entry.GetLibraryEntryAsync(cancellationToken)).GetUpstreamCdnEntryAsync(cancellationToken);
-
-    public static async Task<Model.UpstreamCdn?> GetUpstreamCdnAsync(this Model.CdnFile? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await (await entity.GetLibraryEntryAsync(dbContext, cancellationToken)).GetUpstreamCdnAsync(cancellationToken);
-
-    public static async Task<EntityEntry<Model.UpstreamCdn>?> GetUpstreamCdnEntryAsync(this Model.CdnFile? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await (await entity.GetLibraryEntryAsync(dbContext, cancellationToken)).GetUpstreamCdnEntryAsync(cancellationToken);
-
-    public static async Task<Model.UpstreamCdn?> GetUpstreamCdnAsync(this EntityEntry<Model.CdnFile>? entry, CancellationToken cancellationToken) => await (await entry.GetLibraryEntryAsync(cancellationToken)).GetUpstreamCdnAsync(cancellationToken);
-
-    public static async Task<EntityEntry<Model.UpstreamCdn>?> GetUpstreamCdnEntryAsync(this EntityEntry<Model.CdnFile>? entry, CancellationToken cancellationToken) => await (await entry.GetLibraryEntryAsync(cancellationToken)).GetUpstreamCdnEntryAsync(cancellationToken);
-
-    /// <summary>
-    /// Asyncrhonously loads and gets the related <see cref="Model.LocalVersion" /> for the specified <see cref="Model.CdnVersion" /> entity.
+    /// Asyncrhonously loads and gets the related <see cref="Model.LocalLibrary" /> for the specified <see cref="Model.CdnVersion" /> entity.
     /// </summary>
     /// <param name="entity">The target <see cref="Model.CdnVersion" /> entity.</param>
     /// <param name="dbContext">The current database context object.</param>
     /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
-    /// <returns>The value of the loaded <see cref="Model.CdnVersion.Local" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalVersion" />.</returns>
-    public static async Task<Model.LocalVersion?> GetLocalAsync(this Model.CdnVersion? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntityAsync(dbContext.CdnVersions, l => l.Local, cancellationToken);
+    /// <returns>The value of the loaded <see cref="Model.CdnFile.Version" /> <c>=&gt;</c> <see cref="Model.CdnVersion.Library" /> property <see cref="Model.CdnVersion.Local" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalLibrary" />.</returns>
+    public static async Task<Model.LocalLibrary?> GetLocalLibraryAsync(this Model.CdnVersion? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await (await entity.GetLocalEntryAsync(dbContext, cancellationToken)).GetLibraryAsync(cancellationToken);
 
     /// <summary>
-    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.LocalVersion" /> for the specified <see cref="Model.CdnVersion" /> entity.
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.LocalLibrary" /> for the specified <see cref="Model.CdnVersion" /> entity.
     /// </summary>
     /// <param name="entity">The target <see cref="Model.CdnVersion" /> entity.</param>
     /// <param name="dbContext">The current database context object.</param>
     /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
-    /// <returns>The <see cref="EntityEntry{TEntity}" /> for the loaded <see cref="Model.CdnVersion.Local" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalVersion" />.</returns>
-    public static async Task<EntityEntry<Model.LocalVersion>?> GetLocalEntryAsync(this Model.CdnVersion? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntryAsync(dbContext.CdnVersions, l => l.Local, cancellationToken);
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnFile.Version" /> <c>=&gt;</c> <see cref="Model.CdnVersion.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalLibrary" />.</returns>
+    public static async Task<EntityEntry<Model.LocalLibrary>?> GetLocalLibraryEntryAsync(this Model.CdnVersion? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await (await entity.GetLocalEntryAsync(dbContext, cancellationToken)).GetLibraryEntryAsync(cancellationToken);
 
     /// <summary>
-    /// Asyncrhonously loads and gets the related <see cref="Model.LocalVersion" /> for the specified <see cref="Model.CdnVersion" /> <see cref="EntityEntry{TEntity}" />.
+    /// Asyncrhonously loads and gets the related <see cref="Model.LocalLibrary" /> for the specified <see cref="Model.CdnVersion" /> <see cref="EntityEntry{TEntity}" />.
     /// </summary>
-    /// <param name="entry">The <see cref="EntityEntry{TEntity}" /> for the target <see cref="Model.CdnVersion" />.</param>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnVersion" />.</param>
     /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
-    /// <returns>The value of the loaded <see cref="Model.CdnVersion.Local" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalVersion" />.</returns>
-    public static async Task<Model.LocalVersion?> GetLocalAsync(this EntityEntry<Model.CdnVersion>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntityAsync(l => l.Local, cancellationToken);
-
-    public static async Task<EntityEntry<Model.LocalVersion>?> GetLocalEntryAsync(this EntityEntry<Model.CdnVersion>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntryAsync(l => l.Local, cancellationToken);
-
-    public static async Task<Model.LocalVersion?> GetLocalVersionAsync(this Model.CdnFile? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await (await entity.GetVersionEntryAsync(dbContext, cancellationToken)).GetLocalAsync(cancellationToken);
-
-    public static async Task<EntityEntry<Model.LocalVersion>?> GetLocalVersionEntryAsync(this Model.CdnFile entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await (await entity.GetVersionEntryAsync(dbContext, cancellationToken)).GetLocalEntryAsync(cancellationToken);
-
-    public static async Task<Model.LocalVersion?> GetLocalVersionAsync(this EntityEntry<Model.CdnFile>? entry, CancellationToken cancellationToken) => await (await entry.GetVersionEntryAsync(cancellationToken)).GetLocalAsync(cancellationToken);
-
-    public static async Task<EntityEntry<Model.LocalVersion>?> GetLocalVersionEntryAsync(this EntityEntry<Model.CdnFile>? entry, CancellationToken cancellationToken) => await (await entry.GetVersionEntryAsync(cancellationToken)).GetLocalEntryAsync(cancellationToken);
+    /// <returns>The value of the loaded <see cref="Model.CdnFile.Version" /> <c>=&gt;</c> <see cref="Model.CdnVersion.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalLibrary" />.</returns>
+    public static async Task<Model.LocalLibrary?> GetLocalLibraryAsync(this EntityEntry<Model.CdnVersion>? entry, CancellationToken cancellationToken) => await (await entry.GetLocalEntryAsync(cancellationToken)).GetLibraryAsync(cancellationToken);
 
     /// <summary>
-    /// Asyncrhonously loads and gets the related <see cref="Model.CdnLibrary" /> for the specified <see cref="Model.CdnVersion" /> entity.
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.LocalLibrary" /> for the specified <see cref="Model.CdnVersion" /> <see cref="EntityEntry{TEntity}" />.
     /// </summary>
-    /// <param name="entity">The target <see cref="Model.CdnVersion" /> entity.</param>
-    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnVersion" />.</param>
     /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
-    /// <returns>The value of the loaded <see cref="Model.CdnVersion.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnLibrary" />.</returns>
-    public static async Task<Model.CdnLibrary?> GetLibraryAsync(this Model.CdnVersion? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntityAsync(dbContext.CdnVersions, l => l.Library, cancellationToken);
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnFile.Version" /> <c>=&gt;</c> <see cref="Model.CdnVersion.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalLibrary" />.</returns>
+    public static async Task<EntityEntry<Model.LocalLibrary>?> GetLocalLibraryEntryAsync(this EntityEntry<Model.CdnVersion>? entry, CancellationToken cancellationToken) => await (await entry.GetLocalEntryAsync(cancellationToken)).GetLibraryEntryAsync(cancellationToken);
 
     /// <summary>
-    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.CdnLibrary" /> for the specified <see cref="Model.CdnVersion" /> entity.
-    /// </summary>
-    /// <param name="entity">The target <see cref="Model.CdnVersion" /> entity.</param>
-    /// <param name="dbContext">The current database context object.</param>
-    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
-    /// <returns>The <see cref="EntityEntry{TEntity}" /> for the loaded <see cref="Model.CdnVersion.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnLibrary" />.</returns>
-    public static async Task<EntityEntry<Model.CdnLibrary>?> GetLibraryEntryAsync(this Model.CdnVersion? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntryAsync(dbContext.CdnVersions, l => l.Library, cancellationToken);
-
-    /// <summary>
-    /// Asyncrhonously loads and gets the related <see cref="Model.CdnLibrary" /> for the specified <see cref="Model.CdnVersion" /> <see cref="EntityEntry{TEntity}" />.
-    /// </summary>
-    /// <param name="entry">The <see cref="EntityEntry{TEntity}" /> for the target <see cref="Model.CdnVersion" />.</param>
-    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
-    /// <returns>The value of the loaded <see cref="Model.CdnVersion.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnLibrary" />.</returns>
-    public static async Task<Model.CdnLibrary?> GetLibraryAsync(this EntityEntry<Model.CdnVersion>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntityAsync(l => l.Library, cancellationToken);
-
-    public static async Task<EntityEntry<Model.CdnLibrary>?> GetLibraryEntryAsync(this EntityEntry<Model.CdnVersion>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntryAsync(l => l.Library, cancellationToken);
-
-    public static async Task<Model.CdnLibrary?> GetLibraryAsync(this Model.CdnFile? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await (await entity.GetVersionEntryAsync(dbContext, cancellationToken)).GetLibraryAsync(cancellationToken);
-
-    public static async Task<EntityEntry<Model.CdnLibrary>?> GetLibraryEntryAsync(this Model.CdnFile? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await (await entity.GetVersionEntryAsync(dbContext, cancellationToken)).GetLibraryEntryAsync(cancellationToken);
-
-    public static async Task<Model.CdnLibrary?> GetLibraryAsync(this EntityEntry<Model.CdnFile>? entry, CancellationToken cancellationToken) => await (await entry.GetVersionEntryAsync(cancellationToken)).GetLibraryAsync(cancellationToken);
-
-    public static async Task<EntityEntry<Model.CdnLibrary>?> GetLibraryEntryAsync(this EntityEntry<Model.CdnFile>? entry, CancellationToken cancellationToken) => await (await entry.GetVersionEntryAsync(cancellationToken)).GetLibraryEntryAsync(cancellationToken);
-
-    /// <summary>
-    /// Asyncrhonously loads and gets the related <see cref="Model.LocalFile" /> for the specified <see cref="Model.CdnFile" /> entity.
+    /// Asyncrhonously loads and gets the related <see cref="Model.LocalLibrary" /> for the specified <see cref="Model.CdnFile" /> entity.
     /// </summary>
     /// <param name="entity">The target <see cref="Model.CdnFile" /> entity.</param>
     /// <param name="dbContext">The current database context object.</param>
     /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
-    /// <returns>The value of the loaded <see cref="Model.CdnFile.Local" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalFile" />.</returns>
-    public static async Task<Model.LocalFile?> GetLocalAsync(this Model.CdnFile? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntityAsync(dbContext.CdnFiles, l => l.Local, cancellationToken);
+    /// <returns>The value of the loaded <see cref="Model.CdnFile.Local" /> <c>=&gt;</c> <see cref="Model.LocalFile.Version" /> <c>=&gt;</c> <see cref="Model.LocalVersion.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalLibrary" />.</returns>
+    public static async Task<Model.LocalLibrary?> GetLocalLibraryAsync(this Model.CdnFile? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await (await entity.GetLocalEntryAsync(dbContext, cancellationToken)).GetLibraryAsync(cancellationToken);
 
     /// <summary>
-    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.LocalFile" /> for the specified <see cref="Model.CdnFile" /> entity.
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.LocalLibrary" /> for the specified <see cref="Model.CdnFile" /> entity.
     /// </summary>
     /// <param name="entity">The target <see cref="Model.CdnFile" /> entity.</param>
     /// <param name="dbContext">The current database context object.</param>
     /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
-    /// <returns>The <see cref="EntityEntry{TEntity}" /> for the loaded <see cref="Model.CdnFile.Local" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalFile" />.</returns>
-    public static async Task<EntityEntry<Model.LocalFile>?> GetLocalEntryAsync(this Model.CdnFile? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntryAsync(dbContext.CdnFiles, l => l.Local, cancellationToken);
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnFile.Local" /> <c>=&gt;</c> <see cref="Model.LocalFile.Version" /> <c>=&gt;</c> <see cref="Model.LocalVersion.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalLibrary" />.</returns>
+    public static async Task<EntityEntry<Model.LocalLibrary>?> GetLocalLibraryEntryAsync(this Model.CdnFile? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await (await entity.GetLocalEntryAsync(dbContext, cancellationToken)).GetLibraryEntryAsync(cancellationToken);
 
     /// <summary>
-    /// Asyncrhonously loads and gets the related <see cref="Model.LocalFile" /> for the specified <see cref="Model.CdnFile" /> <see cref="EntityEntry{TEntity}" />.
+    /// Asyncrhonously loads and gets the related <see cref="Model.LocalLibrary" /> for the specified <see cref="Model.CdnFile" /> <see cref="EntityEntry{TEntity}" />.
     /// </summary>
-    /// <param name="entry">The <see cref="EntityEntry{TEntity}" /> for the target <see cref="Model.CdnFile" />.</param>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnFile" />.</param>
     /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
-    /// <returns>The value of the loaded <see cref="Model.CdnFile.Local" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalFile" />.</returns>
-    public static async Task<Model.LocalFile?> GetLocalAsync(this EntityEntry<Model.CdnFile>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntityAsync(l => l.Local, cancellationToken);
-
-    public static async Task<EntityEntry<Model.LocalFile>?> GetLocalEntryAsync(this EntityEntry<Model.CdnFile>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntryAsync(l => l.Local, cancellationToken);
+    /// <returns>The value of the loaded <see cref="Model.CdnFile.Local" /> <c>=&gt;</c> <see cref="Model.LocalFile.Version" /> <c>=&gt;</c> <see cref="Model.LocalVersion.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalLibrary" />.</returns>
+    public static async Task<Model.LocalLibrary?> GetLocalLibraryAsync(this EntityEntry<Model.CdnFile>? entry, CancellationToken cancellationToken) => await (await entry.GetLocalEntryAsync(cancellationToken)).GetLibraryAsync(cancellationToken);
 
     /// <summary>
-    /// Asyncrhonously loads and gets the related <see cref="Model.CdnVersion" /> for the specified <see cref="Model.CdnFile" /> entity.
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.LocalLibrary" /> for the specified <see cref="Model.CdnFile" /> <see cref="EntityEntry{TEntity}" />.
     /// </summary>
-    /// <param name="entity">The target <see cref="Model.CdnFile" /> entity.</param>
-    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnFile" />.</param>
     /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
-    /// <returns>The value of the loaded <see cref="Model.CdnFile.Version" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnVersion" />.</returns>
-    public static async Task<Model.CdnVersion?> GetVersionAsync(this Model.CdnFile? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntityAsync(dbContext.CdnFiles, l => l.Version, cancellationToken);
-
-    /// <summary>
-    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.CdnVersion" /> for the specified <see cref="Model.CdnFile" /> entity.
-    /// </summary>
-    /// <param name="entity">The target <see cref="Model.CdnFile" /> entity.</param>
-    /// <param name="dbContext">The current database context object.</param>
-    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
-    /// <returns>The <see cref="EntityEntry{TEntity}" /> for the loaded <see cref="Model.CdnFile.Version" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnVersion" />.</returns>
-    public static async Task<EntityEntry<Model.CdnVersion>?> GetVersionEntryAsync(this Model.CdnFile? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntryAsync(dbContext.CdnFiles, l => l.Version, cancellationToken);
-
-    /// <summary>
-    /// Asyncrhonously loads and gets the related <see cref="Model.CdnVersion" /> for the specified <see cref="Model.CdnFile" /> <see cref="EntityEntry{TEntity}" />.
-    /// </summary>
-    /// <param name="entry">The <see cref="EntityEntry{TEntity}" /> for the target <see cref="Model.CdnFile" />.</param>
-    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
-    /// <returns>The value of the loaded <see cref="Model.CdnFile.Version" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnVersion" />.</returns>
-    public static async Task<Model.CdnVersion?> GetVersionAsync(this EntityEntry<Model.CdnFile>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntityAsync(l => l.Version, cancellationToken);
-
-    public static async Task<EntityEntry<Model.CdnVersion>?> GetVersionEntryAsync(this EntityEntry<Model.CdnFile>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntryAsync(l => l.Version, cancellationToken);
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnFile.Local" /> <c>=&gt;</c> <see cref="Model.LocalFile.Version" /> <c>=&gt;</c> <see cref="Model.LocalVersion.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalLibrary" />.</returns>
+    public static async Task<EntityEntry<Model.LocalLibrary>?> GetLocalLibraryEntryAsync(this EntityEntry<Model.CdnFile>? entry, CancellationToken cancellationToken) => await (await entry.GetLocalEntryAsync(cancellationToken)).GetLibraryEntryAsync(cancellationToken);
 
     /// <summary>
     /// Asyncrhonously loads and gets the related <see cref="Model.LocalLibrary" /> for the specified <see cref="Model.LocalVersion" /> entity.
@@ -755,18 +783,228 @@ public static class ExtensionMethods
     /// <param name="entity">The target <see cref="Model.LocalVersion" /> entity.</param>
     /// <param name="dbContext">The current database context object.</param>
     /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
-    /// <returns>The <see cref="EntityEntry{TEntity}" /> for the loaded <see cref="Model.LocalVersion.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalLibrary" />.</returns>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.LocalVersion.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalLibrary" />.</returns>
     public static async Task<EntityEntry<Model.LocalLibrary>?> GetLibraryEntryAsync(this Model.LocalVersion? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntryAsync(dbContext.LocalVersions, l => l.Library, cancellationToken);
 
     /// <summary>
     /// Asyncrhonously loads and gets the related <see cref="Model.LocalLibrary" /> for the specified <see cref="Model.LocalVersion" /> <see cref="EntityEntry{TEntity}" />.
     /// </summary>
-    /// <param name="entry">The <see cref="EntityEntry{TEntity}" /> for the target <see cref="Model.LocalVersion" />.</param>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.LocalVersion" />.</param>
     /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
     /// <returns>The value of the loaded <see cref="Model.LocalVersion.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalLibrary" />.</returns>
     public static async Task<Model.LocalLibrary?> GetLibraryAsync(this EntityEntry<Model.LocalVersion>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntityAsync(l => l.Library, cancellationToken);
 
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.LocalLibrary" /> for the specified <see cref="Model.LocalVersion" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.LocalVersion" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.LocalVersion.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalLibrary" />.</returns>
     public static async Task<EntityEntry<Model.LocalLibrary>?> GetLibraryEntryAsync(this EntityEntry<Model.LocalVersion>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntryAsync(l => l.Library, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.CdnLibrary" /> for the specified <see cref="Model.LibraryLog" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.LibraryLog" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.LibraryLog.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnLibrary" />.</returns>
+    public static async Task<Model.CdnLibrary?> GetLibraryAsync(this Model.LibraryLog? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntityAsync(dbContext.LibraryLogs, l => l.Library, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.CdnLibrary" /> for the specified <see cref="Model.LibraryLog" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.LibraryLog" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.LibraryLog.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnLibrary" />.</returns>
+    public static async Task<EntityEntry<Model.CdnLibrary>?> GetLibraryEntryAsync(this Model.LibraryLog? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntryAsync(dbContext.LibraryLogs, l => l.Library, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.CdnLibrary" /> for the specified <see cref="Model.LibraryLog" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.LibraryLog" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.LibraryLog.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnLibrary" />.</returns>
+    public static async Task<Model.CdnLibrary?> GetLibraryAsync(this EntityEntry<Model.LibraryLog>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntityAsync(l => l.Library, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.CdnLibrary" /> for the specified <see cref="Model.LibraryLog" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.LibraryLog" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.LibraryLog.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnLibrary" />.</returns>
+    public static async Task<EntityEntry<Model.CdnLibrary>?> GetLibraryEntryAsync(this EntityEntry<Model.LibraryLog>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntryAsync(l => l.Library, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.CdnLibrary" /> for the specified <see cref="Model.CdnFile" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.CdnFile" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.CdnFile.Version" /> <c>=&gt;</c> <see cref="Model.CdnVersion.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnLibrary" />.</returns>
+    public static async Task<Model.CdnLibrary?> GetLibraryAsync(this Model.CdnFile? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await (await entity.GetVersionEntryAsync(dbContext, cancellationToken)).GetLibraryAsync(cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.CdnLibrary" /> for the specified <see cref="Model.CdnFile" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.CdnFile" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnFile.Version" /> <c>=&gt;</c> <see cref="Model.CdnVersion.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnLibrary" />.</returns>
+    public static async Task<EntityEntry<Model.CdnLibrary>?> GetLibraryEntryAsync(this Model.CdnFile? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await (await entity.GetVersionEntryAsync(dbContext, cancellationToken)).GetLibraryEntryAsync(cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.CdnLibrary" /> for the specified <see cref="Model.CdnFile" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnFile" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.CdnFile.Version" /> <c>=&gt;</c> <see cref="Model.CdnVersion.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnLibrary" />.</returns>
+    public static async Task<Model.CdnLibrary?> GetLibraryAsync(this EntityEntry<Model.CdnFile>? entry, CancellationToken cancellationToken) => await (await entry.GetVersionEntryAsync(cancellationToken)).GetLibraryAsync(cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.CdnLibrary" /> for the specified <see cref="Model.CdnFile" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnFile" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnFile.Version" /> <c>=&gt;</c> <see cref="Model.CdnVersion.Library" /> property which may be <see langword="null" /> if there is no related <see cref="Model.CdnLibrary" />.</returns>
+    public static async Task<EntityEntry<Model.CdnLibrary>?> GetLibraryEntryAsync(this EntityEntry<Model.CdnFile>? entry, CancellationToken cancellationToken) => await (await entry.GetVersionEntryAsync(cancellationToken)).GetLibraryEntryAsync(cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.CdnLibrary" /> for the specified <see cref="Model.CdnFile" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.CdnFile" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.CdnFile.Version" /> <c>=&gt;</c> <see cref="Model.CdnVersion.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnLibrary" />.</returns>
+    public static async Task<Model.LocalLibrary?> GetLibraryAsync(this Model.LocalFile? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await (await entity.GetVersionEntryAsync(dbContext, cancellationToken)).GetLibraryAsync(cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.CdnLibrary" /> for the specified <see cref="Model.CdnFile" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.CdnFile" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnFile.Version" /> <c>=&gt;</c> <see cref="Model.CdnVersion.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnLibrary" />.</returns>
+    public static async Task<EntityEntry<Model.LocalLibrary>?> GetLibraryEntryAsync(this Model.LocalFile? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await (await entity.GetVersionEntryAsync(dbContext, cancellationToken)).GetLibraryEntryAsync(cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.CdnLibrary" /> for the specified <see cref="Model.CdnFile" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnFile" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.CdnFile.Version" /> <c>=&gt;</c> <see cref="Model.CdnVersion.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnLibrary" />.</returns>
+    public static async Task<Model.LocalLibrary?> GetLibraryAsync(this EntityEntry<Model.LocalFile>? entry, CancellationToken cancellationToken) => await (await entry.GetVersionEntryAsync(cancellationToken)).GetLibraryAsync(cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.CdnLibrary" /> for the specified <see cref="Model.CdnFile" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnFile" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnFile.Version" /> <c>=&gt;</c> <see cref="Model.CdnVersion.Library" /> property which may be <see langword="null" /> if there is no related <see cref="Model.CdnLibrary" />.</returns>
+    public static async Task<EntityEntry<Model.LocalLibrary>?> GetLibraryEntryAsync(this EntityEntry<Model.LocalFile>? entry, CancellationToken cancellationToken) => await (await entry.GetVersionEntryAsync(cancellationToken)).GetLibraryEntryAsync(cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.CdnLibrary" /> for the specified <see cref="Model.CdnVersion" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.CdnVersion" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.CdnVersion.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnLibrary" />.</returns>
+    public static async Task<Model.CdnLibrary?> GetLibraryAsync(this Model.CdnVersion? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntityAsync(dbContext.CdnVersions, l => l.Library, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.CdnLibrary" /> for the specified <see cref="Model.CdnVersion" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.CdnVersion" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnVersion.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnLibrary" />.</returns>
+    public static async Task<EntityEntry<Model.CdnLibrary>?> GetLibraryEntryAsync(this Model.CdnVersion? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntryAsync(dbContext.CdnVersions, l => l.Library, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.CdnLibrary" /> for the specified <see cref="Model.CdnVersion" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnVersion" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.CdnVersion.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnLibrary" />.</returns>
+    public static async Task<Model.CdnLibrary?> GetLibraryAsync(this EntityEntry<Model.CdnVersion>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntityAsync(l => l.Library, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.CdnLibrary" /> for the specified <see cref="Model.CdnVersion" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnVersion" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnVersion.Library" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnLibrary" />.</returns>
+    public static async Task<EntityEntry<Model.CdnLibrary>?> GetLibraryEntryAsync(this EntityEntry<Model.CdnVersion>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntryAsync(l => l.Library, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.LocalVersion" /> for the specified <see cref="Model.CdnVersion" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.CdnVersion" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.CdnVersion.Local" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalVersion" />.</returns>
+    public static async Task<Model.LocalVersion?> GetLocalAsync(this Model.CdnVersion? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntityAsync(dbContext.CdnVersions, l => l.Local, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.LocalVersion" /> for the specified <see cref="Model.CdnVersion" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.CdnVersion" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnVersion.Local" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalVersion" />.</returns>
+    public static async Task<EntityEntry<Model.LocalVersion>?> GetLocalEntryAsync(this Model.CdnVersion? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntryAsync(dbContext.CdnVersions, l => l.Local, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.LocalVersion" /> for the specified <see cref="Model.CdnVersion" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnVersion" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.CdnVersion.Local" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalVersion" />.</returns>
+    public static async Task<Model.LocalVersion?> GetLocalAsync(this EntityEntry<Model.CdnVersion>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntityAsync(l => l.Local, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.LocalVersion" /> for the specified <see cref="Model.CdnVersion" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnVersion" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnVersion.Local" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalVersion" />.</returns>
+    public static async Task<EntityEntry<Model.LocalVersion>?> GetLocalEntryAsync(this EntityEntry<Model.CdnVersion>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntryAsync(l => l.Local, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.LocalVersion" /> for the specified <see cref="Model.CdnFile" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.CdnFile" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.CdnFile.Local" /> <c>=&gt;</c> <see cref="Model.LocalFile.Version" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalVersion" />.</returns>
+    public static async Task<Model.LocalVersion?> GetLocalVersionAsync(this Model.CdnFile? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await (await entity.GetLocalEntryAsync(dbContext, cancellationToken)).GetVersionAsync(cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.LocalVersion" /> for the specified <see cref="Model.CdnFile" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.CdnFile" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnFile.Local" /> <c>=&gt;</c> <see cref="Model.LocalFile.Version" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalVersion" />.</returns>
+    public static async Task<EntityEntry<Model.LocalVersion>?> GetLocalVersionEntryAsync(this Model.CdnFile? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await (await entity.GetLocalEntryAsync(dbContext, cancellationToken)).GetVersionEntryAsync(cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.LocalVersion" /> for the specified <see cref="Model.CdnFile" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnFile" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.CdnFile.Local" /> <c>=&gt;</c> <see cref="Model.LocalFile.Version" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalVersion" />.</returns>
+    public static async Task<Model.LocalVersion?> GetLocalVersionAsync(this EntityEntry<Model.CdnFile>? entry, CancellationToken cancellationToken) => await (await entry.GetLocalEntryAsync(cancellationToken)).GetVersionAsync(cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.LocalVersion" /> for the specified <see cref="Model.CdnFile" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnFile" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnFile.Local" /> <c>=&gt;</c> <see cref="Model.LocalFile.Version" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalVersion" />.</returns>
+    public static async Task<EntityEntry<Model.LocalVersion>?> GetLocalVersionEntryAsync(this EntityEntry<Model.CdnFile>? entry, CancellationToken cancellationToken) => await (await entry.GetLocalEntryAsync(cancellationToken)).GetVersionEntryAsync(cancellationToken);
 
     /// <summary>
     /// Asyncrhonously loads and gets the related <see cref="Model.LocalVersion" /> for the specified <see cref="Model.LocalFile" /> entity.
@@ -783,19 +1021,226 @@ public static class ExtensionMethods
     /// <param name="entity">The target <see cref="Model.LocalFile" /> entity.</param>
     /// <param name="dbContext">The current database context object.</param>
     /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
-    /// <returns>The <see cref="EntityEntry{TEntity}" /> for the loaded <see cref="Model.LocalFile.Version" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalVersion" />.</returns>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.LocalFile.Version" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalVersion" />.</returns>
     public static async Task<EntityEntry<Model.LocalVersion>?> GetVersionEntryAsync(this Model.LocalFile? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntryAsync(dbContext.LocalFiles, l => l.Version, cancellationToken);
 
     /// <summary>
     /// Asyncrhonously loads and gets the related <see cref="Model.LocalVersion" /> for the specified <see cref="Model.LocalFile" /> <see cref="EntityEntry{TEntity}" />.
     /// </summary>
-    /// <param name="entry">The <see cref="EntityEntry{TEntity}" /> for the target <see cref="Model.LocalFile" />.</param>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.LocalFile" />.</param>
     /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
     /// <returns>The value of the loaded <see cref="Model.LocalFile.Version" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalVersion" />.</returns>
     public static async Task<Model.LocalVersion?> GetVersionAsync(this EntityEntry<Model.LocalFile>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntityAsync(l => l.Version, cancellationToken);
 
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.LocalVersion" /> for the specified <see cref="Model.LocalFile" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.LocalFile" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.LocalFile.Version" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalVersion" />.</returns>
     public static async Task<EntityEntry<Model.LocalVersion>?> GetVersionEntryAsync(this EntityEntry<Model.LocalFile>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntryAsync(l => l.Version, cancellationToken);
 
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.CdnVersion" /> for the specified <see cref="Model.VersionLog" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.VersionLog" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.VersionLog.Version" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnVersion" />.</returns>
+    public static async Task<Model.CdnVersion?> GetVersionAsync(this Model.VersionLog? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntityAsync(dbContext.VersionLogs, l => l.Version, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.CdnVersion" /> for the specified <see cref="Model.VersionLog" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.VersionLog" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.VersionLog.Version" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnVersion" />.</returns>
+    public static async Task<EntityEntry<Model.CdnVersion>?> GetVersionEntryAsync(this Model.VersionLog? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntryAsync(dbContext.VersionLogs, l => l.Version, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.CdnVersion" /> for the specified <see cref="Model.VersionLog" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.VersionLog" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.VersionLog.Version" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnVersion" />.</returns>
+    public static async Task<Model.CdnVersion?> GetVersionAsync(this EntityEntry<Model.VersionLog>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntityAsync(l => l.Version, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.CdnVersion" /> for the specified <see cref="Model.VersionLog" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.VersionLog" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.VersionLog.Version" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnVersion" />.</returns>
+    public static async Task<EntityEntry<Model.CdnVersion>?> GetVersionEntryAsync(this EntityEntry<Model.VersionLog>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntryAsync(l => l.Version, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.CdnVersion" /> for the specified <see cref="Model.CdnFile" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.CdnFile" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.CdnFile.Version" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnVersion" />.</returns>
+    public static async Task<Model.CdnVersion?> GetVersionAsync(this Model.CdnFile? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntityAsync(dbContext.CdnFiles, l => l.Version, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.CdnVersion" /> for the specified <see cref="Model.CdnFile" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.CdnFile" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnFile.Version" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnVersion" />.</returns>
+    public static async Task<EntityEntry<Model.CdnVersion>?> GetVersionEntryAsync(this Model.CdnFile? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntryAsync(dbContext.CdnFiles, l => l.Version, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.CdnVersion" /> for the specified <see cref="Model.CdnFile" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnFile" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.CdnFile.Version" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnVersion" />.</returns>
+    public static async Task<Model.CdnVersion?> GetVersionAsync(this EntityEntry<Model.CdnFile>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntityAsync(l => l.Version, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.CdnVersion" /> for the specified <see cref="Model.CdnFile" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnFile" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnFile.Version" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnVersion" />.</returns>
+    public static async Task<EntityEntry<Model.CdnVersion>?> GetVersionEntryAsync(this EntityEntry<Model.CdnFile>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntryAsync(l => l.Version, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.LocalFile" /> for the specified <see cref="Model.CdnFile" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.CdnFile" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.CdnFile.Local" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalFile" />.</returns>
+    public static async Task<Model.LocalFile?> GetLocalAsync(this Model.CdnFile? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntityAsync(dbContext.CdnFiles, l => l.Local, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.LocalFile" /> for the specified <see cref="Model.CdnFile" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.CdnFile" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnFile.Local" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalFile" />.</returns>
+    public static async Task<EntityEntry<Model.LocalFile>?> GetLocalEntryAsync(this Model.CdnFile? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntryAsync(dbContext.CdnFiles, l => l.Local, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.LocalFile" /> for the specified <see cref="Model.CdnFile" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnFile" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.CdnFile.Local" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalFile" />.</returns>
+    public static async Task<Model.LocalFile?> GetLocalAsync(this EntityEntry<Model.CdnFile>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntityAsync(l => l.Local, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.LocalFile" /> for the specified <see cref="Model.CdnFile" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.CdnFile" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.CdnFile.Local" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.LocalFile" />.</returns>
+    public static async Task<EntityEntry<Model.LocalFile>?> GetLocalEntryAsync(this EntityEntry<Model.CdnFile>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntryAsync(l => l.Local, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.CdnFile" /> for the specified <see cref="Model.FileLog" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.FileLog" /> entity.</param>*/1`
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.FileLog.File" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnFile" />.</returns>
+    public static async Task<Model.CdnFile?> GetFileAsync(this Model.FileLog? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntityAsync(dbContext.FileLogs, l => l.File, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.CdnFile" /> for the specified <see cref="Model.FileLog" /> entity.
+    /// </summary>
+    /// <param name="entity">The target <see cref="Model.FileLog" /> entity.</param>
+    /// <param name="dbContext">The current database context object.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.FileLog.File" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnFile" />.</returns>
+    public static async Task<EntityEntry<Model.CdnFile>?> GetFileEntryAsync(this Model.FileLog? entity, Services.ContentDb dbContext, CancellationToken cancellationToken) => await entity.GetReferencedEntryAsync(dbContext.FileLogs, l => l.File, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the related <see cref="Model.CdnFile" /> for the specified <see cref="Model.FileLog" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.FileLog" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The value of the loaded <see cref="Model.FileLog.File" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnFile" />.</returns>
+    public static async Task<Model.CdnFile?> GetFileAsync(this EntityEntry<Model.FileLog>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntityAsync(l => l.File, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously loads and gets the <see cref="EntityEntry{TEntity}" /> of the related <see cref="Model.CdnFile" /> for the specified <see cref="Model.FileLog" /> <see cref="EntityEntry{TEntity}" />.
+    /// </summary>
+    /// <param name="entity">The <see cref="EntityEntry{TEntity}" /> of the target <see cref="Model.FileLog" />.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The <see cref="EntityEntry{TEntity}" /> of the loaded <see cref="Model.FileLog.File" /> property, which may be <see langword="null" /> if there is no related <see cref="Model.CdnFile" />.</returns>
+    public static async Task<EntityEntry<Model.CdnFile>?> GetFileEntryAsync(this EntityEntry<Model.FileLog>? entry, CancellationToken cancellationToken) => await entry.GetReferencedEntryAsync(l => l.File, cancellationToken);
+
+    public static async Task<string?> GetDirNameAsync(this Model.LocalVersion? entity, DirectoryInfo contentDirectory, Services.ContentDb dbContext, CancellationToken cancellationToken)
+    {
+        string dirName;
+        if (entity is null || contentDirectory is null || (dirName = entity.DirName).Length == 0)
+            return null;
+        Model.LocalLibrary? library = await entity.GetLibraryAsync(dbContext, cancellationToken);
+        if (library is null || library.DirName.Length == 0)
+            return null;
+        return Path.Combine(contentDirectory.FullName, library.DirName, dirName);
+    }
+    
+    public static async Task<string?> GetDirNameAsync(this EntityEntry<Model.LocalVersion>? entry, DirectoryInfo contentDirectory, CancellationToken cancellationToken)
+    {
+        string dirName;
+        if (entry is null || contentDirectory is null || (dirName = entry.Entity.DirName).Length == 0)
+            return null;
+        Model.LocalLibrary? library = await entry.GetLibraryAsync(cancellationToken);
+        if (library is null || library.DirName.Length == 0)
+            return null;
+        return Path.Combine(contentDirectory.FullName, library.DirName, dirName);
+    }
+    
+    public static async Task<string?> GetDirNameAsync(this EntityEntry<Model.CdnVersion>? entry, DirectoryInfo contentDirectory, CancellationToken cancellationToken)
+    {
+        if (entry is null || contentDirectory is null)
+            return null;
+        string? dirName = await (await entry.GetLocalEntryAsync(cancellationToken)).GetDirNameAsync(contentDirectory, cancellationToken);
+        if (dirName is null)
+            return null;
+        Model.UpstreamCdn? cdn = await entry.GetCdnAsync(cancellationToken);
+        if (cdn is null || cdn.DirName.Length == 0)
+            return null;
+        return Path.Combine(dirName, cdn.DirName);
+    }
+    
+    public static async Task<FileProperties?> GetFilePropertiesAsync(this EntityEntry<Model.LocalFile>? entry, DirectoryInfo contentDirectory, CancellationToken cancellationToken)
+    {
+        string fileName;
+        if (entry is null || contentDirectory is null || (fileName = entry.Entity.FileName).Length == 0)
+            return null;
+        string? dirName = await (await entry.GetVersionEntryAsync(cancellationToken)).GetDirNameAsync(contentDirectory, cancellationToken);
+        if (dirName is null)
+            return null;
+        Model.LocalFile entity = entry.Entity;
+        return new(Name: entity.Name, SRI: entity.SRI, ContentType: entity.ContentType, Encoding: entity.Encoding, DirName: dirName, FileName: fileName, Order: entity.Order);
+    }
+    
+    public static async Task<FileProperties?> GetFilePropertiesAsync(this EntityEntry<Model.CdnFile>? entry, DirectoryInfo contentDirectory, CancellationToken cancellationToken)
+    {
+        if (entry is null || contentDirectory is null)
+            return null;
+        string? fileName = entry.Entity.FileName;
+        if (fileName is null)
+            return await (await entry.GetLocalEntryAsync(cancellationToken)).GetFilePropertiesAsync(contentDirectory, cancellationToken);
+
+        string? dirName = await (await entry.GetVersionEntryAsync(cancellationToken)).GetDirNameAsync(contentDirectory, cancellationToken);
+        if (dirName is null)
+            return null;
+        Model.LocalFile? local = await entry.GetLocalAsync(cancellationToken);
+        if (local is null)
+            return null;
+        Model.CdnFile entity = entry.Entity;
+        return new(Name: local.Name, SRI: entity.SRI ?? local.SRI, ContentType: local.ContentType, Encoding: entity.Encoding ?? local.Encoding, DirName: dirName, FileName: fileName, Order: local.Order);
+    }
+    
     public static string ToStatusMessage(this int statusCode) => statusCode switch
     {
         100 => "Continue",

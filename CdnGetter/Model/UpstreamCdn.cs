@@ -35,6 +35,18 @@ public class UpstreamCdn
         set => _name = value.ToWsNormalizedOrEmptyIfNull();
     }
 
+    private string _dirName = string.Empty;
+    /// <summary>
+    /// The name of the local subdirectory where the content for this library is stored.
+    /// </summary>
+    /// <remarks>The 
+    /// </remarks>
+    public string DirName
+    {
+        get => _dirName;
+        set => _dirName = value.ToTrimmedOrEmptyIfNull();
+    }
+
     public const ushort DEFAULTVALUE_Priority = ushort.MaxValue;
     /// <summary>
     /// The preferential order for the upstream CDN.
@@ -83,6 +95,7 @@ public class UpstreamCdn
         _ = builder.HasIndex(nameof(Priority));
         _ = builder.Property(nameof(Name)).IsRequired().HasMaxLength(MAXLENGTH_Name).UseCollation(COLLATION_NOCASE);
         _ = builder.HasIndex(nameof(Name)).IsUnique();
+        _ = builder.Property(nameof(DirName)).HasMaxLength(MAX_LENGTH_FileName).IsRequired().UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(Description)).IsRequired();
         _ = builder.Property(nameof(CreatedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
         _ = builder.Property(nameof(ModifiedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
@@ -93,6 +106,7 @@ public class UpstreamCdn
         executeNonQuery(@$"CREATE TABLE ""{nameof(Services.ContentDb.UpstreamCdns)}"" (
     ""{nameof(Id)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
     ""{nameof(Name)}"" NVARCHAR({MAXLENGTH_Name}) NOT NULL CHECK(length(trim(""{nameof(Name)}""))=length(""{nameof(Name)}"") AND length(""{nameof(Name)}"")>0) UNIQUE COLLATE NOCASE,
+    ""{nameof(DirName)}"" NVARCHAR({MAX_LENGTH_FileName}) NOT NULL CHECK(length(trim(""{nameof(DirName)}""))=length(""{nameof(DirName)}"") AND length(""{nameof(DirName)}"")>0) UNIQUE COLLATE NOCASE,
     ""{nameof(Priority)}"" UNSIGNED SMALLINT NOT NULL DEFAULT {DEFAULTVALUE_Priority},
     ""{nameof(Description)}"" TEXT NOT NULL CHECK(length(trim(""{nameof(Description)}""))=length(""{nameof(Description)}"")),
     ""{nameof(CreatedOn)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},

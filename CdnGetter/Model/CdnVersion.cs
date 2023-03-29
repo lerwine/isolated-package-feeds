@@ -40,7 +40,7 @@ public class CdnVersion
     public Guid LibraryId
     {
         get => _libraryId;
-        set => value.SetNavigation(_upstreamCdnId, _syncRoot, p => (p.LocalId, p.UpstreamCdnId), ref _libraryId, ref _upstreamCdnId, ref _library);
+        set => value.SetNavigation(_upstreamCdnId, _syncRoot, p => (p.LocalId, p.CdnId), ref _libraryId, ref _upstreamCdnId, ref _library);
     }
 
     private Guid _upstreamCdnId;
@@ -50,7 +50,7 @@ public class CdnVersion
     public Guid UpstreamCdnId
     {
         get => _upstreamCdnId;
-        set => _libraryId.SetNavigation(value, _syncRoot, p => (p.LocalId, p.UpstreamCdnId), ref _libraryId, ref _upstreamCdnId, ref _library);
+        set => _libraryId.SetNavigation(value, _syncRoot, p => (p.LocalId, p.CdnId), ref _libraryId, ref _upstreamCdnId, ref _library);
     }
 
     private CdnLibrary? _library;
@@ -60,7 +60,7 @@ public class CdnVersion
     public CdnLibrary? Library
     {
         get => _library;
-        set => value.SetNavigation(_syncRoot, p => (p.LocalId, p.UpstreamCdnId), ref _libraryId, ref _upstreamCdnId, ref _library);
+        set => value.SetNavigation(_syncRoot, p => (p.LocalId, p.CdnId), ref _libraryId, ref _upstreamCdnId, ref _library);
     }
     
     /// <summary>
@@ -107,11 +107,8 @@ public class CdnVersion
         _ = builder.Property(nameof(ProviderData)).HasConversion(ExtensionMethods.JsonValueConverter);
         _ = builder.Property(nameof(CreatedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
         _ = builder.Property(nameof(ModifiedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
-        _ = builder.HasOne(f => f.Local).WithMany(f => f.Upstream).HasForeignKey(nameof(LocalId)).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
-        _ = builder.HasOne(v => v.Library).WithMany(l => l.Versions)
-            .HasForeignKey(nameof(LibraryId), nameof(UpstreamCdnId))
-            .HasPrincipalKey(nameof(LocalId), nameof(UpstreamCdnId))
-            .IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
+        _ = builder.HasOne(f => f.Local).WithMany(f => f.Upstream).HasForeignKey(nameof(LocalId)).IsRequired().OnDelete(DeleteBehavior.Restrict);
+        _ = builder.HasOne(v => v.Library).WithMany(l => l.Versions).HasForeignKey(nameof(LibraryId), nameof(UpstreamCdnId)).HasPrincipalKey(nameof(LocalId), nameof(UpstreamCdnId)).IsRequired().OnDelete(DeleteBehavior.Restrict);
     }
 
     internal static void CreateTable(Action<string> executeNonQuery)
@@ -125,7 +122,7 @@ public class CdnVersion
     ""{nameof(CreatedOn)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},
     ""{nameof(ModifiedOn)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},
     FOREIGN KEY(""{nameof(LocalId)}"") REFERENCES ""{nameof(Services.ContentDb.LocalVersions)}""(""{nameof(LocalVersion.Id)}"") ON DELETE RESTRICT,
-    FOREIGN KEY(""{nameof(LibraryId)}"",""{nameof(UpstreamCdnId)}"") REFERENCES ""{nameof(Services.ContentDb.CdnLibraries)}""(""{nameof(CdnLibrary.LocalId)}"",""{nameof(CdnLibrary.UpstreamCdnId)}"") ON DELETE RESTRICT,
+    FOREIGN KEY(""{nameof(LibraryId)}"",""{nameof(UpstreamCdnId)}"") REFERENCES ""{nameof(Services.ContentDb.CdnLibraries)}""(""{nameof(CdnLibrary.LocalId)}"",""{nameof(CdnLibrary.CdnId)}"") ON DELETE RESTRICT,
     PRIMARY KEY(""{nameof(LocalId)}"", ""{nameof(LibraryId)}"", ""{nameof(UpstreamCdnId)}""),
     CHECK(""{nameof(CreatedOn)}""<=""{nameof(ModifiedOn)}"")
 )");

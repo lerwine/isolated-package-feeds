@@ -76,7 +76,7 @@ public class CdnLog : ICdnLog
     /// <summary>
     /// The parent upstream content delivery network.
     /// </summary>
-    public UpstreamCdn? CDN
+    public UpstreamCdn? Cdn
     {
         get => _cdn;
         set => value.SetNavigation(_syncRoot, p => p.Id, ref _upstreamCdnId, ref _cdn);
@@ -96,7 +96,7 @@ public class CdnLog : ICdnLog
         _ = builder.Property(nameof(Url)).HasConversion(ExtensionMethods.UriConverter).HasMaxLength(MAX_LENGTH_Url);
         _ = builder.Property(nameof(ProviderData)).HasConversion(ExtensionMethods.JsonValueConverter);
         _ = builder.Property(nameof(Timestamp)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
-        _ = builder.HasOne(f => f.CDN).WithMany(f => f.Logs).HasForeignKey(nameof(UpstreamCdnId)).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
+        _ = builder.HasOne(f => f.Cdn).WithMany(f => f.Logs).HasForeignKey(nameof(UpstreamCdnId)).IsRequired().OnDelete(DeleteBehavior.Restrict);
     }
 
     internal static void CreateTable(Action<string> executeNonQuery)

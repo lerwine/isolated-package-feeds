@@ -133,29 +133,27 @@ public class LocalFile
         _ = builder.Property(nameof(Name)).HasMaxLength(MAXLENGTH_Name).IsRequired().UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(SRI)).HasMaxLength(MAXLENGTH_SRI).IsRequired().UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(Order)).IsRequired().HasDefaultValue(DEFAULTVALUE_Order);
-        // TODO: Remove Data and add FileName
-        _ = builder.Property(nameof(Data)).IsRequired();
+        _ = builder.Property(nameof(FileName)).HasMaxLength(MAX_LENGTH_FileName).IsRequired();
         _ = builder.Property(nameof(ContentType)).HasMaxLength(MAXLENGTH_ContentType).IsRequired();
         _ = builder.Property(nameof(Encoding)).HasMaxLength(MAXLENGTH_Encoding).IsRequired();
         _ = builder.HasIndex(nameof(Order));
         _ = builder.HasIndex(nameof(Order), nameof(VersionId)).IsUnique();
         _ = builder.Property(nameof(CreatedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
         _ = builder.Property(nameof(ModifiedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
-        _ = builder.HasOne(f => f.Version).WithMany(v => v.Files).HasForeignKey(nameof(VersionId)).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
+        _ = builder.HasOne(f => f.Version).WithMany(v => v.Files).HasForeignKey(nameof(VersionId)).IsRequired().OnDelete(DeleteBehavior.Restrict);
         _ = builder.Property(nameof(VersionId)).UseCollation(COLLATION_NOCASE);
     }
 
     internal static void CreateTable(Action<string> executeNonQuery)
     {
-        // TODO: Remove Data and add FileName
         executeNonQuery(@$"CREATE TABLE ""{nameof(Services.ContentDb.LocalFiles)}"" (
     ""{nameof(Id)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
     ""{nameof(Name)}"" NVARCHAR({MAXLENGTH_Name}) NOT NULL CHECK(length(trim(""{nameof(Name)}""))=length(""{nameof(Name)}"") AND length(""{nameof(Name)}"")>0) COLLATE NOCASE,
     ""{nameof(SRI)}"" NVARCHAR({MAXLENGTH_SRI}) NOT NULL CHECK(length(trim(""{nameof(SRI)}""))=length(""{nameof(SRI)}"") AND length(""{nameof(SRI)}"")>0) COLLATE NOCASE,
+    ""{nameof(FileName)}"" NVARCHAR({MAX_LENGTH_FileName}) NOT NULL CHECK(length(trim(""{nameof(FileName)}""))=length(""{nameof(FileName)}"") AND length(""{nameof(FileName)}"")>0) COLLATE NOCASE,
     ""{nameof(Order)}"" UNSIGNED SMALLINT NOT NULL DEFAULT {DEFAULTVALUE_Order},
     ""{nameof(ContentType)}"" NVARCHAR({MAXLENGTH_ContentType}) NOT NULL CHECK(length(trim(""{nameof(ContentType)}""))=length(""{nameof(ContentType)}"") AND length(""{nameof(ContentType)}"")>0),
     ""{nameof(Encoding)}"" NVARCHAR({MAXLENGTH_Encoding}) NOT NULL CHECK(length(trim(""{nameof(Encoding)}""))=length(""{nameof(Encoding)}"")),
-    ""{nameof(Data)}"" BLOB NOT NULL,
     ""{nameof(CreatedOn)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},
     ""{nameof(ModifiedOn)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},
     ""{nameof(VersionId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,

@@ -152,21 +152,17 @@ public class CdnFile
         _ = builder.Property(nameof(LibraryId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(UpstreamCdnId)).UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(SRI)).HasMaxLength(MAXLENGTH_SRI).UseCollation(COLLATION_NOCASE);
-        _ = builder.Property(nameof(Encoding)).HasMaxLength(MAXLENGTH_Encoding).IsRequired();
-        // TODO: Remove Data and add FileName
+        _ = builder.Property(nameof(Encoding)).HasMaxLength(MAXLENGTH_Encoding);
+        _ = builder.Property(nameof(FileName)).HasMaxLength(MAX_LENGTH_FileName);
         _ = builder.Property(nameof(ProviderData)).HasConversion(ExtensionMethods.JsonValueConverter);
         _ = builder.Property(nameof(CreatedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
         _ = builder.Property(nameof(ModifiedOn)).IsRequired().HasDefaultValueSql(DEFAULT_SQL_NOW);
-        _ = builder.HasOne(f => f.Local).WithMany(f => f.Upstream).HasForeignKey(nameof(LocalId)).IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
-        _ = builder.HasOne(f => f.Version).WithMany(v => v.Files)
-            .HasForeignKey(nameof(VersionId), nameof(LibraryId), nameof(UpstreamCdnId))
-            .HasPrincipalKey(nameof(CdnVersion.LocalId), nameof(CdnVersion.LibraryId), nameof(CdnVersion.UpstreamCdnId))
-            .IsRequired().OnDelete(Microsoft.EntityFrameworkCore.DeleteBehavior.Restrict);
+        _ = builder.HasOne(f => f.Local).WithMany(f => f.Upstream).HasForeignKey(nameof(LocalId)).IsRequired().OnDelete(DeleteBehavior.Restrict);
+        _ = builder.HasOne(f => f.Version).WithMany(v => v.Files).HasForeignKey(nameof(VersionId), nameof(LibraryId), nameof(UpstreamCdnId)).HasPrincipalKey(nameof(CdnVersion.LocalId), nameof(CdnVersion.LibraryId), nameof(CdnVersion.UpstreamCdnId)).IsRequired().OnDelete(DeleteBehavior.Restrict);
     }
 
     internal static void CreateTable(Action<string> executeNonQuery)
     {
-        // TODO: Remove Data and add FileName
         executeNonQuery(@$"CREATE TABLE ""{nameof(Services.ContentDb.CdnFiles)}"" (
     ""{nameof(LocalId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
     ""{nameof(VersionId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
@@ -174,7 +170,7 @@ public class CdnFile
     ""{nameof(UpstreamCdnId)}"" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
     ""{nameof(Encoding)}"" NVARCHAR({MAXLENGTH_Encoding}) DEFAULT NULL CHECK(""{nameof(Encoding)}"" IS NULL OR (length(trim(""{nameof(Encoding)}""))=length(""{nameof(Encoding)}""))),
     ""{nameof(SRI)}"" NVARCHAR({MAXLENGTH_SRI}) DEFAULT NULL CHECK(""{nameof(SRI)}"" IS NULL OR (length(trim(""{nameof(SRI)}""))=length(""{nameof(SRI)}"") AND length(""{nameof(SRI)}"")>0)) COLLATE NOCASE,
-    ""{nameof(Data)}"" BLOB DEFAULT NULL,
+    ""{nameof(FileName)}"" NVARCHAR({MAX_LENGTH_FileName}) DEFAULT NULL CHECK(""{nameof(FileName)}"" IS NULL OR (length(trim(""{nameof(FileName)}""))=length(""{nameof(FileName)}"") AND length(""{nameof(FileName)}"")>0)) COLLATE NOCASE,
     ""{nameof(Priority)}"" UNSIGNED SMALLINT DEFAULT NULL,
     ""{nameof(ProviderData)}"" TEXT DEFAULT NULL,
     ""{nameof(CreatedOn)}"" DATETIME NOT NULL DEFAULT {DEFAULT_SQL_NOW},

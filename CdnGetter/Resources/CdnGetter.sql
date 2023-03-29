@@ -1,6 +1,7 @@
 CREATE TABLE "UpstreamCdns" (
 	"Id"	UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
 	"Name"	NVARCHAR(1024) NOT NULL CHECK(length(trim("Name"))=length("Name") AND length("Name")>0) UNIQUE COLLATE NOCASE,
+	"DirName"	NVARCHAR(256) NOT NULL CHECK(length(trim("DirName"))=length("DirName") AND length("DirName")>0) UNIQUE COLLATE NOCASE,
 	"Priority"	UNSIGNED SMALLINT NOT NULL DEFAULT 65535,
 	"Description"	TEXT NOT NULL CHECK(length(trim("Description"))=length("Description")),
 	"CreatedOn"	DATETIME NOT NULL DEFAULT (datetime('now','localtime')),
@@ -29,6 +30,7 @@ CREATE UNIQUE INDEX "IDX_UpstreamCdns_Name" ON "UpstreamCdns" ("Name" COLLATE NO
 CREATE TABLE "LocalLibraries" (
 	"Id"	UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
 	"Name"	NVARCHAR(1024) NOT NULL CHECK(length(trim("Name"))=length("Name") AND length("Name")>0) UNIQUE COLLATE NOCASE,
+	"DirName"	NVARCHAR(256) NOT NULL CHECK(length(trim("DirName"))=length("DirName") AND length("DirName")>0) UNIQUE COLLATE NOCASE,
 	"Description"	TEXT NOT NULL CHECK(length(trim("Description"))=length("Description")),
 	"CreatedOn"	DATETIME NOT NULL DEFAULT (datetime('now','localtime')),
 	"ModifiedOn"	DATETIME NOT NULL DEFAULT (datetime('now','localtime')),
@@ -71,6 +73,7 @@ CREATE INDEX "IDX_LibraryLogs_Timestamp" ON "LibraryLogs" ("Timestamp"	DESC);
 CREATE TABLE "LocalVersions" (
     "Id" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
     "Version" NVARCHAR(1024) NOT NULL CHECK(length(trim("Version"))=length("Version") AND length("Version")>0) COLLATE NOCASE,
+	"DirName"	NVARCHAR(256) NOT NULL CHECK(length(trim("DirName"))=length("DirName") AND length("DirName")>0) UNIQUE COLLATE NOCASE,
     "Order" UNSIGNED SMALLINT NOT NULL DEFAULT 65535,
     "CreatedOn" DATETIME NOT NULL DEFAULT (datetime('now','localtime')),
     "ModifiedOn" DATETIME NOT NULL DEFAULT (datetime('now','localtime')),
@@ -122,7 +125,7 @@ CREATE TABLE "LocalFiles" (
     "Order" UNSIGNED SMALLINT NOT NULL DEFAULT 65535,
     "ContentType" NVARCHAR(512) NOT NULL CHECK(length(trim("ContentType"))=length("ContentType") AND length("ContentType")>0),
     "Encoding" NVARCHAR(32) NOT NULL CHECK(length(trim("Encoding"))=length("Encoding")),
-    "Data" BLOB NOT NULL,
+    "FileName" NVARCHAR(256) NOT NULL CHECK(length(trim("FileName"))=length("FileName") AND length("FileName")>0) COLLATE NOCASE,
     "CreatedOn" DATETIME NOT NULL DEFAULT (datetime('now','localtime')),
     "ModifiedOn" DATETIME NOT NULL DEFAULT (datetime('now','localtime')),
     "VersionId" UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
@@ -142,7 +145,7 @@ CREATE TABLE "CdnFiles" (
 	"UpstreamCdnId"	UNIQUEIDENTIFIER NOT NULL COLLATE NOCASE,
 	"Encoding"	NVARCHAR(32) DEFAULT NULL CHECK("Encoding" IS NULL OR (length(trim("Encoding"))=length("Encoding"))),
 	"SRI"	NVARCHAR(256) DEFAULT NULL CHECK("SRI" IS NULL OR (length(trim("SRI"))=length("SRI") AND length("SRI")>0)) COLLATE NOCASE,
-	"Data"	BLOB DEFAULT NULL,
+	"FileName"	NVARCHAR(256) DEFAULT NULL CHECK("FileName" IS NULL OR (length(trim("FileName"))=length("FileName") AND length("FileName")>0)) COLLATE NOCASE,
 	"Priority"	UNSIGNED SMALLINT DEFAULT NULL,
 	"ProviderData"	TEXT DEFAULT NULL,
     "CreatedOn" DATETIME NOT NULL DEFAULT (datetime('now','localtime')),
