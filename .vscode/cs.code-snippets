@@ -2,7 +2,9 @@
     "Define Critical LoggerMessage w/ no args": {
         "prefix": "logger-message-critical0",
 		"body": [
-			"public const int EVENT_ID_Critical${1:EventName}Error = 0x${2:0000};",
+            "#region Critical ${1:EventName} Error (0x${2:0000})",
+            "",
+			"public const int EVENT_ID_Critical${1}Error = 0x${2};",
 			"public static readonly EventId Critical${1}Error = new(EVENT_ID_Critical${1}Error, nameof(Critical${1}Error));",
 			"private static readonly Action<ILogger, Exception?> _critical${1}Error = LoggerMessage.Define(LogLevel.Critical, Critical${1}Error,",
 			"    \"${3:Message}\");",
@@ -11,14 +13,18 @@
             "/// </summary>",
             "/// <param name=\"logger\">The current logger.</param>",
             "/// <param name=\"error\">The exception that caused the event or <see langword=\"null\" /> for no exception.</param>",
-			"public static void LogCritical${1}Error(this ILogger logger, ${4:Exception}? error) => _critical${1}Error(logger, error);"
+			"public static void LogCritical${1}Error(this ILogger logger, ${4:Exception}? error) => _critical${1}Error(logger, error);",
+            "",
+            "#endregion"
 		],
 		"description": "Create Logger Message definition with no extra arguments and LogLevel.Critical."
     },
     "Define Critical LoggerMessage w/1 arg": {
         "prefix": "logger-message-critical1",
 		"body": [
-			"public const int EVENT_ID_Critical${1:EventName}Error = 0x${2:0000};",
+            "#region Critical ${1:EventName} Error (0x${2:0000})",
+            "",
+			"public const int EVENT_ID_Critical${1}Error = 0x${2};",
 			"public static readonly EventId Critical${1}Error = new(EVENT_ID_Critical${1}Error, nameof(Critical${1}Error));",
 			"private static readonly Action<ILogger, ${3:object}, Exception?> _critical${1}Error = LoggerMessage.Define<${3}>(LogLevel.Critical, Critical${1}Error,",
 			"    \"${4:Message }{${5:Param1}}\");",
@@ -28,14 +34,18 @@
             "/// <param name=\"logger\">The current logger.</param>",
             "/// <param name=\"${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${6:The first event parameter.}</param>",
             "/// <param name=\"error\">The exception that caused the event or <see langword=\"null\" /> for no exception.</param>",
-			"public static void LogCritical${1}Error(this ILogger logger, ${3} ${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${7:Exception}? error) => _critical${1}Error(logger, ${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, error);"
+			"public static void LogCritical${1}Error(this ILogger logger, ${3} ${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${7:Exception}? error) => _critical${1}Error(logger, ${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, error);",
+            "",
+            "#endregion"
 		],
 		"description": "Create Logger Message definition with 1 extra argument and LogLevel.Critical."
     },
     "Define Critical LoggerMessage w/2 args": {
         "prefix": "logger-message-critical2",
 		"body": [
-			"public const int EVENT_ID_Critical${1:EventName}Error = 0x${2:0000};",
+            "#region Critical ${1:EventName} Error (0x${2:0000})",
+            "",
+			"public const int EVENT_ID_Critical${1}Error = 0x${2};",
 			"public static readonly EventId Critical${1}Error = new(EVENT_ID_Critical${1}Error, nameof(Critical${1}Error));",
 			"private static readonly Action<ILogger, ${3:object}, ${4:object}, Exception?> _critical${1}Error = LoggerMessage.Define<${3}, ${4}>(LogLevel.Critical, Critical${1}Error,",
 			"    \"${5:Message }{${6:Param1}} {${7:Param2}}\");",
@@ -46,14 +56,18 @@
             "/// <param name=\"${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${8:The first event parameter.}</param>",
             "/// <param name=\"${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${9:The second event parameter.}</param>",
             "/// <param name=\"error\">The exception that caused the event or <see langword=\"null\" /> for no exception.</param>",
-			"public static void LogCritical${1}Error(this ILogger logger, ${3} ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${10:Exception}? error) => _critical${1}Error(logger, ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, error);"
+			"public static void LogCritical${1}Error(this ILogger logger, ${3} ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${10:Exception}? error) => _critical${1}Error(logger, ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, error);",
+            "",
+            "#endregion"
 		],
 		"description": "Create Logger Message definition with 2 extra arguments and LogLevel.Critical."
     },
     "Define Critical LoggerMessage w/3 args": {
         "prefix": "logger-message-critical3",
 		"body": [
-			"public const int EVENT_ID_Critical${1:EventName}Error = 0x${2:0000};",
+            "#region Critical ${1:EventName} Error (0x${2:0000})",
+            "",
+			"public const int EVENT_ID_Critical${1}Error = 0x${2};",
 			"public static readonly EventId Critical${1}Error = new(EVENT_ID_Critical${1}Error, nameof(Critical${1}Error));",
 			"private static readonly Action<ILogger, ${3:object}, ${4:object}, ${5:object}, Exception?> _critical${1}Error = LoggerMessage.Define<${3}, ${4}, ${5}>(LogLevel.Critical, Critical${1}Error,",
 			"    \"${6:Message }{${7:Param1}} {${8:Param2}} {${9:Param2}}\");",
@@ -65,7 +79,9 @@
             "/// <param name=\"${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${11:The second event parameter.}</param>",
             "/// <param name=\"${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${12:The third event parameter.}</param>",
             "/// <param name=\"error\">The exception that caused the event or <see langword=\"null\" /> for no exception.</param>",
-			"public static void LogCritical${1}Error(this ILogger logger, ${3} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${5} ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${13:Exception}? error) => _critical${1}Error(logger, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, error);"
+			"public static void LogCritical${1}Error(this ILogger logger, ${3} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${5} ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${13:Exception}? error) => _critical${1}Error(logger, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, error);",
+            "",
+            "#endregion"
 		],
 		"description": "Create Logger Message definition with 3 extra arguments and LogLevel.Critical."
     },
@@ -73,7 +89,9 @@
     "Define Error LoggerMessage w/ no args": {
         "prefix": "logger-message-error0",
 		"body": [
-			"public const int EVENT_ID_${1:EventName}Error = 0x${2:0000};",
+            "#region ${1:EventName} Error (0x${2:0000})",
+            "",
+			"public const int EVENT_ID_${1}Error = 0x${2};",
 			"public static readonly EventId ${1}Error = new(EVENT_ID_${1}Error, nameof(${1}Error));",
 			"private static readonly Action<ILogger, Exception?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Error = LoggerMessage.Define(LogLevel.Error, ${1}Error,",
 			"    \"${3:Message}\");",
@@ -82,14 +100,18 @@
             "/// </summary>",
             "/// <param name=\"logger\">The current logger.</param>",
             "/// <param name=\"error\">The exception that caused the event or <see langword=\"null\" /> for no exception.</param>",
-			"public static void Log${1}Error(this ILogger logger, ${4:Exception}? error) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Error(logger, error);"
+			"public static void Log${1}Error(this ILogger logger, ${4:Exception}? error) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Error(logger, error);",
+            "",
+            "#endregion"
 		],
 		"description": "Create Logger Message definition with no extra arguments and LogLevel.Error."
     },
     "Define Error LoggerMessage w/1 arg": {
         "prefix": "logger-message-error1",
 		"body": [
-			"public const int EVENT_ID_${1:EventName}Error = 0x${2:0000};",
+            "#region ${1:EventName} Error (0x${2:0000})",
+            "",
+			"public const int EVENT_ID_${1}Error = 0x${2};",
 			"public static readonly EventId ${1}Error = new(EVENT_ID_${1}Error, nameof(${1}Error));",
 			"private static readonly Action<ILogger, ${3:object}, Exception?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Error = LoggerMessage.Define<${3}>(LogLevel.Error, ${1}Error,",
 			"    \"${4:Message }{${5:Param1}}\");",
@@ -99,14 +121,18 @@
             "/// <param name=\"logger\">The current logger.</param>",
             "/// <param name=\"${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${6:The first event parameter.}</param>",
             "/// <param name=\"error\">The exception that caused the event or <see langword=\"null\" /> for no exception.</param>",
-			"public static void Log${1}Error(this ILogger logger, ${3} ${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${7:Exception}? error) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Error(logger, ${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, error);"
+			"public static void Log${1}Error(this ILogger logger, ${3} ${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${7:Exception}? error) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Error(logger, ${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, error);",
+            "",
+            "#endregion"
 		],
 		"description": "Create Logger Message definition with 1 extra argument and LogLevel.Error."
     },
     "Define Error LoggerMessage w/2 args": {
         "prefix": "logger-message-error2",
 		"body": [
-			"public const int EVENT_ID_${1:EventName}Error = 0x${2:0000};",
+            "#region ${1:EventName} Error (0x${2:0000})",
+            "",
+			"public const int EVENT_ID_${1}Error = 0x${2};",
 			"public static readonly EventId ${1}Error = new(EVENT_ID_${1}Error, nameof(${1}Error));",
 			"private static readonly Action<ILogger, ${3:object}, ${4:object}, Exception?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Error = LoggerMessage.Define<${3}, ${4}>(LogLevel.Error, ${1}Error,",
 			"    \"${5:Message }{${6:Param1}} {${7:Param2}}\");",
@@ -117,14 +143,18 @@
             "/// <param name=\"${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${8:The first event parameter.}</param>",
             "/// <param name=\"${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${9:The second event parameter.}</param>",
             "/// <param name=\"error\">The exception that caused the event or <see langword=\"null\" /> for no exception.</param>",
-			"public static void Log${1}Error(this ILogger logger, ${3} ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${10:Exception}? error) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Error(logger, ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, error);"
+			"public static void Log${1}Error(this ILogger logger, ${3} ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${10:Exception}? error) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Error(logger, ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, error);",
+            "",
+            "#endregion"
 		],
 		"description": "Create Logger Message definition with 2 extra arguments and LogLevel.Error."
     },
     "Define Error LoggerMessage w/3 args": {
         "prefix": "logger-message-error3",
 		"body": [
-			"public const int EVENT_ID_${1:EventName}Error = 0x${2:0000};",
+            "#region ${1:EventName} Error (0x${2:0000})",
+            "",
+			"public const int EVENT_ID_${1}Error = 0x${2};",
 			"public static readonly EventId ${1}Error = new(EVENT_ID_${1}Error, nameof(${1}Error));",
 			"private static readonly Action<ILogger, ${3:object}, ${4:object}, ${5:object}, Exception?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Error = LoggerMessage.Define<${3}, ${4}, ${5}>(LogLevel.Error, ${1}Error,",
 			"    \"${6:Message }{${7:Param1}} {${8:Param2}} {${9:Param2}}\");",
@@ -136,7 +166,9 @@
             "/// <param name=\"${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${11:The second event parameter.}</param>",
             "/// <param name=\"${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${12:The third event parameter.}</param>",
             "/// <param name=\"error\">The exception that caused the event or <see langword=\"null\" /> for no exception.</param>",
-			"public static void Log${1}Error(this ILogger logger, ${3} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${5} ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${13:Exception}? error) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Error(logger, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, error);"
+			"public static void Log${1}Error(this ILogger logger, ${3} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${5} ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${13:Exception}? error) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Error(logger, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, error);",
+            "",
+            "#endregion"
 		],
 		"description": "Create Logger Message definition with 3 extra arguments and LogLevel.Error."
     },
@@ -144,7 +176,9 @@
     "Define Warning LoggerMessage w/ no args": {
         "prefix": "logger-message-warning0",
 		"body": [
-			"public const int EVENT_ID_${1:EventName}Warning = 0x${2:0000};",
+            "#region ${1:EventName} Warning (0x${2:0000})",
+            "",
+			"public const int EVENT_ID_${1}Warning = 0x${2};",
 			"public static readonly EventId ${1}Warning = new(EVENT_ID_${1}Warning, nameof(${1}Warning));",
 			"private static readonly Action<ILogger, Exception?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Warning = LoggerMessage.Define(LogLevel.Warning, ${1}Warning,",
 			"    \"${3:Message}\");",
@@ -153,14 +187,18 @@
             "/// </summary>",
             "/// <param name=\"logger\">The current logger.</param>",
             "/// <param name=\"exception\">The optional exception that caused the event.</param>",
-			"public static void Log${1}Warning(this ILogger logger, Exception? exception = null) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Warning(logger, exception);"
+			"public static void Log${1}Warning(this ILogger logger, Exception? exception = null) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Warning(logger, exception);",
+            "",
+            "#endregion"
 		],
 		"description": "Create Logger Message definition with no extra arguments and LogLevel.Warning."
     },
     "Define Warning LoggerMessage w/1 arg": {
         "prefix": "logger-message-warning1",
 		"body": [
-			"public const int EVENT_ID_${1:EventName}Warning = 0x${2:0000};",
+            "#region ${1:EventName} Warning (0x${2:0000})",
+            "",
+			"public const int EVENT_ID_${1}Warning = 0x${2};",
 			"public static readonly EventId ${1}Warning = new(EVENT_ID_${1}Warning, nameof(${1}Warning));",
 			"private static readonly Action<ILogger, ${3:object}, Exception?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Warning = LoggerMessage.Define<${3}>(LogLevel.Warning, ${1}Warning,",
 			"    \"${4:Message }{${5:Param1}}\");",
@@ -170,14 +208,18 @@
             "/// <param name=\"logger\">The current logger.</param>",
             "/// <param name=\"${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${6:The first event parameter.}</param>",
             "/// <param name=\"exception\">The optional exception that caused the event.</param>",
-			"public static void Log${1}Warning(this ILogger logger, ${3} ${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, Exception? exception = null) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Warning(logger, ${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, exception);"
+			"public static void Log${1}Warning(this ILogger logger, ${3} ${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, Exception? exception = null) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Warning(logger, ${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, exception);",
+            "",
+            "#endregion"
 		],
 		"description": "Create Logger Message definition with 1 extra argument and LogLevel.Warning."
     },
     "Define Warning LoggerMessage w/2 args": {
         "prefix": "logger-message-warning2",
 		"body": [
-			"public const int EVENT_ID_${1:EventName}Warning = 0x${2:0000};",
+            "#region ${1:EventName} Warning (0x${2:0000})",
+            "",
+			"public const int EVENT_ID_${1}Warning = 0x${2};",
 			"public static readonly EventId ${1}Warning = new(EVENT_ID_${1}Warning, nameof(${1}Warning));",
 			"private static readonly Action<ILogger, ${3:object}, ${4:object}, Exception?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Warning = LoggerMessage.Define<${3}, ${4}>(LogLevel.Warning, ${1}Warning,",
 			"    \"${5:Message }{${6:Param1}} {${7:Param2}}\");",
@@ -188,14 +230,18 @@
             "/// <param name=\"${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${8:The first event parameter.}</param>",
             "/// <param name=\"${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${9:The second event parameter.}</param>",
             "/// <param name=\"exception\">The optional exception that caused the event.</param>",
-			"public static void Log${1}Warning(this ILogger logger, ${3} ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, Exception? exception = null) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Warning(logger, ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, exception);"
+			"public static void Log${1}Warning(this ILogger logger, ${3} ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, Exception? exception = null) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Warning(logger, ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, exception);",
+            "",
+            "#endregion"
 		],
 		"description": "Create Logger Message definition with 2 extra arguments and LogLevel.Warning."
     },
     "Define Warning LoggerMessage w/3 args": {
         "prefix": "logger-message-warning3",
 		"body": [
-			"public const int EVENT_ID_${1:EventName}Warning = 0x${2:0000};",
+            "#region ${1:EventName} Warning (0x${2:0000})",
+            "",
+			"public const int EVENT_ID_${1}Warning = 0x${2};",
 			"public static readonly EventId ${1}Warning = new(EVENT_ID_${1}Warning, nameof(${1}Warning));",
 			"private static readonly Action<ILogger, ${3:object}, ${4:object}, ${5:object}, Exception?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Warning = LoggerMessage.Define<${3}, ${4}, ${5}>(LogLevel.Warning, ${1}Warning,",
 			"    \"${6:Message }{${7:Param1}} {${8:Param2}} {${9:Param2}}\");",
@@ -207,7 +253,9 @@
             "/// <param name=\"${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${11:The second event parameter.}</param>",
             "/// <param name=\"${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${12:The third event parameter.}</param>",
             "/// <param name=\"exception\">The optional exception that caused the event.</param>",
-			"public static void Log${1}Warning(this ILogger logger, ${3} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${5} ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, Exception? exception = null) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Warning(logger, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, exception);"
+			"public static void Log${1}Warning(this ILogger logger, ${3} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${5} ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, Exception? exception = null) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Warning(logger, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, exception);",
+            "",
+            "#endregion"
 		],
 		"description": "Create Logger Message definition with 3 extra arguments and LogLevel.Warning."
     },
@@ -215,7 +263,9 @@
     "Define Information LoggerMessage w/ no args": {
         "prefix": "logger-message-information0",
 		"body": [
-			"public const int EVENT_ID_${1:EventName}Information = 0x${2:0000};",
+            "#region ${1:EventName} Information (0x${2:0000})",
+            "",
+			"public const int EVENT_ID_${1}Information = 0x${2};",
 			"public static readonly EventId ${1}Information = new(EVENT_ID_${1}Information, nameof(${1}Information));",
 			"private static readonly Action<ILogger, Exception?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Information = LoggerMessage.Define(LogLevel.Information, ${1}Information,",
 			"    \"${3:Message}\");",
@@ -223,14 +273,18 @@
             "/// Logs an ${1} event with event code 0x${2}.",
             "/// </summary>",
             "/// <param name=\"logger\">The current logger.</param>",
-			"public static void Log${1}Information(this ILogger logger) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Information(logger, null);"
+			"public static void Log${1}Information(this ILogger logger) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Information(logger, null);",
+            "",
+            "#endregion"
 		],
 		"description": "Create Logger Message definition with no extra arguments and LogLevel.Information."
     },
     "Define Information LoggerMessage w/1 arg": {
         "prefix": "logger-message-information1",
 		"body": [
-			"public const int EVENT_ID_${1:EventName}Information = 0x${2:0000};",
+            "#region ${1:EventName} Information (0x${2:0000})",
+            "",
+			"public const int EVENT_ID_${1}Information = 0x${2};",
 			"public static readonly EventId ${1}Information = new(EVENT_ID_${1}Information, nameof(${1}Information));",
 			"private static readonly Action<ILogger, ${3:object}, Exception?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Information = LoggerMessage.Define<${3}>(LogLevel.Information, ${1}Information,",
 			"    \"${4:Message }{${5:Param1}}\");",
@@ -239,14 +293,18 @@
             "/// </summary>",
             "/// <param name=\"logger\">The current logger.</param>",
             "/// <param name=\"${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${6:The first event parameter.}</param>",
-			"public static void Log${1}Information(this ILogger logger, ${3} ${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Information(logger, ${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, null);"
+			"public static void Log${1}Information(this ILogger logger, ${3} ${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Information(logger, ${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, null);",
+            "",
+            "#endregion"
 		],
 		"description": "Create Logger Message definition with 1 extra argument and LogLevel.Information."
     },
     "Define Information LoggerMessage w/2 args": {
         "prefix": "logger-message-information2",
 		"body": [
-			"public const int EVENT_ID_${1:EventName}Information = 0x${2:0000};",
+            "#region ${1:EventName} Information (0x${2:0000})",
+            "",
+			"public const int EVENT_ID_${1}Information = 0x${2};",
 			"public static readonly EventId ${1}Information = new(EVENT_ID_${1}Information, nameof(${1}Information));",
 			"private static readonly Action<ILogger, ${3:object}, ${4:object}, Exception?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Information = LoggerMessage.Define<${3}, ${4}>(LogLevel.Information, ${1}Information,",
 			"    \"${5:Message }{${6:Param1}} {${7:Param2}}\");",
@@ -256,14 +314,18 @@
             "/// <param name=\"logger\">The current logger.</param>",
             "/// <param name=\"${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${8:The first event parameter.}</param>",
             "/// <param name=\"${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${9:The second event parameter.}</param>",
-			"public static void Log${1}Information(this ILogger logger, ${3} ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Information(logger, ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, null);"
+			"public static void Log${1}Information(this ILogger logger, ${3} ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Information(logger, ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, null);",
+            "",
+            "#endregion"
 		],
 		"description": "Create Logger Message definition with 2 extra arguments and LogLevel.Information."
     },
     "Define Information LoggerMessage w/3 args": {
         "prefix": "logger-message-information3",
 		"body": [
-			"public const int EVENT_ID_${1:EventName}Information = 0x${2:0000};",
+            "#region ${1:EventName} Information (0x${2:0000})",
+            "",
+			"public const int EVENT_ID_${1}Information = 0x${2};",
 			"public static readonly EventId ${1}Information = new(EVENT_ID_${1}Information, nameof(${1}Information));",
 			"private static readonly Action<ILogger, ${3:object}, ${4:object}, ${5:object}, Exception?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Information = LoggerMessage.Define<${3}, ${4}, ${5}>(LogLevel.Information, ${1}Information,",
 			"    \"${6:Message }{${7:Param1}} {${8:Param2}} {${9:Param2}}\");",
@@ -274,7 +336,9 @@
             "/// <param name=\"${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${10:The first event parameter.}</param>",
             "/// <param name=\"${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${11:The second event parameter.}</param>",
             "/// <param name=\"${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${12:The third event parameter.}</param>",
-			"public static void Log${1}Information(this ILogger logger, ${3} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${5} ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Information(logger, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, null);"
+			"public static void Log${1}Information(this ILogger logger, ${3} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${5} ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Information(logger, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, null);",
+            "",
+            "#endregion"
 		],
 		"description": "Create Logger Message definition with 3 extra arguments and LogLevel.Information."
     },
@@ -282,7 +346,9 @@
     "Define Trace LoggerMessage w/ no args": {
         "prefix": "logger-message-trace0",
 		"body": [
-			"public const int EVENT_ID_${1:EventName}Trace = 0x${2:0000};",
+            "#region ${1:EventName} Trace (0x${2:0000})",
+            "",
+			"public const int EVENT_ID_${1}Trace = 0x${2};",
 			"public static readonly EventId ${1}Trace = new(EVENT_ID_${1}Trace, nameof(${1}Trace));",
 			"private static readonly Action<ILogger, Exception?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Trace = LoggerMessage.Define(LogLevel.Trace, ${1}Trace,",
 			"    \"${3:Message}\");",
@@ -290,14 +356,18 @@
             "/// Logs an ${1} event with event code 0x${2}.",
             "/// </summary>",
             "/// <param name=\"logger\">The current logger.</param>",
-			"public static void Log${1}Trace(this ILogger logger) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Trace(logger, null);"
+			"public static void Log${1}Trace(this ILogger logger) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Trace(logger, null);",
+            "",
+            "#endregion"
 		],
 		"description": "Create Logger Message definition with no extra arguments and LogLevel.Trace."
     },
     "Define Trace LoggerMessage w/1 arg": {
         "prefix": "logger-message-trace1",
 		"body": [
-			"public const int EVENT_ID_${1:EventName}Trace = 0x${2:0000};",
+            "#region ${1:EventName} Trace (0x${2:0000})",
+            "",
+			"public const int EVENT_ID_${1}Trace = 0x${2};",
 			"public static readonly EventId ${1}Trace = new(EVENT_ID_${1}Trace, nameof(${1}Trace));",
 			"private static readonly Action<ILogger, ${3:object}, Exception?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Trace = LoggerMessage.Define<${3}>(LogLevel.Trace, ${1}Trace,",
 			"    \"${4:Message }{${5:Param1}}\");",
@@ -306,14 +376,18 @@
             "/// </summary>",
             "/// <param name=\"logger\">The current logger.</param>",
             "/// <param name=\"${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${6:The first event parameter.}</param>",
-			"public static void Log${1}Trace(this ILogger logger, ${3} ${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Trace(logger, ${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, null);"
+			"public static void Log${1}Trace(this ILogger logger, ${3} ${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Trace(logger, ${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, null);",
+            "",
+            "#endregion"
 		],
 		"description": "Create Logger Message definition with 1 extra argument and LogLevel.Trace."
     },
     "Define Trace LoggerMessage w/2 args": {
         "prefix": "logger-message-trace2",
 		"body": [
-			"public const int EVENT_ID_${1:EventName}Trace = 0x${2:0000};",
+            "#region ${1:EventName} Trace (0x${2:0000})",
+            "",
+			"public const int EVENT_ID_${1}Trace = 0x${2};",
 			"public static readonly EventId ${1}Trace = new(EVENT_ID_${1}Trace, nameof(${1}Trace));",
 			"private static readonly Action<ILogger, ${3:object}, ${4:object}, Exception?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Trace = LoggerMessage.Define<${3}, ${4}>(LogLevel.Trace, ${1}Trace,",
 			"    \"${5:Message }{${6:Param1}} {${7:Param2}}\");",
@@ -323,14 +397,18 @@
             "/// <param name=\"logger\">The current logger.</param>",
             "/// <param name=\"${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${8:The first event parameter.}</param>",
             "/// <param name=\"${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${9:The second event parameter.}</param>",
-			"public static void Log${1}Trace(this ILogger logger, ${3} ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Trace(logger, ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, null);"
+			"public static void Log${1}Trace(this ILogger logger, ${3} ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Trace(logger, ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, null);",
+            "",
+            "#endregion"
 		],
 		"description": "Create Logger Message definition with 2 extra arguments and LogLevel.Trace."
     },
     "Define Trace LoggerMessage w/3 args": {
         "prefix": "logger-message-trace3",
 		"body": [
-			"public const int EVENT_ID_${1:EventName}Trace = 0x${2:0000};",
+            "#region ${1:EventName} Trace (0x${2:0000})",
+            "",
+			"public const int EVENT_ID_${1}Trace = 0x${2};",
 			"public static readonly EventId ${1}Trace = new(EVENT_ID_${1}Trace, nameof(${1}Trace));",
 			"private static readonly Action<ILogger, ${3:object}, ${4:object}, ${5:object}, Exception?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Trace = LoggerMessage.Define<${3}, ${4}, ${5}>(LogLevel.Trace, ${1}Trace,",
 			"    \"${6:Message }{${7:Param1}} {${8:Param2}} {${9:Param2}}\");",
@@ -341,7 +419,9 @@
             "/// <param name=\"${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${10:The first event parameter.}</param>",
             "/// <param name=\"${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${11:The second event parameter.}</param>",
             "/// <param name=\"${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${12:The third event parameter.}</param>",
-			"public static void Log${1}Trace(this ILogger logger, ${3} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${5} ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Trace(logger, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, null);"
+			"public static void Log${1}Trace(this ILogger logger, ${3} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${5} ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Trace(logger, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, null);",
+            "",
+            "#endregion"
 		],
 		"description": "Create Logger Message definition with 3 extra arguments and LogLevel.Trace."
     },
@@ -349,7 +429,9 @@
     "Define Debug LoggerMessage w/ no args": {
         "prefix": "logger-message-debug0",
 		"body": [
-			"public const int EVENT_ID_${1:EventName}Debug = 0x${2:0000};",
+            "#region ${1:EventName} Debug (0x${2:0000})",
+            "",
+			"public const int EVENT_ID_${1}Debug = 0x${2};",
 			"public static readonly EventId ${1}Debug = new(EVENT_ID_${1}Debug, nameof(${1}Debug));",
 			"private static readonly Action<ILogger, Exception?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Debug = LoggerMessage.Define(LogLevel.Debug, ${1}Debug,",
 			"    \"${3:Message}\");",
@@ -358,14 +440,18 @@
             "/// </summary>",
             "/// <param name=\"logger\">The current logger.</param>",
             "/// <param name=\"exception\">The optional exception that caused the event.</param>",
-			"public static void Log${1}Debug(this ILogger logger, Exception? exception = null) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Debug(logger, exception);"
+			"public static void Log${1}Debug(this ILogger logger, Exception? exception = null) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Debug(logger, exception);",
+            "",
+            "#endregion"
 		],
 		"description": "Create Logger Message definition with no extra arguments and LogLevel.Debug."
     },
     "Define Debug LoggerMessage w/1 arg": {
         "prefix": "logger-message-debug1",
 		"body": [
-			"public const int EVENT_ID_${1:EventName}Debug = 0x${2:0000};",
+            "#region ${1:EventName} Debug (0x${2:0000})",
+            "",
+			"public const int EVENT_ID_${1}Debug = 0x${2};",
 			"public static readonly EventId ${1}Debug = new(EVENT_ID_${1}Debug, nameof(${1}Debug));",
 			"private static readonly Action<ILogger, ${3:object}, Exception?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Debug = LoggerMessage.Define<${3}>(LogLevel.Debug, ${1}Debug,",
 			"    \"${4:Message }{${5:Param1}}\");",
@@ -375,14 +461,18 @@
             "/// <param name=\"logger\">The current logger.</param>",
             "/// <param name=\"${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${6:The first event parameter.}</param>",
             "/// <param name=\"exception\">The optional exception that caused the event.</param>",
-			"public static void Log${1}Debug(this ILogger logger, ${3} ${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, Exception? exception = null) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Debug(logger, ${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, exception);"
+			"public static void Log${1}Debug(this ILogger logger, ${3} ${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, Exception? exception = null) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Debug(logger, ${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, exception);",
+            "",
+            "#endregion"
 		],
 		"description": "Create Logger Message definition with 1 extra argument and LogLevel.Debug."
     },
     "Define Debug LoggerMessage w/2 args": {
         "prefix": "logger-message-debug2",
 		"body": [
-			"public const int EVENT_ID_${1:EventName}Debug = 0x${2:0000};",
+            "#region ${1:EventName} Debug (0x${2:0000})",
+            "",
+			"public const int EVENT_ID_${1}Debug = 0x${2};",
 			"public static readonly EventId ${1}Debug = new(EVENT_ID_${1}Debug, nameof(${1}Debug));",
 			"private static readonly Action<ILogger, ${3:object}, ${4:object}, Exception?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Debug = LoggerMessage.Define<${3}, ${4}>(LogLevel.Debug, ${1}Debug,",
 			"    \"${5:Message }{${6:Param1}} {${7:Param2}}\");",
@@ -393,14 +483,18 @@
             "/// <param name=\"${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${8:The first event parameter.}</param>",
             "/// <param name=\"${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${9:The second event parameter.}</param>",
             "/// <param name=\"exception\">The optional exception that caused the event.</param>",
-			"public static void Log${1}Debug(this ILogger logger, ${3} ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, Exception? exception = null) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Debug(logger, ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, exception);"
+			"public static void Log${1}Debug(this ILogger logger, ${3} ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, Exception? exception = null) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Debug(logger, ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, exception);",
+            "",
+            "#endregion"
 		],
 		"description": "Create Logger Message definition with 2 extra arguments and LogLevel.Debug."
     },
     "Define Debug LoggerMessage w/3 args": {
         "prefix": "logger-message-debug3",
 		"body": [
-			"public const int EVENT_ID_${1:EventName}Debug = 0x${2:0000};",
+            "#region ${1:EventName} Debug (0x${2:0000})",
+            "",
+			"public const int EVENT_ID_${1}Debug = 0x${2};",
 			"public static readonly EventId ${1}Debug = new(EVENT_ID_${1}Debug, nameof(${1}Debug));",
 			"private static readonly Action<ILogger, ${3:object}, ${4:object}, ${5:object}, Exception?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Debug = LoggerMessage.Define<${3}, ${4}, ${5}>(LogLevel.Debug, ${1}Debug,",
 			"    \"${6:Message }{${7:Param1}} {${8:Param2}} {${9:Param2}}\");",
@@ -412,8 +506,85 @@
             "/// <param name=\"${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${11:The second event parameter.}</param>",
             "/// <param name=\"${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${12:The third event parameter.}</param>",
             "/// <param name=\"exception\">The optional exception that caused the event.</param>",
-			"public static void Log${1}Debug(this ILogger logger, ${3} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${5} ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, Exception? exception = null) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Debug(logger, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, exception);"
+			"public static void Log${1}Debug(this ILogger logger, ${3} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${5} ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, Exception? exception = null) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Debug(logger, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, exception);",
+            "",
+            "#endregion"
 		],
 		"description": "Create Logger Message definition with 3 extra arguments and LogLevel.Debug."
+    },
+    
+    "Define Logger Scope w/ no args": {
+        "prefix": "logger-scope0",
+		"body": [
+            "#region ${1:ScopeName} Scope",
+            "",
+			"private static readonly Func<ILogger, IDisposable?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Scope = LoggerMessage.DefineScope(\"${2:Message}\");",
+            "/// <summary>",
+            "/// Formats the ${1} message and creates a scope.",
+            "/// </summary>",
+            "/// <param name=\"logger\">The current logger.</param>",
+            "/// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>",
+			"public static IDisposable? Begin${1}Scope(this ILogger logger) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Scope(logger);",
+            "",
+            "#endregion"
+		],
+		"description": "Create Logger scope definition with no extra arguments."
+    },
+    "Define Logger Scope w/ 1 arg": {
+        "prefix": "logger-scope1",
+		"body": [
+            "#region ${1:ScopeName} Scope",
+            "",
+			"private static readonly Func<ILogger, ${2:object}, IDisposable?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Scope = LoggerMessage.DefineScope<$2>(\"${3:Message} {${4:ParamName}}\");",
+            "/// <summary>",
+            "/// Formats the ${1} message and creates a scope.",
+            "/// </summary>",
+            "/// <param name=\"logger\">The current logger.</param>",
+            "/// <param name=\"${4/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${5:description}</param>",
+            "/// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>",
+			"public static IDisposable? Begin${1}Scope(this ILogger logger, ${2} ${4/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Scope(logger, ${4/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/});",
+            "",
+            "#endregion"
+		],
+		"description": "Create Logger scope definition with 1 extra argument."
+    },
+    "Define Logger Scope w/ 2 args": {
+        "prefix": "logger-scope2",
+		"body": [
+            "#region ${1:ScopeName} Scope",
+            "",
+			"private static readonly Func<ILogger, ${2:object}, ${3:object}, IDisposable?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Scope = LoggerMessage.DefineScope<$2, $3>(\"${4:Message} {${5:ParamName1}} {${6:ParamName2}}\");",
+            "/// <summary>",
+            "/// Formats the ${1} message and creates a scope.",
+            "/// </summary>",
+            "/// <param name=\"logger\">The current logger.</param>",
+            "/// <param name=\"${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${7:description}</param>",
+            "/// <param name=\"${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${8:description}</param>",
+            "/// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>",
+			"public static IDisposable? Begin${1}Scope(this ILogger logger, ${2} ${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${3} ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Scope(logger, ${5/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/});",
+            "",
+            "#endregion"
+		],
+		"description": "Create Logger scope definition with 2 extra arguments."
+    },
+    "Define Logger Scope w/ 3 args": {
+        "prefix": "logger-scope3",
+		"body": [
+            "#region ${1:ScopeName} Scope",
+            "",
+			"private static readonly Func<ILogger, ${2:object}, ${3:object}, ${4:object}, IDisposable?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Scope = LoggerMessage.DefineScope<$2, $3, $4>(\"${5:Message} {${6:ParamName1}} {${7:ParamName2}} {${8:ParamName2}}\");",
+            "/// <summary>",
+            "/// Formats the ${1} message and creates a scope.",
+            "/// </summary>",
+            "/// <param name=\"logger\">The current logger.</param>",
+            "/// <param name=\"${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${9:description}</param>",
+            "/// <param name=\"${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${10:description}</param>",
+            "/// <param name=\"${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${11:description}</param>",
+            "/// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>",
+			"public static IDisposable? Begin${1}Scope(this ILogger logger, ${2} ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${3} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Scope(logger, ${6/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${8/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/});",
+            "",
+            "#endregion"
+		],
+		"description": "Create Logger scope definition with 2 extra arguments."
     }
 }
