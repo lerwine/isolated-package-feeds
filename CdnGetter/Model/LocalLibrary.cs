@@ -136,7 +136,6 @@ public class LocalLibrary : ModificationTrackingModelBase
 #pragma warning disable CS1998
     internal async Task GetNewVersionsPreferredAsync(Services.ContentDb dbContext, CancellationToken stoppingToken)
     {
-        // TODO: Implement LocalLibrary.GetNewVersionsPreferredAsync
         throw new NotImplementedException();
     }
 #pragma warning restore CS1998

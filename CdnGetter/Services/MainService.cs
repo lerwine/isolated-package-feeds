@@ -139,11 +139,11 @@ public class MainService : BackgroundService
                         IEnumerable<string> upstream = _appSettings.Upstream.TrimmedNotEmptyValues();
                         if (upstream.Any())
                         {
-                            // TODO: Show library versions for upstream CDN(s)
+                            throw new NotImplementedException("Show library versions for upstream CDN(s) functionality not implemented");
                         }
                         else
                         {
-                            // TODO: Show library versions
+                            throw new NotImplementedException("Show library versions functionality not implemented");
                         }
                     }
                 }
@@ -153,7 +153,7 @@ public class MainService : BackgroundService
                         _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Library)}");
                     else
                     {
-                        // TODO: Show files
+                        throw new NotImplementedException("Show files functionality not implemented");
                     }
                 }
                 else
@@ -180,7 +180,7 @@ public class MainService : BackgroundService
                         if (cdns.Any())
                         {
                             IEnumerable<string> versions = _appSettings.Version.TrimmedNotEmptyValues();
-                            // TODO: Add libraries
+                            throw new NotImplementedException("Add libraries functionality not implemented.");
                         }
                         else
                             _logger.LogRequiredDependentParameterWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Upstream)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.AddLibrary)}");
@@ -201,7 +201,7 @@ public class MainService : BackgroundService
                     else
                     {
                         IEnumerable<string> upstream = _appSettings.Upstream.TrimmedNotEmptyValues();
-                        // TODO: Add new versions
+                        throw new NotImplementedException("Add new versions functionality not implemented.");
                     }
                 }
                 else if ((libraryNames = _appSettings.RemoveLibrary.TrimmedNotEmptyValues()).Any())
@@ -216,7 +216,7 @@ public class MainService : BackgroundService
                     {
                         IEnumerable<string> upstream = _appSettings.Upstream.TrimmedNotEmptyValues();
                         IEnumerable<string> versions = _appSettings.Version.TrimmedNotEmptyValues();
-                        // TODO: Remove libraries
+                        throw new NotImplementedException("Remove libraries functionality not implemented.");
                     }
                 }
                 else if ((libraryNames = _appSettings.ReloadLibrary.TrimmedNotEmptyValues()).Any())
@@ -231,11 +231,11 @@ public class MainService : BackgroundService
                         IEnumerable<string> versions = _appSettings.Version.TrimmedNotEmptyValues();
                         if (cdns.Any())
                         {
-                            // TODO: Reload libraries
+                            throw new NotImplementedException("Reload libraries for specific CDNs functionality not implemented.");
                         }
                         else if (versions.Any())
                         {
-                            // TODO: Reload libraries
+                            throw new NotImplementedException("Reload libraries for specific versions functionality not implemented.");
                         }
                         else
                             _logger.LogRequiredAltDependentParameterWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Upstream)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Version)}",
@@ -254,11 +254,11 @@ public class MainService : BackgroundService
                         IEnumerable<string> versions = _appSettings.Version.TrimmedNotEmptyValues();
                         if (cdns.Any())
                         {
-                            // TODO: Reload libraries
+                            throw new NotImplementedException("Reload libraries for specific CDNs functionality not implemented.");
                         }
                         else if (versions.Any())
                         {
-                            // TODO: Reload libraries
+                            throw new NotImplementedException("Reload libraries for specific versions functionality not implemented.");
                         }
                         else
                             _logger.LogRequiredAltDependentParameterWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Upstream)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Version)}",

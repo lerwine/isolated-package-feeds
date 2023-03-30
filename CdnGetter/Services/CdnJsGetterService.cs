@@ -28,7 +28,6 @@ public class CdnJsGetterService : ContentGetterService
 #pragma warning disable CS1998
     public override async Task AddAsync(UpstreamCdn upstreamCdn, IEnumerable<string> libraryNames, CancellationToken cancellationToken)
     {
-        // TODO: Implement CdnJsGetterService.AddAsync
         throw new NotImplementedException();
     }
 #pragma warning restore CS1998
@@ -36,7 +35,6 @@ public class CdnJsGetterService : ContentGetterService
 #pragma warning disable CS1998
     public override async Task GetNewVersionsAsync(CdnLibrary cdnLibrary, CancellationToken cancellationToken)
     {
-        // TODO: Implement CdnJsGetterService.GetNewVersionsAsync
         throw new NotImplementedException();
     }
 #pragma warning restore CS1998
@@ -44,7 +42,6 @@ public class CdnJsGetterService : ContentGetterService
 #pragma warning disable CS1998
     protected override async Task AddNewVersionsAsync(UpstreamCdn upstreamCdn, string libraryName, CancellationToken cancellationToken)
     {
-        // TODO: Implement CdnJsGetterService.AddNewVersionsAsync
         throw new NotImplementedException();
     }
 #pragma warning restore CS1998
@@ -54,7 +51,6 @@ public class CdnJsGetterService : ContentGetterService
 #pragma warning disable CS1998
     protected override async Task ReloadAsync(CdnLibrary library, CancellationToken cancellationToken)
     {
-        // TODO: Implement CdnJsGetterService.ReloadAsync
         throw new NotImplementedException();
     }
 #pragma warning restore CS1998
