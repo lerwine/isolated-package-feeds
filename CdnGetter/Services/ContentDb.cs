@@ -26,11 +26,11 @@ public class ContentDb : DbContext
                 _connectionStringValidated = true;
                 SqliteConnectionStringBuilder builder = new(Database.GetConnectionString());
                 string connectionString = builder.ConnectionString;
-                _logger.LogInformation($"Using {nameof(SqliteConnectionStringBuilder.ConnectionString)} {{{nameof(SqliteConnectionStringBuilder.ConnectionString)}}}", connectionString);
+                _logger.LogUsingConnectionStringTrace(connectionString);
                 if (!File.Exists(builder.DataSource))
                 {
                     builder.Mode = SqliteOpenMode.ReadWriteCreate;
-                    _logger.LogInformation("Initializing new database");
+                    _logger.LogInitializingNewDatabase(builder.DataSource);
                     using SqliteConnection connection = new(builder.ConnectionString);
                     connection.Open();
                     void executeNonQuery(string text)
@@ -41,9 +41,8 @@ public class ContentDb : DbContext
                         try { _ = command.ExecuteNonQuery(); }
                         catch (Exception exception)
                         {
-#pragma warning disable CA2201 // Exception type System.Exception is not sufficiently specific
-                            throw new Exception($"Error executing query '{text}': {exception.Message}");
-#pragma warning restore CA2201 // Exception type System.Exception is not sufficiently specific
+                            _logger.LogCriticalQueryExecutionError(text, exception);
+                            throw;
                         }
                     }
                     UpstreamCdn.CreateTable(executeNonQuery);
@@ -121,7 +120,7 @@ public class ContentDb : DbContext
 {
         if (cancellationToken.IsCancellationRequested)
             return;
-        using IDisposable? scope = _logger.BeginScope(nameof(OnBeforeSaveAsync));
+        using IDisposable? scope = _logger.BeginExecuteMethodScope(nameof(OnBeforeSaveAsync));
         foreach (EntityEntry e in ChangeTracker.Entries())
         {
             if (cancellationToken.IsCancellationRequested)
@@ -155,48 +154,38 @@ public class ContentDb : DbContext
 
     public override int SaveChanges()
     {
-        using (_logger.BeginScope("{MethodName}()", nameof(SaveChanges)))
-        {
-            OnBeforeSaveAsync().Wait();
-            int returnValue = base.SaveChanges();
-            _logger.LogDbSaveChangeCompletedTrace(false, null, returnValue);
-            return returnValue;
-        }
+        using IDisposable? scope = _logger.BeginExecuteMethodScope(nameof(SaveChanges));
+        OnBeforeSaveAsync().Wait();
+        int returnValue = base.SaveChanges();
+        _logger.LogDbSaveChangeCompletedTrace(false, null, returnValue);
+        return returnValue;
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
-        using (_logger.BeginScope($"{{MethodName}}({nameof(acceptAllChangesOnSuccess)}: {{{nameof(acceptAllChangesOnSuccess)}}})", nameof(SaveChanges),
-            acceptAllChangesOnSuccess))
-        {
-            OnBeforeSaveAsync().Wait();;
-            int returnValue = base.SaveChanges(acceptAllChangesOnSuccess);
-            _logger.LogDbSaveChangeCompletedTrace(false, acceptAllChangesOnSuccess, returnValue);
-            return returnValue;
-        }
+        using IDisposable? scope = _logger.BeginExecuteMethodScope(nameof(SaveChanges), nameof(acceptAllChangesOnSuccess), acceptAllChangesOnSuccess);
+        OnBeforeSaveAsync().Wait();;
+        int returnValue = base.SaveChanges(acceptAllChangesOnSuccess);
+        _logger.LogDbSaveChangeCompletedTrace(false, acceptAllChangesOnSuccess, returnValue);
+        return returnValue;
     }
 
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
-        using (_logger.BeginScope($"{{MethodName}}({nameof(acceptAllChangesOnSuccess)}: {{{nameof(acceptAllChangesOnSuccess)}}})", nameof(SaveChangesAsync),
-            acceptAllChangesOnSuccess))
-        {
-            await OnBeforeSaveAsync(cancellationToken);
-            int returnValue = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-            _logger.LogDbSaveChangeCompletedTrace(true, acceptAllChangesOnSuccess, returnValue);
-            return returnValue;
-        }
+        using IDisposable? scope = _logger.BeginExecuteMethodScope(nameof(SaveChangesAsync), nameof(acceptAllChangesOnSuccess), acceptAllChangesOnSuccess);
+        await OnBeforeSaveAsync(cancellationToken);
+        int returnValue = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        _logger.LogDbSaveChangeCompletedTrace(true, acceptAllChangesOnSuccess, returnValue);
+        return returnValue;
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        using (_logger.BeginScope("{MethodName}()", nameof(SaveChangesAsync)))
-        {
-            await OnBeforeSaveAsync(cancellationToken);
-            int returnValue = await base.SaveChangesAsync(cancellationToken);
-            _logger.LogDbSaveChangeCompletedTrace(true, null, returnValue);
-            return returnValue;
-        }
+        using IDisposable? scope = _logger.BeginExecuteMethodScope(nameof(SaveChangesAsync));
+        await OnBeforeSaveAsync(cancellationToken);
+        int returnValue = await base.SaveChangesAsync(cancellationToken);
+        _logger.LogDbSaveChangeCompletedTrace(true, null, returnValue);
+        return returnValue;
     }
 
     /// <summary>
