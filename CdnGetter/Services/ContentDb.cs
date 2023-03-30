@@ -143,14 +143,14 @@ public class ContentDb : DbContext
         ValidationContext validationContext = new(entity, serviceProvider, null);
         if (entity is INotifyValidatingAsync notifyValidatingAsync)
             await notifyValidatingAsync.OnValidatingAsync(validationContext, e.State, serviceProvider);
-        _logger.LogValidatingEntity(e.State, e.Metadata, entity);
+        _logger.LogValidatingEntityTrace(e.State, e.Metadata, entity);
         try { Validator.ValidateObject(entity, validationContext, true); }
         catch (ValidationException validationException)
         {
-            _logger.LogValidationFailed(validationException, e.Metadata, entity);
+            _logger.LogEntityValidationFailure(validationException, e.Metadata, entity);
             throw;
         }
-        _logger.LogValidationSucceeded(e.State, e.Metadata, entity);
+        _logger.LogValidationSucceededTrace(e.State, e.Metadata, entity);
     }
 
     public override int SaveChanges()
@@ -159,7 +159,7 @@ public class ContentDb : DbContext
         {
             OnBeforeSaveAsync().Wait();
             int returnValue = base.SaveChanges();
-            _logger.LogDbSaveChangeCompleted(false, null, returnValue);
+            _logger.LogDbSaveChangeCompletedTrace(false, null, returnValue);
             return returnValue;
         }
     }
@@ -171,7 +171,7 @@ public class ContentDb : DbContext
         {
             OnBeforeSaveAsync().Wait();;
             int returnValue = base.SaveChanges(acceptAllChangesOnSuccess);
-            _logger.LogDbSaveChangeCompleted(false, acceptAllChangesOnSuccess, returnValue);
+            _logger.LogDbSaveChangeCompletedTrace(false, acceptAllChangesOnSuccess, returnValue);
             return returnValue;
         }
     }
@@ -183,7 +183,7 @@ public class ContentDb : DbContext
         {
             await OnBeforeSaveAsync(cancellationToken);
             int returnValue = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-            _logger.LogDbSaveChangeCompleted(true, acceptAllChangesOnSuccess, returnValue);
+            _logger.LogDbSaveChangeCompletedTrace(true, acceptAllChangesOnSuccess, returnValue);
             return returnValue;
         }
     }
@@ -194,7 +194,7 @@ public class ContentDb : DbContext
         {
             await OnBeforeSaveAsync(cancellationToken);
             int returnValue = await base.SaveChangesAsync(cancellationToken);
-            _logger.LogDbSaveChangeCompleted(true, null, returnValue);
+            _logger.LogDbSaveChangeCompletedTrace(true, null, returnValue);
             return returnValue;
         }
     }

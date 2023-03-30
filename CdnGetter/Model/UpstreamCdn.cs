@@ -141,7 +141,7 @@ public class UpstreamCdn : ModificationTrackingModelBase
                             Console.WriteLine((d.Length > 0) ? $"\t{d}" : d);
                 }
                 else
-                    logger.LogServiceTypeNotFound(type);
+                    logger.LogServiceTypeNotFoundError(type);
             }
             if (count > 0)
             {
@@ -149,6 +149,6 @@ public class UpstreamCdn : ModificationTrackingModelBase
                 Console.WriteLine("{0:d} CDNs total.", count);
             }
             else
-                logger.LogNoUpstreamCdnsFound();
+                logger.LogNoUpstreamCdnsFoundWarning();
     }
 }

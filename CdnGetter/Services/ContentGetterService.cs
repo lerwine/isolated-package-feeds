@@ -55,13 +55,13 @@ public abstract class ContentGetterService
             catch (Exception exception)
             {
                 _contentDirectory = exception;
-                GetLogger().LogInvalidCdnContentRoot(path, exception);
+                GetLogger().LogInvalidContentRootError(path, exception);
                 result = null;
                 return false;
             }
             if (result.Parent is null)
             {
-                GetLogger().LogCannotCreateCdnContentRoot(result.FullName);
+                GetLogger().LogCannotCreateCdnContentRootError(result.FullName);
                 return false;
             }
             try
@@ -74,7 +74,7 @@ public abstract class ContentGetterService
             }
             catch (Exception exception)
             {
-                GetLogger().LogCannotCreateCdnContentRoot(result.FullName, exception);
+                GetLogger().LogCannotCreateCdnContentRootError(result.FullName, exception);
                 return false;
             }
             return true;
@@ -174,7 +174,7 @@ public abstract class ContentGetterService
                 return result;
             CdnLibrary? library = await this.DbContext.CdnLibraries.Include(r => r.Local).FirstOrDefaultAsync(l => l.Local!.Name == name && l.CdnId == upstreamCdnId, cancellationToken);
             if (library is null)
-                GetLogger().LogCdnLibraryNotFound(name, cdnName);
+                GetLogger().LogCdnLibraryNotFoundWarning(name, cdnName);
             else
                 result.AddLast(library);
         }
