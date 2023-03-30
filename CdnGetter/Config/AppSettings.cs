@@ -92,7 +92,7 @@ public class AppSettings
     /// Gets names of libraries to remove from the database.
     /// </summary>
     /// <remarks>
-    ///     Parameter Set #1: Mandatory Switch
+    ///     Mandatory Switch
     ///     <list type="bullet">
     ///         <item>
     ///             <term>--CdnGetter:RemoveLibrary=<c>name[,name,...]</c></term>
@@ -120,7 +120,7 @@ public class AppSettings
     ///     Parameter Set #1: Mandatory Switches
     ///     <list type="bullet">
     ///         <item>
-    ///             <term>--RCdnGetter:eloadLibrary=<c>name[,name,...]</c></term>
+    ///             <term>---CdnGetter:ReloadLibrary=<c>name[,name,...]</c></term>
     ///             <description>The library name(s) on the upstream CDN to be reloaded.</description>
     ///         </item>
     ///         <item>
@@ -158,7 +158,7 @@ public class AppSettings
     ///     Parameter Set #1: Mandatory Switches
     ///     <list type="bullet">
     ///         <item>
-    ///             <term>--CdnGetter:ReloadLibrary=<c>name[,name,...]</c></term>
+    ///             <term>--CdnGetter:ReloadExistingVersions=<c>name[,name,...]</c></term>
     ///             <description>The library name(s) on the upstream CDN to be reloaded.</description>
     ///         </item>
     ///         <item>
@@ -177,7 +177,7 @@ public class AppSettings
     ///         Parameter Set #2: Mandatory Switches
     ///         <list type="bullet">
     ///             <item>
-    ///                 <term>--CdnGetter:ReloadLibrary=<c>name[,name,...]</c></term>
+    ///                 <term>--CdnGetter:ReloadExistingVersions=<c>name[,name,...]</c></term>
     ///                 <description>The library name(s) to be reloaded.</description>
     ///             </item>
     ///             <item>
@@ -258,15 +258,15 @@ public class AppSettings
     ///             </item>
     ///             <item>
     ///                 <term>--CdnGetter:Library=<c>name[,name,...]</c></term>
-    ///                 <description>The library name(s) to show versions for.</description>
+    ///                 <description>The library name(s) to show files for.</description>
     ///             </item>
     ///             <item>
     ///                 <term>--CdnGetter:Version=<c>string[,string,...]</c></term>
-    ///                 <description>The library name(s) to show versions for.</description>
+    ///                 <description>The library version(s) to show files for.</description>
     ///             </item>
     ///             <item>
     ///                 <term>--CdnGetter:Upstream=<c>name[,name,...]</c></term>
-    ///                 <description>The library name(s) to show versions for.</description>
+    ///                 <description>The upstream CDN name(s) to show files for.</description>
     ///             </item>
     ///         </list>
     ///     </para>
