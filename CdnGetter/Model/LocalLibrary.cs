@@ -9,8 +9,6 @@ namespace CdnGetter.Model;
 
 public class LocalLibrary : ModificationTrackingModelBase
 {
-    private readonly object _syncRoot = new();
-
     /// <summary>
     /// The unique identifier for the content library.
     /// </summary>
@@ -135,8 +133,11 @@ public class LocalLibrary : ModificationTrackingModelBase
         await dbContext.SaveChangesAsync(true, cancellationToken);
     }
 
+#pragma warning disable CS1998
     internal async Task GetNewVersionsPreferredAsync(Services.ContentDb dbContext, CancellationToken stoppingToken)
     {
+        // TODO: Implement LocalLibrary.GetNewVersionsPreferredAsync
         throw new NotImplementedException();
     }
+#pragma warning restore CS1998
 }

@@ -100,17 +100,17 @@ public abstract class ContentGetterService
 
     public abstract Task GetNewVersionsAsync(CdnLibrary cdnLibrary, CancellationToken cancellationToken);
     
-    public async Task GetNewVersionsAsync(UpstreamCdn upstreamCdn, ContentDb dbContext, AppSettings appSettings, IEnumerable<string> libraryNames, CancellationToken cancellationToken)
-    {
-        foreach (string n in libraryNames)
-        {
-            CdnLibrary? existing = await GetMatchingLibraryAsync(upstreamCdn.Id, n, cancellationToken);
-            if (existing is null)
-                await AddNewVersionsAsync(upstreamCdn, n, cancellationToken);
-            else
-                await ReloadAsync(existing, cancellationToken);
-        }
-    }
+    // public async Task GetNewVersionsAsync(UpstreamCdn upstreamCdn, ContentDb dbContext, AppSettings appSettings, IEnumerable<string> libraryNames, CancellationToken cancellationToken)
+    // {
+    //     foreach (string n in libraryNames)
+    //     {
+    //         CdnLibrary? existing = await GetMatchingLibraryAsync(upstreamCdn.Id, n, cancellationToken);
+    //         if (existing is null)
+    //             await AddNewVersionsAsync(upstreamCdn, n, cancellationToken);
+    //         else
+    //             await ReloadAsync(existing, cancellationToken);
+    //     }
+    // }
     
     public abstract Task AddAsync(UpstreamCdn upstreamCdn, IEnumerable<string> libraryNames, CancellationToken cancellationToken);
     
@@ -125,7 +125,7 @@ public abstract class ContentGetterService
                 await ReloadAsync(existing, cancellationToken);
         }
     }
-    
+
     /// <summary>
     /// Reloads libraries by name for the current upstream CDN service.
     /// </summary>
@@ -133,7 +133,7 @@ public abstract class ContentGetterService
     /// <param name="dbContext">The database context.</param>
     /// <param name="appSettings">Application settings.</param>
     /// <param name="libraryNames">The names of libraries to reload.</param>
-    /// <param name="cancellationToken">Triggered when <see cref="Microsoft.Extensions.Hosting.IHostedService.StopAsync(CancellationToken)"/> is called.</param>
+    /// <param name="cancellationToken">Triggered when <see cref="IHostedService.StopAsync(CancellationToken)"/> is called.</param>
     public async Task ReloadExistingAsync(UpstreamCdn upstreamCdn, IEnumerable<string> libraryNames, CancellationToken cancellationToken)
     {
         LinkedList<CdnLibrary> toReload = await GetMatchingLibrariesAsync(upstreamCdn.Name, upstreamCdn.Id, libraryNames, cancellationToken);
@@ -141,14 +141,14 @@ public abstract class ContentGetterService
             foreach (CdnLibrary r in toReload)
                 await ReloadAsync(r, cancellationToken);
     }
-    
+
     /// <summary>
     /// Removes libararies by name for the current upstream CDN service.
     /// </summary>
     /// <param name="upstreamCdn">The upstream CDN service to remove libraries from.</param>
     /// <param name="dbContext">The database context.</param>
     /// <param name="libraryNames">The names of the libraries to remove.</param>
-    /// <param name="cancellationToken">Triggered when <see cref="Microsoft.Extensions.Hosting.IHostedService.StopAsync(CancellationToken)"/> is called.</param>
+    /// <param name="cancellationToken">Triggered when <see cref="IHostedService.StopAsync(CancellationToken)"/> is called.</param>
     public async Task RemoveAsync(UpstreamCdn upstreamCdn, IEnumerable<string> libraryNames, CancellationToken cancellationToken)
     {
         if (cancellationToken.IsCancellationRequested)

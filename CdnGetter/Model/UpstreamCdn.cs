@@ -14,8 +14,6 @@ namespace CdnGetter.Model;
 /// </summary>
 public class UpstreamCdn : ModificationTrackingModelBase
 {
-    private readonly object _syncRoot = new();
-
     /// <summary>
     /// The unique identifier of the registered upstream service.
     /// </summary>
