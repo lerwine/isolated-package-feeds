@@ -2,7 +2,7 @@
 
 ## Content Retrieval Service Classes
 
-For a class to function as middleware for a specifice remote CDN, it must inerit from [CdnGetter.Services.ContentGetterService](./Services/ContentGetterService.cs) and it must also have the 
+For a class to function as middleware for a specifice remote CDN, it must inerit from [CdnGetter.Services.ContentGetterService](./Services/ContentGetterService.cs) and it must also have the
 [CdnGetter.Services.ContentGetterAttribute](./Services/ContentGetterAttribute.cs) attribute, which specifies a unique GUID that identifies the corresponding [UpstreamCdn](./Model/UpstreamCdn.cs)
 database entity and a name that describes the upstream CDN. The static `UpstreamCdnServices` property of that attribute contains all the upstream CDN service types that were found.
 Each `ContentGetterService` implementation should have its own settings section under the main [Application Settings](./Config/AppSettings.cs)
