@@ -586,5 +586,34 @@
             "#endregion"
 		],
 		"description": "Create Logger scope definition with 2 extra arguments."
-    }
+    },
+    "Property and backing field": {
+        "prefix": "propfull",
+        "body": [
+            "#region ${1:PropertyName} Property",
+            "",
+            "private ${2:Type} _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}$0;",
+            "",
+            "/// <summary>",
+            "/// ${3:description}",
+            "/// </summary>",
+            "public ${2} ${1}",
+            "{",
+            "\tget => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/};",
+            "\tset => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/} = value;",
+            "}",
+            "",
+            "#endregion"
+        ],
+        "description": "Property and backing field"
+    },
+    "#pragma warning disable": {
+        "prefix": "pragma-warning-disable",
+        "body": [
+            "#pragma warning disable ${1:Code}",
+            "\t${TM_SELECTED_TEXT}$0",
+            "#pragma warning restore ${1}"
+        ],
+        "description": "Disable Warning(s)"
+    },
 }
