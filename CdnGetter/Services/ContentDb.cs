@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CdnGetter.Services;
 
@@ -13,12 +14,14 @@ namespace CdnGetter.Services;
 public class ContentDb : DbContext
 {
     private readonly ILogger<ContentDb> _logger;
+    private readonly IServiceScopeFactory _scopeFactory;
     private static readonly object _syncRoot = new();
     private static bool _connectionStringValidated;
 
-    public ContentDb(DbContextOptions<ContentDb> options, ILogger<ContentDb> logger) : base(options)
+    public ContentDb(DbContextOptions<ContentDb> options, ILogger<ContentDb> logger, IServiceScopeFactory scopeFactory) : base(options)
     {
         _logger = logger;
+        _scopeFactory = scopeFactory;
         lock (_syncRoot)
         {
             if (!_connectionStringValidated)
@@ -121,6 +124,7 @@ public class ContentDb : DbContext
         if (cancellationToken.IsCancellationRequested)
             return;
         using IDisposable? scope = _logger.BeginExecuteMethodScope(nameof(OnBeforeSaveAsync));
+        using IServiceScope serviceScope = _scopeFactory.CreateScope();
         foreach (EntityEntry e in ChangeTracker.Entries())
         {
             if (cancellationToken.IsCancellationRequested)
@@ -130,15 +134,15 @@ public class ContentDb : DbContext
                 {
                     case EntityState.Added:
                     case EntityState.Modified:
-                        await ValidateEntryAsync(e, entity);
+                        await ValidateEntryAsync(e, entity, serviceScope.ServiceProvider);
                         break;
                 }
         }
     }
 
-    internal async Task ValidateEntryAsync(EntityEntry e, IValidatableObject entity)
+    internal async Task ValidateEntryAsync(EntityEntry e, IValidatableObject entity, IServiceProvider backingServiceProvider)
     {
-        DbContextServiceProvider serviceProvider = new(this, e);
+        DbContextServiceProvider serviceProvider = new(this, backingServiceProvider, e);
         ValidationContext validationContext = new(entity, serviceProvider, null);
         if (entity is INotifyValidatingAsync notifyValidatingAsync)
             await notifyValidatingAsync.OnValidatingAsync(validationContext, e.State, serviceProvider);
@@ -212,25 +216,24 @@ public class ContentDb : DbContext
     {
         private readonly object _entity;
         private readonly ContentDb _dbContext;
+        private readonly IServiceProvider _backingServiceProvider;
 
-        internal DbContextServiceProvider(ContentDb dbContext, object entity)
+        internal DbContextServiceProvider(ContentDb dbContext, IServiceProvider backingServiceProvider, object entity)
         {
             _dbContext = dbContext;
             _entity = entity;
+            _backingServiceProvider = backingServiceProvider;
         }
 
         public object? GetService(Type serviceType)
         {
-            if (serviceType is not null)
-            {
-                if (serviceType.IsInstanceOfType(_dbContext))
-                    return _dbContext;
-                if (serviceType.IsInstanceOfType(_entity))
-                    return _entity;
-                if (serviceType.IsInstanceOfType(_dbContext._logger))
-                    return _dbContext._logger;
-            }
-            return null;
+            if (serviceType is null)
+                return null;
+            if (serviceType.IsInstanceOfType(_entity))
+                return _entity;
+            if (serviceType.IsInstanceOfType(_dbContext._logger))
+                return _dbContext._logger;
+            return _backingServiceProvider.GetService(serviceType);
         }
     }
 }
