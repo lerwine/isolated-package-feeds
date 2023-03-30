@@ -254,11 +254,11 @@ public class MainService : BackgroundService
                         IEnumerable<string> versions = _appSettings.Version.TrimmedNotEmptyValues();
                         if (cdns.Any())
                         {
-                            throw new NotImplementedException("Reload libraries for specific CDNs functionality not implemented.");
+                            throw new NotImplementedException("Reload existing versions for specific CDNs functionality not implemented.");
                         }
                         else if (versions.Any())
                         {
-                            throw new NotImplementedException("Reload libraries for specific versions functionality not implemented.");
+                            throw new NotImplementedException("Reload libraries for specific existing versions functionality not implemented.");
                         }
                         else
                             _logger.LogRequiredAltDependentParameterWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Upstream)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Version)}",
