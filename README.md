@@ -17,6 +17,7 @@ The initial scope is to create NuGet and NPM Package Feed services as well as co
 - [Make HTTP requests with the HttpClient class](https://learn.microsoft.com/en-us/dotnet/fundamentals/networking/http/httpclient)
   - [JsonContent Class](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.json.jsoncontent?view=net-7.0)
   - [StringContent Class](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.stringcontent?view=net-7.0)
+- [XUnit Testing](https://xunit.net)
 
 ### NuGet
 
