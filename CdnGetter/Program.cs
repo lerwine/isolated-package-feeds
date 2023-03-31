@@ -6,13 +6,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
-IHost host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
+IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((hbContext, services) => {
         services.AddHostedService<MainService>();
+        services.Configure<CommandSettings>(hbContext.Configuration);
         IConfigurationSection section = hbContext.Configuration.GetSection(nameof(CdnGetter));
         services.Configure<AppSettings>(section);
+        
         string databaseFilePath = AppSettings.GetDbFileName(section.Get<AppSettings>());
         databaseFilePath = Path.GetFullPath(Path.IsPathRooted(databaseFilePath) ? databaseFilePath : Path.Combine(hbContext.HostingEnvironment.ContentRootPath, databaseFilePath));
         services.AddDbContext<ContentDb>(opt =>

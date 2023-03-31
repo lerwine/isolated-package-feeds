@@ -13,14 +13,14 @@ public class MainService : BackgroundService
     private readonly ILogger<MainService> _logger;
     private readonly ContentDb _dbContext;
     private readonly IHostApplicationLifetime _applicationLifetime;
-    private readonly Config.AppSettings _appSettings;
+    private readonly Config.CommandSettings _commandSettings;
     private readonly IServiceScopeFactory _scopeFactory;
 
-    public MainService(ILogger<MainService> logger, ContentDb dbContext, IOptions<Config.AppSettings> options, IHostApplicationLifetime applicationLifetime, IServiceScopeFactory scopeFactory)
+    public MainService(ILogger<MainService> logger, ContentDb dbContext, IOptions<Config.CommandSettings> options, IHostApplicationLifetime applicationLifetime, IServiceScopeFactory scopeFactory)
     {
         _logger = logger;
         _dbContext = dbContext;
-        _appSettings = options.Value ?? new();
+        _commandSettings = options.Value ?? new();
         _applicationLifetime = applicationLifetime;
         _scopeFactory = scopeFactory;
     }
@@ -77,38 +77,38 @@ public class MainService : BackgroundService
     {
         try
         {
-            if (_appSettings.Show.IsTrimmedNotEmpty(out string? sv))
+            if (_commandSettings.Show.IsTrimmedNotEmpty(out string? sv))
             {
-                if (_appSettings.AddLibrary.TrimmedNotEmptyValues().Any())
-                    _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.AddLibrary)}");
-                else if (_appSettings.GetNewVersions.TrimmedNotEmptyValues().Any())
-                    _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.GetNewVersions)}");
-                else if (_appSettings.RemoveLibrary.TrimmedNotEmptyValues().Any())
-                    _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.RemoveLibrary)}");
-                else if (_appSettings.ReloadLibrary.TrimmedNotEmptyValues().Any())
-                    _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.ReloadLibrary)}");
-                else if (_appSettings.ReloadExistingVersions.TrimmedNotEmptyValues().Any())
-                    _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.ReloadExistingVersions)}");
-                else if (sv.Equals(Config.AppSettings.SHOW_CDNs, StringComparison.InvariantCultureIgnoreCase))
+                if (_commandSettings.AddLibrary.TrimmedNotEmptyValues().Any())
+                    _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.AddLibrary)}");
+                else if (_commandSettings.GetNewVersions.TrimmedNotEmptyValues().Any())
+                    _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.GetNewVersions)}");
+                else if (_commandSettings.RemoveLibrary.TrimmedNotEmptyValues().Any())
+                    _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.RemoveLibrary)}");
+                else if (_commandSettings.ReloadLibrary.TrimmedNotEmptyValues().Any())
+                    _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.ReloadLibrary)}");
+                else if (_commandSettings.ReloadExistingVersions.TrimmedNotEmptyValues().Any())
+                    _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.ReloadExistingVersions)}");
+                else if (sv.Equals(Config.CommandSettings.SHOW_CDNs, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    if (_appSettings.Library.TrimmedNotEmptyValues().Any())
-                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Library)}");
-                    else if (_appSettings.Version.TrimmedNotEmptyValues().Any())
-                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Version)}");
-                    else if (_appSettings.Upstream.TrimmedNotEmptyValues().Any())
-                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Upstream)}");
+                    if (_commandSettings.Library.TrimmedNotEmptyValues().Any())
+                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Library)}");
+                    else if (_commandSettings.Version.TrimmedNotEmptyValues().Any())
+                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Version)}");
+                    else if (_commandSettings.Upstream.TrimmedNotEmptyValues().Any())
+                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Upstream)}");
                     else
                         await UpstreamCdn.ShowCDNsAsync(_dbContext, _logger, _scopeFactory, stoppingToken);
                 }
-                else if (sv.Equals(Config.AppSettings.SHOW_Libraries, StringComparison.InvariantCultureIgnoreCase))
+                else if (sv.Equals(Config.CommandSettings.SHOW_Libraries, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    if (_appSettings.Library.TrimmedNotEmptyValues().Any())
-                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Library)}");
-                    else if (_appSettings.Version.TrimmedNotEmptyValues().Any())
-                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Version)}");
+                    if (_commandSettings.Library.TrimmedNotEmptyValues().Any())
+                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Library)}");
+                    else if (_commandSettings.Version.TrimmedNotEmptyValues().Any())
+                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Version)}");
                     else
                     {
-                        IEnumerable<string> cdnNames = _appSettings.Upstream.TrimmedNotEmptyValues();
+                        IEnumerable<string> cdnNames = _commandSettings.Upstream.TrimmedNotEmptyValues();
                         if (cdnNames.Any())
                         {
                             LinkedList<UpstreamCdn> cdns = await GetUpstreamCdns(cdnNames, stoppingToken);
@@ -129,14 +129,14 @@ public class MainService : BackgroundService
                             await _dbContext.LocalLibraries.ForEachAsync(l => Console.WriteLine(l.Name), stoppingToken);
                     }
                 }
-                else if (sv.Equals(Config.AppSettings.SHOW_Versions, StringComparison.InvariantCultureIgnoreCase))
+                else if (sv.Equals(Config.CommandSettings.SHOW_Versions, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    if (_appSettings.Version.TrimmedNotEmptyValues().Any())
-                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Version)}");
+                    if (_commandSettings.Version.TrimmedNotEmptyValues().Any())
+                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Version)}");
                     else
                     {
-                        IEnumerable<string> libraries = _appSettings.Library.TrimmedNotEmptyValues();
-                        IEnumerable<string> upstream = _appSettings.Upstream.TrimmedNotEmptyValues();
+                        IEnumerable<string> libraries = _commandSettings.Library.TrimmedNotEmptyValues();
+                        IEnumerable<string> upstream = _commandSettings.Upstream.TrimmedNotEmptyValues();
                         if (upstream.Any())
                         {
                             throw new NotImplementedException("Show library versions for upstream CDN(s) functionality not implemented");
@@ -147,88 +147,88 @@ public class MainService : BackgroundService
                         }
                     }
                 }
-                else if (sv.Equals(Config.AppSettings.SHOW_Files, StringComparison.InvariantCultureIgnoreCase))
+                else if (sv.Equals(Config.CommandSettings.SHOW_Files, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    if (_appSettings.Library.TrimmedNotEmptyValues().Any())
-                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Library)}");
+                    if (_commandSettings.Library.TrimmedNotEmptyValues().Any())
+                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Show)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Library)}");
                     else
                     {
                         throw new NotImplementedException("Show files functionality not implemented");
                     }
                 }
                 else
-                    _logger.LogInvalidParameterValueWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Show)}", sv);
+                    _logger.LogInvalidParameterValueWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Show)}", sv);
             }
             else
             {
-                IEnumerable<string> libraryNames = _appSettings.AddLibrary.TrimmedNotEmptyValues();
+                IEnumerable<string> libraryNames = _commandSettings.AddLibrary.TrimmedNotEmptyValues();
                 if (libraryNames.Any())
                 {
-                    if (_appSettings.GetNewVersions.TrimmedNotEmptyValues().Any())
-                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.AddLibrary)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.GetNewVersions)}");
-                    else if (_appSettings.RemoveLibrary.TrimmedNotEmptyValues().Any())
-                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.AddLibrary)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.RemoveLibrary)}");
-                    else if (_appSettings.ReloadLibrary.TrimmedNotEmptyValues().Any())
-                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.AddLibrary)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.ReloadLibrary)}");
-                    else if (_appSettings.ReloadExistingVersions.TrimmedNotEmptyValues().Any())
-                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.AddLibrary)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.ReloadExistingVersions)}");
-                    else if (_appSettings.Library.TrimmedNotEmptyValues().Any())
-                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.AddLibrary)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Library)}");
+                    if (_commandSettings.GetNewVersions.TrimmedNotEmptyValues().Any())
+                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.AddLibrary)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.GetNewVersions)}");
+                    else if (_commandSettings.RemoveLibrary.TrimmedNotEmptyValues().Any())
+                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.AddLibrary)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.RemoveLibrary)}");
+                    else if (_commandSettings.ReloadLibrary.TrimmedNotEmptyValues().Any())
+                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.AddLibrary)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.ReloadLibrary)}");
+                    else if (_commandSettings.ReloadExistingVersions.TrimmedNotEmptyValues().Any())
+                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.AddLibrary)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.ReloadExistingVersions)}");
+                    else if (_commandSettings.Library.TrimmedNotEmptyValues().Any())
+                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.AddLibrary)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Library)}");
                     else
                     {
-                        IEnumerable<string> cdns = _appSettings.Upstream.TrimmedNotEmptyValues();
+                        IEnumerable<string> cdns = _commandSettings.Upstream.TrimmedNotEmptyValues();
                         if (cdns.Any())
                         {
-                            IEnumerable<string> versions = _appSettings.Version.TrimmedNotEmptyValues();
+                            IEnumerable<string> versions = _commandSettings.Version.TrimmedNotEmptyValues();
                             throw new NotImplementedException("Add libraries functionality not implemented.");
                         }
                         else
-                            _logger.LogRequiredDependentParameterWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Upstream)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.AddLibrary)}");
+                            _logger.LogRequiredDependentParameterWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Upstream)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.AddLibrary)}");
                     }
                 }
-                else if ((libraryNames = _appSettings.GetNewVersions.TrimmedNotEmptyValues()).Any())
+                else if ((libraryNames = _commandSettings.GetNewVersions.TrimmedNotEmptyValues()).Any())
                 {
-                    if (_appSettings.RemoveLibrary.TrimmedNotEmptyValues().Any())
-                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.GetNewVersions)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.RemoveLibrary)}");
-                    else if (_appSettings.ReloadLibrary.TrimmedNotEmptyValues().Any())
-                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.GetNewVersions)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.ReloadLibrary)}");
-                    else if (_appSettings.ReloadExistingVersions.TrimmedNotEmptyValues().Any())
-                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.GetNewVersions)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.ReloadExistingVersions)}");
-                    else if (_appSettings.Library.TrimmedNotEmptyValues().Any())
-                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.GetNewVersions)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Library)}");
-                    else if (_appSettings.Version.TrimmedNotEmptyValues().Any())
-                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.GetNewVersions)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Version)}");
+                    if (_commandSettings.RemoveLibrary.TrimmedNotEmptyValues().Any())
+                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.GetNewVersions)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.RemoveLibrary)}");
+                    else if (_commandSettings.ReloadLibrary.TrimmedNotEmptyValues().Any())
+                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.GetNewVersions)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.ReloadLibrary)}");
+                    else if (_commandSettings.ReloadExistingVersions.TrimmedNotEmptyValues().Any())
+                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.GetNewVersions)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.ReloadExistingVersions)}");
+                    else if (_commandSettings.Library.TrimmedNotEmptyValues().Any())
+                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.GetNewVersions)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Library)}");
+                    else if (_commandSettings.Version.TrimmedNotEmptyValues().Any())
+                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.GetNewVersions)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Version)}");
                     else
                     {
-                        IEnumerable<string> upstream = _appSettings.Upstream.TrimmedNotEmptyValues();
+                        IEnumerable<string> upstream = _commandSettings.Upstream.TrimmedNotEmptyValues();
                         throw new NotImplementedException("Add new versions functionality not implemented.");
                     }
                 }
-                else if ((libraryNames = _appSettings.RemoveLibrary.TrimmedNotEmptyValues()).Any())
+                else if ((libraryNames = _commandSettings.RemoveLibrary.TrimmedNotEmptyValues()).Any())
                 {
-                    if (_appSettings.ReloadLibrary.TrimmedNotEmptyValues().Any())
-                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.RemoveLibrary)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.ReloadLibrary)}");
-                    else if (_appSettings.ReloadExistingVersions.TrimmedNotEmptyValues().Any())
-                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.RemoveLibrary)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.ReloadExistingVersions)}");
-                    else if (_appSettings.Library.TrimmedNotEmptyValues().Any())
-                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.RemoveLibrary)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Library)}");
+                    if (_commandSettings.ReloadLibrary.TrimmedNotEmptyValues().Any())
+                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.RemoveLibrary)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.ReloadLibrary)}");
+                    else if (_commandSettings.ReloadExistingVersions.TrimmedNotEmptyValues().Any())
+                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.RemoveLibrary)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.ReloadExistingVersions)}");
+                    else if (_commandSettings.Library.TrimmedNotEmptyValues().Any())
+                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.RemoveLibrary)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Library)}");
                     else
                     {
-                        IEnumerable<string> upstream = _appSettings.Upstream.TrimmedNotEmptyValues();
-                        IEnumerable<string> versions = _appSettings.Version.TrimmedNotEmptyValues();
+                        IEnumerable<string> upstream = _commandSettings.Upstream.TrimmedNotEmptyValues();
+                        IEnumerable<string> versions = _commandSettings.Version.TrimmedNotEmptyValues();
                         throw new NotImplementedException("Remove libraries functionality not implemented.");
                     }
                 }
-                else if ((libraryNames = _appSettings.ReloadLibrary.TrimmedNotEmptyValues()).Any())
+                else if ((libraryNames = _commandSettings.ReloadLibrary.TrimmedNotEmptyValues()).Any())
                 {
-                    if (_appSettings.ReloadExistingVersions.TrimmedNotEmptyValues().Any())
-                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.ReloadLibrary)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.ReloadExistingVersions)}");
-                    else if (_appSettings.Library.TrimmedNotEmptyValues().Any())
-                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.ReloadLibrary)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Library)}");
+                    if (_commandSettings.ReloadExistingVersions.TrimmedNotEmptyValues().Any())
+                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.ReloadLibrary)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.ReloadExistingVersions)}");
+                    else if (_commandSettings.Library.TrimmedNotEmptyValues().Any())
+                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.ReloadLibrary)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Library)}");
                     else
                     {
-                        IEnumerable<string> cdns = _appSettings.Upstream.TrimmedNotEmptyValues();
-                        IEnumerable<string> versions = _appSettings.Version.TrimmedNotEmptyValues();
+                        IEnumerable<string> cdns = _commandSettings.Upstream.TrimmedNotEmptyValues();
+                        IEnumerable<string> versions = _commandSettings.Version.TrimmedNotEmptyValues();
                         if (cdns.Any())
                         {
                             throw new NotImplementedException("Reload libraries for specific CDNs functionality not implemented.");
@@ -238,20 +238,20 @@ public class MainService : BackgroundService
                             throw new NotImplementedException("Reload libraries for specific versions functionality not implemented.");
                         }
                         else
-                            _logger.LogRequiredAltDependentParameterWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Upstream)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Version)}",
-                                $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.ReloadLibrary)}");
+                            _logger.LogRequiredAltDependentParameterWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Upstream)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Version)}",
+                                $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.ReloadLibrary)}");
                     }
                 }
-                else if ((libraryNames = _appSettings.ReloadExistingVersions.TrimmedNotEmptyValues()).Any())
+                else if ((libraryNames = _commandSettings.ReloadExistingVersions.TrimmedNotEmptyValues()).Any())
                 {
-                    if (_appSettings.Library.TrimmedNotEmptyValues().Any())
-                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.ReloadExistingVersions)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Library)}");
-                    else if (_appSettings.Version.TrimmedNotEmptyValues().Any())
-                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.ReloadExistingVersions)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Version)}");
+                    if (_commandSettings.Library.TrimmedNotEmptyValues().Any())
+                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.ReloadExistingVersions)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Library)}");
+                    else if (_commandSettings.Version.TrimmedNotEmptyValues().Any())
+                        _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.ReloadExistingVersions)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Version)}");
                     else
                     {
-                        IEnumerable<string> cdns = _appSettings.Upstream.TrimmedNotEmptyValues();
-                        IEnumerable<string> versions = _appSettings.Version.TrimmedNotEmptyValues();
+                        IEnumerable<string> cdns = _commandSettings.Upstream.TrimmedNotEmptyValues();
+                        IEnumerable<string> versions = _commandSettings.Version.TrimmedNotEmptyValues();
                         if (cdns.Any())
                         {
                             throw new NotImplementedException("Reload existing versions for specific CDNs functionality not implemented.");
@@ -261,14 +261,14 @@ public class MainService : BackgroundService
                             throw new NotImplementedException("Reload libraries for specific existing versions functionality not implemented.");
                         }
                         else
-                            _logger.LogRequiredAltDependentParameterWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Upstream)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Version)}",
-                                $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.ReloadExistingVersions)}");
+                            _logger.LogRequiredAltDependentParameterWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Upstream)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Version)}",
+                                $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.ReloadExistingVersions)}");
                     }
                 }
-                else if (_appSettings.Library.TrimmedNotEmptyValues().Any())
-                    _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.ReloadExistingVersions)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Library)}");
-                else if (_appSettings.Version.TrimmedNotEmptyValues().Any())
-                    _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.ReloadExistingVersions)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Version)}");
+                else if (_commandSettings.Library.TrimmedNotEmptyValues().Any())
+                    _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.ReloadExistingVersions)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Library)}");
+                else if (_commandSettings.Version.TrimmedNotEmptyValues().Any())
+                    _logger.LogMutuallyExclusiveSwitchWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.ReloadExistingVersions)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Version)}");
                 else
                 {
                     LocalLibrary[] libraries = await _dbContext.LocalLibraries.ToArrayAsync(stoppingToken);
