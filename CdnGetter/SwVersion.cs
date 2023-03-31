@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -7,21 +8,52 @@ namespace CdnGetter;
 
 public readonly struct SwVersion : IEquatable<SwVersion>, IComparable<SwVersion>
 {
+    public enum VersionStringFormat
+    {
+        Standard,
+        Alt,
+        NonStandard
+    }
+
+    public record ExtraVersionComponent(char? Lead, string Value);
+
     private static readonly StringComparer _comparer = StringComparer.OrdinalIgnoreCase;
     public static readonly ValueConverter<SwVersion, string> Converter = new(
         v => v.ToString(),
         s => Parse(s)
     );
 
+    public const char LEAD_CHAR_PreRelease = '-';
+    
+    private static readonly char[] PreReleaseSeparators = new[] { '-', '.' };
+
+    public const char LEAD_CHAR_Build = '+';
+    
+    private static readonly char[] BuildSeparators = new[] { '-', '.', '+' };
+
+    public const string GROUP_NAME_prefix = "prefix";
+
     public const string GROUP_NAME_major = "major";
+
     public const string GROUP_NAME_minor = "minor";
+    
     public const string GROUP_NAME_patch = "patch";
+    
     public const string GROUP_NAME_revision = "revision";
+    
     public const string GROUP_NAME_minorRevision = "minorRevision";
-    public const string GROUP_NAME_preRelease = "preRelease";
-    public const string GROUP_NAME_build = "build";
-    public static readonly Regex ParsingRegex = new(@$"$(?<{GROUP_NAME_major}>-?\d+)(\.(?<{GROUP_NAME_minor}>\d+)(\.(?<{GROUP_NAME_patch}>\d+)(\.(?<{GROUP_NAME_revision}>\d+)(\.(?<{GROUP_NAME_minorRevision}>\d+))?)?)?)?(-(?<{GROUP_NAME_preRelease}>[\w-]+(\.[\w-]+)*))?(\+(?<{GROUP_NAME_build}>[\w-]+(\.[\w-]+)*))?$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    
+    public const string GROUP_NAME_preReleaseValue = "preRelease";
+    
+    public const string GROUP_NAME_buildValue = "build";
+    
+    public static readonly Regex StandardFormatRegex = new(@$"^(?<{GROUP_NAME_prefix}>([^\d-]+|-\D)+)?(?<{GROUP_NAME_major}>-?\d+)(\.(?<{GROUP_NAME_minor}>\d+)(\.(?<{GROUP_NAME_patch}>\d+)(\.(?<{GROUP_NAME_revision}>\d+)(\.(?<{GROUP_NAME_minorRevision}>\d+))?)?)?)?(-(?<{GROUP_NAME_preReleaseValue}>[^\s+]+))?(\+(?<{GROUP_NAME_buildValue}>\S+))?$", RegexOptions.Compiled);
+    
+    public static readonly Regex AltFormatRegex = new(@$"^(?<{GROUP_NAME_prefix}>([^\d-]+|-\D)+)?(?<{GROUP_NAME_major}>-?\d+)(\.(?<{GROUP_NAME_minor}>\d+)(\.(?<{GROUP_NAME_patch}>\d+)(\.(?<{GROUP_NAME_revision}>\d+)(\.(?<{GROUP_NAME_minorRevision}>\d+))?)?)?)?(?<{GROUP_NAME_preReleaseValue}>[^+\s-]\S*)?$", RegexOptions.Compiled);
+    
     public static readonly Regex ExtraneousLeadingZeroRegex = new(@"^-0+(?=0($|\D))|((?<=^-)|^)0+(?=[1-9])", RegexOptions.Compiled);
+
+    public string Prefix { get; }
 
     public int Major { get; }
     
@@ -33,60 +65,128 @@ public readonly struct SwVersion : IEquatable<SwVersion>, IComparable<SwVersion>
     
     public int? MinorRevision { get; }
     
-    public ReadOnlyCollection<string> PreRelease { get; }
+    public ReadOnlyCollection<ExtraVersionComponent> PreRelease { get; }
     
-    public ReadOnlyCollection<string> Build { get; }
+    public ReadOnlyCollection<ExtraVersionComponent> Build { get; }
 
-    private SwVersion(Match match)
+    public VersionStringFormat Format { get; }
+
+    private SwVersion(Match match, bool isAltFormat)
     {
-        Major = int.Parse(match.Groups[GROUP_NAME_major].Value);
-        Group mg = match.Groups[GROUP_NAME_minorRevision];
+        VersionStringFormat format = isAltFormat ? VersionStringFormat.Alt : VersionStringFormat.Standard;
+        if (int.TryParse(match.Groups[GROUP_NAME_major].Value, out int value))
+            Major = value;
+        else
+        {
+            Major = 0;
+            format = VersionStringFormat.NonStandard;
+        }
+        Group mg = match.Groups[GROUP_NAME_minor];
         if (mg.Success)
         {
-            MinorRevision = int.Parse(mg.Value);
-            Revision = int.Parse(match.Groups[GROUP_NAME_revision].Value);
-            Patch = int.Parse(match.Groups[GROUP_NAME_patch].Value);
-            Minor = int.Parse(match.Groups[GROUP_NAME_minor].Value);
+            if (int.TryParse(mg.Value, out value))
+                Minor = value;
+            else
+            {
+                Minor = 0;
+                format = VersionStringFormat.NonStandard;
+            }
+            if ((mg = match.Groups[GROUP_NAME_patch]).Success)
+            {
+                if (int.TryParse(mg.Value, out value))
+                    Patch = value;
+                else
+                {
+                    Patch = 0;
+                    format = VersionStringFormat.NonStandard;
+                }
+                if ((mg = match.Groups[GROUP_NAME_revision]).Success)
+                {
+                    if (int.TryParse(mg.Value, out value))
+                        Revision = value;
+                    else
+                    {
+                        Revision = 0;
+                        format = VersionStringFormat.NonStandard;
+                    }
+                    if ((mg = match.Groups[GROUP_NAME_minorRevision]).Success)
+                    {
+                        if (int.TryParse(mg.Value, out value))
+                            MinorRevision = value;
+                        else
+                        {
+                            MinorRevision = 0;
+                            format = VersionStringFormat.NonStandard;
+                        }
+                    }
+                    else
+                        MinorRevision = null;
+                }
+                else
+                    Revision = MinorRevision = null;
+            }
+            else
+                Patch = Revision = MinorRevision = null;
+        }
+        else
+            Minor = Patch = Revision = MinorRevision = null;
+        if ((Format = format) == VersionStringFormat.NonStandard)
+        {
+            Prefix = match.Value;
+            PreRelease = new(Array.Empty<ExtraVersionComponent>());
+            Build = new(Array.Empty<ExtraVersionComponent>());
         }
         else
         {
-            MinorRevision = null;
-            if ((mg = match.Groups[GROUP_NAME_revision]).Success)
-            {
-                Revision = int.Parse(mg.Value);
-                Patch = int.Parse(match.Groups[GROUP_NAME_patch].Value);
-                Minor = int.Parse(match.Groups[GROUP_NAME_minor].Value);
-            }
+            Prefix = (mg = match.Groups[GROUP_NAME_prefix]).Success ? mg.Value : "";
+            if ((mg = match.Groups[GROUP_NAME_preReleaseValue]).Success)
+                PreRelease = new(ParseComponents(LEAD_CHAR_PreRelease, mg.Value, PreReleaseSeparators).ToArray());
             else
-            {
-                Revision = null;
-                if ((mg = match.Groups[GROUP_NAME_patch]).Success)
-                {
-                    Patch = int.Parse(mg.Value);
-                    Minor = int.Parse(match.Groups[GROUP_NAME_minor].Value);
-                }
-                else
-                {
-                    Patch = null;
-                    if ((mg = match.Groups[GROUP_NAME_minor]).Success)
-                        Minor = int.Parse(mg.Value);
-                    else
-                        Minor = null;
-                }
-            }
+                PreRelease = new(Array.Empty<ExtraVersionComponent>());
+            if (format == VersionStringFormat.Standard && (mg = match.Groups[GROUP_NAME_buildValue]).Success)
+                Build = new(ParseComponents(LEAD_CHAR_Build, mg.Value, BuildSeparators).ToArray());
+            else
+                Build = new(Array.Empty<ExtraVersionComponent>());
         }
-        if ((mg = match.Groups[GROUP_NAME_preRelease]).Success)
-            PreRelease = new(mg.Value.Split('.').Select(s => ExtraneousLeadingZeroRegex.Replace(s, "")).ToArray());
+    }
+
+    private static IEnumerable<ExtraVersionComponent> ParseComponents(char initialLead, string source, char[] separators)
+    {
+        int index = source.IndexOfAny(separators);
+        if (index < 0)
+            yield return new(initialLead, source);
         else
-            PreRelease = new(Array.Empty<string>());
-        if ((mg = match.Groups[GROUP_NAME_build]).Success)
-            Build = new(mg.Value.Split('.').Select(s => ExtraneousLeadingZeroRegex.Replace(s, "")).ToArray());
-        else
-            Build = new(Array.Empty<string>());
+        {
+            yield return new(initialLead, (index == 0) ? "" : source[..index]);
+            int startIndex = index + 1;
+            while (startIndex < source.Length)
+            {
+                char c = source[index];
+                if ((index = source.IndexOfAny(separators, startIndex)) < 0)
+                {
+                    yield return new(c, source[startIndex..]);
+                    yield break;
+                }
+                yield return new(source[index], (startIndex < index) ? source[startIndex..index] :  "");
+                startIndex = index + 1;
+            }
+            yield return new(source[index], "");
+        }
     }
     
-    private SwVersion(string[]? preRelease, string[]? build, int major, int? minor = null, int? patch = null, int? revision = null, int? minorRevision = null)
+    private SwVersion(string nonStandard)
     {
+        Prefix = nonStandard;
+        Format = VersionStringFormat.NonStandard;
+        Major = 0;
+        Minor = Patch = Revision = MinorRevision = null;
+        PreRelease = new(Array.Empty<ExtraVersionComponent>());
+        Build = new(Array.Empty<ExtraVersionComponent>());
+    }
+    
+    private SwVersion(ExtraVersionComponent[]? preRelease, ExtraVersionComponent[]? build, int major, int? minor = null, int? patch = null, int? revision = null, int? minorRevision = null)
+    {
+        Prefix = "";
         Major = major;
         if ((Minor = minor).HasValue && minor!.Value < 0)
             throw new ArgumentOutOfRangeException(nameof(minor));
@@ -96,40 +196,66 @@ public readonly struct SwVersion : IEquatable<SwVersion>, IComparable<SwVersion>
             throw new ArgumentOutOfRangeException(nameof(revision));
         if ((MinorRevision = minorRevision).HasValue && minorRevision!.Value < 0)
             throw new ArgumentOutOfRangeException(nameof(minorRevision));
-        PreRelease = new((preRelease is null) ? Array.Empty<string>() : preRelease.Select(s => (s is not null && (s = s.Trim()).Length > 0) ? ExtraneousLeadingZeroRegex.Replace(s, "") : "").ToArray());
-        Build = new((build is null) ? Array.Empty<string>() : build.Select(s => (s is not null && (s = s.Trim()).Length > 0) ? ExtraneousLeadingZeroRegex.Replace(s, "") : "").ToArray());
+        if (preRelease is not null && preRelease.Length > 0)
+        {
+            char? c = preRelease[0].Lead;
+            if (c.HasValue)
+            {
+                if (c.Value != LEAD_CHAR_PreRelease || preRelease.Skip(1).Any(p => !(p.Lead.HasValue && PreReleaseSeparators.Contains(p.Lead.Value))))
+                    throw new ArgumentOutOfRangeException(nameof(preRelease));
+                Format = VersionStringFormat.Standard;
+            }
+            else
+            {
+                if (preRelease[0].Value.Length == 0 || preRelease.Skip(1).Any(p => !(p.Lead.HasValue && PreReleaseSeparators.Contains(p.Lead.Value))))
+                    throw new ArgumentOutOfRangeException(nameof(preRelease));
+                Format = VersionStringFormat.Alt;
+            }
+            PreRelease = new(preRelease);
+        }
+        else
+        {
+            Format = VersionStringFormat.Standard;
+            PreRelease = new(Array.Empty<ExtraVersionComponent>());
+        }
+        if (build is not null && build.Length > 0)
+        {
+            char? c = build[0].Lead;
+            if (!c.HasValue || c.Value != LEAD_CHAR_Build || build.Skip(1).Any(p => !(p.Lead.HasValue && BuildSeparators.Contains(p.Lead.Value))))
+                throw new ArgumentOutOfRangeException(nameof(build));
+            Build = new(build);
+        }
+        else
+            Build = new(Array.Empty<ExtraVersionComponent>());
     }
     
-    public SwVersion(int major, int minor, int patch, int revision, int minorRevision, string[]? preRelease, params string[] build) : this(preRelease, build, major, minor, patch, revision, minorRevision) { }
+    public SwVersion(int major, int minor, int patch, int revision, int minorRevision, ExtraVersionComponent[]? preRelease, params ExtraVersionComponent[] build) : this(preRelease, build, major, minor, patch, revision, minorRevision) { }
     
-    public SwVersion(int major, int minor, int patch, int revision, string[]? preRelease, params string[] build) : this(preRelease, build, major, minor, patch, revision) { }
+    public SwVersion(int major, int minor, int patch, int revision, ExtraVersionComponent[]? preRelease, params ExtraVersionComponent[] build) : this(preRelease, build, major, minor, patch, revision) { }
     
-    public SwVersion(int major, int minor, int patch, string[]? preRelease, params string[] build) : this(preRelease, build, major, minor, patch) { }
+    public SwVersion(int major, int minor, int patch, ExtraVersionComponent[]? preRelease, params ExtraVersionComponent[] build) : this(preRelease, build, major, minor, patch) { }
     
-    public SwVersion(int major, int minor, string[]? preRelease, params string[] build) : this(preRelease, build, major, minor) { }
+    public SwVersion(int major, int minor, ExtraVersionComponent[]? preRelease, params ExtraVersionComponent[] build) : this(preRelease, build, major, minor) { }
     
-    public SwVersion(int major, string[]? preRelease, params string[] build) : this(preRelease, build, major) { }
+    public SwVersion(int major, ExtraVersionComponent[]? preRelease, params ExtraVersionComponent[] build) : this(preRelease, build, major) { }
     
-    public SwVersion(int major, int minor, int patch, int revision, int minorRevision, params string[] preRelease) : this(preRelease, null, major, minor, patch, revision, minorRevision) { }
+    public SwVersion(int major, int minor, int patch, int revision, int minorRevision, params ExtraVersionComponent[] preRelease) : this(preRelease, null, major, minor, patch, revision, minorRevision) { }
     
-    public SwVersion(int major, int minor, int patch, int revision, params string[] preRelease) : this(preRelease, null, major, minor, patch, revision) { }
+    public SwVersion(int major, int minor, int patch, int revision, params ExtraVersionComponent[] preRelease) : this(preRelease, null, major, minor, patch, revision) { }
     
-    public SwVersion(int major, int minor, int patch, params string[] preRelease) : this(preRelease, null, major, minor, patch) { }
+    public SwVersion(int major, int minor, int patch, params ExtraVersionComponent[] preRelease) : this(preRelease, null, major, minor, patch) { }
     
-    public SwVersion(int major, int minor, params string[] preRelease) : this(preRelease, null, major, minor) { }
+    public SwVersion(int major, int minor, params ExtraVersionComponent[] preRelease) : this(preRelease, null, major, minor) { }
     
-    public SwVersion(int major, params string[] preRelease) : this(preRelease, null, major) { }
+    public SwVersion(int major, params ExtraVersionComponent[] preRelease) : this(preRelease, null, major) { }
     
     public static bool TryParse(string? versionString, [NotNullWhen(true)] out SwVersion? result)
     {
         if ((versionString = versionString.ToTrimmedOrNullIfEmpty()) is not null)
         {
-            Match match = ParsingRegex.Match(versionString);
-            if (match.Success)
-            {
-                result = new(match);
-                return true;
-            }
+            Match match = StandardFormatRegex.Match(versionString);
+            result = match.Success ? new(match, false) : (match = AltFormatRegex.Match(versionString)).Success ? new(match, true) : new(versionString);
+            return true;
         }
         result = null;
         return false;
@@ -140,77 +266,79 @@ public readonly struct SwVersion : IEquatable<SwVersion>, IComparable<SwVersion>
         if ((versionString = versionString.ToTrimmedOrNullIfEmpty()!) is null)
             throw new ArgumentException($"'{nameof(versionString)}' cannot be null or whitespace.", nameof(versionString));
 
-        Match match = ParsingRegex.Match(versionString);
-        if (match.Success)
-            return new(match);
-        throw new ArgumentException($"'{nameof(versionString)}' is not a valid version format.", nameof(versionString));
+        Match match = StandardFormatRegex.Match(versionString);
+        return match.Success ? new(match, false) : (match = AltFormatRegex.Match(versionString)).Success ? new(match, true) : new(versionString);
     }
 
     public bool Equals(SwVersion other)
     {
-        if (Major != other.Major || (Minor ?? 0) != (other.Minor ?? 0) || (Patch ?? 0) != (other.Patch ?? 0) || (Revision ?? 0) != (other.Revision ?? 0) || (MinorRevision ?? 0) != (other.MinorRevision ?? 0))
+        if (Format == VersionStringFormat.NonStandard)
+            return other.Format == VersionStringFormat.NonStandard && Prefix == other.Prefix;
+        if (Format != other.Format || Major != other.Major)
             return false;
-        using IEnumerator<string> enumerator1 = PreRelease.GetEnumerator();
-        using IEnumerator<string> enumerator2 = other.PreRelease.GetEnumerator();
-        while (enumerator1.MoveNext())
+        static bool nullablesNotEqual(int? x, int? y)
         {
-            if (!(enumerator2.MoveNext() && _comparer.Equals(enumerator1.Current, enumerator2.Current)))
-                return false;
+            return x.HasValue ? x.Value != (y ?? 0) : y.HasValue && y.Value != 0;
         }
-        if (enumerator2.MoveNext())
+        if (nullablesNotEqual(Minor, other.Minor) || nullablesNotEqual(Patch, other.Patch) || nullablesNotEqual(Revision, other.MinorRevision) || nullablesNotEqual(Revision, other.MinorRevision) || Format != other.Format || Prefix != other.Prefix)
             return false;
-        using IEnumerator<string> enumerator3 = Build.GetEnumerator();
-        using IEnumerator<string> enumerator4 = other.Build.GetEnumerator();
-        while (enumerator3.MoveNext())
+        static bool sequencesEqual(IEnumerable<ExtraVersionComponent> x, IEnumerable<ExtraVersionComponent> y)
         {
-            if (!(enumerator4.MoveNext() && _comparer.Equals(enumerator3.Current, enumerator4.Current)))
-                return false;
+            using IEnumerator<ExtraVersionComponent> enumerator1 = x.GetEnumerator();
+            using IEnumerator<ExtraVersionComponent> enumerator2 = y.GetEnumerator();
+            while (enumerator1.MoveNext())
+            {
+                if (!(enumerator2.MoveNext() && enumerator1.Current.Lead == enumerator2.Current.Lead && _comparer.Equals(enumerator1.Current.Value, enumerator2.Current.Value)))
+                    return false;
+            }
+            return !enumerator2.MoveNext();
         }
-        return !enumerator4.MoveNext();
+        return Prefix == other.Prefix && sequencesEqual(PreRelease, other.PreRelease) && sequencesEqual(Build, other.Build);
     }
 
     public override bool Equals(object? obj) => obj is not null && obj is SwVersion s && Equals(s);
     
     public int CompareTo(SwVersion other)
     {
+        if (Format == VersionStringFormat.NonStandard && other.Format == VersionStringFormat.NonStandard)
+            return Prefix.CompareTo(other.Prefix);
         int result = Major - other.Major;
-        if (result == 0 && (result = (Minor ?? 0) - (other.Minor ?? 0)) == 0 && (result = (Patch ?? 0) - (other.Patch ?? 0)) == 0 && (result = (Revision ?? 0) - (other.Revision ?? 0)) == 0 &&
-            (result = (MinorRevision ?? 0) - (other.MinorRevision ?? 0)) == 0)
+        if (result == 0)
         {
-            using IEnumerator<string> enumerator1 = PreRelease.GetEnumerator();
-            using IEnumerator<string> enumerator2 = other.PreRelease.GetEnumerator();
-            while (enumerator1.MoveNext())
+            static int compareNullables(int? x, int? y)
             {
-                if (enumerator2.MoveNext())
-                {
-                    if ((result = _comparer.Compare(enumerator1.Current, enumerator2.Current)) != 0)
-                        return result;
-                }
-                else
-                    return -1;
+                return x.HasValue ? (y.HasValue ? x.Value - y.Value : x.Value) : y.HasValue ? 0 - y.Value : 0;
             }
-            if (enumerator2.MoveNext())
-                return 1;
-            using IEnumerator<string> enumerator3 = Build.GetEnumerator();
-            using IEnumerator<string> enumerator4 = other.Build.GetEnumerator();
-            while (enumerator3.MoveNext())
+            if ((result = compareNullables(Minor, other.Minor)) == 0 && (result = compareNullables(Patch, other.Patch)) == 0 && (result = compareNullables(Revision, other.Revision)) == 0 &&
+                (result = compareNullables(MinorRevision, other.MinorRevision)) == 0)
             {
-                if (enumerator4.MoveNext())
+                static int compareSequences(IEnumerable<ExtraVersionComponent> x, IEnumerable<ExtraVersionComponent> y)
                 {
-                    if ((result = _comparer.Compare(enumerator3.Current, enumerator4.Current)) != 0)
-                        return result;
+                    using IEnumerator<ExtraVersionComponent> enumerator1 = x.GetEnumerator();
+                    using IEnumerator<ExtraVersionComponent> enumerator2 = y.GetEnumerator();
+                    while (enumerator1.MoveNext())
+                    {
+                        if (!enumerator2.MoveNext())
+                            return -1;
+                        char? c1 = enumerator1.Current.Lead;
+                        char? c2 = enumerator2.Current.Lead;
+                        int r = c1.HasValue ? (c2.HasValue ? c1.Value.CompareTo(c2.Value) : -1) : c2.HasValue ? 1 : 0;
+                        if (r != 0 || (r = _comparer.Compare(enumerator1.Current.Value, enumerator2.Current.Value)) != 0)
+                            return r;
+                    }
+                    return enumerator2.MoveNext() ? 1 : 0;
                 }
-                else
-                    return -1;
+                if ((result = compareSequences(PreRelease, other.PreRelease)) == 0 && (result = compareSequences(PreRelease, other.PreRelease)) == 0 && (result = Format.CompareTo(other.Format)) == 0)
+                    return Prefix.CompareTo(other.Prefix);
             }
-            if (enumerator4.MoveNext())
-                return 1;
         }
         return result;
     }
 
     public override int GetHashCode()
     {
+        if (Format == VersionStringFormat.NonStandard)
+            return Prefix.GetHashCode();
         int hash;
         unchecked
         {
@@ -249,104 +377,158 @@ public readonly struct SwVersion : IEquatable<SwVersion>, IComparable<SwVersion>
                     }
                 }
             }
-            foreach (string s in PreRelease)
-                hash = hash * 43 + _comparer.GetHashCode(s);
-            foreach (string s in Build)
-                hash = hash * 43 + _comparer.GetHashCode(s);
+            int ch = 11;
+            foreach (ExtraVersionComponent s in PreRelease)
+            {
+                char? c = s.Lead;
+                if (c.HasValue)
+                    ch = ch * 17 + c.Value.GetHashCode();
+                else
+                    ch *= 17;
+                ch = ch * 17 + _comparer.GetHashCode(s.Value);
+            }
+            hash = hash * 43 + ch;
+            ch = 11;
+            foreach (ExtraVersionComponent s in Build)
+            {
+                char? c = s.Lead;
+                if (c.HasValue)
+                    ch = ch * 17 + c.Value.GetHashCode();
+                else
+                    ch *= 17;
+                ch = ch * 17 + _comparer.GetHashCode(s.Value);
+            }
+            hash = hash * 43 + ch;
+            hash = hash * 43 + Format.GetHashCode();
+            hash = hash * 43 + Prefix.GetHashCode();
         }
         return hash;
     }
 
     public override string ToString() => ToString(0);
 
-    public string ToString(int minSegments)
+    public IEnumerable<int> GetNumericalComponents(int minSegments)
     {
-        if (minSegments < 1)
+        yield return Major;
+        if (Minor.HasValue)
         {
-            if (PreRelease.Count > 0)
+            yield return Minor.Value;
+            if (Patch.HasValue)
             {
-                if (Build.Count > 0)
+                yield return Patch.Value;
+                if (Revision.HasValue)
                 {
-                    if (MinorRevision.HasValue && MinorRevision.Value > 0)
-                        return $"{Major}.{Minor!.Value}.{Patch!.Value}.{Revision!.Value}.{MinorRevision.Value}-{string.Join('.', PreRelease)}+{string.Join('.', Build)}";
-                    if (Revision.HasValue && Revision.Value > 0)
-                        return $"{Major}.{Minor!.Value}.{Patch!.Value}.{Revision.Value}-{string.Join('.', PreRelease)}+{string.Join('.', Build)}";
-                    if (Patch.HasValue && Patch.Value > 0)
-                        return $"{Major}.{Minor!.Value}.{Patch.Value}-{string.Join('.', PreRelease)}+{string.Join('.', Build)}";
-                    return $"{Major}.{Minor ?? 0}-{string.Join('.', PreRelease)}+{string.Join('.', Build)}";
+                    yield return Revision.Value;
+                    if (MinorRevision.HasValue)
+                        yield return MinorRevision.Value;
+                    else if (minSegments > 4)
+                        yield return 0;
                 }
-                
-                if (MinorRevision.HasValue && MinorRevision.Value > 0)
-                    return $"{Major}.{Minor!.Value}.{Patch!.Value}.{Revision!.Value}.{MinorRevision.Value}";
-                if (Revision.HasValue && Revision.Value > 0)
-                    return $"{Major}.{Minor!.Value}.{Patch!.Value}.{Revision.Value}";
-                if (Patch.HasValue && Patch.Value > 0)
-                    return $"{Major}.{Minor!.Value}.{Patch.Value}";
-                return $"{Major}.{Minor ?? 0}-{string.Join('.', PreRelease)}";
+                else
+                {
+                    if (minSegments > 5)
+                        minSegments = 5;
+                    for (int i = 3; i < minSegments; i++)
+                        yield return 0;
+                }
             }
-            if (Build.Count > 0)
+            else
             {
-                if (MinorRevision.HasValue && MinorRevision.Value > 0)
-                    return $"{Major}.{Minor!.Value}.{Patch!.Value}.{Revision!.Value}.{MinorRevision.Value}";
-                if (Revision.HasValue && Revision.Value > 0)
-                    return $"{Major}.{Minor!.Value}.{Patch!.Value}.{Revision.Value}";
-                if (Patch.HasValue && Patch.Value > 0)
-                    return $"{Major}.{Minor!.Value}.{Patch.Value}";
-                return $"{Major}.{Minor ?? 0}+{string.Join('.', Build)}";
+                if (minSegments > 5)
+                    minSegments = 5;
+                for (int i = 2; i < minSegments; i++)
+                    yield return 0;
             }
-            if (MinorRevision.HasValue && MinorRevision.Value > 0)
-                return $"{Major}.{Minor!.Value}.{Patch!.Value}.{Revision!.Value}.{MinorRevision.Value}";
-            if (Revision.HasValue && Revision.Value > 0)
-                return $"{Major}.{Minor!.Value}.{Patch!.Value}.{Revision.Value}";
-            if (Patch.HasValue && Patch.Value > 0)
-                return $"{Major}.{Minor!.Value}.{Patch.Value}";
-            return $"{Major}.{Minor ?? 0}";
         }
-        if (PreRelease.Count > 0)
+        else
         {
-            if (Build.Count > 0)
-            {
-                if (minSegments > 4 || MinorRevision.HasValue)
-                    return $"{Major}.{Minor ?? 0}.{Patch ?? 0}.{Revision ?? 0}.{MinorRevision ?? 0}-{string.Join('.', PreRelease)}+{string.Join('.', Build)}";
-                if (minSegments == 4 || Revision.HasValue)
-                    return $"{Major}.{Minor ?? 0}.{Patch ?? 0}.{Revision ?? 0}-{string.Join('.', PreRelease)}+{string.Join('.', Build)}";
-                if (minSegments == 3 || Patch.HasValue)
-                    return $"{Major}.{Minor ?? 0}.{Patch ?? 0}-{string.Join('.', PreRelease)}+{string.Join('.', Build)}";
-                if (minSegments == 2 || Minor.HasValue)
-                    return $"{Major}.{Minor ?? 0}-{string.Join('.', PreRelease)}+{string.Join('.', Build)}";
-                return $"{Major}-{string.Join('.', PreRelease)}+{string.Join('.', Build)}";
-            }
-            if (minSegments > 4 || MinorRevision.HasValue)
-                return $"{Major}.{Minor ?? 0}.{Patch ?? 0}.{Revision ?? 0}.{MinorRevision ?? 0}-{string.Join('.', PreRelease)}";
-            if (minSegments == 4 || Revision.HasValue)
-                return $"{Major}.{Minor ?? 0}.{Patch ?? 0}.{Revision ?? 0}-{string.Join('.', PreRelease)}";
-            if (minSegments == 3 || Patch.HasValue)
-                return $"{Major}.{Minor ?? 0}.{Patch ?? 0}-{string.Join('.', PreRelease)}";
-            if (minSegments == 2 || Minor.HasValue)
-                return $"{Major}.{Minor ?? 0}-{string.Join('.', PreRelease)}";
-            return $"{Major}-{string.Join('.', PreRelease)}";
+            if (minSegments > 5)
+                minSegments = 5;
+            for (int i = 1; i < minSegments; i++)
+                yield return 0;
         }
-        if (Build.Count > 0)
+    }
+
+    public string ToString(int minSegments, bool omitBuild = false, bool omitPreRelease = false)
+    {
+        StringBuilder stringBuilder;
+        IEnumerable<int> numericalComponents;
+        switch (Format)
         {
-            if (minSegments > 4 || MinorRevision.HasValue)
-                return $"{Major}.{Minor ?? 0}.{Patch ?? 0}.{Revision ?? 0}.{MinorRevision ?? 0}+{string.Join('.', Build)}";
-            if (minSegments == 4 || Revision.HasValue)
-                return $"{Major}.{Minor ?? 0}.{Patch ?? 0}.{Revision ?? 0}+{string.Join('.', Build)}";
-            if (minSegments == 3 || Patch.HasValue)
-                return $"{Major}.{Minor ?? 0}.{Patch ?? 0}+{string.Join('.', Build)}";
-            if (minSegments == 2 || Minor.HasValue)
-                return $"{Major}.{Minor ?? 0}+{string.Join('.', Build)}";
-            return $"{Major}+{string.Join('.', Build)}";
+            case VersionStringFormat.NonStandard:
+                return Prefix;
+            case VersionStringFormat.Alt:
+                numericalComponents = GetNumericalComponents(minSegments);
+                if (omitPreRelease || PreRelease.Count == 0)
+                    return Prefix + string.Join(".", numericalComponents.Select(n => n.ToString()));
+                using (IEnumerator<int> enumerator = numericalComponents.GetEnumerator())
+                {
+                    stringBuilder = new StringBuilder(Prefix).Append(enumerator.Current);
+                    while (enumerator.MoveNext())
+                        stringBuilder.Append('.').Append(enumerator.Current);
+                    
+                    foreach (ExtraVersionComponent vc in PreRelease)
+                    {
+                        char? c = vc.Lead;
+                        if (c.HasValue)
+                        {
+                            if (vc.Value.Length > 0)
+                                stringBuilder.Append(c.Value).Append(vc.Value);
+                            else
+                                stringBuilder.Append(c.Value);
+                        }
+                        else
+                            stringBuilder.Append(vc.Value);
+                    }
+                    return stringBuilder.ToString();
+                }
+            default:
+                numericalComponents = GetNumericalComponents(minSegments);
+                if (omitPreRelease || PreRelease.Count == 0)
+                {
+                    if (omitBuild || Build.Count == 0)
+                        return Prefix + string.Join(".", numericalComponents.Select(n => n.ToString()));
+                    using IEnumerator<int> enumerator = numericalComponents.GetEnumerator();
+                    enumerator.MoveNext();
+                    stringBuilder = new StringBuilder(Prefix).Append(enumerator.Current);
+                    while (enumerator.MoveNext())
+                        stringBuilder.Append('.').Append(enumerator.Current);
+                    foreach (ExtraVersionComponent vc in Build)
+                        if (vc.Value.Length > 0)
+                            stringBuilder.Append(vc.Lead!.Value).Append(vc.Value);
+                        else
+                            stringBuilder.Append(vc.Lead!.Value);
+                }
+                else
+                {
+                    using IEnumerator<int> enumerator = numericalComponents.GetEnumerator();
+                    enumerator.MoveNext();
+                    stringBuilder = new StringBuilder(Prefix).Append(enumerator.Current);
+                    while (enumerator.MoveNext())
+                        stringBuilder.Append('.').Append(enumerator.Current);
+                    foreach (ExtraVersionComponent vc in PreRelease)
+                    {
+                        char? c = vc.Lead;
+                        if (c.HasValue)
+                        {
+                            if (vc.Value.Length > 0)
+                                stringBuilder.Append(c.Value).Append(vc.Value);
+                            else
+                                stringBuilder.Append(c.Value);
+                        }
+                        else
+                            stringBuilder.Append(vc.Value);
+                    }
+                    if (omitBuild || Build.Count == 0)
+                        return stringBuilder.ToString();
+                }
+                foreach (ExtraVersionComponent vc in Build)
+                    if (vc.Value.Length > 0)
+                        stringBuilder.Append(vc.Lead!.Value).Append(vc.Value);
+                    else
+                        stringBuilder.Append(vc.Lead!.Value);
+                return stringBuilder.ToString();
         }
-        if (minSegments > 4 || MinorRevision.HasValue)
-            return $"{Major}.{Minor ?? 0}.{Patch ?? 0}.{Revision ?? 0}.{MinorRevision ?? 0}";
-        if (minSegments == 4 || Revision.HasValue)
-            return $"{Major}.{Minor ?? 0}.{Patch ?? 0}.{Revision ?? 0}";
-        if (minSegments == 3 || Patch.HasValue)
-            return $"{Major}.{Minor ?? 0}.{Patch ?? 0}";
-        if (minSegments == 2 || Minor.HasValue)
-            return $"{Major}.{Minor ?? 0}";
-        return Major.ToString();
     }
     
     public static bool operator ==(SwVersion left, SwVersion right) => left.Equals(right);
