@@ -69,6 +69,12 @@ public class ContentDb : DbContext
     /// </summary>
     public DbSet<UpstreamCdn> UpstreamCdns { get; set; } = null!;
 
+    /// <summary>
+    /// Finds the upstream CDN by its name.
+    /// </summary>
+    /// <param name="name">The name of the CDN to find.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The matching <see cref="UpstreamCdn" /> or <see langword="null" /> if none matched the specified <paramref name="name" />.</returns>
     internal async Task<UpstreamCdn?> FindCdnByNameAsync(string name, CancellationToken cancellationToken) => await UpstreamCdns.FirstOrDefaultAsync(cdn => cdn.Name == name, cancellationToken);
 
     /// <summary>
@@ -81,6 +87,12 @@ public class ContentDb : DbContext
     /// </summary>
     public DbSet<LocalLibrary> LocalLibraries { get; set; } = null!;
 
+    /// <summary>
+    /// Finds the local library by its name.
+    /// </summary>
+    /// <param name="name">The name of the library to find.</param>
+    /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
+    /// <returns>The matching <see cref="LocalLibrary" /> or <see langword="null" /> if none matched the specified <paramref name="name" />.</returns>
     internal async Task<LocalLibrary?> FindLibraryByNameAsync(string name, CancellationToken cancellationToken) => await LocalLibraries.FirstOrDefaultAsync(cdn => cdn.Name == name, cancellationToken);
     
     /// <summary>
