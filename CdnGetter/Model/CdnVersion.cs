@@ -35,7 +35,7 @@ public class CdnVersion : ModificationTrackingModelBase
 
     private Guid _libraryId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="CdnLibrary" />.
+    /// The unique identifier of the ancestor <see cref="LocalLibrary" />.
     /// </summary>
     public Guid LibraryId
     {

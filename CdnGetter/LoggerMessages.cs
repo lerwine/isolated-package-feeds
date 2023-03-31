@@ -417,6 +417,21 @@ internal static class LoggerMessages
         }), error);
     
     #endregion
+    #region NoLibraryNameSpecified Warning (0x001a)
+    
+    public const int EVENT_ID_NoLibraryNameSpecifiedWarning = 0x001a;
+    public static readonly EventId NoLibraryNameSpecifiedWarning = new(EVENT_ID_NoLibraryNameSpecifiedWarning, nameof(NoLibraryNameSpecifiedWarning));
+    private static readonly Action<ILogger, string, string, string, Exception?> _noLibraryNameSpecifiedWarning = LoggerMessage.Define<string, string, string>(LogLevel.Warning, NoLibraryNameSpecifiedWarning,
+        "At least one library name must be specified with the --{LibrarySwitchName} switch when --{ShowSwitchName}={ShowSwitchValue} is used.");
+    /// <summary>
+    /// Logs an NoLibraryNameSpecified event with event code 0x001a.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="showSwitchValue">The name of the show value.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    public static void LogNoLibraryNameSpecifiedWarning(this ILogger logger, string showSwitchValue) => _noLibraryNameSpecifiedWarning(logger, nameof(Config.CommandSettings.Library), nameof(Config.CommandSettings.Show), showSwitchValue, null);
+    
+    #endregion
     #region ExecuteMethod Scope
     
     private static readonly Func<ILogger, string, IDisposable?> _executeMethodScope = LoggerMessage.DefineScope<string>("Execute method {MethodName}()");

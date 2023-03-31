@@ -69,6 +69,8 @@ public class ContentDb : DbContext
     /// </summary>
     public DbSet<UpstreamCdn> UpstreamCdns { get; set; } = null!;
 
+    internal async Task<UpstreamCdn?> FindCdnByNameAsync(string name, CancellationToken cancellationToken) => await UpstreamCdns.FirstOrDefaultAsync(cdn => cdn.Name == name, cancellationToken);
+
     /// <summary>
     /// Activity logs for libraries retrieved from upstream content delivery networks.
     /// </summary>
@@ -79,6 +81,8 @@ public class ContentDb : DbContext
     /// </summary>
     public DbSet<LocalLibrary> LocalLibraries { get; set; } = null!;
 
+    internal async Task<LocalLibrary?> FindLibraryByNameAsync(string name, CancellationToken cancellationToken) => await LocalLibraries.FirstOrDefaultAsync(cdn => cdn.Name == name, cancellationToken);
+    
     /// <summary>
     /// Content libraries retrieved from upstream content delivery networks.
     /// </summary>
