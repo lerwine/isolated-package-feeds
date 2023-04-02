@@ -6,531 +6,470 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace CdnGetter;
 
-public readonly struct SwVersion : IEquatable<SwVersion>, IComparable<SwVersion>
+/// <summary>
+/// Represents a comparable software version.
+/// </summary>
+public readonly partial struct SwVersion : IEquatable<SwVersion>, IComparable<SwVersion>
 {
-    public enum VersionStringFormat
-    {
-        Standard,
-        Alt,
-        NonStandard
-    }
+    private const string GRP_p = "p";
 
-    public record ExtraVersionComponent(char? Lead, string Value);
+    private const string GRP_n = "n";
 
-    private static readonly StringComparer _comparer = StringComparer.OrdinalIgnoreCase;
-    public static readonly ValueConverter<SwVersion, string> Converter = new(
-        v => v.ToString(),
-        s => Parse(s)
-    );
+    private const string GRP_r = "r";
 
-    public const char LEAD_CHAR_PreRelease = '-';
-    
-    private static readonly char[] PreReleaseSeparators = new[] { '-', '.' };
+    private const string GRP_b = "b";
 
-    public const char LEAD_CHAR_Build = '+';
-    
-    private static readonly char[] BuildSeparators = new[] { '-', '.', '+' };
+    private static readonly Regex _versionRegex = new(@$"^(?<{GRP_p}>([^\d.+-]+|-\D)+)?(?<{GRP_n}>-?\d+(\.\d+)*)(?<{GRP_r}>-[^+]*|[^+]+)?(?<{GRP_b}>\+.*)?", RegexOptions.Compiled);
 
-    public const string GROUP_NAME_prefix = "prefix";
+    public const char SEPARATOR_Dot = '.';
 
-    public const string GROUP_NAME_major = "major";
+    public const char LEADCHAR_PreRelease = '-';
 
-    public const string GROUP_NAME_minor = "minor";
-    
-    public const string GROUP_NAME_patch = "patch";
-    
-    public const string GROUP_NAME_revision = "revision";
-    
-    public const string GROUP_NAME_minorRevision = "minorRevision";
-    
-    public const string GROUP_NAME_preReleaseValue = "preRelease";
-    
-    public const string GROUP_NAME_buildValue = "build";
-    
-    public static readonly Regex StandardFormatRegex = new(@$"^(?<{GROUP_NAME_prefix}>([^\d-]+|-\D)+)?(?<{GROUP_NAME_major}>-?\d+)(\.(?<{GROUP_NAME_minor}>\d+)(\.(?<{GROUP_NAME_patch}>\d+)(\.(?<{GROUP_NAME_revision}>\d+)(\.(?<{GROUP_NAME_minorRevision}>\d+))?)?)?)?(-(?<{GROUP_NAME_preReleaseValue}>[^\s+]+))?(\+(?<{GROUP_NAME_buildValue}>\S+))?$", RegexOptions.Compiled);
-    
-    public static readonly Regex AltFormatRegex = new(@$"^(?<{GROUP_NAME_prefix}>([^\d-]+|-\D)+)?(?<{GROUP_NAME_major}>-?\d+)(\.(?<{GROUP_NAME_minor}>\d+)(\.(?<{GROUP_NAME_patch}>\d+)(\.(?<{GROUP_NAME_revision}>\d+)(\.(?<{GROUP_NAME_minorRevision}>\d+))?)?)?)?(?<{GROUP_NAME_preReleaseValue}>[^+\s-]\S*)?$", RegexOptions.Compiled);
-    
-    public static readonly Regex ExtraneousLeadingZeroRegex = new(@"^-0+(?=0($|\D))|((?<=^-)|^)0+(?=[1-9])", RegexOptions.Compiled);
+    public const char LEADCHAR_Build = '+';
 
-    public string Prefix { get; }
+    private static readonly char[] SEPARATOR_PreRelease = new char[] { LEADCHAR_PreRelease, SEPARATOR_Dot };
 
+    private static readonly char[] SEPARATOR_Build = new char[] { LEADCHAR_Build, SEPARATOR_Dot, LEADCHAR_PreRelease };
+
+    public readonly StringComparer TextComparer = StringComparer.OrdinalIgnoreCase;
+
+    /// <summary>
+    /// The text version component that precedes other version components.
+    /// A <see langword="null" /> value indicates there is no prefixed version component.
+    /// </summary>
+    /// <remarks>This will never be a zero-length string.</remarks>
+    public string? Prefix { get; }
+
+    /// <summary>
+    /// The value of first numerical version component indicating the major version number.
+    /// </summary>
+    /// <remarks>This will always be <c>0</c> when <see cref="Format" /> is <see cref="VersionStringFormat.NonNumerical" /> since non-standard version strings do not have parsable numerical components..</remarks>
     public int Major { get; }
-    
-    public int? Minor { get; }
-    
-    public int? Patch { get; }
-    
-    public int? Revision { get; }
-    
-    public int? MinorRevision { get; }
-    
-    public ReadOnlyCollection<ExtraVersionComponent> PreRelease { get; }
-    
-    public ReadOnlyCollection<ExtraVersionComponent> Build { get; }
 
+    /// <summary>
+    /// The value of the second numerical version component indicating the minor version number.
+    /// A <see langword="null" /> value indicates an implied <c>0</c> value.
+    /// </summary>
+    /// <remarks>This will always be <see langword="null" /> when <see cref="Format" /> is <see cref="VersionStringFormat.NonNumerical" />.
+    /// This will never have a negative value.</remarks>
+    public int? Minor { get; }
+
+    /// <summary>
+    /// The value of the third numerical version component indicating the patch number.
+    /// A <see langword="null" /> value indicates an implied <c>0</c> value.
+    /// </summary>
+    /// <remarks>This will always be <see langword="null" /> when <see cref="Format" /> is <see cref="VersionStringFormat.NonNumerical" />.
+    /// This will never have a negative value.</remarks>
+    public int? Patch { get; }
+
+    /// <summary>
+    /// The value of the fourth numerical version component indicating the revision number.
+    /// A <see langword="null" /> value indicates an implied <c>0</c> value.
+    /// </summary>
+    /// <remarks>This will always be <see langword="null" /> when <see cref="Format" /> is <see cref="VersionStringFormat.NonNumerical" />.
+    /// This will never have a negative value.</remarks>
+    public int? Revision { get; }
+
+    /// <summary>
+    /// The numerical version components that follow the <see cref="Revision" /> components.
+    /// A <see langword="null" /> value indicates there are no additinal numerical component.
+    /// </summary>
+    /// <remarks>This will never contain an empty collection; It will always have at least 1 element if it is not <see cref="null" />.</remarks>
+    public ReadOnlyCollection<int>? AdditionalNumerical { get; }
+
+    /// <summary>
+    /// The segments of the pre-release component, which follows the numerical components.
+    /// A <see langword="null" /> value indicates there is no pre-release component.
+    /// </summary>
+    /// <remarks>This will never contain an empty collection; It will always have at least 1 element if it is not <see cref="null" />.</remarks>
+    public ReadOnlyCollection<PreReleaseSegment>? PreRelease { get; }
+
+    /// <summary>
+    /// The segments of the build component, which follows the numerical components.
+    /// A <see langword="null" /> value indicates there is no build component.
+    /// </summary>
+    /// <remarks>This will never contain an empty collection; It will always have at least 1 element if it is not <see cref="null" />.</remarks>
+    public ReadOnlyCollection<BuildSegment>? Build { get; }
+
+    /// <summary>
+    /// The format of the version string.
+    /// </summary>
     public VersionStringFormat Format { get; }
 
-    private SwVersion(Match match, bool isAltFormat)
-    {
-        VersionStringFormat format = isAltFormat ? VersionStringFormat.Alt : VersionStringFormat.Standard;
-        if (int.TryParse(match.Groups[GROUP_NAME_major].Value, out int value))
-            Major = value;
-        else
-        {
-            Major = 0;
-            format = VersionStringFormat.NonStandard;
-        }
-        Group mg = match.Groups[GROUP_NAME_minor];
-        if (mg.Success)
-        {
-            if (int.TryParse(mg.Value, out value))
-                Minor = value;
-            else
-            {
-                Minor = 0;
-                format = VersionStringFormat.NonStandard;
-            }
-            if ((mg = match.Groups[GROUP_NAME_patch]).Success)
-            {
-                if (int.TryParse(mg.Value, out value))
-                    Patch = value;
-                else
-                {
-                    Patch = 0;
-                    format = VersionStringFormat.NonStandard;
-                }
-                if ((mg = match.Groups[GROUP_NAME_revision]).Success)
-                {
-                    if (int.TryParse(mg.Value, out value))
-                        Revision = value;
-                    else
-                    {
-                        Revision = 0;
-                        format = VersionStringFormat.NonStandard;
-                    }
-                    if ((mg = match.Groups[GROUP_NAME_minorRevision]).Success)
-                    {
-                        if (int.TryParse(mg.Value, out value))
-                            MinorRevision = value;
-                        else
-                        {
-                            MinorRevision = 0;
-                            format = VersionStringFormat.NonStandard;
-                        }
-                    }
-                    else
-                        MinorRevision = null;
-                }
-                else
-                    Revision = MinorRevision = null;
-            }
-            else
-                Patch = Revision = MinorRevision = null;
-        }
-        else
-            Minor = Patch = Revision = MinorRevision = null;
-        if ((Format = format) == VersionStringFormat.NonStandard)
-        {
-            Prefix = match.Value;
-            PreRelease = new(Array.Empty<ExtraVersionComponent>());
-            Build = new(Array.Empty<ExtraVersionComponent>());
-        }
-        else
-        {
-            Prefix = (mg = match.Groups[GROUP_NAME_prefix]).Success ? mg.Value : "";
-            if ((mg = match.Groups[GROUP_NAME_preReleaseValue]).Success)
-                PreRelease = new(ParseComponents(LEAD_CHAR_PreRelease, mg.Value, PreReleaseSeparators).ToArray());
-            else
-                PreRelease = new(Array.Empty<ExtraVersionComponent>());
-            if (format == VersionStringFormat.Standard && (mg = match.Groups[GROUP_NAME_buildValue]).Success)
-                Build = new(ParseComponents(LEAD_CHAR_Build, mg.Value, BuildSeparators).ToArray());
-            else
-                Build = new(Array.Empty<ExtraVersionComponent>());
-        }
-    }
+    public static readonly ValueConverter<SwVersion, string> Converter = new(
+        v => v.ToString(),
+        s => new(s)
+    );
 
-    private static IEnumerable<ExtraVersionComponent> ParseComponents(char initialLead, string source, char[] separators)
+    private SwVersion(int major, int? minor, int? patch, int? revision, IEnumerable<int>? additionalNumerical, IEnumerable<PreReleaseSegment>? preRelease, IEnumerable<BuildSegment>? build, string? prefix)
     {
-        int index = source.IndexOfAny(separators);
-        if (index < 0)
-            yield return new(initialLead, source);
+        if (minor.HasValue && minor.Value < 0)
+            throw new ArgumentOutOfRangeException(nameof(minor));
+        if (patch.HasValue && patch.Value < 0)
+            throw new ArgumentOutOfRangeException(nameof(patch));
+        if (revision.HasValue && revision.Value < 0)
+            throw new ArgumentOutOfRangeException(nameof(revision));
+        if (additionalNumerical is null)
+            AdditionalNumerical = null;
         else
         {
-            yield return new(initialLead, (index == 0) ? "" : source[..index]);
-            int startIndex = index + 1;
-            while (startIndex < source.Length)
+            int[] an = additionalNumerical.ToArray();
+            if (an.Length > 0)
             {
-                char c = source[index];
-                if ((index = source.IndexOfAny(separators, startIndex)) < 0)
-                {
-                    yield return new(c, source[startIndex..]);
-                    yield break;
-                }
-                yield return new(source[index], (startIndex < index) ? source[startIndex..index] :  "");
-                startIndex = index + 1;
-            }
-            yield return new(source[index], "");
-        }
-    }
-    
-    private SwVersion(string nonStandard)
-    {
-        Prefix = nonStandard;
-        Format = VersionStringFormat.NonStandard;
-        Major = 0;
-        Minor = Patch = Revision = MinorRevision = null;
-        PreRelease = new(Array.Empty<ExtraVersionComponent>());
-        Build = new(Array.Empty<ExtraVersionComponent>());
-    }
-    
-    private SwVersion(ExtraVersionComponent[]? preRelease, ExtraVersionComponent[]? build, int major, int? minor = null, int? patch = null, int? revision = null, int? minorRevision = null)
-    {
-        Prefix = "";
-        Major = major;
-        if ((Minor = minor).HasValue && minor!.Value < 0)
-            throw new ArgumentOutOfRangeException(nameof(minor));
-        if ((Patch = patch).HasValue && patch!.Value < 0)
-            throw new ArgumentOutOfRangeException(nameof(patch));
-        if ((Revision = revision).HasValue && revision!.Value < 0)
-            throw new ArgumentOutOfRangeException(nameof(revision));
-        if ((MinorRevision = minorRevision).HasValue && minorRevision!.Value < 0)
-            throw new ArgumentOutOfRangeException(nameof(minorRevision));
-        if (preRelease is not null && preRelease.Length > 0)
-        {
-            char? c = preRelease[0].Lead;
-            if (c.HasValue)
-            {
-                if (c.Value != LEAD_CHAR_PreRelease || preRelease.Skip(1).Any(p => !(p.Lead.HasValue && PreReleaseSeparators.Contains(p.Lead.Value))))
-                    throw new ArgumentOutOfRangeException(nameof(preRelease));
-                Format = VersionStringFormat.Standard;
+                if (an.Any(nextSparator => nextSparator < 0))
+                    throw new ArgumentOutOfRangeException(nameof(additionalNumerical));
+                AdditionalNumerical = new(an);
             }
             else
-            {
-                if (preRelease[0].Value.Length == 0 || preRelease.Skip(1).Any(p => !(p.Lead.HasValue && PreReleaseSeparators.Contains(p.Lead.Value))))
-                    throw new ArgumentOutOfRangeException(nameof(preRelease));
-                Format = VersionStringFormat.Alt;
-            }
-            PreRelease = new(preRelease);
+                AdditionalNumerical = null;
+        }
+        if (preRelease.TryGetFirst(out PreReleaseSegment prs))
+        {
+            if (prs.AltSeparator && prs.Value.Length == 0)
+                throw new ArgumentOutOfRangeException(nameof(preRelease));
+            Format = prs.AltSeparator ? VersionStringFormat.Alt : VersionStringFormat.Standard;
+            PreRelease = new(preRelease.ToArray());
         }
         else
         {
             Format = VersionStringFormat.Standard;
-            PreRelease = new(Array.Empty<ExtraVersionComponent>());
+            PreRelease = null;
         }
-        if (build is not null && build.Length > 0)
+        if (build.TryGetFirst(out BuildSegment bs))
         {
-            char? c = build[0].Lead;
-            if (!c.HasValue || c.Value != LEAD_CHAR_Build || build.Skip(1).Any(p => !(p.Lead.HasValue && BuildSeparators.Contains(p.Lead.Value))))
-                throw new ArgumentOutOfRangeException(nameof(build));
-            Build = new(build);
+            if (bs.Separator != BuildSeparator.Plus)
+                throw new ArgumentException($"The {nameof(BuildSegment.Separator)} property of the first element of {nameof(build)} must be {nameof(BuildSeparator)}.{nameof(BuildSeparator.Plus)}.", nameof(build));
+            Build = new(build.ToArray());
         }
         else
-            Build = new(Array.Empty<ExtraVersionComponent>());
+            Build = null;
+        Prefix = (prefix is null || prefix.Length == 0) ? null : prefix;
+        Major = major;
+        Minor = minor;
+        Patch = patch;
+        Revision = revision;
     }
-    
-    public SwVersion(int major, int minor, int patch, int revision, int minorRevision, ExtraVersionComponent[]? preRelease, params ExtraVersionComponent[] build) : this(preRelease, build, major, minor, patch, revision, minorRevision) { }
-    
-    public SwVersion(int major, int minor, int patch, int revision, ExtraVersionComponent[]? preRelease, params ExtraVersionComponent[] build) : this(preRelease, build, major, minor, patch, revision) { }
-    
-    public SwVersion(int major, int minor, int patch, ExtraVersionComponent[]? preRelease, params ExtraVersionComponent[] build) : this(preRelease, build, major, minor, patch) { }
-    
-    public SwVersion(int major, int minor, ExtraVersionComponent[]? preRelease, params ExtraVersionComponent[] build) : this(preRelease, build, major, minor) { }
-    
-    public SwVersion(int major, ExtraVersionComponent[]? preRelease, params ExtraVersionComponent[] build) : this(preRelease, build, major) { }
-    
-    public SwVersion(int major, int minor, int patch, int revision, int minorRevision, params ExtraVersionComponent[] preRelease) : this(preRelease, null, major, minor, patch, revision, minorRevision) { }
-    
-    public SwVersion(int major, int minor, int patch, int revision, params ExtraVersionComponent[] preRelease) : this(preRelease, null, major, minor, patch, revision) { }
-    
-    public SwVersion(int major, int minor, int patch, params ExtraVersionComponent[] preRelease) : this(preRelease, null, major, minor, patch) { }
-    
-    public SwVersion(int major, int minor, params ExtraVersionComponent[] preRelease) : this(preRelease, null, major, minor) { }
-    
-    public SwVersion(int major, params ExtraVersionComponent[] preRelease) : this(preRelease, null, major) { }
-    
-    public static bool TryParse(string? versionString, [NotNullWhen(true)] out SwVersion? result)
+
+    public SwVersion(string prefix, int major, int minor, int patch, int revision, IEnumerable<int> additionalNumerical, IEnumerable<PreReleaseSegment> preRelease, BuildSegment build, params BuildSegment[] additionalBuild)
+        : this(major, minor, patch, revision, additionalNumerical, preRelease, additionalBuild.PrependValue(build), prefix) { }
+
+    public SwVersion(int major, int minor, int patch, int revision, IEnumerable<int> additionalNumerical, IEnumerable<PreReleaseSegment> preRelease, BuildSegment build, params BuildSegment[] additionalBuild)
+        : this(major, minor, patch, revision, additionalNumerical, preRelease, additionalBuild.PrependValue(build), null) { }
+
+    public SwVersion(string prefix, int major, int minor, int patch, int revision, IEnumerable<int> additionalNumerical, PreReleaseSegment preRelease, params PreReleaseSegment[] additionalPreRelease)
+        : this(major, minor, patch, revision, additionalNumerical, additionalPreRelease.PrependValue(preRelease), null, prefix) { }
+
+    public SwVersion(int major, int minor, int patch, int revision, IEnumerable<int> additionalNumerical, PreReleaseSegment preRelease, params PreReleaseSegment[] additionalPreRelease)
+        : this(major, minor, patch, revision, additionalNumerical, additionalPreRelease.PrependValue(preRelease), null, null) { }
+
+    public SwVersion(string prefix, int major, int minor, int patch, int revision, IEnumerable<int> additionalNumerical, BuildSegment build, params BuildSegment[] additionalBuild)
+        : this(major, minor, patch, revision, additionalNumerical, null, additionalBuild.PrependValue(build), prefix) { }
+
+    public SwVersion(int major, int minor, int patch, int revision, IEnumerable<int> additionalNumerical, BuildSegment build, params BuildSegment[] additionalBuild)
+        : this(major, minor, patch, revision, additionalNumerical, null, additionalBuild.PrependValue(build), null) { }
+
+    public SwVersion(string prefix, int major, int minor, int patch, IEnumerable<PreReleaseSegment> preRelease, BuildSegment build, params BuildSegment[] additionalBuild)
+        : this(major, minor, patch, null, null, preRelease, additionalBuild.PrependValue(build), prefix) { }
+
+    public SwVersion(string prefix, int major, int minor, int patch, int revision, params int[] additionalNumerical) : this(major, minor, patch, revision, additionalNumerical, null, null, prefix) { }
+
+    public SwVersion(int major, int minor, int patch, IEnumerable<PreReleaseSegment> preRelease, BuildSegment build, params BuildSegment[] additionalBuild)
+        : this(major, minor, patch, null, null, preRelease, additionalBuild.PrependValue(build), null) { }
+
+    public SwVersion(string prefix, int major, int minor, int patch, PreReleaseSegment preRelease, params PreReleaseSegment[] additionalPreRelease)
+        : this(major, minor, patch, null, null, additionalPreRelease.PrependValue(preRelease), null, prefix) { }
+
+    public SwVersion(int major, int minor, int patch, PreReleaseSegment preRelease, params PreReleaseSegment[] additionalPreRelease)
+        : this(major, minor, patch, null, null, additionalPreRelease.PrependValue(preRelease), null, null) { }
+
+    public SwVersion(string prefix, int major, int minor, int patch, BuildSegment build, params BuildSegment[] additionalBuild)
+        : this(major, minor, patch, null, null, null, additionalBuild.PrependValue(build), prefix) { }
+
+    public SwVersion(string prefix, int major, int minor, IEnumerable<PreReleaseSegment> preRelease, BuildSegment build, params BuildSegment[] additionalBuild)
+        : this(major, minor, null, null, null, preRelease, additionalBuild.PrependValue(build), prefix) { }
+
+    public SwVersion(int major, int minor, int patch, int revision, params int[] additionalNumerical) : this(major, minor, patch, revision, additionalNumerical, null, null, null) { }
+
+    public SwVersion(int major, int minor, int patch, BuildSegment build, params BuildSegment[] additionalBuild)
+        : this(major, minor, patch, null, null, null, additionalBuild.PrependValue(build), null) { }
+
+    public SwVersion(int major, int minor, IEnumerable<PreReleaseSegment> preRelease, BuildSegment build, params BuildSegment[] additionalBuild)
+        : this(major, minor, null, null, null, preRelease, additionalBuild.PrependValue(build), null) { }
+
+    public SwVersion(string prefix, int major, int minor, PreReleaseSegment preRelease, params PreReleaseSegment[] additionalPreRelease)
+        : this(major, minor, null, null, null, additionalPreRelease.PrependValue(preRelease), null, prefix) { }
+
+    public SwVersion(int major, int minor, PreReleaseSegment preRelease, params PreReleaseSegment[] additionalPreRelease)
+        : this(major, minor, null, null, null, additionalPreRelease.PrependValue(preRelease), null, null) { }
+
+    public SwVersion(string prefix, int major, int minor, BuildSegment build, params BuildSegment[] additionalBuild)
+        : this(major, minor, null, null, null, null, additionalBuild.PrependValue(build), prefix) { }
+
+    public SwVersion(string prefix, int major, IEnumerable<PreReleaseSegment> preRelease, BuildSegment build, params BuildSegment[] additionalBuild)
+        : this(major, null, null, null, null, preRelease, additionalBuild.PrependValue(build), prefix) { }
+
+    public SwVersion(int major, int minor, BuildSegment build, params BuildSegment[] additionalBuild) : this(major, minor, null, null, null, null, additionalBuild.PrependValue(build), null) { }
+
+    public SwVersion(int major, IEnumerable<PreReleaseSegment> preRelease, BuildSegment build, params BuildSegment[] additionalBuild)
+        : this(major, null, null, null, null, preRelease, additionalBuild.PrependValue(build), null) { }
+
+    public SwVersion(string prefix, int major, PreReleaseSegment preRelease, params PreReleaseSegment[] additionalPreRelease)
+        : this(major, null, null, null, null, additionalPreRelease.PrependValue(preRelease), null, prefix) { }
+
+    public SwVersion(int major, PreReleaseSegment preRelease, params PreReleaseSegment[] additionalPreRelease)
+        : this(major, null, null, null, null, additionalPreRelease.PrependValue(preRelease), null, null) { }
+
+    public SwVersion(string prefix, int major, BuildSegment build, params BuildSegment[] additionalBuild) : this(major, null, null, null, null, null, additionalBuild.PrependValue(build), prefix) { }
+
+    public SwVersion(string prefix, int major, int minor, int patch) : this(major, minor, patch, null, null, null, null, prefix) { }
+
+    public SwVersion(int major, int minor, int patch) : this(major, minor, patch, null, null, null, null, null) { }
+
+    public SwVersion(int major, BuildSegment build, params BuildSegment[] additionalBuild) : this(major, null, null, null, null, null, additionalBuild.PrependValue(build), null) { }
+
+    public SwVersion(string prefix, int major, int minor) : this(major, minor, null, null, null, null, null, prefix) { }
+
+    public SwVersion(int major, int minor) : this(major, minor, null, null, null, null, null, null) { }
+
+    public SwVersion(string prefix, int major) : this(major, null, null, null, null, null, null, prefix) { }
+
+    public SwVersion(int major) : this(major, null, null, null, null, null, null, null) { }
+
+    public SwVersion(string? versionString)
     {
-        if ((versionString = versionString.ToTrimmedOrNullIfEmpty()) is not null)
+        if (string.IsNullOrEmpty(versionString))
         {
-            Match match = StandardFormatRegex.Match(versionString);
-            result = match.Success ? new(match, false) : (match = AltFormatRegex.Match(versionString)).Success ? new(match, true) : new(versionString);
-            return true;
+            Format = VersionStringFormat.NonNumerical;
+            Major = 0;
+            Minor = Patch = Revision = null;
+            AdditionalNumerical = null;
+            Build = null;
+            Prefix = null;
+            PreRelease = null;
+            return;
         }
-        result = null;
-        return false;
+        Match m = _versionRegex.Match(versionString);
+        if (m.Success)
+        {
+            Collection<int> nv = new();
+            string[] sv = m.Groups[GRP_n].Value.Split(SEPARATOR_Dot);
+            foreach (string s in sv)
+            {
+                if (int.TryParse(s, out int n))
+                    nv.Add(n);
+                else
+                {
+                    nv.Clear();
+                    break;
+                }
+            }
+            var grp = m.Groups[GRP_p];
+            string? preRelease;
+            if (nv.Count == 0 || (nv[0] == 0 && sv[0][0] == LEADCHAR_PreRelease))
+            {
+                Prefix = grp.Success ? grp.Value + m.Groups[GRP_n].Value : m.Groups[GRP_n].Value;
+                Major = 0;
+                Minor = Patch = Revision = null;
+                AdditionalNumerical = null;
+                Format = VersionStringFormat.NonNumerical;
+                preRelease = (grp = m.Groups[GRP_r]).Success ? grp.Value : null;
+            }
+            else
+            {
+                if (grp.Success)
+                    Prefix = grp.Value;
+                else
+                    Prefix = null;
+                using IEnumerator<int> enumerator = nv.GetEnumerator();
+                enumerator.MoveNext();
+                Major = enumerator.Current;
+                if (enumerator.MoveNext())
+                {
+                    Minor = enumerator.Current;
+                    if (enumerator.MoveNext())
+                    {
+                        Patch = enumerator.Current;
+                        if (enumerator.MoveNext())
+                        {
+                            Revision = enumerator.Current;
+                            if (enumerator.MoveNext())
+                            {
+                                nv = new Collection<int>();
+                                do { nv.Add(enumerator.Current); }
+                                while (enumerator.MoveNext());
+                                AdditionalNumerical = new(nv);
+                            }
+                            else
+                                AdditionalNumerical = null;
+                        }
+                        else
+                        {
+                            Revision = null;
+                            AdditionalNumerical = null;
+                        }
+                    }
+                    else
+                    {
+                        Patch = Revision = null;
+                        AdditionalNumerical = null;
+                    }
+                }
+                else
+                {
+                    Minor = Patch = Revision = null;
+                    AdditionalNumerical = null;
+                }
+                if ((grp = m.Groups[GRP_r]).Success)
+                {
+                    preRelease = grp.Value;
+                    Format = (preRelease[0] == LEADCHAR_PreRelease) ? VersionStringFormat.Standard : VersionStringFormat.Alt;
+                }
+                else
+                {
+                    preRelease = null;
+                    Format = VersionStringFormat.Standard;
+                }
+            }
+            if (preRelease is null)
+                PreRelease = null;
+            else
+                PreRelease = new(ParsePreReleaseSegments(preRelease).ToArray());
+            if ((grp = m.Groups[GRP_b]).Success)
+                Build = new(ParseBuildSegments(grp.Value).ToArray());
+            else
+                Build = null;
+        }
+        else
+        {
+            Format = VersionStringFormat.NonNumerical;
+            Major = 0;
+            Minor = Patch = Revision = null;
+            AdditionalNumerical = null;
+            int index = versionString.IndexOf(LEADCHAR_Build);
+            if (index < 0 || index == versionString.Length - 1)
+                Build = null;
+            else
+            {
+                Build = new(ParseBuildSegments(versionString[..index]).ToArray());
+                versionString = versionString[index..];
+            }
+            if ((index = versionString.IndexOf(LEADCHAR_PreRelease)) < 0)
+            {
+                Prefix = versionString;
+                PreRelease = null;
+            }
+            else
+            {
+                Prefix = (index > 0) ? versionString[..index] : null;
+                PreRelease = new(ParsePreReleaseSegments(versionString[index..]).ToArray());
+            }
+        }
     }
 
-    public static SwVersion Parse(string versionString)
+    private static IEnumerable<BuildSegment> ParseBuildSegments(string text)
     {
-        if ((versionString = versionString.ToTrimmedOrNullIfEmpty()!) is null)
-            throw new ArgumentException($"'{nameof(versionString)}' cannot be null or whitespace.", nameof(versionString));
+        int previousSeparator = text.IndexOfAny(SEPARATOR_Build, 1);
+        if (previousSeparator < 0)
+        {
+            yield return new BuildSegment(BuildSeparator.Plus, text[1..]);
+            yield break;
+        }
+        yield return new BuildSegment(BuildSeparator.Plus, (previousSeparator > 1) ? text[1..previousSeparator] : "");
+        int startIndex = previousSeparator + 1;
+        while (startIndex < text.Length)
+        {
+            int nextSeparator = text.IndexOfAny(SEPARATOR_PreRelease, startIndex);
+            if (nextSeparator < 0)
+                switch (text[previousSeparator])
+                {
+                    case SEPARATOR_Dot:
+                        yield return new BuildSegment(BuildSeparator.Dot, (startIndex < text.Length - 1) ? text[startIndex..] : "");
+                        yield break;
+                    case LEADCHAR_PreRelease:
+                        yield return new BuildSegment(BuildSeparator.Dash, (startIndex < text.Length - 1) ? text[startIndex..] : "");
+                        yield break;
+                    default:
+                        yield return new BuildSegment(BuildSeparator.Plus, (startIndex < text.Length - 1) ? text[startIndex..] : "");
+                        yield break;
+                }
 
-        Match match = StandardFormatRegex.Match(versionString);
-        return match.Success ? new(match, false) : (match = AltFormatRegex.Match(versionString)).Success ? new(match, true) : new(versionString);
+            switch (text[previousSeparator])
+            {
+                case SEPARATOR_Dot:
+                    yield return new BuildSegment(BuildSeparator.Dot, (startIndex < nextSeparator - 1) ? text[startIndex..nextSeparator] : "");
+                    break;
+                case LEADCHAR_PreRelease:
+                    yield return new BuildSegment(BuildSeparator.Dash, (startIndex < nextSeparator - 1) ? text[startIndex..nextSeparator] : "");
+                    break;
+                default:
+                    yield return new BuildSegment(BuildSeparator.Plus, (startIndex < nextSeparator - 1) ? text[startIndex..nextSeparator] : "");
+                    break;
+            }
+            startIndex = nextSeparator + 1;
+        }
+    }
+
+    private static IEnumerable<PreReleaseSegment> ParsePreReleaseSegments(string text)
+    {
+        int previousSeparator;
+        if (text[0] == LEADCHAR_PreRelease)
+            previousSeparator = 0;
+        else if ((previousSeparator = text.IndexOfAny(SEPARATOR_PreRelease)) < 0)
+        {
+            yield return new PreReleaseSegment(true, text);
+            yield break;
+        }
+        int startIndex = previousSeparator + 1;
+        while (startIndex < text.Length)
+        {
+            int nextSeparator = text.IndexOfAny(SEPARATOR_PreRelease, startIndex);
+            if (nextSeparator < 0)
+            {
+                yield return new PreReleaseSegment(text[previousSeparator] != LEADCHAR_PreRelease, (startIndex < text.Length - 1) ? text[startIndex..] : "");
+                yield break;
+            }
+            yield return new PreReleaseSegment(text[previousSeparator] != LEADCHAR_PreRelease, (startIndex < nextSeparator - 1) ? text[startIndex..nextSeparator] : "");
+            startIndex = nextSeparator + 1;
+        }
+    }
+
+    public int CompareTo(SwVersion other)
+    {
+        throw new NotImplementedException();
     }
 
     public bool Equals(SwVersion other)
     {
-        if (Format == VersionStringFormat.NonStandard)
-            return other.Format == VersionStringFormat.NonStandard && Prefix == other.Prefix;
-        if (Format != other.Format || Major != other.Major)
-            return false;
-        static bool nullablesNotEqual(int? x, int? y)
-        {
-            return x.HasValue ? x.Value != (y ?? 0) : y.HasValue && y.Value != 0;
-        }
-        if (nullablesNotEqual(Minor, other.Minor) || nullablesNotEqual(Patch, other.Patch) || nullablesNotEqual(Revision, other.MinorRevision) || nullablesNotEqual(Revision, other.MinorRevision) || Format != other.Format || Prefix != other.Prefix)
-            return false;
-        static bool sequencesEqual(IEnumerable<ExtraVersionComponent> x, IEnumerable<ExtraVersionComponent> y)
-        {
-            using IEnumerator<ExtraVersionComponent> enumerator1 = x.GetEnumerator();
-            using IEnumerator<ExtraVersionComponent> enumerator2 = y.GetEnumerator();
-            while (enumerator1.MoveNext())
-            {
-                if (!(enumerator2.MoveNext() && enumerator1.Current.Lead == enumerator2.Current.Lead && _comparer.Equals(enumerator1.Current.Value, enumerator2.Current.Value)))
-                    return false;
-            }
-            return !enumerator2.MoveNext();
-        }
-        return Prefix == other.Prefix && sequencesEqual(PreRelease, other.PreRelease) && sequencesEqual(Build, other.Build);
+        throw new NotImplementedException();
     }
 
-    public override bool Equals(object? obj) => obj is not null && obj is SwVersion s && Equals(s);
-    
-    public int CompareTo(SwVersion other)
+    public override bool Equals([NotNullWhen(true)] object? obj)
     {
-        if (Format == VersionStringFormat.NonStandard && other.Format == VersionStringFormat.NonStandard)
-            return Prefix.CompareTo(other.Prefix);
-        int result = Major - other.Major;
-        if (result == 0)
-        {
-            static int compareNullables(int? x, int? y)
-            {
-                return x.HasValue ? (y.HasValue ? x.Value - y.Value : x.Value) : y.HasValue ? 0 - y.Value : 0;
-            }
-            if ((result = compareNullables(Minor, other.Minor)) == 0 && (result = compareNullables(Patch, other.Patch)) == 0 && (result = compareNullables(Revision, other.Revision)) == 0 &&
-                (result = compareNullables(MinorRevision, other.MinorRevision)) == 0)
-            {
-                static int compareSequences(IEnumerable<ExtraVersionComponent> x, IEnumerable<ExtraVersionComponent> y)
-                {
-                    using IEnumerator<ExtraVersionComponent> enumerator1 = x.GetEnumerator();
-                    using IEnumerator<ExtraVersionComponent> enumerator2 = y.GetEnumerator();
-                    while (enumerator1.MoveNext())
-                    {
-                        if (!enumerator2.MoveNext())
-                            return -1;
-                        char? c1 = enumerator1.Current.Lead;
-                        char? c2 = enumerator2.Current.Lead;
-                        int r = c1.HasValue ? (c2.HasValue ? c1.Value.CompareTo(c2.Value) : -1) : c2.HasValue ? 1 : 0;
-                        if (r != 0 || (r = _comparer.Compare(enumerator1.Current.Value, enumerator2.Current.Value)) != 0)
-                            return r;
-                    }
-                    return enumerator2.MoveNext() ? 1 : 0;
-                }
-                if ((result = compareSequences(PreRelease, other.PreRelease)) == 0 && (result = compareSequences(PreRelease, other.PreRelease)) == 0 && (result = Format.CompareTo(other.Format)) == 0)
-                    return Prefix.CompareTo(other.Prefix);
-            }
-        }
-        return result;
+        // TODO: Implement Equals(object?)
+        return base.Equals(obj);
     }
 
     public override int GetHashCode()
     {
-        if (Format == VersionStringFormat.NonStandard)
-            return Prefix.GetHashCode();
-        int hash;
-        unchecked
-        {
-            hash = (Major == 0) ? 0 : 1376 + Major;
-            if (MinorRevision.HasValue && MinorRevision.Value != 0)
-            {
-                hash = hash * 43 + Minor!.Value;
-                hash = hash * 43 + Patch!.Value;
-                hash = hash * 43 + Revision!.Value;
-                hash = hash * 43 + MinorRevision.Value;
-            }
-            else
-            {
-                hash *= 43;
-                if (Revision.HasValue && Revision.Value != 0)
-                {
-                    hash = hash * 43 + Minor!.Value;
-                    hash = hash * 43 + Patch!.Value;
-                    hash = hash * 43 + Revision!.Value;
-                }
-                else
-                {
-                    hash *= 43;
-                    if (Patch.HasValue && Patch.Value != 0)
-                    {
-                        hash = hash * 43 + Minor!.Value;
-                        hash = hash * 43 + Patch!.Value;
-                    }
-                    else
-                    {
-                        hash *= 43;
-                        if (Minor.HasValue && Minor.Value != 0)
-                            hash = hash * 43 + Minor!.Value;
-                        else
-                            hash *= 43;
-                    }
-                }
-            }
-            int ch = 11;
-            foreach (ExtraVersionComponent s in PreRelease)
-            {
-                char? c = s.Lead;
-                if (c.HasValue)
-                    ch = ch * 17 + c.Value.GetHashCode();
-                else
-                    ch *= 17;
-                ch = ch * 17 + _comparer.GetHashCode(s.Value);
-            }
-            hash = hash * 43 + ch;
-            ch = 11;
-            foreach (ExtraVersionComponent s in Build)
-            {
-                char? c = s.Lead;
-                if (c.HasValue)
-                    ch = ch * 17 + c.Value.GetHashCode();
-                else
-                    ch *= 17;
-                ch = ch * 17 + _comparer.GetHashCode(s.Value);
-            }
-            hash = hash * 43 + ch;
-            hash = hash * 43 + Format.GetHashCode();
-            hash = hash * 43 + Prefix.GetHashCode();
-        }
-        return hash;
+        // TODO: Implement GetHashCode()
+        return base.GetHashCode();
+    }
+
+    /// <summary>
+    /// Converts the current version object to a formatted version string.
+    /// </summary>
+    /// <param name="minDigitCount">The minimum number of numerical components to display or <c>0</c> to only display the defined numerical components.</param>
+    /// <param name="omitBuild">If <see langword="true" />, the <see cref="Build" /> components are omitted. The default is <see langword="false" />./param>
+    /// <param name="omitPreRelease">If <see langword="true" />, the <see cref="PreRelease" /> components are omitted. The default is <see langword="false" />.</param>
+    /// <returns>A formatted version string according to the current <see cref="Format" />.</returns>
+    public string ToString(int minDigitCount, bool omitBuild = false, bool omitPreRelease = false)
+    {
+        // TODO: Implement ToString(int, bool, bool)
+        return base.ToString()!;
     }
 
     public override string ToString() => ToString(0);
 
-    public IEnumerable<int> GetNumericalComponents(int minSegments)
-    {
-        yield return Major;
-        if (Minor.HasValue)
-        {
-            yield return Minor.Value;
-            if (Patch.HasValue)
-            {
-                yield return Patch.Value;
-                if (Revision.HasValue)
-                {
-                    yield return Revision.Value;
-                    if (MinorRevision.HasValue)
-                        yield return MinorRevision.Value;
-                    else if (minSegments > 4)
-                        yield return 0;
-                }
-                else
-                {
-                    if (minSegments > 5)
-                        minSegments = 5;
-                    for (int i = 3; i < minSegments; i++)
-                        yield return 0;
-                }
-            }
-            else
-            {
-                if (minSegments > 5)
-                    minSegments = 5;
-                for (int i = 2; i < minSegments; i++)
-                    yield return 0;
-            }
-        }
-        else
-        {
-            if (minSegments > 5)
-                minSegments = 5;
-            for (int i = 1; i < minSegments; i++)
-                yield return 0;
-        }
-    }
-
-    public string ToString(int minSegments, bool omitBuild = false, bool omitPreRelease = false)
-    {
-        StringBuilder stringBuilder;
-        IEnumerable<int> numericalComponents;
-        switch (Format)
-        {
-            case VersionStringFormat.NonStandard:
-                return Prefix;
-            case VersionStringFormat.Alt:
-                numericalComponents = GetNumericalComponents(minSegments);
-                if (omitPreRelease || PreRelease.Count == 0)
-                    return Prefix + string.Join(".", numericalComponents.Select(n => n.ToString()));
-                using (IEnumerator<int> enumerator = numericalComponents.GetEnumerator())
-                {
-                    stringBuilder = new StringBuilder(Prefix).Append(enumerator.Current);
-                    while (enumerator.MoveNext())
-                        stringBuilder.Append('.').Append(enumerator.Current);
-                    
-                    foreach (ExtraVersionComponent vc in PreRelease)
-                    {
-                        char? c = vc.Lead;
-                        if (c.HasValue)
-                        {
-                            if (vc.Value.Length > 0)
-                                stringBuilder.Append(c.Value).Append(vc.Value);
-                            else
-                                stringBuilder.Append(c.Value);
-                        }
-                        else
-                            stringBuilder.Append(vc.Value);
-                    }
-                    return stringBuilder.ToString();
-                }
-            default:
-                numericalComponents = GetNumericalComponents(minSegments);
-                if (omitPreRelease || PreRelease.Count == 0)
-                {
-                    if (omitBuild || Build.Count == 0)
-                        return Prefix + string.Join(".", numericalComponents.Select(n => n.ToString()));
-                    using IEnumerator<int> enumerator = numericalComponents.GetEnumerator();
-                    enumerator.MoveNext();
-                    stringBuilder = new StringBuilder(Prefix).Append(enumerator.Current);
-                    while (enumerator.MoveNext())
-                        stringBuilder.Append('.').Append(enumerator.Current);
-                    foreach (ExtraVersionComponent vc in Build)
-                        if (vc.Value.Length > 0)
-                            stringBuilder.Append(vc.Lead!.Value).Append(vc.Value);
-                        else
-                            stringBuilder.Append(vc.Lead!.Value);
-                }
-                else
-                {
-                    using IEnumerator<int> enumerator = numericalComponents.GetEnumerator();
-                    enumerator.MoveNext();
-                    stringBuilder = new StringBuilder(Prefix).Append(enumerator.Current);
-                    while (enumerator.MoveNext())
-                        stringBuilder.Append('.').Append(enumerator.Current);
-                    foreach (ExtraVersionComponent vc in PreRelease)
-                    {
-                        char? c = vc.Lead;
-                        if (c.HasValue)
-                        {
-                            if (vc.Value.Length > 0)
-                                stringBuilder.Append(c.Value).Append(vc.Value);
-                            else
-                                stringBuilder.Append(c.Value);
-                        }
-                        else
-                            stringBuilder.Append(vc.Value);
-                    }
-                    if (omitBuild || Build.Count == 0)
-                        return stringBuilder.ToString();
-                }
-                foreach (ExtraVersionComponent vc in Build)
-                    if (vc.Value.Length > 0)
-                        stringBuilder.Append(vc.Lead!.Value).Append(vc.Value);
-                    else
-                        stringBuilder.Append(vc.Lead!.Value);
-                return stringBuilder.ToString();
-        }
-    }
-    
     public static bool operator ==(SwVersion left, SwVersion right) => left.Equals(right);
 
     public static bool operator !=(SwVersion left, SwVersion right) => !left.Equals(right);

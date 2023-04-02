@@ -30,6 +30,49 @@ public static class ExtensionMethods
         return guid.Value;
     }
 
+    public static bool TryGetFirst<T>([NotNullWhen(true)] this IEnumerable<T>? source, out T first)
+    {
+        if (source is not null && source.Any())
+            try
+            {
+                first = source.First();
+                return true;
+            }
+            catch { /* Okay to ignore */ }
+        first = default!;
+        return false;
+    }
+
+    public static IEnumerable<T> Enumerate<T>(params T[] elements) => (elements is null) ? Enumerable.Empty<T>() : elements;
+
+    public static IEnumerable<T> PrependValue<T>(this IEnumerable<T>? source,  T element)
+        where T : struct
+    {
+        return (source is null) ? Enumerate(element) : source.Prepend(element);
+    }
+
+    public static IEnumerable<T> AppendValue<T>(this IEnumerable<T>? source,  T element)
+        where T : struct
+    {
+        return (source is null) ? Enumerate(element) : source.Append(element);
+    }
+
+    public static IEnumerable<T> PrependIfNotNull<T>(this IEnumerable<T>? source,  T? element)
+        where T : class
+    {
+        if (source is null)
+            return (element is null) ? Enumerable.Empty<T>() : Enumerate(element);
+        return (element is null) ? source : source.Prepend(element);
+    }
+
+    public static IEnumerable<T> AppendIfNotNull<T>(this IEnumerable<T>? source,  T? element)
+        where T : class
+    {
+        if (source is null)
+            return (element is null) ? Enumerable.Empty<T>() : Enumerate(element);
+        return (element is null) ? source : source.Append(element);
+    }
+
     public static T[] EmptyIfNull<T>(this T[]? source) { return (source is null) ? Array.Empty<T>() : source; }
 
     public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T>? source) { return (source is null) ? Enumerable.Empty<T>() : source; }
