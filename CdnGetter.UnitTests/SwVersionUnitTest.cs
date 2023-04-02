@@ -1327,8 +1327,8 @@ public class SwVersionUnitTest
             foreach (string prefix in new string[] { "v", "package:", "R." })
                 foreach (int major in new int[] { 0, 1, -1, int.MinValue, int.MaxValue })
             {
-                Add(prefix, major, new SwVersion.PreReleaseSegment(true, "A"), Array.Empty<SwVersion.PreReleaseSegment>(), new(null, major, null, null, null, null, new[] { new SwVersion.PreReleaseSegment(true, "A") }, null, SwVersion.VersionStringFormat.Standard));
-                Add(prefix, major, new SwVersion.PreReleaseSegment(false, "pre"), new[] { new SwVersion.PreReleaseSegment(true, "Free"), new SwVersion.PreReleaseSegment(false, "Community") }, new(null, major, null, null, null, null, new[] { new SwVersion.PreReleaseSegment(false, "pre"), new SwVersion.PreReleaseSegment(true, "Free"), new SwVersion.PreReleaseSegment(false, "Community") }, null, SwVersion.VersionStringFormat.Alt));
+                Add(prefix, major, new SwVersion.PreReleaseSegment(true, "A"), Array.Empty<SwVersion.PreReleaseSegment>(), new(prefix, major, null, null, null, null, new[] { new SwVersion.PreReleaseSegment(true, "A") }, null, SwVersion.VersionStringFormat.Standard));
+                Add(prefix, major, new SwVersion.PreReleaseSegment(false, "pre"), new[] { new SwVersion.PreReleaseSegment(true, "Free"), new SwVersion.PreReleaseSegment(false, "Community") }, new(prefix, major, null, null, null, null, new[] { new SwVersion.PreReleaseSegment(false, "pre"), new SwVersion.PreReleaseSegment(true, "Free"), new SwVersion.PreReleaseSegment(false, "Community") }, null, SwVersion.VersionStringFormat.Alt));
             }
         }
     }
@@ -1432,8 +1432,8 @@ public class SwVersionUnitTest
             foreach (string prefix in new string[] { "v", "package:", "R." })
                 foreach (int major in new int[] { 0, 1, -1, int.MinValue, int.MaxValue })
                 {
-                    Add(prefix, major, new SwVersion.BuildSegment(SwVersion.BuildSeparator.Plus, "Win32"), Array.Empty<SwVersion.BuildSegment>(), new(null, major, null, null, null, null, null, new[] { new SwVersion.BuildSegment(SwVersion.BuildSeparator.Plus, "Win32") } , SwVersion.VersionStringFormat.Standard));
-                    Add(prefix, major, new SwVersion.BuildSegment(SwVersion.BuildSeparator.Plus, ""), new[] { new SwVersion.BuildSegment(SwVersion.BuildSeparator.Dash, "Free"), new SwVersion.BuildSegment(SwVersion.BuildSeparator.Dot, "Community") }, new(null, major, null, null, null, null, null, new[] { new SwVersion.BuildSegment(SwVersion.BuildSeparator.Plus, ""), new SwVersion.BuildSegment(SwVersion.BuildSeparator.Dash, "Free"), new SwVersion.BuildSegment(SwVersion.BuildSeparator.Dot, "Community") }, SwVersion.VersionStringFormat.Standard));
+                    Add(prefix, major, new SwVersion.BuildSegment(SwVersion.BuildSeparator.Plus, "Win32"), Array.Empty<SwVersion.BuildSegment>(), new(prefix, major, null, null, null, null, null, new[] { new SwVersion.BuildSegment(SwVersion.BuildSeparator.Plus, "Win32") } , SwVersion.VersionStringFormat.Standard));
+                    Add(prefix, major, new SwVersion.BuildSegment(SwVersion.BuildSeparator.Plus, ""), new[] { new SwVersion.BuildSegment(SwVersion.BuildSeparator.Dash, "Free"), new SwVersion.BuildSegment(SwVersion.BuildSeparator.Dot, "Community") }, new(prefix, major, null, null, null, null, null, new[] { new SwVersion.BuildSegment(SwVersion.BuildSeparator.Plus, ""), new SwVersion.BuildSegment(SwVersion.BuildSeparator.Dash, "Free"), new SwVersion.BuildSegment(SwVersion.BuildSeparator.Dot, "Community") }, SwVersion.VersionStringFormat.Standard));
                 }
         }
     }
