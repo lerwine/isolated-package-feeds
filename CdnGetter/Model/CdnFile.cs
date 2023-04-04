@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.Extensions.Logging;
 using static CdnGetter.SqlExtensions;
 
 namespace CdnGetter.Model;
@@ -185,5 +186,10 @@ public class CdnFile : ModificationTrackingModelBase
     FOREIGN KEY(""{nameof(VersionId)}"",""{nameof(LibraryId)}"",""{nameof(UpstreamCdnId)}"") REFERENCES ""{nameof(Services.ContentDb.CdnVersions)}""(""{nameof(CdnVersion.LocalId)}"",""{nameof(CdnVersion.LibraryId)}"",""{nameof(CdnVersion.UpstreamCdnId)}""),
     CHECK(""{nameof(CreatedOn)}""<=""{nameof(ModifiedOn)}"")
 )");
+    }
+
+    internal static async Task ShowAsync(IEnumerable<string> libraryNames, IEnumerable<string> versionStrings, IEnumerable<string> upstreamNames, Services.ContentDb dbContext, ILogger<Services.MainService> logger, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException("Show files functionality not implemented");
     }
 }

@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.Extensions.Logging;
 using static CdnGetter.SqlExtensions;
 
 namespace CdnGetter.Model;
@@ -134,9 +135,14 @@ public class LocalLibrary : ModificationTrackingModelBase
     }
 
 #pragma warning disable CS1998
-    internal async Task GetNewVersionsPreferredAsync(Services.ContentDb dbContext, CancellationToken stoppingToken)
+    internal static async Task GetNewVersionsPreferredAsync(Services.ContentDb dbContext, ILogger logger, CancellationToken stoppingToken)
     {
-        throw new NotImplementedException();
+        LocalLibrary[] libraries = await dbContext.LocalLibraries.ToArrayAsync(stoppingToken);
+        if (libraries.Length == 0)
+            logger.LogNothingToDoWarning();
+        else
+            throw new NotImplementedException("Get New Versions for Preferred not implemented.");
+            // foreach (LocalLibrary l in libraries)
     }
 #pragma warning restore CS1998
 }

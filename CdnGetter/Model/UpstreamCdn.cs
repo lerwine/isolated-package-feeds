@@ -113,7 +113,7 @@ public class UpstreamCdn : ModificationTrackingModelBase
         executeNonQuery($"CREATE UNIQUE INDEX \"IDX_UpstreamCdns_Name\" ON \"{nameof(Services.ContentDb.UpstreamCdns)}\" (\"{nameof(Name)}\" COLLATE NOCASE ASC)");
     }
 
-    internal async static Task ShowCDNsAsync(Services.ContentDb dbContext, ILogger logger, IServiceScopeFactory scopeFactory, CancellationToken cancellationToken)
+    internal async static Task ShowAsync(Services.ContentDb dbContext, ILogger logger, IServiceScopeFactory scopeFactory, CancellationToken cancellationToken)
     {
             using IServiceScope scope = scopeFactory.CreateScope();
             int count = 0;
@@ -148,5 +148,19 @@ public class UpstreamCdn : ModificationTrackingModelBase
             }
             else
                 logger.LogNoUpstreamCdnsFoundWarning();
+    }
+
+    internal static async Task<LinkedList<UpstreamCdn>> GetByNamesAsync(IEnumerable<string> names, Services.ContentDb dbContext, ILogger logger, CancellationToken cancellationToken)
+    {
+        LinkedList<UpstreamCdn> result = new();
+        foreach (string n in names.Distinct(Services.MainService.NameComparer))
+        {
+            UpstreamCdn? cdn = await dbContext.FindCdnByNameAsync(n, cancellationToken);
+            if (cdn is null)
+                logger.LogUpstreamCdnNotFoundError(n);
+            else
+                result.AddLast(cdn);
+        }
+        return result;
     }
 }

@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.Extensions.Logging;
 using static CdnGetter.SqlExtensions;
 
 namespace CdnGetter.Model;
@@ -141,5 +142,139 @@ public class CdnVersion : ModificationTrackingModelBase
             return;
         dbContext.CdnVersions.Remove(this);
         await dbContext.SaveChangesAsync(true, cancellationToken);
+    }
+    
+    internal static async Task ShowAsync(IEnumerable<string> libraryNames, IEnumerable<string> upstreamNames, Services.ContentDb dbContext, ILogger logger, CancellationToken cancellationToken)
+    {
+        if (libraryNames.Any())
+        {
+            LinkedList<LocalLibrary> localLibraries = new();
+            foreach (string n in libraryNames)
+            {
+                LocalLibrary? l = await dbContext.FindLibraryByNameAsync(n, cancellationToken);
+                if (cancellationToken.IsCancellationRequested)
+                    return;
+                if (l is null)
+                    logger.LogLocalLibraryNotFoundWarning(n);
+                else
+                    localLibraries.AddLast(l);
+            }
+            if (localLibraries.First is null)
+                return;
+            LinkedList<UpstreamCdn> upstreamCdns = new();
+            foreach (string n in upstreamNames)
+            {
+                UpstreamCdn? c = await dbContext.FindCdnByNameAsync(n, cancellationToken);
+                if (cancellationToken.IsCancellationRequested)
+                    return;
+                if (c is null)
+                    logger.LogUpstreamCdnNotFoundError(n);
+                else
+                    upstreamCdns.AddLast(c);
+            }
+            if (localLibraries.First.Next is null)
+            {
+                Guid libraryId = localLibraries.First.Value.Id;
+                string libName = localLibraries.First.Value.Name;
+                if (upstreamCdns.First is null)
+                {
+                    LocalVersion[] localVersions = await dbContext.LocalVersions.Where(v => v.LibraryId == libraryId).OrderByDescending(v => v.Order).ToArrayAsync(cancellationToken);
+                    if (localVersions.Length == 0)
+                        Console.WriteLine("(none)");
+                    else
+                        foreach (LocalVersion v in localVersions)
+                            Console.WriteLine(v.Version.ToString());
+                }
+                else if (upstreamCdns.First.Next is null)
+                {
+                    Guid cdnId = upstreamCdns.First.Value.Id;
+                    CdnVersion[] cdnVersions = await dbContext.CdnVersions.Where(v => v.LibraryId == libraryId && v.UpstreamCdnId == cdnId).Include(v => v.Local)
+                        .OrderByDescending(v => v.Local!.Order).ToArrayAsync(cancellationToken);
+                    if (cdnVersions.Length == 0)
+                        Console.WriteLine("(none)");
+                    else
+                        foreach (CdnVersion v in cdnVersions)
+                            Console.WriteLine(v.Local!.Version.ToString());
+                }
+                else
+                    foreach (UpstreamCdn cdn in upstreamCdns)
+                    {
+                        Guid cdnId = cdn.Id;
+                        CdnVersion[] cdnVersions = await dbContext.CdnVersions.Where(v => v.LibraryId == libraryId && v.UpstreamCdnId == cdnId).Include(v => v.Local)
+                            .OrderByDescending(v => v.Local!.Order).ToArrayAsync(cancellationToken);
+                        Console.WriteLine($"{cdn.Name}:");
+                        if (cdnVersions.Length == 0)
+                            Console.WriteLine("    (none)");
+                        else
+                            foreach (CdnVersion v in cdnVersions)
+                                Console.WriteLine($"    {v.Local!.Version}");
+                    }
+            }
+            else if (upstreamCdns.First is null)
+            {
+                foreach (LocalLibrary localLibrary in localLibraries)
+                {
+                    Console.WriteLine($"Library: {localLibrary.Name}");
+                    Guid libraryId = localLibrary.Id;
+                    foreach (LocalVersion localVersion in await dbContext.LocalVersions.Where(v => v.LibraryId == libraryId).OrderByDescending(v => v.Order).ToArrayAsync(cancellationToken))
+                    {
+                        Console.WriteLine($"    {localVersion.Version}");
+                        Guid versionId = localVersion.Id;
+                        string[] names = await dbContext.CdnVersions.Where(v => v.LibraryId == libraryId && v.LocalId == versionId).Include(v => v.Library).ThenInclude(v => v!.Cdn).OrderBy(v => v.Priority)
+                            .Select(v => v.Library!.Cdn!.Name).ToArrayAsync(cancellationToken);
+                        if (names.Length == 1)
+                            Console.WriteLine($"        CDN: {names[0]}");
+                        else
+                        {
+                            string t = string.Join(", ", names);
+                            Console.WriteLine($"        CDNs: {t}");
+                        }
+                    }
+                }
+            }
+            else if (upstreamCdns.First.Next is null)
+            {
+                Guid cdnId = upstreamCdns.First.Value.Id;
+                foreach (LocalLibrary localLibrary in localLibraries)
+                {
+                    Guid libraryId = localLibrary.Id;
+                    CdnVersion[] cdnVersions = await dbContext.CdnVersions.Where(v => v.LibraryId == libraryId && v.UpstreamCdnId == cdnId).Include(v => v.Local)
+                        .OrderByDescending(v => v.Local!.Order).ToArrayAsync(cancellationToken);
+                    Console.WriteLine($"{localLibrary.Name}:");
+                    if (cdnVersions.Length == 0)
+                        Console.WriteLine("    (none)");
+                    else
+                    {
+                        string t = string.Join("; ", cdnVersions.Select(v => v.Local!.Version.ToString()));
+                        Console.WriteLine($"    Versions: {t}");
+                    }
+                }
+            }
+            else
+                foreach (LocalLibrary localLibrary in localLibraries)
+                {
+                    Console.WriteLine($"{localLibrary.Name}:");
+                    Guid libraryId = localLibrary.Id;
+                    foreach (UpstreamCdn upstreamCdn in upstreamCdns)
+                    {
+                        Guid cdnId = upstreamCdn.Id;
+                        CdnVersion[] cdnVersions = await dbContext.CdnVersions.Where(v => v.LibraryId == libraryId && v.UpstreamCdnId == cdnId).Include(v => v.Local)
+                            .OrderByDescending(v => v.Local!.Order).ToArrayAsync(cancellationToken);
+                        Console.WriteLine($"    CDN: {upstreamCdn.Name}:");
+                        if (cdnVersions.Length == 0)
+                            Console.WriteLine("        (none)");
+                        else
+                            foreach (CdnVersion v in cdnVersions)
+                                Console.WriteLine($"    {v.Local!.Version}");
+                    }
+                }
+        }
+        else
+            logger.LogNoLibraryNameSpecifiedWarning(nameof(Config.CommandSettings.SHOW_Versions));
+    }
+
+    internal static async Task AddNewAsync(IEnumerable<string> cdnNames, Services.ContentDb dbContext, ILogger<Services.MainService> logger, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException("Add new versions functionality not implemented.");
     }
 }
