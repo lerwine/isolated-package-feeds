@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.Extensions.Logging;
 using static CdnGetter.SqlExtensions;
 
 namespace CdnGetter.Model;
@@ -141,5 +142,71 @@ public class CdnLibrary : ModificationTrackingModelBase
             if (!await dbContext.CdnLibraries.AnyAsync(r => r.LocalId == id, cancellationToken: cancellationToken))
                 await local.RemoveAsync(dbContext, cancellationToken);
         }
+    }
+
+    internal static async Task ShowAsync(IEnumerable<string> cdnNames, Services.ContentDb dbContext, ILogger logger, CancellationToken cancellationToken)
+    {
+        if (cdnNames.Any())
+        {
+            LinkedList<UpstreamCdn> cdns = await UpstreamCdn.GetByNamesAsync(cdnNames, dbContext, logger, cancellationToken);
+            if (cdns.Count == 1)
+            {
+                Guid id = cdns.First!.Value.Id;
+                await dbContext.CdnLibraries.Where(l => l.LocalId == id).Include(l => l.Local).Select(l => l.Local!.Name).ForEachAsync(n => Console.WriteLine(n), cancellationToken);
+            }
+            else
+                foreach (UpstreamCdn cdn in cdns)
+                {
+                    Console.WriteLine(cdn.Name);
+                    Guid id = cdn.Id;
+                    await dbContext.CdnLibraries.Where(l => l.LocalId == id).Include(l => l.Local).Select(l => l.Local!.Name).ForEachAsync(ln => Console.WriteLine($"\t{ln}"), cancellationToken);
+                }
+        }
+        else
+            await dbContext.LocalLibraries.ForEachAsync(l => Console.WriteLine(l.Name), cancellationToken);
+    }
+
+    internal static async Task AddAsync(IEnumerable<string> cdnNames, IEnumerable<string> versionStrings, Services.ContentDb dbContext, ILogger<Services.MainService> logger, CancellationToken cancellationToken)
+    {
+            if (cdnNames.Any())
+            {
+                throw new NotImplementedException("Add libraries functionality not implemented.");
+            }
+            else
+                logger.LogRequiredDependentParameterWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Upstream)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.AddLibrary)}");
+    }
+
+    internal static async Task RemoveAsync(IEnumerable<string> cdnNames, IEnumerable<string> versionStrings, Services.ContentDb dbContext, ILogger<Services.MainService> logger, CancellationToken cancellationToken)
+    {
+    }
+
+    internal static async Task ReloadAsync(IEnumerable<string> cdnNames, IEnumerable<string> versionStrings, Services.ContentDb dbContext, ILogger<Services.MainService> logger, CancellationToken cancellationToken)
+    {
+        if (cdnNames.Any())
+        {
+            throw new NotImplementedException("Reload libraries for specific CDNs functionality not implemented.");
+        }
+        else if (versionStrings.Any())
+        {
+            throw new NotImplementedException("Reload libraries for specific versions functionality not implemented.");
+        }
+        else
+            logger.LogRequiredAltDependentParameterWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Upstream)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Version)}",
+                $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.ReloadLibrary)}");
+    }
+
+    internal static async Task ReloadExistingAsync(IEnumerable<string> cdnNames, IEnumerable<string> versionStrings, Services.ContentDb dbContext, ILogger<Services.MainService> logger, CancellationToken cancellationToken)
+    {
+        if (cdnNames.Any())
+        {
+            throw new NotImplementedException("Reload existing versions for specific CDNs functionality not implemented.");
+        }
+        else if (versionStrings.Any())
+        {
+            throw new NotImplementedException("Reload libraries for specific existing versions functionality not implemented.");
+        }
+        else
+            logger.LogRequiredAltDependentParameterWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Upstream)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Version)}",
+                $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.ReloadExistingVersions)}");
     }
 }
