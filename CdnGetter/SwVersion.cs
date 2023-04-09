@@ -19,7 +19,7 @@ public readonly partial struct SwVersion : IEquatable<SwVersion>, IComparable<Sw
 
     private const string GRP_b = "b";
 
-    private static readonly Regex _versionRegex = new(@$"^(?<{GRP_p}>([^\d.+-]+|-\D)+)?(?<{GRP_n}>-?\d+(\.\d+)*)(?<{GRP_r}>-[^+]*|[^+]+)?(?<{GRP_b}>\+.*)?", RegexOptions.Compiled);
+    private static readonly Regex _versionRegex = new(@$"^(?<{GRP_p}>(-?[^\d.+-]+)+)?(?<{GRP_n}>-?\d+(\.\d+)*)(?<{GRP_r}>-[^+]*|[^+]+)?(?<{GRP_b}>\+.*)?", RegexOptions.Compiled);
 
     public const char SEPARATOR_Dot = '.';
 
