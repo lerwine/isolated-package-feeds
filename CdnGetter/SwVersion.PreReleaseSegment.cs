@@ -22,9 +22,9 @@ public readonly partial struct SwVersion
         /// </summary>
         public string Value { get; }
 
-        public PreReleaseSegment(bool altSeprator, string value)
+        public PreReleaseSegment(bool altSeparator, string value)
         {
-            AltSeparator = altSeprator;
+            AltSeparator = altSeparator;
             if (value is null)
                 Value = "";
             else
