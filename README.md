@@ -59,3 +59,5 @@ The initial scope is to create NuGet and NPM Package Feed services as well as co
     - [API server for api.cdnjs.com](https://github.com/lerwine/api-server)
     - [Package configurations](https://github.com/lerwine/packages)
     - [Brand and design assets for cdnjs](https://github.com/lerwine/brand)
+- [jsdelivr](https://www.jsdelivr.com/)
+  - [API Documentation](https://www.jsdelivr.com/docs/data.jsdelivr.com#overview)
