@@ -18,6 +18,7 @@ The initial scope is to create NuGet and NPM Package Feed services as well as co
   - [JsonContent Class](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.json.jsoncontent?view=net-7.0)
   - [StringContent Class](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.stringcontent?view=net-7.0)
 - [XUnit Testing](https://xunit.net)
+- [c# Documentation Comments](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/documentation-comments)
 
 ### NuGet
 
