@@ -148,24 +148,32 @@ internal static class LoggerMessages
 
     public const int EVENT_ID_InvalidBaseUrlError = 0x000a;
     public static readonly EventId InvalidBaseUrlError = new(EVENT_ID_InvalidBaseUrlError, nameof(InvalidBaseUrlError));
-    private static readonly Action<ILogger, string, string, Exception?> _invalidBaseUrlError = LoggerMessage.Define<string, string>(LogLevel.Error, InvalidBaseUrlError,
-        "Invalid base URL for {UpstreamCdnType} ({UpstreamCdnName}).");
+    private static readonly Action<ILogger, string, string, string, Exception?> _invalidBaseUrlError = LoggerMessage.Define<string, string, string>(LogLevel.Error, InvalidBaseUrlError,
+        "Invalid base URL for {UpstreamCdnType} ({UpstreamCdnName}): \"{URIstring}\" is not an absolute http or https URL.");
     /// <summary>
     /// Logs an InvalidBaseUrl event with event code 0x000a.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="upstreamCdnType">The type of the upstream CDN.</param>
     /// <param name="upstreamCdnName">The identifier name of the upstream CDN.</param>
+    /// <param name="uriString">The invalid URI string.</param>
     /// <param name="error">The optional exception that caused the event.</param>
-    public static void LogInvalidBaseUrlError(this ILogger logger, Type upstreamCdnType, string upstreamCdnName, Exception? error = null) => _invalidBaseUrlError(logger, upstreamCdnType.FullName ?? upstreamCdnType.Name, upstreamCdnName, error);
+    public static void LogInvalidBaseUrlError(this ILogger logger, Type upstreamCdnType, string upstreamCdnName, string uriString, Exception? error = null) => _invalidBaseUrlError(logger, upstreamCdnType.FullName ?? upstreamCdnType.Name, upstreamCdnName, uriString, error);
     /// <summary>
     /// Logs an InvalidBaseUrl event with event code 0x000a.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="upstreamCdnName">The identifier name of the upstream CDN.</param>
+    /// <param name="uriString">The invalid URI string.</param>
     /// <param name="error">The optional exception that caused the event.</param>
     /// <typeparam name="T">The type of the upstream CDN.</typeparam>
-    public static void LogInvalidBaseUrlError<T>(this ILogger logger, string upstreamCdnName, Exception? error = null) => LogInvalidBaseUrlError(logger, typeof(T), upstreamCdnName, error);
+    public static void LogInvalidBaseUrlError<T>(this ILogger logger, string upstreamCdnName, string uriString, Exception? error = null) => LogInvalidBaseUrlError(logger, typeof(T), upstreamCdnName, uriString, error);
+
+    [Obsolete("Use LogInvalidBaseUrlError<T>(ILogger, string, string, Exception?)")]
+    public static void LogInvalidBaseUrlError<T>(this ILogger logger, string upstreamCdnName, Exception? error = null) => throw new NotImplementedException();
+
+    [Obsolete("Use LogInvalidBaseUrlError(ILogger, Type, string, string, Exception?)")]
+    public static void LogInvalidBaseUrlError(this ILogger logger, Type upstreamCdnType, string upstreamCdnName, Exception? error = null) => throw new NotImplementedException();
 
     #endregion
     #region LocalLibraryNotFound Warning (0x000b)

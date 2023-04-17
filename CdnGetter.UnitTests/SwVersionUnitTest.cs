@@ -210,10 +210,6 @@ public class SwVersionUnitTest
     
     public static readonly Random _random = new();
 
-    private static IEnumerable<T> Ordered<T>(params T[] values) where T : IComparable<T> => values.OrderBy(t => t);
-    
-    private static IEnumerable<int> OrderedInt(params int[] values) => values.OrderBy(t => t);
-    
     private static IEnumerable<int> GetMajorValues()
     {
         yield return int.MinValue;
@@ -252,21 +248,6 @@ public class SwVersionUnitTest
         majorValues = (new int[] { int.MinValue, _random.Next(int.MinValue + 1, -1), -1, 0, 1, sharedMajor, uniqueMajor, int.MaxValue }).OrderBy(i => i);
         minorValues = (new int[] { 0, 1, sharedMajor, sharedMinor, uniqueMinor, int.MaxValue }).OrderBy(i => i);
         return (new int[] { 0, 1, sharedMajor, sharedMinor, uniquePatch, int.MaxValue }).OrderBy(i => i);
-    }
-    
-    private static IEnumerable<int> GetRevisionValues(out IEnumerable<int> majorValues, out IEnumerable<int> minorValues, out IEnumerable<int> patchValues)
-    {
-        int sharedMajor = _random.Next(2, int.MaxValue - 1);
-        int uniqueMajor = GetRandomInt(2, int.MaxValue - 1, sharedMajor);
-        int sharedMinor = GetRandomInt(2, int.MaxValue - 1, sharedMajor, uniqueMajor);
-        int uniqueMinor = GetRandomInt(2, int.MaxValue - 1, sharedMajor, uniqueMajor, sharedMinor);
-        int sharedPatch = GetRandomInt(2, int.MaxValue - 1, sharedMajor, uniqueMajor, sharedMinor, uniqueMinor);
-        int uniquePatch = GetRandomInt(2, int.MaxValue - 1, sharedMajor, uniqueMajor, sharedMinor, uniqueMinor, sharedPatch);
-        int uniqueRevision = GetRandomInt(2, int.MaxValue - 1, sharedMajor, uniqueMajor, sharedMinor, uniqueMinor, sharedPatch, uniquePatch);
-        majorValues = (new int[] { int.MinValue, _random.Next(int.MinValue + 1, -1), -1, 0, 1, sharedMajor, uniqueMajor, int.MaxValue }).OrderBy(i => i);
-        minorValues = (new int[] { 0, 1, sharedMajor, sharedMinor, uniqueMinor, int.MaxValue }).OrderBy(i => i);
-        patchValues = (new int[] { 0, 1, sharedMajor, sharedMinor, sharedPatch, uniquePatch, int.MaxValue }).OrderBy(i => i);
-        return (new int[] { 0, 1, sharedMajor, sharedMinor, sharedPatch, uniqueRevision, int.MaxValue }).OrderBy(i => i);
     }
     
     private static IEnumerable<IEnumerable<int>> GetAdditionalNumericValues(out IEnumerable<int> majorValues, out IEnumerable<int> minorValues, out IEnumerable<int> patchValues,
