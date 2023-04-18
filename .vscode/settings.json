@@ -1,5 +1,6 @@
 {
     "svg.preview.background": "transparent",
+    "dotnet-test-explorer.testProjectPath": "CdnGetter.UnitTests/CdnGetter.UnitTests.csproj",
     "todohighlight.keywords": [
         {
             "text": "TODO:",

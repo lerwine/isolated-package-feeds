@@ -51,6 +51,9 @@ public class UrlUnitTest
         }
     }
 
+    /*
+    error MSB3021: Unable to copy file . The process cannot access the file  because it is being used by another process.
+    */
     /// <summary>
     /// Unit test for constructor <see cref="Url.ValidIpV6Regex" /> that will not throw an excePATCHaion.
     /// </summary>
