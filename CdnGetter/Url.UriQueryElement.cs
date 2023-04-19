@@ -4,11 +4,11 @@ namespace CdnGetter;
 
 public partial class Url
 {
-    public struct UriQueryElement : IEquatable<UriQueryElement>, IComparable<UriQueryElement>
+    public readonly struct UriQueryElement : IEquatable<UriQueryElement>, IComparable<UriQueryElement>
     {
-        public string Key { get; private set; }
+        public string Key { get; }
         
-        public string? Value { get; private set; }
+        public string? Value { get; }
         
         public UriQueryElement(string key, string? value)
         {
@@ -31,14 +31,38 @@ public partial class Url
             int hashCode = 3;
             unchecked
             {
-                hashCode = (hashCode * 7) + Key.GetHashCode();
-                return (Value is null) ? hashCode : (hashCode * 7) + Value.GetHashCode();
+                hashCode = (hashCode * 7) + Comparer.GetHashCode(Key);
+                return (Value is null) ? hashCode : (hashCode * 7) + Comparer.GetHashCode(Value);
             }
         }
 
         public override string ToString()
         {
-            throw new NotImplementedException();
+            if (Key.Length > 0)
+            {
+                if (Value is null)
+                    return QueryKeyEncodeRegex.Replace(Key, m => Uri.HexEscape(m.Value[0]));
+                if (Value.Length > 0)
+                    return $"{QueryKeyEncodeRegex.Replace(Key, m => Uri.HexEscape(m.Value[0]))}={QueryValueEncodeRegex.Replace(Value, m => Uri.HexEscape(m.Value[0]))}";
+                return $"{QueryKeyEncodeRegex.Replace(Key, m => Uri.HexEscape(m.Value[0]))}=";
+            }
+            if (Value is null)
+                return string.Empty;
+            if (Value.Length > 0)
+                return $"={QueryValueEncodeRegex.Replace(Value, m => Uri.HexEscape(m.Value[0]))}";
+            return "=";
         }
+
+        public static bool operator ==(UriQueryElement left, UriQueryElement right) => left.Equals(right);
+
+        public static bool operator !=(UriQueryElement left, UriQueryElement right) => !(left == right);
+
+        public static bool operator <(UriQueryElement left, UriQueryElement right) => left.CompareTo(right) < 0;
+
+        public static bool operator <=(UriQueryElement left, UriQueryElement right) => left.CompareTo(right) <= 0;
+
+        public static bool operator >(UriQueryElement left, UriQueryElement right) => left.CompareTo(right) > 0;
+
+        public static bool operator >=(UriQueryElement left, UriQueryElement right) => left.CompareTo(right) >= 0;
     }
 }

@@ -182,6 +182,8 @@ public partial class Url
             throw new NotImplementedException();
         }
 
+        public override bool Equals(object? obj) => obj is UriQueryCollection other && Equals(other);
+
         public IEnumerator<UriQueryElement> GetEnumerator() => _backingCollection.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)_backingCollection).GetEnumerator();
@@ -297,5 +299,29 @@ public partial class Url
         }
 
         public bool TryGetValue(string key, [MaybeNullWhen(false)] out string? value) => _backingDictionary.TryGetValue(key, out value);
+
+        public override int GetHashCode()
+        {
+            int result = 3;
+            unchecked
+            {
+                foreach (UriQueryElement e in _backingCollection)
+                    result = (result * 7) + e.GetHashCode();
+            }
+            return result;
+        }
+
+        public string ToString(bool noLeadingQueryChar)
+        {
+            lock (_backingCollection)
+                return _backingCollection.Count switch
+                {
+                    0 => noLeadingQueryChar ? string.Empty : QUERY_LEAD_CHAR,
+                    1 => noLeadingQueryChar ? _backingCollection[0].ToString() : QUERY_LEAD_CHAR + _backingCollection[0].ToString(),
+                    _ => noLeadingQueryChar ? string.Join(QUERY_SEPARATOR, _backingCollection.Select(e => e.ToString())) :
+                                                QUERY_LEAD_CHAR + string.Join(QUERY_SEPARATOR, _backingCollection.Select(e => e.ToString())),
+                };
+        }
+        public override string ToString() => ToString(false);
     }
 }

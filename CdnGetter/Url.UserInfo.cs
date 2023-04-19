@@ -2,63 +2,7 @@ namespace CdnGetter;
 
 public partial class Url
 {
-    /*
-URI         = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
-
-authority   = [ userinfo "@" ] host [ ":" port ]
-   userinfo    = *( unreserved / pct-encoded / sub-delims / ":" )
-   host        = IP-literal / IPv4address / reg-name
-       IPv6address =                            6( h16 ":" ) ls32
-                   /                       "::" 5( h16 ":" ) ls32
-                   / [               h16 ] "::" 4( h16 ":" ) ls32
-                   / [ *1( h16 ":" ) h16 ] "::" 3( h16 ":" ) ls32
-                   / [ *2( h16 ":" ) h16 ] "::" 2( h16 ":" ) ls32
-                   / [ *3( h16 ":" ) h16 ] "::"    h16 ":"   ls32
-                   / [ *4( h16 ":" ) h16 ] "::"              ls32
-                   / [ *5( h16 ":" ) h16 ] "::"              h16
-                   / [ *6( h16 ":" ) h16 ] "::"
-           ls32        = ( h16 ":" h16 ) / IPv4address
-                       ; least-significant 32 bits of address
-           h16         = 1*4HEXDIG
-                       ; 16 bits of address represented in hexadecimal
-       IPvFuture   = "v" 1*HEXDIG "." 1*( unreserved / sub-delims / ":" )
-       IP-literal  = "[" ( IPv6address / IPvFuture  ) "]"
-       IPv4address = dec-octet "." dec-octet "." dec-octet "." dec-octet
-           dec-octet   = DIGIT                 ; 0-9
-                       / %x31-39 DIGIT         ; 10-99
-                       / "1" 2DIGIT            ; 100-199
-                       / "2" %x30-34 DIGIT     ; 200-249
-                       / "25" %x30-35          ; 250-255
-   port        = *DIGIT
-       reg-name    = *( unreserved / pct-encoded / sub-delims )
-
-hier-part   = "//" authority path-abempty
-           / path-absolute
-           / path-rootless
-           / path-empty
-
-path          = path-abempty    ; begins with "/" or is empty
-               / path-absolute   ; begins with "/" but not "//"
-               / path-noscheme   ; begins with a non-colon segment
-               / path-rootless   ; begins with a segment
-               / path-empty      ; zero characters
-
-   path-abempty  = *( "/" segment )
-   path-absolute = "/" [ segment-nz *( "/" segment ) ]
-   path-noscheme = segment-nz-nc *( "/" segment )
-   path-rootless = segment-nz *( "/" segment )
-   path-empty    = 0<pchar>
-       segment       = *pchar
-       segment-nz    = 1*pchar
-       segment-nz-nc = 1*( unreserved / pct-encoded / sub-delims / "@" )
-                       ; non-zero-length segment without any colon ":"
-           pchar         = unreserved / pct-encoded / sub-delims / ":" / "@"
-
-query       = *( pchar / "/" / "?" )
-fragment    = *( pchar / "/" / "?" )
-*/
-
-    public class UserInfo
+    public class UserInfo : IEquatable<UserInfo>, IComparable<UserInfo>
     {
         private string _userName;
         
@@ -77,6 +21,56 @@ fragment    = *( pchar / "/" / "?" )
         {
             _userName = userName ?? "";
             Password = password;    
+        }
+
+        public bool Equals(UserInfo? other)
+        {
+            if (other is null)
+                return false;
+            if (ReferenceEquals(this, other))
+                return true;
+            if (!Comparer.Equals(_userName, other._userName))
+                return false;
+            string? x = Password;
+            string? y = other.Password;
+            return (x is null) ? y is null : y is not null && Comparer.Equals(x, y);
+        }
+
+        public override bool Equals(object? obj) => obj is UserInfo other && Equals(other);
+
+        public int CompareTo(UserInfo? other)
+        {
+            if (other is null)
+                return 1;
+            if (ReferenceEquals(this, other))
+                return 0;
+            int result = Comparer.Compare(_userName, other._userName);
+            if (result != 0)
+                return result;
+            string? x = Password;
+            string? y = other.Password;
+            return (x is null) ? ((y is null) ? 0 : -1) : (y is null) ? 1 : Comparer.Compare(x, y);
+        }
+
+        public override int GetHashCode()
+        {
+            int hashCode = 3;
+            unchecked
+            {
+                hashCode = (hashCode * 7) + _userName.GetHashCode();
+                string? password = Password;
+                return (password is null) ? hashCode * 7 : (hashCode * 7) + password.GetHashCode();
+            }
+        }
+
+        public override string ToString()
+        {
+            string userName = _userName;
+            string? password = Password;
+            if (password is null)
+                return (userName.Length > 0) ? NameEncodeRegex.Replace(userName, m => Uri.HexEscape(m.Value[0])) : userName;
+            return (userName.Length > 0) ? $"{NameEncodeRegex.Replace(userName, m => Uri.HexEscape(m.Value[0]))}:{PasswordEncodeRegex.Replace(password, m => Uri.HexEscape(m.Value[0]))}" :
+                $":{PasswordEncodeRegex.Replace(password, m => Uri.HexEscape(m.Value[0]))}";
         }
     }
 }
