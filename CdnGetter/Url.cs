@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace CdnGetter;
 
@@ -503,7 +499,6 @@ fragment    = *( pchar / "/" / "?" )
 
     public override int GetHashCode()
     {
-        // 3, 5, 7, 11, 13
         int hashCode = 13;
         unchecked
         {
