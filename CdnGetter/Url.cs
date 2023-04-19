@@ -308,7 +308,7 @@ fragment    = *( pchar / "/" / "?" )
     /// <param name="path">The raw (not URI-encoded) path string.</param>
     /// <param name="query">The URI query sub-components or <see langword="null" /> for no query component.</param>
     /// <param name="fragment">The fragment component or <see langword="null" /> for no fragment component.</param>
-    public Url(UrlAuthority? authority = null, string? path = null, IEnumerable<UriQueryElement>? query = null, string? fragment = null)
+    public Url(UrlAuthority authority, string? path = null, IEnumerable<UriQueryElement>? query = null, string? fragment = null)
     {
         _scheme = string.Empty;
         _schemeSeparator = SchemeSeparatorType.NoSlash;
@@ -327,7 +327,7 @@ fragment    = *( pchar / "/" / "?" )
     /// <param name="path">The raw (not URI-encoded) path string.</param>
     /// <param name="query">The URI query sub-components or <see langword="null" /> for no query component.</param>
     /// <param name="fragment">The fragment component or <see langword="null" /> for no fragment component.</param>
-    public Url(string path, IEnumerable<UriQueryElement>? query = null, string? fragment = null)
+    public Url(string? path = null, IEnumerable<UriQueryElement>? query = null, string? fragment = null)
     {
         _scheme = string.Empty;
         _schemeSeparator = SchemeSeparatorType.NoSlash;
