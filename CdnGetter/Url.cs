@@ -166,8 +166,34 @@ fragment    = *( pchar / "/" / "?" )
     /// <summary>
     /// Matches a valid URI port string.
     /// </summary>
-    public static readonly Regex ValidPortRegex = new(@"^(6(5(5(3[0-5]?|[0-2]\d?|[4-9])?|[0-4]\d{0,2}|[6-9]\d?)?|[0-4]\d{0,3}|[6-9]\d{0,2})?|[0-5]\d{0,4}|[7-9]\d{0,3})$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
+    public static readonly Regex ValidPortRegex = new(@"^(6(5(5(3[0-5]?|[0-2]\d?|[4-9])?|[0-4]\d{0,2}|[6-9]\d?)?|[0-4]\d{0,3}|[6-9]\d{0,2})?|[1-5]\d{0,4}|[7-9]\d{0,3})$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    /*
+    (
+        [1-5]\d{0,4}
+    |
+        6(
+            5(
+                5(
+                    3[0-5]?
+                |
+                    [0-2]\d?
+                |
+                    [4-9]
+                )?
+            |
+                [0-4]\d{0,2}
+            |
+                [6-9]\d?
+            )?
+        |
+            [0-4]\d{0,3}
+        |
+            [6-9]\d{0,2}
+        )?
+    |
+        [7-9]\d{0,3}
+    )
+    */
     /// <summary>
     /// Pattern for parsing URI components.
     /// </summary>

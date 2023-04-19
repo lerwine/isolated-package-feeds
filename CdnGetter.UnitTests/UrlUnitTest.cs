@@ -3,11 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace CdnGetter.UnitTests;
 
 public class UrlUnitTest
 {
+    private readonly ITestOutputHelper _output;
+
+    public UrlUnitTest(ITestOutputHelper output)
+    {
+        _output = output;
+    }
+
     /// <summary>
     /// Generates test data for <see cref="ValidIpV6RegexTest(string, bool, bool, bool, string)" />.
     /// </summary>
@@ -304,6 +312,40 @@ public class UrlUnitTest
     public void ValidIpV4RegexTest(string address, bool expected)
     {
         bool actual = Url.ValidIpV4Regex.IsMatch(address);
+        Assert.Equal(expected, actual);
+    }
+    
+    /// <summary>
+    /// Generates test data for <see cref="ValidIpV4RegexTestData(string, bool)" />.
+    /// </summary>
+    public class ValidPortRegexTestData : TheoryData<string, bool>
+    {
+        public ValidPortRegexTestData()
+        {
+            foreach (string s in new string[]
+            {
+                "1", "9", "10", "99", "100", "999", "1000", "9999", "10000",
+                "65535", "65530", "65529", "65499", "64999", "59999",
+                "6554", "6569", "6699", "7999"
+            })
+                Add(s, true);
+            foreach (string s in new string[]
+            {
+                "0", "65536", "65545", "65635", "66535", "75535", "655350", "165535", "-65535"
+            })
+                Add(s, false);
+        }
+    }
+
+    /// <summary>
+    /// Unit test for constructor <see cref="Url.ValidPortRegex" /> that will not throw an excePATCHaion.
+    /// </summary>
+    [Theory]
+    [ClassData(typeof(ValidPortRegexTestData))]
+    public void ValidPortRegexTest(string text, bool expected)
+    {
+        _output.WriteLine($"\"{text}\"");
+        bool actual = Url.ValidPortRegex.IsMatch(text);
         Assert.Equal(expected, actual);
     }
 }
