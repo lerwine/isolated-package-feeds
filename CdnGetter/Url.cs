@@ -33,38 +33,9 @@ public partial class Url : IEquatable<Url>, IComparable<Url>
     public static readonly Regex PasswordEncodeRegex = new(@"[^!$&'()*+,;=\w.~:-]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     public static readonly Regex PasswordEncodeRegexAlt = new(@"%(?![\da-f]{2})|[^%!$&'()*+,;=\w.~:-]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     public static readonly Regex UserInfoRegex = new(@"(?<username>([!$&'()*+,;=\w.~-]|%[\da-f]{2})*)(?::(?<pw>([!$&'()*+,;=\w.~:-]|%[\da-f]{2})*))?", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    public static readonly Regex ValidIpV4Regex = new(@"^(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]\.){3}(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    public static readonly Regex ValidIpV6Regex = new(@"^\[((?:::f{4}:|[\da-f]{1,4}(?::[\da-f]{1,4}){7}|(?:(?:[\da-f]{1,4}(?::[\da-f]{1,4}){0,5})?)::(?:(?:[\da-f]{1,4}(?::[\da-f]{1,4}){0,5})?)))\]$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    // public static readonly Regex ValidIpV6Regex = new(@"^\[
-    //     (
-    //         (?:
-    //             ::f{4}:
-    //             |
-    //             [\da-f]{1,4}
-    //             (?:
-    //                 :[\da-f]{1,4}
-    //             ){7}
-    //             |
-    //             (?:
-    //                 (?:
-    //                     [\da-f]{1,4}
-    //                     (?:
-    //                         :[\da-f]{1,4}
-    //                     ){0,5}
-    //                 )?
-    //             )
-    //             ::
-    //             (?:
-    //                 (?:
-    //                     [\da-f]{1,4}
-    //                     (?:
-    //                         :[\da-f]{1,4}
-    //                     ){0,5}
-    //                 )?
-    //             )
-    //         )
-    //     )
-    // \]$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    public static readonly Regex ValidIpV4Regex = new(@"^(([01](\d\d?)?|2([0-4]\d?|5[0-5]?|[6-9])?|[3-9]\d?)\.){3}([01](\d\d?)?|2([0-4]\d?|5[0-5]?|[6-9])?|[3-9]\d?)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    public static readonly Regex ValidIpV6Regex = new(@"^\[((?=(([^:]+:)+((:[^:]+)+|:)|:(:[^:]+)+)$)(([\da-f]{1,4}::?){1,6}([\da-f]{1,4}(::)?)?|(::?[\da-f]{1,4}){1,7})|([\da-f]{1,4}:){7}[\da-f]{1,4}|::)\]$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    public static readonly Regex ValidIpV6wV4Regex = new(@"^\[(:(:[\da-f]{1,4}){0,5}:|[\da-f]{1,4}:(:([\da-f]{1,4}:){0,4}|[\da-f]{1,4}:(:([\da-f]{1,4}:){0,3}|[\da-f]{1,4}:(:([\da-f]{1,4}:){0,2}|[\da-f]{1,4}:(:([\da-f]{1,4}:)?|[\da-f]{1,4}:([\da-f]{1,4}?)?:)))))(([01](\d\d?)?|2([0-4]\d?|5[0-5]?|[6-9])?|[3-9]\d?)\.){3}([01](\d\d?)?|2([0-4]\d?|5[0-5]?|[6-9])?|[3-9]\d?)\]$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     public static readonly Regex ValidHostNameRegex = new(@"^([!$&'()*+,;=\w.~-]+|%[\da-f]{2})*$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     public static readonly Regex ValidPortRegex = new(@"^(6(5(5(3[0-5]?|[0-2]\d?|[4-9])?|[0-4]\d{0,2}|[6-9]\d?)?|[0-4]\d{0,3}|[6-9]\d{0,2})?|[0-5]\d{0,4}|[7-9]\d{0,3})$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     public static readonly Regex UrlParseComponentsRegex = new(@"^(?:(?<scheme>[^?#:/\\@]+):/(?<sep>/)?)?(?:(?:(?<user>[^?#:/\\@]*)(?::(?<pw>[^?#/\\@]*))?@)(?<host>[^?#:/\\]+)(?::(?<port>[^?#:/\\]+))?)(?<path>[^?#]*)(?:\?(?<query>[^#]*))?(?:#(?<fragment>.*))?$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
