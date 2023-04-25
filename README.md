@@ -19,10 +19,6 @@ The initial scope is to create NuGet and NPM Package Feed services as well as co
   - [StringContent Class](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.stringcontent?view=net-7.0)
 - [XUnit Testing](https://xunit.net)
 - [c# Documentation Comments](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/documentation-comments)
-- [RFC 7230: Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing; 2.7 Uniform Resource Identifiers](https://www.rfc-editor.org/rfc/rfc7230#section-2.7)
-  - [RFC 3986: URI Generic Syntax](https://www.rfc-editor.org/rfc/rfc3986)
-  - [RFC 3305: Uniform Resource Identifiers (URIs), URLs, and Uniform Resource Names (URNs): Clarifications and Recommendations](https://www.rfc-editor.org/rfc/rfc3305)
-  - [RFC: URI Design and Ownership](https://www.rfc-editor.org/rfc/rfc8820)
 
 ### NuGet
 
