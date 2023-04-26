@@ -1,13 +1,23 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace CdnGetter.UnitTests;
 
 public class UrlUnitTest
 {
+    private readonly ITestOutputHelper _output;
+
+    public UrlUnitTest(ITestOutputHelper output)
+    {
+        _output = output;
+    }
+
     /// <summary>
     /// Generates test data for <see cref="ValidIpV6RegexTest(string, bool, bool, bool, string)" />.
     /// </summary>
@@ -305,5 +315,626 @@ public class UrlUnitTest
     {
         bool actual = Url.ValidIpV4Regex.IsMatch(address);
         Assert.Equal(expected, actual);
+    }
+    
+    /// <summary>
+    /// Generates test data for <see cref="ValidIpV4RegexTestData(string, bool)" />.
+    /// </summary>
+    public class ValidPortRegexTestData : TheoryData<string, bool>
+    {
+        public ValidPortRegexTestData()
+        {
+            foreach (string s in new string[]
+            {
+                "1", "9", "10", "99", "100", "999", "1000", "9999", "10000",
+                "65535", "65530", "65529", "65499", "64999", "59999",
+                "6554", "6569", "6699", "7999"
+            })
+                Add(s, true);
+            foreach (string s in new string[]
+            {
+                "0", "65536", "65545", "65635", "66535", "75535", "655350", "165535", "-65535"
+            })
+                Add(s, false);
+        }
+    }
+
+    /// <summary>
+    /// Unit test for constructor <see cref="Url.ValidPortRegex" /> that will not throw an excePATCHaion.
+    /// </summary>
+    [Theory]
+    [ClassData(typeof(ValidPortRegexTestData))]
+    public void ValidPortRegexTest(string text, bool expected)
+    {
+        _output.WriteLine($"\"{text}\"");
+        bool actual = Url.ValidPortRegex.IsMatch(text);
+        Assert.Equal(expected, actual);
+    }
+
+    public class UserInfoTestData : TheoryData<string, string?, string>
+    {
+        public UserInfoTestData()
+        {
+            Add(string.Empty, null, "{ \"UserName\": \"\", \"Password\": null }");
+            Add(string.Empty, string.Empty, "{ \"UserName\": \":\", \"Password\": null }");
+            foreach (char p in new char[] { ' ', '"', '#', '%', '/', '<', '>', '?', '@', '[', '\\', ']', '^', '`', '{', '|', '}' })
+                Add(string.Empty, $"{p}20", $":{Uri.HexEscape(p)}20");
+            foreach (char p in new char[] { 'a', 'A', 'z', 'Z', '!', '$', '&', '\'', '(', ')', '*', '+', ',', ';', '=', '.', '~', '-', '_', ':' })
+                Add(string.Empty, p.ToString(), $":{p}");
+            foreach (char u in NameCharsMustEncode)
+            {
+                Add(u.ToString(), null, Uri.HexEscape(u));
+                Add(u.ToString(), string.Empty, $"{Uri.HexEscape(u)}:");
+                Add($"{u}20", null, $"{Uri.HexEscape(u)}20");
+                Add($"{u}20", string.Empty, $"{Uri.HexEscape(u)}20:");
+                foreach (char p in new char[] { ' ', '"', '#', '%', '/', '<', '>', '?', '@', '[', '\\', ']', '^', '`', '{', '|', '}' })
+                    Add($"{u}20", $"{p}20", $"{Uri.HexEscape(u)}20:{Uri.HexEscape(p)}20");
+                foreach (char p in new char[] { 'a', 'A', 'z', 'Z', '!', '$', '&', '\'', '(', ')', '*', '+', ',', ';', '=', '.', '~', '-', '_', ':' })
+                    Add($"{u}20", p.ToString(), $"{Uri.HexEscape(u)}20:{p}");
+            }
+            foreach (char u in NameCharsNoEncode)
+            {
+                Add(u.ToString(), null, u.ToString());
+                Add(u.ToString(), string.Empty, $"{u}:");
+                foreach (char p in new char[] { ' ', '"', '#', '%', '/', '<', '>', '?', '@', '[', '\\', ']', '^', '`', '{', '|', '}' })
+                    Add(u.ToString(), $"{p}20", $"{u}:{Uri.HexEscape(p)}20");
+                foreach (char p in new char[] { 'a', 'A', 'z', 'Z', '!', '$', '&', '\'', '(', ')', '*', '+', ',', ';', '=', '.', '~', '-', '_', ':' })
+                    Add(u.ToString(), p.ToString(), $"{u}:{p}");
+            }
+        }
+    }
+
+    [Theory]
+    [ClassData(typeof(UserInfoTestData))]
+    public void UserInfoTest(string userName, string? password, string expected)
+    {
+        Url.UserInfo target = new(userName, password);
+        Assert.Equal(userName, target.UserName);
+        if (password is null)
+            Assert.Null(target.Password);
+        else
+        {
+            Assert.NotNull(target.Password);
+            Assert.Equal(userName, password);
+        }
+        string actual = target.ToString();
+        Assert.Equal(expected, actual);
+    }
+
+    private static readonly ushort[] ValidPorts = new ushort[] { 1, 80, 81, 443, 8080, 6535 };
+    
+    record ValidUserInfoItem(string UserName, string? Password, string Expected)
+    {
+        internal JsonObject ToJson() => new()
+        {
+            { nameof(UserName), JsonValue.Create(UserName) },
+            { nameof(Password), (Password is null) ? null : JsonValue.Create(Password) },
+            { nameof(Expected), JsonValue.Create(Expected) }
+        };
+        
+        internal static ValidUserInfoItem? FromJson(string? jsonString)
+        {
+            return string.IsNullOrEmpty(jsonString) ? null : FromJson(JsonNode.Parse(jsonString) as JsonObject);
+        }
+
+        internal static ValidUserInfoItem? FromJson(JsonObject? obj)
+        {
+            if (obj is null)
+                return null;
+            return new(obj[nameof(UserName)]!.AsValue().GetValue<string>(), (obj[nameof(Password)] is JsonValue pw) ? pw.GetValue<string>() : null, obj[nameof(Expected)]!.AsValue().GetValue<string>());
+        }
+    }
+
+    private static readonly ValidUserInfoItem[] ValidUserInfo = new ValidUserInfoItem[]
+    {
+        new("Test", "pw", "Test:pw"), new(":", "@", $"{Uri.HexEscape('@')}:{Uri.HexEscape('@')}"), new(string.Empty, null, string.Empty)
+    };
+
+    private static readonly char[] NameCharsMustEncode = new char[] { ' ', '"', '#', '%', '/', ':', '<', '>', '?', '@', '[', '\\', ']', '^', '`', '{', '|', '}' };
+
+    private static readonly char[] NameCharsNoEncode = new char[] { 'a', 'A', 'z', 'Z', '!', '$', '&', '\'', '(', ')', '*', '+', ',', ';', '=', '.', '~', '-', '_' };
+
+    record ValidAuthorityItem(ValidUserInfoItem? UserInfo, string HostName, ushort? Port, string Expected)
+    {
+        internal JsonObject ToJson() => new()
+        {
+            { nameof(UserInfo), UserInfo?.ToJson() },
+            { nameof(HostName), JsonValue.Create(HostName) },
+            { nameof(Port), Port.HasValue ? JsonValue.Create(Port.Value) : null },
+            { nameof(Expected), JsonValue.Create(Expected) }
+        };
+        
+        internal static ValidAuthorityItem? FromJson(string? jsonString)
+        {
+            return string.IsNullOrEmpty(jsonString) ? null : FromJson(JsonNode.Parse(jsonString) as JsonObject);
+        }
+
+        internal static ValidAuthorityItem? FromJson(JsonObject? obj)
+        {
+            if (obj is null)
+                return null;
+            if (obj[nameof(Port)] is JsonValue p)
+                return new(ValidUserInfoItem.FromJson(obj[nameof(UserInfo)]?.AsObject()), obj[nameof(HostName)]!.AsValue().GetValue<string>(), p.GetValue<ushort>(), obj[nameof(Expected)]!.AsValue().GetValue<string>());
+            return new(ValidUserInfoItem.FromJson(obj[nameof(UserInfo)]?.AsObject()), obj[nameof(HostName)]!.AsValue().GetValue<string>(), null, obj[nameof(Expected)]!.AsValue().GetValue<string>());
+        }
+    }
+
+    private static readonly ValidAuthorityItem[] ValidAuthorities = new ValidAuthorityItem[]
+    {
+        new(null, "localhost", null, "localhost"),
+        new(null, "192.168.1.1", 8080, "192.168.1.1:8080"),
+        new(null, "d10b:5B2a:FBAa::3C:Ce2E:0:1F", null, "[d10b:5B2a:FBAa::3C:Ce2E:0:1F]"),
+        new(null, "d10b:5B2a:FBAa::3C:Ce2E:0:1F", 443, "[d10b:5B2a:FBAa::3C:Ce2E:0:1F]:443"),
+        new(new ValidUserInfoItem("me", "pw", "me:pw"), "mysite.net", null, "me:pw@mysite.net"),
+        new(new ValidUserInfoItem("me", "pw", "me:pw"), "7::88A:853", null, "7::88A:853"),
+        new(new ValidUserInfoItem("me", "pw", "me:pw"), "7::88A:853", 900, "me:pw@[7::88A:853]:900"),
+    };
+
+    record ValidSchemeItem(string Name, Url.SchemeSeparatorType SchemeSeparator, ValidAuthorityItem[] Authorities, bool CanHavePath, string Expected)
+    {
+        internal JsonObject ToJson()
+        {
+            JsonArray arr = new();
+            foreach (ValidAuthorityItem item in Authorities)
+                arr.Add(item.ToJson());
+            return new()
+            {
+                { nameof(Name), JsonValue.Create(Name) },
+                { nameof(SchemeSeparator), JsonValue.Create((byte)SchemeSeparator) },
+                { nameof(Authorities), arr },
+                { nameof(CanHavePath), JsonValue.Create(CanHavePath) },
+                { nameof(Expected), JsonValue.Create(Expected) }
+            };
+        }
+        
+        internal static ValidSchemeItem? FromJson(string? jsonString)
+        {
+            return string.IsNullOrEmpty(jsonString) ? null : FromJson(JsonNode.Parse(jsonString) as JsonObject);
+        }
+
+        internal static ValidSchemeItem? FromJson(JsonObject? obj)
+        {
+            if (obj is null)
+                return null;
+            JsonArray arr = obj[nameof(Authorities)]!.AsArray();
+            List<ValidAuthorityItem> items = new();
+            foreach (JsonNode? o in arr)
+                items.Add(ValidAuthorityItem.FromJson(o as JsonObject)!);
+            return new(obj[nameof(Name)]!.AsValue().GetValue<string>(), (Url.SchemeSeparatorType)obj[nameof(Name)]!.AsValue().GetValue<byte>(), items.ToArray(), obj[nameof(Name)]!.AsValue().GetValue<bool>(), obj[nameof(Expected)]!.AsValue().GetValue<string>());
+        }
+    }
+
+    private static readonly ValidSchemeItem[] ValidSchemeNames = new ValidSchemeItem[] {
+        new("http", Url.SchemeSeparatorType.DoubleSlash, ValidAuthorities, true, "http://"),
+        new("https", Url.SchemeSeparatorType.DoubleSlash, ValidAuthorities, true, "https://"),
+        new("alt", Url.SchemeSeparatorType.SingleSlash, ValidAuthorities, true, "alt:/"),
+        new("mailto", Url.SchemeSeparatorType.NoSlash, new ValidAuthorityItem[]
+        {
+            new(new ValidUserInfoItem("barbara.erwine", null, "barbara.erwine"), "gmail.com", null, "barbara.erwine@gmail.com"),
+            new(new ValidUserInfoItem("lenny", null, "lenny"), "erwinefamily.net", null, "lenny@erwinefamily.net")
+        }, false, "mailto:")
+    };
+
+    public class UrlAuthorityTestData : TheoryData<string?, string?, string, ushort?, string>
+    {
+        public UrlAuthorityTestData()
+        {
+            foreach ((string hostName, string expected1) in new (string HostName, string Expected)[]
+            {
+                new("localhost", "localhost"),
+                new("10.0.0.1", "10.0.0.1"),
+                new("55d::45Bd:c2:411:6.130.68.161", "[55d::45Bd:c2:411:6.130.68.161]")
+            })
+            {
+                Add(null, null, hostName, null, expected1);
+                foreach (ushort port in ValidPorts)
+                    Add(null, null, hostName, port, $"{expected1}:{port}");
+                foreach ((string userName, string? password, string expected2) in ValidUserInfo)
+                {
+                    Add(userName, password, hostName, null, $"{expected2}@{expected1}");
+                    foreach (ushort port in ValidPorts)
+                        Add(userName, password, hostName, port, $"{expected2}@{expected1}:{port}");
+                }
+            }
+            foreach (char h in NameCharsMustEncode)
+            {
+                Add(null, null, h.ToString(), null, Uri.HexEscape(h));
+                foreach (ushort port in ValidPorts)
+                    Add(null, null, h.ToString(), port, $"{Uri.HexEscape(h)}:{port}");
+                foreach ((string userName, string? password, string expected) in ValidUserInfo)
+                {
+                    Add(userName, password, h.ToString(), null, $"{expected}@{Uri.HexEscape(h)}");
+                    foreach (ushort port in ValidPorts)
+                        Add(userName, password, h.ToString(), port, $"{expected}@{Uri.HexEscape(h)}:{port}");
+                }
+            }
+            foreach (char h in NameCharsNoEncode)
+            {
+                Add(null, null, h.ToString(), null, h.ToString());
+                foreach (ushort port in ValidPorts)
+                    Add(null, null, h.ToString(), port, $"{h}:{port}");
+                foreach ((string userName, string? password, string expected) in ValidUserInfo)
+                {
+                    Add(userName, password, h.ToString(), null, $"{expected}@{h}");
+                    foreach (ushort port in ValidPorts)
+                        Add(userName, password, h.ToString(), port, $"{expected}@{h}:{port}");
+                }
+            }
+        }
+    }
+
+    [Theory]
+    [ClassData(typeof(UrlAuthorityTestData))]
+    public void UrlAuthorityTest(string? userName, string? password, string hostName, ushort? port, string expected)
+    {
+        Url.UrlAuthority target;
+        if (userName is null)
+        {
+            target = new Url.UrlAuthority(hostName, port);
+            Assert.Null(target.UserInfo);
+        }
+        else
+        {
+            target = new Url.UrlAuthority(new Url.UserInfo(userName, password), hostName, port);
+            Url.UserInfo userInfo = target.UserInfo!;
+            Assert.NotNull(userInfo);
+            Assert.Equal(userName, userInfo.UserName);
+            if (password is null)
+                Assert.Null(userInfo.Password);
+            else
+            {
+                Assert.NotNull(userInfo.Password);
+                Assert.Equal(password, userInfo.Password);
+            }
+        }
+        Assert.Equal(hostName, target.HostName);
+        if (port.HasValue)
+        {
+            Assert.NotNull(target.Port);
+            Assert.Equal(port, target.Port);
+        }
+        else
+            Assert.Null(target.Port);
+        string actual = target.ToString();
+        Assert.Equal(expected, actual);
+    }
+
+    public class UriQueryElementTestData : TheoryData<string, string?, string>
+    {
+        public UriQueryElementTestData()
+        {
+            foreach (char k in new char[] { ' ', '"', '#', '%', '&', '<', '=', '>', '?', '[', '\\', ']', '^', '`', '{', '|', '}' })
+            {
+                Add(k.ToString(), null, Uri.HexEscape(k));
+                foreach (char v in new char[] { ' ', '"', '#', '%', '&','<', '>', '?', '[', '\\', ']', '^', '`', '{', '|', '}' })
+                    Add(k.ToString(), v.ToString(), $"{Uri.HexEscape(k)}={Uri.HexEscape(v)}");
+                foreach (string value in new string[] { "MyVal", "a", "A", "z", "Z", "^", "!", "$", "'", "(", ")", "*", "+", ",", ":", ";", "@", "=", "/", ".", "~", "-", string.Empty })
+                    Add(k.ToString(), value, $"{Uri.HexEscape(k)}={value}");
+            }
+
+            foreach (string key in new string[] { "Test", "a", "A", "z", "Z", "!", "$", "'", "(", ")", "*", "+", ",", ":", ";", "@", "/", ".", "~", "-", string.Empty })
+            {
+                Add(key, null, key);
+                foreach (char v in new char[] { ' ', '"', '#', '%', '&','<', '>', '?', '[', '\\', ']', '^', '`', '{', '|', '}' })
+                    Add(key, v.ToString(), $"{key}={Uri.HexEscape(v)}");
+                foreach (string value in new string[] { "MyVal", "a", "A", "z", "Z", "^", "!", "$", "'", "(", ")", "*", "+", ",", ":", ";", "@", "=", "/", ".", "~", "-", string.Empty })
+                    Add(key, value, $"{key}={value}");
+            }
+        }
+    }
+
+    [Theory]
+    [ClassData(typeof(UriQueryElementTestData))]
+    public void UriQueryElementTest(string key, string? value, string expected)
+    {
+        Url.UriQueryElement target = new(key, value);
+        Assert.Equal(target.Key, key);
+        string actual;
+        if (value is null)
+            Assert.Null(target.Value);
+        else
+        {
+            actual = target.Value!;
+            Assert.NotNull(actual);
+            Assert.Equal(value, actual);
+        }
+        actual = target.ToString();
+        Assert.Equal(expected, actual);
+    }
+
+    record QueryTestDataItem(string Key, string? Value, string Expected)
+    {
+        internal JsonObject ToJson() => new()
+        {
+            { nameof(Key), JsonValue.Create(Key) },
+            { nameof(Value), (Value is null) ? null : JsonValue.Create(Value) },
+            { nameof(Expected), JsonValue.Create(Expected) }
+        };
+        
+        internal static QueryTestDataItem? FromJson(string? jsonString)
+        {
+            return string.IsNullOrEmpty(jsonString) ? null : FromJson(JsonNode.Parse(jsonString) as JsonObject);
+        }
+
+        internal static QueryTestDataItem? FromJson(JsonObject? obj)
+        {
+            if (obj is null)
+                return null;
+            return new(obj[nameof(Key)]!.AsValue().GetValue<string>(), (obj[nameof(Value)] is JsonValue pw) ? pw.GetValue<string>() : null, obj[nameof(Expected)]!.AsValue().GetValue<string>());
+        }
+    }
+
+    private static readonly QueryTestDataItem[] ValidQuerySubComponents = new QueryTestDataItem[]
+    {
+        new("id", "12", "id=12"),
+        new(string.Empty, string.Empty, "="),
+        new("%20", "[nil]", "%2520=%5Bnil%5D")
+    };
+
+    record PathTestDataItem(string Path, bool IsRooted, string[] Expected);
+    
+    private static readonly PathTestDataItem[] ValidPathComponents = new PathTestDataItem[]
+    {
+        new("", false, Array.Empty<string>()),
+        new("/", true, Array.Empty<string>()),
+        new("\\", true, Array.Empty<string>()),
+        new("\\/", true, Array.Empty<string>()),
+        new("Test", false, new string[] { "Test" }),
+        new("Test/", false, new string[] { "Test" }),
+        new("Test\\Data", false, new string[] { "Test", "Data" }),
+        new(" ", false, new string[] { "%20" }),
+        new("/Test", true, new string[] { "Test" }),
+        new("/Test\\Data", true, new string[] { "Test", "Data" })
+    };
+
+    record FragmentTestDataItem(string Fragment, string Expected);
+
+    private static readonly FragmentTestDataItem[] ValidFragmentComponents = new FragmentTestDataItem[]
+    {
+        new("/page", "/page"),
+        new("!$&'()*+,:;@=/?.~-AazZ", "!$&'()*+,:;@=/?.~-AazZ"),
+        new("#frag", "%22frag"),
+        new("\"#%<>[\\]^`{|}", "%20%22%23%25%3C%3E%5B%5C%5D%5E%60%7B%7C%7D"),
+        new(string.Empty, string.Empty)
+    };
+
+    /*
+    
+        */
+
+    public class Constructor6TestData : TheoryData<string, byte, string, string?, string?, string?, string>
+    {
+        public Constructor6TestData()
+        {
+            foreach (ValidSchemeItem scheme in ValidSchemeNames.Where(s => s.CanHavePath))
+            {
+                foreach (ValidAuthorityItem authority in scheme.Authorities)
+                {
+                    foreach (FragmentTestDataItem fragment in ValidFragmentComponents)
+                    {
+                        Add(scheme.Name, (byte)scheme.SchemeSeparator, authority.ToJson().ToJsonString(), null, null, fragment.Fragment, $"{scheme.Expected}{authority.Expected}#{fragment.Expected}");
+                        string expected = string.Join("&", ValidQuerySubComponents.Select(q => q.Expected));
+                        JsonArray arr = new();
+                        foreach (JsonObject obj in ValidQuerySubComponents.Select(q => q.ToJson()))
+                            arr.Add(obj);
+                        string qj = arr.ToJsonString();
+                        Add(scheme.Name, (byte)scheme.SchemeSeparator, authority.ToJson().ToJsonString(), null, qj, fragment.Fragment, $"{scheme.Expected}{authority.Expected}?{expected}#{fragment.Expected}");
+                        expected = ValidQuerySubComponents[0].Expected;
+                        arr = new()
+                        {
+                            ValidQuerySubComponents[0].ToJson()
+                        };
+                        qj = arr.ToJsonString();
+                        Add(scheme.Name, (byte)scheme.SchemeSeparator, authority.ToJson().ToJsonString(), null, qj, fragment.Fragment, $"{scheme.Expected}{authority.Expected}?{expected}#{fragment.Expected}");
+                        foreach (PathTestDataItem path in ValidPathComponents)
+                        {
+                            if (path.IsRooted)
+                                Add(scheme.Name, (byte)scheme.SchemeSeparator, authority.ToJson().ToJsonString(), path.Path, null, fragment.Fragment, $"{scheme.Expected}{authority.Expected}{path.Expected}#{fragment.Expected}");
+                            else
+                                Add(scheme.Name, (byte)scheme.SchemeSeparator, authority.ToJson().ToJsonString(), path.Path, null, fragment.Fragment, $"{scheme.Expected}{authority.Expected}/{path.Expected}#{fragment.Expected}");
+                            expected = string.Join("&", ValidQuerySubComponents.Select(q => q.Expected));
+                            arr = new();
+                            foreach (JsonObject obj in ValidQuerySubComponents.Select(q => q.ToJson()))
+                                arr.Add(obj);
+                            qj = arr.ToJsonString();
+                            if (path.IsRooted)
+                                Add(scheme.Name, (byte)scheme.SchemeSeparator, authority.ToJson().ToJsonString(), path.Path, qj, fragment.Fragment, $"{scheme.Expected}{authority.Expected}{path.Expected}?{expected}#{fragment.Expected}");
+                            else
+                                Add(scheme.Name, (byte)scheme.SchemeSeparator, authority.ToJson().ToJsonString(), path.Path, qj, fragment.Fragment, $"{scheme.Expected}{authority.Expected}/{path.Expected}?{expected}#{fragment.Expected}");
+                            expected = ValidQuerySubComponents[0].Expected;
+                            arr = new()
+                            {
+                                ValidQuerySubComponents[0].ToJson()
+                            };
+                            qj = arr.ToJsonString();
+                            if (path.IsRooted)
+                                Add(scheme.Name, (byte)scheme.SchemeSeparator, authority.ToJson().ToJsonString(), path.Path, qj, fragment.Fragment, $"{scheme.Expected}{authority.Expected}{path.Expected}?{expected}#{fragment.Expected}");
+                            else
+                                Add(scheme.Name, (byte)scheme.SchemeSeparator, authority.ToJson().ToJsonString(), path.Path, qj, fragment.Fragment, $"{scheme.Expected}{authority.Expected}/{path.Expected}?{expected}#{fragment.Expected}");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    [Theory]
+    [ClassData(typeof(Constructor6TestData))]
+    public void Constructor6Test(string scheme, byte schemeSeparator, string authority, string? path, string? query, string fragment, string expected)
+    {
+        Url.SchemeSeparatorType expectedSeparator = (Url.SchemeSeparatorType)schemeSeparator;
+        ValidAuthorityItem a = ValidAuthorityItem.FromJson(authority)!;
+        Url.UrlAuthority ua = new(a.HostName, a.Port);
+        if (a.UserInfo is not null)
+            ua.UserInfo = new(a.UserInfo.UserName, a.UserInfo.Password);
+        Url target;
+        if (!string.IsNullOrEmpty(query) && JsonNode.Parse(query) is JsonArray qa)
+            target = new Url(scheme, expectedSeparator, ua, path, qa.Select(n => QueryTestDataItem.FromJson(n as JsonObject)).Select(d => new Url.UriQueryElement(d.Key, d.Value)), fragment);
+        else
+            target = new Url(scheme, expectedSeparator, ua, path, null, fragment);
+        Assert.Equal(scheme, target.Scheme);
+        Assert.Equal(expectedSeparator, target.SchemeSeparator);
+    }
+
+    public class Constructor5aTestData : TheoryData<string, byte, string, string?, string?, string>
+    {
+
+    }
+
+    [Theory]
+    [ClassData(typeof(Constructor5aTestData))]
+    public void Constructor5aTest(string scheme, byte schemeSeparator, string authority, string? path, string query, string expected)
+    {
+
+    }
+
+    public class Constructor4TestData : TheoryData<string, byte, string, string?, string>
+    {
+
+    }
+
+    [Theory]
+    [ClassData(typeof(Constructor4TestData))]
+    public void Constructor4Test(string scheme, byte schemeSeparator, string authority, string path, string expected)
+    {
+
+    }
+
+    public class Constructor3TestData : TheoryData<string, byte, string, string>
+    {
+
+    }
+
+    [Theory]
+    [ClassData(typeof(Constructor3TestData))]
+    public void Constructor3Test(string scheme, byte schemeSeparator, string authority, string expected)
+    {
+
+    }
+
+    public class Constructor5bTestData : TheoryData<string, byte, string, string?, string, string>
+    {
+
+    }
+
+    [Theory]
+    [ClassData(typeof(Constructor5bTestData))]
+    public void Constructor5bTest(string scheme, byte schemeSeparator, string path, string? query, string fragment, string expected)
+    {
+
+    }
+
+    public class Constructor4bTestData : TheoryData<string, byte, string, string, string>
+    {
+
+    }
+
+    [Theory]
+    [ClassData(typeof(Constructor4bTestData))]
+    public void Constructor4bTest(string scheme, byte schemeSeparator, string path, string expected)
+    {
+
+    }
+
+    public class Constructor3bTestData : TheoryData<string, byte, string, string>
+    {
+
+    }
+
+    [Theory]
+    [ClassData(typeof(Constructor3bTestData))]
+    public void Constructor3bTest(string scheme, byte schemeSeparator, string path, string expected)
+    {
+
+    }
+
+    public class Constructor4cTestData : TheoryData<string?, string?, string?, string, string>
+    {
+
+    }
+
+    [Theory]
+    [ClassData(typeof(Constructor4cTestData))]
+    public void Constructor4cTest(string? authority, string? path, string? query, string fragment, string expected)
+    {
+
+    }
+
+    public class Constructor3cTestData : TheoryData<string?, string?, string, string>
+    {
+
+    }
+
+    [Theory]
+    [ClassData(typeof(Constructor3cTestData))]
+    public void Constructor3cTest(string? authority, string? path, string query, string expected)
+    {
+
+    }
+
+    public class Constructor2aTestData : TheoryData<string?, string, string>
+    {
+
+    }
+
+    [Theory]
+    [ClassData(typeof(Constructor2aTestData))]
+    public void Constructor2aTest(string? authority, string path, string expected)
+    {
+
+    }
+
+    public class Constructor1aTestData : TheoryData<string, string>
+    {
+
+    }
+
+    [Theory]
+    [ClassData(typeof(Constructor1aTestData))]
+    public void Constructor1aTest(string authority, string expected)
+    {
+
+    }
+
+    public class Constructor3dTestData : TheoryData<string?, string?, string, string>
+    {
+
+    }
+
+    [Theory]
+    [ClassData(typeof(Constructor3dTestData))]
+    public void Constructor3dTest(string? path, string? query, string fragment, string expected)
+    {
+
+    }
+
+    public class Constructor2bTestData : TheoryData<string?, string, string>
+    {
+
+    }
+
+    [Theory]
+    [ClassData(typeof(Constructor2bTestData))]
+    public void Constructor2bTest(string? path, string query, string expected)
+    {
+
+    }
+
+    public class Constructor1bTestData : TheoryData<string, string>
+    {
+
+    }
+
+    [Theory]
+    [ClassData(typeof(Constructor1bTestData))]
+    public void Constructor1bTest(string path, string expected)
+    {
+
+    }
+
+    [Fact]
+    public void Constructor0Test()
+    {
+
     }
 }
