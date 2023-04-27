@@ -11,6 +11,7 @@ public partial class ParsedUri
         NormalizeDotPathSegments    = 0b0000_1000,
         StripEmptyQuery             = 0b0001_0000,
         StripEmptyFragment          = 0b0010_0000,
-        StripDefaultPort            = 0b0100_0000
+        StripDefaultPort            = 0b0100_0000,
+        NormalizeEncodedQuerySpaces = 0b1000_0000
     }
 }
