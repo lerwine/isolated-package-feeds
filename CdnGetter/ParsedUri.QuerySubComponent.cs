@@ -30,10 +30,10 @@ public partial class ParsedUri
                         case 0:
                             return new QuerySubComponent(string.Empty);
                         case 1:
-                            return (kvp[0] == DELIMITER_CHAR_KEY_VALUE) ? new QuerySubComponent(string.Empty, string.Empty) :
+                            return (kvp[0] == DELIMITER_CHAR_EQUALS) ? new QuerySubComponent(string.Empty, string.Empty) :
                                 new QuerySubComponent(UriDecode(kvp), null);
                         default:
-                            int index = kvp.IndexOf(DELIMITER_CHAR_KEY_VALUE);
+                            int index = kvp.IndexOf(DELIMITER_CHAR_EQUALS);
                             if (index < 0)
                                 return new QuerySubComponent(UriDecode(kvp), null);
                             if (index == 0)
@@ -45,17 +45,17 @@ public partial class ParsedUri
                     switch (kvp.Length)
                     {
                         case 0:
-                            return new QuerySubComponent(DELIMITER_CHAR_PARAMETER, string.Empty);
+                            return new QuerySubComponent(DELIMITER_CHAR_AMPERSAND, string.Empty);
                         case 1:
-                            return (kvp[0] == DELIMITER_CHAR_KEY_VALUE) ? new QuerySubComponent(DELIMITER_CHAR_PARAMETER, string.Empty, string.Empty) :
-                                new QuerySubComponent(DELIMITER_CHAR_PARAMETER, UriDecode(kvp), null);
+                            return (kvp[0] == DELIMITER_CHAR_EQUALS) ? new QuerySubComponent(DELIMITER_CHAR_AMPERSAND, string.Empty, string.Empty) :
+                                new QuerySubComponent(DELIMITER_CHAR_AMPERSAND, UriDecode(kvp), null);
                         default:
-                            int index = kvp.IndexOf(DELIMITER_CHAR_KEY_VALUE);
+                            int index = kvp.IndexOf(DELIMITER_CHAR_EQUALS);
                             if (index < 0)
-                                return new QuerySubComponent(DELIMITER_CHAR_PARAMETER, UriDecode(kvp), null);
+                                return new QuerySubComponent(DELIMITER_CHAR_AMPERSAND, UriDecode(kvp), null);
                             if (index == 0)
-                                return new QuerySubComponent(DELIMITER_CHAR_PARAMETER, string.Empty, UriDecode(kvp[1..]));
-                            return new QuerySubComponent(DELIMITER_CHAR_PARAMETER, UriDecode(kvp[..index]), (index < kvp.Length - 1) ? UriDecode(kvp[(index + 1)..]) : string.Empty);
+                                return new QuerySubComponent(DELIMITER_CHAR_AMPERSAND, string.Empty, UriDecode(kvp[1..]));
+                            return new QuerySubComponent(DELIMITER_CHAR_AMPERSAND, UriDecode(kvp[..index]), (index < kvp.Length - 1) ? UriDecode(kvp[(index + 1)..]) : string.Empty);
                     }
                 }));
             }
@@ -73,9 +73,9 @@ public partial class ParsedUri
                             case 0:
                                 return new QuerySubComponent(c, string.Empty);
                             case 1:
-                                return (g.Value[0] == DELIMITER_CHAR_KEY_VALUE) ? new QuerySubComponent(c, string.Empty, string.Empty) : new QuerySubComponent(c, g.Value);
+                                return (g.Value[0] == DELIMITER_CHAR_EQUALS) ? new QuerySubComponent(c, string.Empty, string.Empty) : new QuerySubComponent(c, g.Value);
                             default:
-                                if ((index = g.Value.IndexOf(DELIMITER_CHAR_KEY_VALUE)) < 0)
+                                if ((index = g.Value.IndexOf(DELIMITER_CHAR_EQUALS)) < 0)
                                     return new QuerySubComponent(c, UriDecode(g.Value), null);
                                 if (index == 0)
                                     return new QuerySubComponent(c, string.Empty, UriDecode(g.Value[1..]));
@@ -85,8 +85,8 @@ public partial class ParsedUri
                     return new QuerySubComponent(c, string.Empty);
                 }
                 if (m.Length == 1)
-                    return (m.Value[0] == DELIMITER_CHAR_KEY_VALUE) ? new QuerySubComponent(string.Empty, string.Empty) : new QuerySubComponent(m.Value);
-                if ((index = g.Value.IndexOf(DELIMITER_CHAR_KEY_VALUE)) < 0)
+                    return (m.Value[0] == DELIMITER_CHAR_EQUALS) ? new QuerySubComponent(string.Empty, string.Empty) : new QuerySubComponent(m.Value);
+                if ((index = g.Value.IndexOf(DELIMITER_CHAR_EQUALS)) < 0)
                     return new QuerySubComponent(UriDecode(g.Value), null);
                 if (index == 0)
                     return new QuerySubComponent(string.Empty, UriDecode(g.Value[1..]));

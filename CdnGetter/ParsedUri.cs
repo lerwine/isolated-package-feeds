@@ -8,21 +8,37 @@ using System.Threading.Tasks;
 
 namespace CdnGetter;
 
+/// <summary>
+/// Normalized alternative to <see cref="Uri" /> for more consistent comparison.
+/// </summary>
+/// <remarks>Default comparisons for this class are case-insensitive, using the word comparison rules of the invariant culture.</remarks>
 public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 {
-    private const char DELIMITER_CHAR_SCHEME = ':';
-    private const char DELIMITER_CHAR_PATH = '/';
-    private const char DELIMITER_CHAR_ALT_PATH = '\\';
+    #region Static Fields / Constants
+
+    /// <summary>
+    /// Gets the default URI component comparer.
+    /// </summary>
+    public static readonly StringComparer DefaultComponentComparer = StringComparer.InvariantCultureIgnoreCase;
+
+    /// <summary>
+    /// Delimiter character for 
+    /// </summary>
+    private const char DELIMITER_CHAR_COLON = ':';
+    private const char DELIMITER_CHAR_SLASH = '/';
+    private const char DELIMITER_CHAR_BACKSLASH = '\\';
     private const char DELIMITER_CHAR_QUERY = '?';
-    private const char DELIMITER_CHAR_KEY_VALUE = '=';
-    private const char DELIMITER_CHAR_PARAMETER = '&';
-    private const char DELIMITER_CHAR_FRAGMENT = '#';
-    private static readonly char[] URL_DELIMITERS = new char[] { DELIMITER_CHAR_SCHEME, DELIMITER_CHAR_PATH, DELIMITER_CHAR_ALT_PATH, DELIMITER_CHAR_QUERY, DELIMITER_CHAR_FRAGMENT };
+    private const char DELIMITER_CHAR_EQUALS = '=';
+    private const char DELIMITER_CHAR_AMPERSAND = '&';
+    private const char DELIMITER_CHAR_HASH = '#';
+    private static readonly char[] URL_DELIMITERS = new char[] { DELIMITER_CHAR_COLON, DELIMITER_CHAR_SLASH, DELIMITER_CHAR_BACKSLASH, DELIMITER_CHAR_QUERY, DELIMITER_CHAR_HASH };
     private const int PORT_NUMBER_FTP = 21;
     private const int PORT_NUMBER_SFTP = 22;
     private const int PORT_NUMBER_GOPHER = 70;
     private const int PORT_NUMBER_NNTP = 119;
     private const string SCHEME_SEPARATOR_DSLASH = "//";
+
+    #region Regular Expressions
 
     public static readonly Regex QueryDelimiterRegex = new(@"[&?]", RegexOptions.Compiled);
 
@@ -60,18 +76,64 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
     private const string GROUP_NAME_path = "path";
     private static readonly Regex UserInfoHostAndPortRegex = new($@"^((?<{GROUP_NAME_user}>[^@\\/]+)@)?(?<{GROUP_NAME_host}>[^:\\/]*)(:(?<{GROUP_NAME_port}>\d+))?(?<{GROUP_NAME_path}>.*)$", RegexOptions.Compiled);
 
+    /*
+    @(32, 33, 35, 36, 38, 39, 40, 41, 43, 44, 45, 46) + [System.Linq.Enumerable]::Range(48, 10) + @(59, 61) + [System.Linq.Enumerable]::Range(64, 92 - 64) + [System.Linq.Enumerable]::Range(93, 124 - 93) + [System.Linq.Enumerable]::Range(125, 0xff - 125)
+
+34 = '"'
+37 = '%';
+42 = '*'
+47 = '/'
+58 = ':'
+60 = '<'
+62 = '>'
+63 = '?'
+92 = '\'
+124 = '|'
+    */
+    private const string GROUP_NAME_drive = "drive";
+    private static readonly Regex DosPathRegex = new($@"^([\\/]{2}[.?][\\/])?(?<{GROUP_NAME_drive}>[a-z]):(?<{GROUP_NAME_path}>([\\/]+[^""*/:<>?\\|]+)*[\\/]*)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    
+    private static readonly Regex UncPathLooseRegex = new($@"^[\\/][\\/]+(?<{GROUP_NAME_host}>[^""*/:<>?\\|]+|[\da-f]{{2}}(::?[\da-f]{{2}}){0,8}|::)(?<{GROUP_NAME_path}>([\\/]+[^""*/:<>?\\|]+)+)?$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    
+    private static readonly Regex UncPathAsUriStringRegex = new($@"^\\\\(?<{GROUP_NAME_host}>[^""*/:<>?\\|]+|[\da-f]{{2}}(::?[\da-f]{{2}}){0,8}|::)(?<{GROUP_NAME_path}>([\\/]+[^""#&*/:<>?@\\^|]+)+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    
+    private static readonly Regex PsPathRegex = new($@"^(?<{GROUP_NAME_drive}>[^\x00-\x1F*:?\[\\\]]*):(?<{GROUP_NAME_path}>([\\/]+[^""*/:<>?\\|]+)*[\\/]*)$");
+    
+    private static readonly Regex UnixPathRegex = new(@"^(((/+[^\x00/]+)+|[^\x00/]+(/+[^\x00/]+)*)/*|/+)$");
+
+    #endregion
+
+    public static readonly ParsedUri Empty = new();
+
+    #endregion
+
+    /// <summary>
+    /// Gets the scheme name for this URI.
+    /// </summary>
+    /// <value>The scheme name of the URI represented by this instance or <see langword="null" /> if this represents a relative URI.</value>
+    /// <remarks>If not <see langword="null" />, this will always contain a valid, lower-case URI scheme name.</remarks>
     public string? SchemeName { get; }
 
     public string? SchemeSeparator { get; }
 
+    /// <summary>
+    /// Gets the authority component.
+    /// </summary>
+    /// <value>The authority component of the URI represented by this instance or <see langword="null" /> if this represents a relative URI.</value>
     public UriAuthority? Authority { get; }
 
     public ReadOnlyCollection<PathSegment> PathSegments { get; }
     
     public ReadOnlyCollection<QuerySubComponent>? Query { get; }
 
+    /// <summary>
+    /// Gets the URI fragment or <see langword="null" /> if the URI has no fragment component.
+    /// </summary>
+    /// <remarks>Unlike <see cref="Uri.Fragment" />, this is the un-escaped value, and does not include the delimiting <c>#</c> character</remarks>
     public string? Fragment { get; }
     
+    #region Constructors
+
     public ParsedUri(string schemeName, string schemeSeparator, UriAuthority authority, IEnumerable<PathSegment>? pathSegments = null, IEnumerable<QuerySubComponent>? query = null, string? fragment = null)
     {
         if (string.IsNullOrEmpty(schemeName))
@@ -109,6 +171,8 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
     public ParsedUri(IEnumerable<PathSegment>? pathSegments, params QuerySubComponent[] query) : this(pathSegments, query, null) { }
     
     public ParsedUri(params PathSegment[] pathSegments) : this(pathSegments, (IEnumerable<QuerySubComponent>?)null, null) { }
+
+    #endregion
 
     public static string UriDecode(string? value)
     {
@@ -162,7 +226,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
                 {
                     if (index == 0)
                     {
-                        if ((index = uriString.IndexOf(DELIMITER_CHAR_FRAGMENT)) < 0) // uriString == "?query"
+                        if ((index = uriString.IndexOf(DELIMITER_CHAR_HASH)) < 0) // uriString == "?query"
                             uri = new ParsedUri(new PathSegment(uriString), QuerySubComponent.Parse(uriString[1..]));
                         else if (uriString.Length > 2)
                         {
@@ -181,7 +245,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
                     {
                         query = uriString[(index + 1)..];
                         uriString = UriDecode(uriString[..index]);
-                        if ((index = query.IndexOf(DELIMITER_CHAR_FRAGMENT)) < 0) // uriString == "path"; query = "query"
+                        if ((index = query.IndexOf(DELIMITER_CHAR_HASH)) < 0) // uriString == "path"; query = "query"
                             uri = new ParsedUri(new PathSegment(uriString), QuerySubComponent.Parse(query));
                         else if (query.Length > 1)
                         {
@@ -301,9 +365,90 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
         throw new NotImplementedException();
     }
 
+
+    public static bool TryParseUnixPath(string? path, NormalizationOptions options, [NotNullWhen(true)] out ParsedUri? uri)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            uri = Empty;
+            return true;
+        }
+        string[] ps;
+        if (UnixPathRegex.IsMatch(path))
+        {
+            ps = path.Split(DELIMITER_CHAR_SLASH);
+            bool isRooted = ps[0].Length == 0;
+            if (options.HasFlag(NormalizationOptions.StripEmptyPathSegments))
+            {
+                if (options.HasFlag(NormalizationOptions.NormalizeDotPathSegments))
+                    ps = NormalizeDotPathSegments(ps.Skip(1).Where(s => s.Length > 0));
+                else if (ps.Skip(1).Any(s => s.Length == 0))
+                    ps = ps.Skip(1).Where(s => s.Length > 0).ToArray();
+            }
+            else if (options.HasFlag(NormalizationOptions.NormalizeDotPathSegments))
+                ps = NormalizeDotPathSegments(ps);
+            if (options.HasFlag(NormalizationOptions.EnsureTrailingPathSeparator))
+                EnsureTrailingEmpty(ref ps);
+            else if (options.HasFlag(NormalizationOptions.StripTrailingPathSeparator))
+                StripTrailingEmpty(ref ps);
+        }
+        else
+        {
+            uri = null;
+            return false;
+        }
+    }
+
+    private static string[] NormalizeDotPathSegments(IEnumerable<string> segments)
+    {
+        if (segments.Contains(".."))
+        {
+            List<string> s = segments.Where(p => p != ".").ToList();
+            int index = 0;
+            while (index < s.Count)
+            {
+                if (s[index] == "..")
+                {
+                    s.RemoveAt(index);
+                    if (index > 0)
+                    {
+                        index--;
+                        s.RemoveAt(index);
+                    }
+                }
+                else
+                    index++;
+            }
+            return segments.ToArray();
+        }
+        if (segments.Contains("."))
+            return segments.Where(p => p != ".").ToArray();
+        return (segments is string[] sArr) ? sArr : segments.ToArray();
+    }
+
+    private static void StripTrailingEmpty(ref string[] segments)
+    {
+        if (segments.Length > 1 && segments[^1].Length == 0)
+        {
+            int index = segments.Length - 2;
+            while (index > 0 && segments[index].Length == 0)
+                index--;
+            Array.Resize(ref segments, index + 1);
+        }
+    }
+
+    private static void EnsureTrailingEmpty(ref string[] segments)
+    {
+        if (segments.Length == 0 || segments[^1].Length > 0)
+        {
+            Array.Resize(ref segments, segments.Length + 1);
+            segments[^1] = string.Empty;
+        }
+    }
+
     private static bool TryParseHttp(string scheme, string uriString, NormalizationOptions options, ushort defaultPort, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_PATH || uriString[1] != DELIMITER_CHAR_PATH ||
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_SLASH || uriString[1] != DELIMITER_CHAR_SLASH ||
             !TrySplitPathQueryAndFragment(uriString[2..], options, out string? userInfo, out string hostName, out ushort? port, out string path, out string? query, out string? fragment)
             || hostName.Length == 0)
         {
@@ -323,7 +468,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     private static bool TryParseFtp(string uriString, NormalizationOptions options, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_PATH || uriString[1] != DELIMITER_CHAR_PATH || !TrySplitPathAndFragment(uriString[2..], options, out string? userInfo, out string hostName, out ushort? port, out string path, out string? fragment))
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_SLASH || uriString[1] != DELIMITER_CHAR_SLASH || !TrySplitPathAndFragment(uriString[2..], options, out string? userInfo, out string hostName, out ushort? port, out string path, out string? fragment))
         {
             uri = null;
             return false;
@@ -335,7 +480,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     private static bool TryParseSftp(string uriString, NormalizationOptions options, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_PATH || uriString[1] != DELIMITER_CHAR_PATH || !TrySplitPathAndFragment(uriString[2..], options, out string? userInfo, out string hostName, out ushort? port, out string path, out string? fragment))
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_SLASH || uriString[1] != DELIMITER_CHAR_SLASH || !TrySplitPathAndFragment(uriString[2..], options, out string? userInfo, out string hostName, out ushort? port, out string path, out string? fragment))
         {
             uri = null;
             return false;
@@ -347,7 +492,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     private static bool TryParseFile(string uriString, NormalizationOptions options, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_PATH || uriString[1] != DELIMITER_CHAR_PATH || (uriString = SplitPathAndFragment(uriString, options, out string? userInfo, out string hostName, out string? fragment)).Length == 0)
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_SLASH || uriString[1] != DELIMITER_CHAR_SLASH || (uriString = SplitPathAndFragment(uriString, options, out string? userInfo, out string hostName, out string? fragment)).Length == 0)
         {
             uri = null;
             return false;
@@ -358,7 +503,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     private static bool TryParseGopher(string uriString, NormalizationOptions options, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_PATH || uriString[1] != DELIMITER_CHAR_PATH || !TrySplitPathAndFragment(uriString[2..], options, out string? userInfo, out string hostName, out ushort? port, out string path, out string? fragment) || hostName.Length == 0)
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_SLASH || uriString[1] != DELIMITER_CHAR_SLASH || !TrySplitPathAndFragment(uriString[2..], options, out string? userInfo, out string hostName, out ushort? port, out string path, out string? fragment) || hostName.Length == 0)
         {
             uri = null;
             return false;
@@ -370,7 +515,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     private static bool TryParseNntp(string uriString, NormalizationOptions options, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_PATH || uriString[1] != DELIMITER_CHAR_PATH || !TrySplitPathAndFragment(uriString[2..], options, out string? userInfo, out string hostName, out ushort? port, out string path, out string? fragment) || hostName.Length == 0)
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_SLASH || uriString[1] != DELIMITER_CHAR_SLASH || !TrySplitPathAndFragment(uriString[2..], options, out string? userInfo, out string hostName, out ushort? port, out string path, out string? fragment) || hostName.Length == 0)
         {
             uri = null;
             return false;
@@ -408,7 +553,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     private static bool TryParseTelnet(string uriString, NormalizationOptions options, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_PATH || uriString[1] != DELIMITER_CHAR_PATH)
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_SLASH || uriString[1] != DELIMITER_CHAR_SLASH)
         {
             uri = null;
             return false;
@@ -419,7 +564,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     private static bool TryParseSsh(string uriString, NormalizationOptions options, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_PATH || uriString[1] != DELIMITER_CHAR_PATH)
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_SLASH || uriString[1] != DELIMITER_CHAR_SLASH)
         {
             uri = null;
             return false;
@@ -430,7 +575,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     private static bool TryParseLdap(string scheme, string uriString, NormalizationOptions options, int defaultPort, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_PATH || uriString[1] != DELIMITER_CHAR_PATH)
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_SLASH || uriString[1] != DELIMITER_CHAR_SLASH)
         {
             uri = null;
             return false;
@@ -441,7 +586,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     private static bool TryParseNetTcp(string uriString, NormalizationOptions options, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_PATH || uriString[1] != DELIMITER_CHAR_PATH)
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_SLASH || uriString[1] != DELIMITER_CHAR_SLASH)
         {
             uri = null;
             return false;
@@ -452,7 +597,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     private static bool TryParseNetPipe(string uriString, NormalizationOptions options, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_PATH || uriString[1] != DELIMITER_CHAR_PATH)
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_SLASH || uriString[1] != DELIMITER_CHAR_SLASH)
         {
             uri = null;
             return false;
@@ -474,7 +619,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
             fragment = null;
             return string.Empty;
         }
-        int index = uriString.IndexOf(DELIMITER_CHAR_FRAGMENT);
+        int index = uriString.IndexOf(DELIMITER_CHAR_HASH);
         if (index < 0)
         {
             fragment = null;
@@ -559,7 +704,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
         {
             switch (uriString[0])
             {
-                case DELIMITER_CHAR_FRAGMENT:
+                case DELIMITER_CHAR_HASH:
                     query = null;
                     fragment = options.HasFlag(NormalizationOptions.StripEmptyFragment) ? null : string.Empty;
                     break;
@@ -574,7 +719,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
             return string.Empty;
         }
         
-        int index = uriString.IndexOf(DELIMITER_CHAR_FRAGMENT);
+        int index = uriString.IndexOf(DELIMITER_CHAR_HASH);
         if ((index) < 0)
         {
             fragment = null;

@@ -40,7 +40,7 @@ public partial class ParsedUri
             {
                 if (parsePasswordSubcomponent)
                 {
-                    int index = userInfo.IndexOf(DELIMITER_CHAR_SCHEME);
+                    int index = userInfo.IndexOf(DELIMITER_CHAR_COLON);
                     if (index == 0)
                         return new(string.Empty, UriDecode(userInfo[1..]));
                     if (index == userInfo.Length - 1)
@@ -49,7 +49,7 @@ public partial class ParsedUri
                         return new(UriDecode(userInfo[..index]), UriDecode(userInfo[(index + 1)..]));
                 }
             }
-            else if (parsePasswordSubcomponent && userInfo[0] == DELIMITER_CHAR_SCHEME)
+            else if (parsePasswordSubcomponent && userInfo[0] == DELIMITER_CHAR_COLON)
                 return new(string.Empty, string.Empty);
             return new(UriDecode(userInfo), null);
         }
