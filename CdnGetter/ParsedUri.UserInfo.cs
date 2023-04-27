@@ -31,5 +31,27 @@ public partial class ParsedUri
         {
             throw new NotImplementedException();
         }
+
+        internal static UserInfo Parse(string userInfo, bool parsePasswordSubcomponent = false)
+        {
+            if (string.IsNullOrEmpty(userInfo))
+                return new(string.Empty, null);
+            if (userInfo.Length > 1)
+            {
+                if (parsePasswordSubcomponent)
+                {
+                    int index = userInfo.IndexOf(SCHEME_DELIMITER_CHAR);
+                    if (index == 0)
+                        return new(string.Empty, UriDecode(userInfo[1..]));
+                    if (index == userInfo.Length - 1)
+                        return new(UriDecode(userInfo[..index]), string.Empty);
+                    if (index > 0)
+                        return new(UriDecode(userInfo[..index]), UriDecode(userInfo[(index + 1)..]));
+                }
+            }
+            else if (parsePasswordSubcomponent && userInfo[0] == SCHEME_DELIMITER_CHAR)
+                return new(string.Empty, string.Empty);
+            return new(UriDecode(userInfo), null);
+        }
     }
 }

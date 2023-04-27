@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace CdnGetter;
 
 public partial class ParsedUri
@@ -14,9 +16,82 @@ public partial class ParsedUri
 
         public QuerySubComponent(string key, string? value = null) => (Key, Value) = (key ?? "", value);
 
-        public static IEnumerable<QuerySubComponent> Parse(string queryString)
+        public static IEnumerable<QuerySubComponent> Parse(string queryString, bool normalizeQuerySeparators = false)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(queryString))
+                return Enumerable.Empty<QuerySubComponent>();
+            if (normalizeQuerySeparators)
+            {
+                string[] kvpItems = QueryDelimiterRegex.Split(queryString);
+                return kvpItems.Take(1).Select(kvp =>
+                {
+                    switch (kvp.Length)
+                    {
+                        case 0:
+                            return new QuerySubComponent(string.Empty);
+                        case 1:
+                            return (kvp[0] == KEY_ASSIGNMENT_CHAR) ? new QuerySubComponent(string.Empty, string.Empty) :
+                                new QuerySubComponent(UriDecode(kvp), null);
+                        default:
+                            int index = kvp.IndexOf(KEY_ASSIGNMENT_CHAR);
+                            if (index < 0)
+                                return new QuerySubComponent(UriDecode(kvp), null);
+                            if (index == 0)
+                                return new QuerySubComponent(string.Empty, UriDecode(kvp[1..]));
+                            return new QuerySubComponent(UriDecode(kvp[..index]), (index < kvp.Length - 1) ? UriDecode(kvp[(index + 1)..]) : string.Empty);
+                    }
+                }).Concat(kvpItems.Skip(1).Select(kvp =>
+                {
+                    switch (kvp.Length)
+                    {
+                        case 0:
+                            return new QuerySubComponent(PARAMETER_DELIMITER_CHAR, string.Empty);
+                        case 1:
+                            return (kvp[0] == KEY_ASSIGNMENT_CHAR) ? new QuerySubComponent(PARAMETER_DELIMITER_CHAR, string.Empty, string.Empty) :
+                                new QuerySubComponent(PARAMETER_DELIMITER_CHAR, UriDecode(kvp), null);
+                        default:
+                            int index = kvp.IndexOf(KEY_ASSIGNMENT_CHAR);
+                            if (index < 0)
+                                return new QuerySubComponent(PARAMETER_DELIMITER_CHAR, UriDecode(kvp), null);
+                            if (index == 0)
+                                return new QuerySubComponent(PARAMETER_DELIMITER_CHAR, string.Empty, UriDecode(kvp[1..]));
+                            return new QuerySubComponent(PARAMETER_DELIMITER_CHAR, UriDecode(kvp[..index]), (index < kvp.Length - 1) ? UriDecode(kvp[(index + 1)..]) : string.Empty);
+                    }
+                }));
+            }
+            return QuerySubcomponentRegex.Matches(queryString).Select(m =>
+            {
+                int index;
+                Group g = m.Groups[GROUP_NAME_sep];
+                if (g.Success)
+                {
+                    char c = g.Value[0];
+                    if ((g = m.Groups[GROUP_NAME_sub]).Success)
+                    {
+                        switch (g.Length)
+                        {
+                            case 0:
+                                return new QuerySubComponent(c, string.Empty);
+                            case 1:
+                                return (g.Value[0] == KEY_ASSIGNMENT_CHAR) ? new QuerySubComponent(c, string.Empty, string.Empty) : new QuerySubComponent(c, g.Value);
+                            default:
+                                if ((index = g.Value.IndexOf(KEY_ASSIGNMENT_CHAR)) < 0)
+                                    return new QuerySubComponent(c, UriDecode(g.Value), null);
+                                if (index == 0)
+                                    return new QuerySubComponent(c, string.Empty, UriDecode(g.Value[1..]));
+                                return new QuerySubComponent(c, UriDecode(g.Value[..index]), (index < g.Length - 1) ? UriDecode(g.Value[(index + 1)..]) : string.Empty);
+                        }
+                    }
+                    return new QuerySubComponent(c, string.Empty);
+                }
+                if (m.Length == 1)
+                    return (m.Value[0] == KEY_ASSIGNMENT_CHAR) ? new QuerySubComponent(string.Empty, string.Empty) : new QuerySubComponent(m.Value);
+                if ((index = g.Value.IndexOf(KEY_ASSIGNMENT_CHAR)) < 0)
+                    return new QuerySubComponent(UriDecode(g.Value), null);
+                if (index == 0)
+                    return new QuerySubComponent(string.Empty, UriDecode(g.Value[1..]));
+                return new QuerySubComponent(UriDecode(g.Value[..index]), (index < g.Length - 1) ? UriDecode(g.Value[(index + 1)..]) : string.Empty);
+            });
         }
 
         public bool Equals(QuerySubComponent? other)

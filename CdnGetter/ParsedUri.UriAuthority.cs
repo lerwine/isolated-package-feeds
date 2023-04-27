@@ -10,9 +10,15 @@ public partial class ParsedUri
 
         public ushort? Port { get; }
 
-        public UriAuthority(UserInfo userInfo, string hostName, ushort? port = null) => (UserInfo, HostName, Port) = (userInfo, hostName ?? "", port);
+        public bool PortIsImplicit { get; }
+        
+        public UriAuthority(UserInfo userInfo, string hostName, ushort port, bool portIsImplicit = false) => (UserInfo, HostName, Port, PortIsImplicit) = (userInfo, hostName ?? "", port, portIsImplicit);
 
-        public UriAuthority(string hostName, ushort? port = null) => (HostName, Port) = (hostName ?? "", port);
+        public UriAuthority(UserInfo userInfo, string hostName) => (UserInfo, HostName) = (userInfo, hostName ?? "");
+        
+        public UriAuthority(string hostName) => HostName = hostName ?? "";
+
+        public UriAuthority(string hostName, ushort port, bool portIsImplicit = false) => (HostName, Port, PortIsImplicit) = (hostName ?? "", port, portIsImplicit);
 
         public static readonly UriAuthority Empty = new(string.Empty);
 

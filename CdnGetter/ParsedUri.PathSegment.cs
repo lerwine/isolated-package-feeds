@@ -19,6 +19,13 @@ public partial class ParsedUri
             Name = name;
         }
 
+        public static IEnumerable<PathSegment> Parse(string? pathString, NormalizationOptions options, bool forceRooted = false, bool normalizePathSeparators = false)
+        {
+            if (string.IsNullOrEmpty(pathString))
+                return forceRooted ? ExtensionMethods.Enumerate(new PathSegment(PATH_DELIMITER_CHAR, string.Empty)) : Enumerable.Empty<PathSegment>();
+            throw new NotImplementedException();
+        }
+
         public bool Equals(PathSegment? other)
         {
             throw new NotImplementedException();
