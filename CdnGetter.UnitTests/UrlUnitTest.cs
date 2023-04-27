@@ -320,6 +320,50 @@ public class UrlUnitTest
     /// <summary>
     /// Generates test data for <see cref="ValidIpV4RegexTestData(string, bool)" />.
     /// </summary>
+    public class UrlParseComponentsRegexTestData : TheoryData<string, bool>
+    {
+        public UrlParseComponentsRegexTestData()
+        {
+            Random r = new();
+            for (int i = 0; i < 256; i++)
+            {
+                int v1 = r.Next(0, 256);
+                while (v1 == i)
+                    v1 = r.Next(0, 256);
+                int v2 = r.Next(0, 256);
+                while (v2 == i)
+                    v2 = r.Next(0, 256);
+                int v3 = r.Next(0, 256);
+                while (v3 == i)
+                    v3 = r.Next(0, 256);
+                Add($"{i}.{v1}.{v2}.{v3}", true);
+                Add($"{v1}.{i}.{v2}.{v3}", true);
+                Add($"{v1}.{v2}.{i}.{v3}", true);
+                Add($"{v1}.{v2}.{v3}.{i}", true);
+                Add($"{v2}.{v3}.{i}", false);
+                Add($"{v1}.{v2}.{v3}.{v2}.{i}", false);
+                Add($"{i}.{v1}.{v2}.256", false);
+                Add($"{v1}.{i}.256.{v3}", false);
+                Add($"{v1}.256.{i}.{v3}", false);
+                Add($"256.{v2}.{v3}.{i}", false);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Unit test for constructor <see cref="Url.UrlParseComponentsRegex" /> that will not throw an excePATCHaion.
+    /// </summary>
+    [Theory]
+    [ClassData(typeof(UrlParseComponentsRegexTestData))]
+    public void UrlParseComponentsRegexTest(string address, bool expected)
+    {
+        bool actual = Url.ValidIpV4Regex.IsMatch(address);
+        Assert.Equal(expected, actual);
+    }
+
+    /// <summary>
+    /// Generates test data for <see cref="ValidIpV4RegexTestData(string, bool)" />.
+    /// </summary>
     public class ValidPortRegexTestData : TheoryData<string, bool>
     {
         public ValidPortRegexTestData()
