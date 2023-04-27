@@ -154,6 +154,8 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
         Fragment = fragment;
     }
     
+    public ParsedUri(string schemeName, string schemeSeparator, UriAuthority authority, params PathSegment[] pathSegments) : this(schemeName, schemeSeparator, authority, (IEnumerable<PathSegment>)pathSegments) { }
+
     public ParsedUri(PathSegment rootSegment, IEnumerable<QuerySubComponent>? query = null, string? fragment = null)
     {
         PathSegments = new(new PathSegment[] { rootSegment ?? PathSegment.EmptyRoot });
@@ -391,12 +393,20 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
                 EnsureTrailingEmpty(ref ps);
             else if (options.HasFlag(NormalizationOptions.StripTrailingPathSeparator))
                 StripTrailingEmpty(ref ps);
+            if (isRooted)
+                uri = ps.Length switch
+                {
+                    0 => new ParsedUri("file", "//", UriAuthority.Empty, PathSegment.EmptyRoot),
+                    1 => new ParsedUri("file", "//", UriAuthority.Empty, (ps[0].Length > 0) ? new PathSegment(DELIMITER_CHAR_SLASH, ps[0]) : PathSegment.EmptyRoot),
+                    _ => new ParsedUri("file", "//", UriAuthority.Empty, ((ps[0].Length > 0) ? ps : ps.Skip(1))
+                        .Select(p => (p.Length > 0) ? new PathSegment(DELIMITER_CHAR_SLASH, p) : PathSegment.EmptyRoot)),
+                };
+            else
+                uri = (ps.Length > 0) ? new ParsedUri(ps.Take(1).Select(p => new PathSegment(p)).Concat(ps.Skip(1).Select(p => new PathSegment(DELIMITER_CHAR_SLASH, p)))) : Empty;
+            return true;
         }
-        else
-        {
-            uri = null;
-            return false;
-        }
+        uri = null;
+        return false;
     }
 
     private static string[] NormalizeDotPathSegments(IEnumerable<string> segments)
