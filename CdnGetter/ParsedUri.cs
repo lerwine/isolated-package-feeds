@@ -10,14 +10,14 @@ namespace CdnGetter;
 
 public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 {
-    private const char SCHEME_DELIMITER_CHAR = ':';
-    private const char PATH_DELIMITER_CHAR = '/';
-    private const char ALT_PATH_DELIMITER_CHAR = '\\';
-    private const char QUERY_DELIMITER_CHAR = '?';
-    private const char KEY_ASSIGNMENT_CHAR = '=';
-    private const char PARAMETER_DELIMITER_CHAR = '&';
-    private const char FRAGMENT_DELIMITER_CHAR = '#';
-    private static readonly char[] URL_DELIMITERS = new char[] { SCHEME_DELIMITER_CHAR, PATH_DELIMITER_CHAR, ALT_PATH_DELIMITER_CHAR, QUERY_DELIMITER_CHAR, FRAGMENT_DELIMITER_CHAR };
+    private const char DELIMITER_CHAR_SCHEME = ':';
+    private const char DELIMITER_CHAR_PATH = '/';
+    private const char DELIMITER_CHAR_ALT_PATH = '\\';
+    private const char DELIMITER_CHAR_QUERY = '?';
+    private const char DELIMITER_CHAR_KEY_VALUE = '=';
+    private const char DELIMITER_CHAR_PARAMETER = '&';
+    private const char DELIMITER_CHAR_FRAGMENT = '#';
+    private static readonly char[] URL_DELIMITERS = new char[] { DELIMITER_CHAR_SCHEME, DELIMITER_CHAR_PATH, DELIMITER_CHAR_ALT_PATH, DELIMITER_CHAR_QUERY, DELIMITER_CHAR_FRAGMENT };
     private const int PORT_NUMBER_FTP = 21;
     private const int PORT_NUMBER_SFTP = 22;
     private const int PORT_NUMBER_GOPHER = 70;
@@ -162,7 +162,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
                 {
                     if (index == 0)
                     {
-                        if ((index = uriString.IndexOf(FRAGMENT_DELIMITER_CHAR)) < 0) // uriString == "?query"
+                        if ((index = uriString.IndexOf(DELIMITER_CHAR_FRAGMENT)) < 0) // uriString == "?query"
                             uri = new ParsedUri(new PathSegment(uriString), QuerySubComponent.Parse(uriString[1..]));
                         else if (uriString.Length > 2)
                         {
@@ -181,7 +181,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
                     {
                         query = uriString[(index + 1)..];
                         uriString = UriDecode(uriString[..index]);
-                        if ((index = query.IndexOf(FRAGMENT_DELIMITER_CHAR)) < 0) // uriString == "path"; query = "query"
+                        if ((index = query.IndexOf(DELIMITER_CHAR_FRAGMENT)) < 0) // uriString == "path"; query = "query"
                             uri = new ParsedUri(new PathSegment(uriString), QuerySubComponent.Parse(query));
                         else if (query.Length > 1)
                         {
@@ -303,7 +303,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     private static bool TryParseHttp(string scheme, string uriString, NormalizationOptions options, ushort defaultPort, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != PATH_DELIMITER_CHAR || uriString[1] != PATH_DELIMITER_CHAR ||
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_PATH || uriString[1] != DELIMITER_CHAR_PATH ||
             !TrySplitPathQueryAndFragment(uriString[2..], options, out string? userInfo, out string hostName, out ushort? port, out string path, out string? query, out string? fragment)
             || hostName.Length == 0)
         {
@@ -323,7 +323,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     private static bool TryParseFtp(string uriString, NormalizationOptions options, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != PATH_DELIMITER_CHAR || uriString[1] != PATH_DELIMITER_CHAR || !TrySplitPathAndFragment(uriString[2..], options, out string? userInfo, out string hostName, out ushort? port, out string path, out string? fragment))
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_PATH || uriString[1] != DELIMITER_CHAR_PATH || !TrySplitPathAndFragment(uriString[2..], options, out string? userInfo, out string hostName, out ushort? port, out string path, out string? fragment))
         {
             uri = null;
             return false;
@@ -335,7 +335,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     private static bool TryParseSftp(string uriString, NormalizationOptions options, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != PATH_DELIMITER_CHAR || uriString[1] != PATH_DELIMITER_CHAR || !TrySplitPathAndFragment(uriString[2..], options, out string? userInfo, out string hostName, out ushort? port, out string path, out string? fragment))
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_PATH || uriString[1] != DELIMITER_CHAR_PATH || !TrySplitPathAndFragment(uriString[2..], options, out string? userInfo, out string hostName, out ushort? port, out string path, out string? fragment))
         {
             uri = null;
             return false;
@@ -347,7 +347,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     private static bool TryParseFile(string uriString, NormalizationOptions options, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != PATH_DELIMITER_CHAR || uriString[1] != PATH_DELIMITER_CHAR || (uriString = SplitPathAndFragment(uriString, options, out string? userInfo, out string hostName, out string? fragment)).Length == 0)
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_PATH || uriString[1] != DELIMITER_CHAR_PATH || (uriString = SplitPathAndFragment(uriString, options, out string? userInfo, out string hostName, out string? fragment)).Length == 0)
         {
             uri = null;
             return false;
@@ -358,7 +358,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     private static bool TryParseGopher(string uriString, NormalizationOptions options, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != PATH_DELIMITER_CHAR || uriString[1] != PATH_DELIMITER_CHAR || !TrySplitPathAndFragment(uriString[2..], options, out string? userInfo, out string hostName, out ushort? port, out string path, out string? fragment) || hostName.Length == 0)
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_PATH || uriString[1] != DELIMITER_CHAR_PATH || !TrySplitPathAndFragment(uriString[2..], options, out string? userInfo, out string hostName, out ushort? port, out string path, out string? fragment) || hostName.Length == 0)
         {
             uri = null;
             return false;
@@ -370,7 +370,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     private static bool TryParseNntp(string uriString, NormalizationOptions options, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != PATH_DELIMITER_CHAR || uriString[1] != PATH_DELIMITER_CHAR || !TrySplitPathAndFragment(uriString[2..], options, out string? userInfo, out string hostName, out ushort? port, out string path, out string? fragment) || hostName.Length == 0)
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_PATH || uriString[1] != DELIMITER_CHAR_PATH || !TrySplitPathAndFragment(uriString[2..], options, out string? userInfo, out string hostName, out ushort? port, out string path, out string? fragment) || hostName.Length == 0)
         {
             uri = null;
             return false;
@@ -408,7 +408,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     private static bool TryParseTelnet(string uriString, NormalizationOptions options, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != PATH_DELIMITER_CHAR || uriString[1] != PATH_DELIMITER_CHAR)
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_PATH || uriString[1] != DELIMITER_CHAR_PATH)
         {
             uri = null;
             return false;
@@ -419,7 +419,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     private static bool TryParseSsh(string uriString, NormalizationOptions options, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != PATH_DELIMITER_CHAR || uriString[1] != PATH_DELIMITER_CHAR)
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_PATH || uriString[1] != DELIMITER_CHAR_PATH)
         {
             uri = null;
             return false;
@@ -430,7 +430,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     private static bool TryParseLdap(string scheme, string uriString, NormalizationOptions options, int defaultPort, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != PATH_DELIMITER_CHAR || uriString[1] != PATH_DELIMITER_CHAR)
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_PATH || uriString[1] != DELIMITER_CHAR_PATH)
         {
             uri = null;
             return false;
@@ -441,7 +441,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     private static bool TryParseNetTcp(string uriString, NormalizationOptions options, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != PATH_DELIMITER_CHAR || uriString[1] != PATH_DELIMITER_CHAR)
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_PATH || uriString[1] != DELIMITER_CHAR_PATH)
         {
             uri = null;
             return false;
@@ -452,7 +452,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     private static bool TryParseNetPipe(string uriString, NormalizationOptions options, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != PATH_DELIMITER_CHAR || uriString[1] != PATH_DELIMITER_CHAR)
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_PATH || uriString[1] != DELIMITER_CHAR_PATH)
         {
             uri = null;
             return false;
@@ -474,7 +474,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
             fragment = null;
             return string.Empty;
         }
-        int index = uriString.IndexOf(FRAGMENT_DELIMITER_CHAR);
+        int index = uriString.IndexOf(DELIMITER_CHAR_FRAGMENT);
         if (index < 0)
         {
             fragment = null;
@@ -559,11 +559,11 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
         {
             switch (uriString[0])
             {
-                case FRAGMENT_DELIMITER_CHAR:
+                case DELIMITER_CHAR_FRAGMENT:
                     query = null;
                     fragment = options.HasFlag(NormalizationOptions.StripEmptyFragment) ? null : string.Empty;
                     break;
-                case QUERY_DELIMITER_CHAR:
+                case DELIMITER_CHAR_QUERY:
                     fragment = null;
                     query = options.HasFlag(NormalizationOptions.StripEmptyQuery) ? null : string.Empty;
                     break;
@@ -574,11 +574,11 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
             return string.Empty;
         }
         
-        int index = uriString.IndexOf(FRAGMENT_DELIMITER_CHAR);
+        int index = uriString.IndexOf(DELIMITER_CHAR_FRAGMENT);
         if ((index) < 0)
         {
             fragment = null;
-            if ((index = uriString.IndexOf(QUERY_DELIMITER_CHAR)) < 0)
+            if ((index = uriString.IndexOf(DELIMITER_CHAR_QUERY)) < 0)
             {
                 query = null;
                 return string.Empty;

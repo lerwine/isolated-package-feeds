@@ -10,7 +10,7 @@ public partial class ParsedUri
         
         public PathSegment(char separator, string name) => (Separator, Name) = (separator, name ?? "");
 
-        public static readonly PathSegment EmptyRoot = new(PATH_DELIMITER_CHAR, string.Empty);
+        public static readonly PathSegment EmptyRoot = new(DELIMITER_CHAR_PATH, string.Empty);
         
         public PathSegment(string name)
         {
@@ -22,7 +22,7 @@ public partial class ParsedUri
         public static IEnumerable<PathSegment> Parse(string? pathString, NormalizationOptions options, bool forceRooted = false, bool normalizePathSeparators = false)
         {
             if (string.IsNullOrEmpty(pathString))
-                return forceRooted ? ExtensionMethods.Enumerate(new PathSegment(PATH_DELIMITER_CHAR, string.Empty)) : Enumerable.Empty<PathSegment>();
+                return forceRooted ? ExtensionMethods.Enumerate(new PathSegment(DELIMITER_CHAR_PATH, string.Empty)) : Enumerable.Empty<PathSegment>();
             throw new NotImplementedException();
         }
 
