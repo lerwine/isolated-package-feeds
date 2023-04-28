@@ -273,7 +273,9 @@ public class CdnVersion : ModificationTrackingModelBase
             logger.LogNoLibraryNameSpecifiedWarning(nameof(Config.CommandSettings.SHOW_Versions));
     }
 
+#pragma warning disable CS1998
     internal static async Task AddNewAsync(IEnumerable<string> cdnNames, Services.ContentDb dbContext, ILogger<Services.MainService> logger, CancellationToken cancellationToken)
+#pragma warning restore CS1998
     {
         throw new NotImplementedException("Add new versions functionality not implemented.");
     }

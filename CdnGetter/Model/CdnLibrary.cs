@@ -166,7 +166,9 @@ public class CdnLibrary : ModificationTrackingModelBase
             await dbContext.LocalLibraries.ForEachAsync(l => Console.WriteLine(l.Name), cancellationToken);
     }
 
+#pragma warning disable CS1998
     internal static async Task AddAsync(IEnumerable<string> cdnNames, IEnumerable<string> versionStrings, Services.ContentDb dbContext, ILogger<Services.MainService> logger, CancellationToken cancellationToken)
+#pragma warning restore CS1998
     {
             if (cdnNames.Any())
             {
@@ -176,11 +178,15 @@ public class CdnLibrary : ModificationTrackingModelBase
                 logger.LogRequiredDependentParameterWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Upstream)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.AddLibrary)}");
     }
 
+#pragma warning disable CS1998
     internal static async Task RemoveAsync(IEnumerable<string> cdnNames, IEnumerable<string> versionStrings, Services.ContentDb dbContext, ILogger<Services.MainService> logger, CancellationToken cancellationToken)
+#pragma warning restore CS1998
     {
     }
 
+#pragma warning disable CS1998
     internal static async Task ReloadAsync(IEnumerable<string> cdnNames, IEnumerable<string> versionStrings, Services.ContentDb dbContext, ILogger<Services.MainService> logger, CancellationToken cancellationToken)
+#pragma warning restore CS1998
     {
         if (cdnNames.Any())
         {
@@ -195,7 +201,9 @@ public class CdnLibrary : ModificationTrackingModelBase
                 $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.ReloadLibrary)}");
     }
 
+#pragma warning disable CS1998
     internal static async Task ReloadExistingAsync(IEnumerable<string> cdnNames, IEnumerable<string> versionStrings, Services.ContentDb dbContext, ILogger<Services.MainService> logger, CancellationToken cancellationToken)
+#pragma warning restore CS1998
     {
         if (cdnNames.Any())
         {
