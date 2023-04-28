@@ -48,6 +48,8 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     public static readonly Regex PathDelimiterRegex = new(@"[/:\\]", RegexOptions.Compiled);
 
+    public static readonly Regex DosPathDelimiterRegex = new(@"[\\/]", RegexOptions.Compiled);
+
     public static readonly Regex PathSegmentRegex = new($@"^[^/:\\]+|\G(?<{GROUP_NAME_sep}>[/:\\])[^/:\\]*", RegexOptions.Compiled);
     
     /// <summary>
@@ -76,28 +78,14 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
     private const string GROUP_NAME_path = "path";
     private static readonly Regex UserInfoHostAndPortRegex = new($@"^((?<{GROUP_NAME_user}>[^@\\/]+)@)?(?<{GROUP_NAME_host}>[^:\\/]*)(:(?<{GROUP_NAME_port}>\d+))?(?<{GROUP_NAME_path}>.*)$", RegexOptions.Compiled);
 
-    /*
-    @(32, 33, 35, 36, 38, 39, 40, 41, 43, 44, 45, 46) + [System.Linq.Enumerable]::Range(48, 10) + @(59, 61) + [System.Linq.Enumerable]::Range(64, 92 - 64) + [System.Linq.Enumerable]::Range(93, 124 - 93) + [System.Linq.Enumerable]::Range(125, 0xff - 125)
-
-34 = '"'
-37 = '%';
-42 = '*'
-47 = '/'
-58 = ':'
-60 = '<'
-62 = '>'
-63 = '?'
-92 = '\'
-124 = '|'
-    */
     private const string GROUP_NAME_drive = "drive";
-    private static readonly Regex DosPathRegex = new($@"^([\\/]{2}[.?][\\/])?(?<{GROUP_NAME_drive}>[a-z]):(?<{GROUP_NAME_path}>([\\/]+[^""*/:<>?\\|]+)*[\\/]*)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex DosPathRegex = new($@"^([\\/]{2}[.?][\\/])?(?<{GROUP_NAME_drive}>[a-z]:)[\\/](?<{GROUP_NAME_path}>[\\/]*[^""*/:<>?\\|]+([\\/]+[^""*/:<>?\\|]+)*[\\/]*|[\\/]+)?$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     
-    private static readonly Regex UncPathLooseRegex = new($@"^[\\/][\\/]+(?<{GROUP_NAME_host}>[^""*/:<>?\\|]+|[\da-f]{{2}}(::?[\da-f]{{2}}){0,8}|::)(?<{GROUP_NAME_path}>([\\/]+[^""*/:<>?\\|]+)+)?$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex UncPathLooseRegex = new($@"^[\\/][\\/]+(?<{GROUP_NAME_host}>[^""*/:<>?\\|]+|[\da-f]{{2}}(::?[\da-f]{{2}}){0,8}|::)[\\/](?<{GROUP_NAME_path}>[\\/]*[^""*/:<>?\\|]+([\\/]+[^""*/:<>?\\|]+)*[\\/]*|[\\/]+)?$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     
-    private static readonly Regex UncPathAsUriStringRegex = new($@"^\\\\(?<{GROUP_NAME_host}>[^""*/:<>?\\|]+|[\da-f]{{2}}(::?[\da-f]{{2}}){0,8}|::)(?<{GROUP_NAME_path}>([\\/]+[^""#&*/:<>?@\\^|]+)+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex UncPathAsUriStringRegex = new($@"^\\\\(?<{GROUP_NAME_host}>[^""*/:<>?\\|]+|[\da-f]{{2}}(::?[\da-f]{{2}}){0,8}|::)\\(?<{GROUP_NAME_path}>([^""#&*/:<>?@\\^|]+[\\/]+[^""#&*/:<>?@\\^|]+)*[\\/]*)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     
-    private static readonly Regex PsPathRegex = new($@"^(?<{GROUP_NAME_drive}>[^\x00-\x1F*:?\[\\\]]*):(?<{GROUP_NAME_path}>([\\/]+[^""*/:<>?\\|]+)*[\\/]*)$");
+    private static readonly Regex PsPathRegex = new($@"^(?<{GROUP_NAME_drive}>[^\x00-\x1F*:?\[\\\]]+:)[\\/]+(?<{GROUP_NAME_path}>([^""*/:<>?\\|]+[\\/]+[^""*/:<>?\\|]+)*[\\/]*)?$");
     
     private static readonly Regex UnixPathRegex = new(@"^(((/+[^\x00/]+)+|[^\x00/]+(/+[^\x00/]+)*)/*|/+)$");
 
@@ -114,6 +102,10 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
     /// <remarks>If not <see langword="null" />, this will always contain a valid, lower-case URI scheme name.</remarks>
     public string? SchemeName { get; }
 
+    /// <summary>
+    /// Gets the additional scheme separator characters for this URI.
+    /// </summary>
+    /// <value>The additional scheme separator characters for the URI represented by this instance or <see langword="null" /> if this represents a relative URI.</value>
     public string? SchemeSeparator { get; }
 
     /// <summary>
@@ -122,18 +114,37 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
     /// <value>The authority component of the URI represented by this instance or <see langword="null" /> if this represents a relative URI.</value>
     public UriAuthority? Authority { get; }
 
+    /// <summary>
+    /// Gets the path segments for this URI.
+    /// </summary>
     public ReadOnlyCollection<PathSegment> PathSegments { get; }
     
+    /// <summary>
+    /// Gets the query sub-components for this URI.
+    /// </summary>
+    /// <value>The query sub-components for the URI represented by this instance or <see langword="null" /> if this URI has no query component.</value>
+    /// <remarks>If this not <see langword="null" /> and does not have any elements, then that indicates that there is a query component, but it is empty.</remarks>
     public ReadOnlyCollection<QuerySubComponent>? Query { get; }
 
     /// <summary>
     /// Gets the URI fragment or <see langword="null" /> if the URI has no fragment component.
     /// </summary>
-    /// <remarks>Unlike <see cref="Uri.Fragment" />, this is the un-escaped value, and does not include the delimiting <c>#</c> character</remarks>
+    /// <value>The fragment component for the URI represented by this instance or <see langword="null" /> if this URI has no fragment component.</value>
+    /// <remarks>Unlike <see cref="Uri.Fragment" />, this is the un-escaped value, and does not include the delimiting <c>#</c> character.
+    /// An empty string indicatse that this has an empty fragment component.</remarks>
     public string? Fragment { get; }
     
     #region Constructors
 
+    /// <summary>
+    /// Creates a new absolute <c>ParsedUri</c> object from un-escaped component values.
+    /// </summary>
+    /// <param name="schemeName">The name of the URI scheme.</param>
+    /// <param name="schemeSeparator">The additional URI scheme separator characters.</param>
+    /// <param name="authority">The URI authority component.</param>
+    /// <param name="pathSegments">The optional segments of the URI path component.</param>
+    /// <param name="query">The optional sub-components of the URI query component or <see langword="null" /> if there is no query component.</param>
+    /// <param name="fragment">The optional fragment component of the URI or <see langword="null" /> if there is no fragment component.</param>
     public ParsedUri(string schemeName, string schemeSeparator, UriAuthority authority, IEnumerable<PathSegment>? pathSegments = null, IEnumerable<QuerySubComponent>? query = null, string? fragment = null)
     {
         if (string.IsNullOrEmpty(schemeName))
@@ -154,8 +165,21 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
         Fragment = fragment;
     }
     
+    /// <summary>
+    /// Creates a new absolute <c>ParsedUri</c> object from un-escaped component values.
+    /// </summary>
+    /// <param name="schemeName">The name of the URI scheme.</param>
+    /// <param name="schemeSeparator">The additional URI scheme separator characters.</param>
+    /// <param name="authority">The URI authority component.</param>
+    /// <param name="pathSegments">The segments of the URI path component.</param>
     public ParsedUri(string schemeName, string schemeSeparator, UriAuthority authority, params PathSegment[] pathSegments) : this(schemeName, schemeSeparator, authority, (IEnumerable<PathSegment>)pathSegments) { }
 
+    /// <summary>
+    /// Creates a new relative <c>ParsedUri</c> object from un-escaped component values.
+    /// </summary>
+    /// <param name="rootSegment">The root segment representing the path component.</param>
+    /// <param name="query">The optional sub-components of the URI query component or <see langword="null" /> if there is no query component.</param>
+    /// <param name="fragment">The optional fragment component of the URI or <see langword="null" /> if there is no fragment component.</param>
     public ParsedUri(PathSegment rootSegment, IEnumerable<QuerySubComponent>? query = null, string? fragment = null)
     {
         PathSegments = new(new PathSegment[] { rootSegment ?? PathSegment.EmptyRoot });
@@ -163,6 +187,12 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
         Fragment = fragment;
     }
     
+    /// <summary>
+    /// Creates a new relative <c>ParsedUri</c> object from un-escaped component values.
+    /// </summary>
+    /// <param name="pathSegments">The segments of the URI path component.</param>
+    /// <param name="query">The optional sub-components of the URI query component or <see langword="null" /> if there is no query component.</param>
+    /// <param name="fragment">The optional fragment component of the URI or <see langword="null" /> if there is no fragment component.</param>
     public ParsedUri(IEnumerable<PathSegment>? pathSegments, IEnumerable<QuerySubComponent>? query = null, string? fragment = null)
     {
         PathSegments = new((pathSegments is null) ? Array.Empty<PathSegment>() : pathSegments.Where(s => s is not null).ToArray());
@@ -170,12 +200,26 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
         Fragment = fragment;
     }
     
+    /// <summary>
+    /// Creates a new relative <c>ParsedUri</c> object with a query component.
+    /// </summary>
+    /// <param name="pathSegments">The segments of the URI path component.</param>
+    /// <param name="query">The sub-components of the URI query component.</param>
     public ParsedUri(IEnumerable<PathSegment>? pathSegments, params QuerySubComponent[] query) : this(pathSegments, query, null) { }
     
+    /// <summary>
+    /// Creates a new relative <c>ParsedUri</c> object.
+    /// </summary>
+    /// <param name="pathSegments">The segments of the URI path component.</param>
     public ParsedUri(params PathSegment[] pathSegments) : this(pathSegments, (IEnumerable<QuerySubComponent>?)null, null) { }
 
     #endregion
 
+    /// <summary>
+    /// Unescapes URI-encoded character sequences.
+    /// </summary>
+    /// <param name="value">The string that might have URI-encoded character sequences.</param>
+    /// <returns>The un-escaped string.</returns>
     public static string UriDecode(string? value)
     {
         if (string.IsNullOrEmpty(value))
@@ -183,6 +227,14 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
         return EncodedSequenceRegex.Replace(value, m => new string((char)int.Parse(m.Value.AsSpan(1), System.Globalization.NumberStyles.HexNumber), 1));
     }
 
+    /// <summary>
+    /// Tries to parse a string as a URI.
+    /// </summary>
+    /// <param name="uriString">The source URI string.</param>
+    /// <param name="kind">The kind of URI to parse.</param>
+    /// <param name="options">Normalization options.</param>
+    /// <param name="uri">The parsed URI or <see langword="null" /> if the <paramref name="uriString" /> could not be parsed.</param>
+    /// <returns><see langword="true" /> if the <paramref name="uriString" /> could be parsed; otherwise, <see langword="false" />.</returns>
     public static bool TryParse(string uriString, UriKind kind, NormalizationOptions options, [NotNullWhen(true)] out ParsedUri? uri)
     {
         if (string.IsNullOrEmpty(uriString))
@@ -275,6 +327,12 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
                         uri = null;
                         return false;
                     }
+                    Match match = DosPathRegex.Match(uriString);
+                    if (match.Success)
+                    {
+                        uri = ParseDosPath(match, options);
+                        return true;
+                    }
                     string scheme = uriString[0..index];
                     if (!ValidSchemeNameRegex.IsMatch(scheme))
                     {
@@ -325,8 +383,23 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
         }
         if (kind == UriKind.Absolute)
         {
+            Match match = UncPathAsUriStringRegex.Match(uriString);
+            if (match.Success)
+            {
+                uri = ParseUncPath(match, options);
+                return true;
+            }
             uri = null;
             return false;
+        }
+        if (kind != UriKind.Relative)
+        {
+            Match match = UncPathAsUriStringRegex.Match(uriString);
+            if (match.Success)
+            {
+                uri = ParseUncPath(match, options);
+                return true;
+            }
         }
         // uriString == "/";	index == 0
         // uriString == "/path";	index == 0
@@ -367,94 +440,31 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Tries to parse a string as a URI.
+    /// </summary>
+    /// <param name="uriString">The source URI string.</param>
+    /// <param name="kind">The kind of URI to parse.</param>
+    /// <param name="uri">The parsed URI or <see langword="null" /> if the <paramref name="uriString" /> could not be parsed.</param>
+    /// <returns><see langword="true" /> if the <paramref name="uriString" /> could be parsed; otherwise, <see langword="false" />.</returns>
+    public static bool TryParse(string uriString, UriKind kind, [NotNullWhen(true)] out ParsedUri? uri) => TryParse(uriString, kind, NormalizationOptions.None, out uri);
 
-    public static bool TryParseUnixPath(string? path, NormalizationOptions options, [NotNullWhen(true)] out ParsedUri? uri)
-    {
-        if (string.IsNullOrEmpty(path))
-        {
-            uri = Empty;
-            return true;
-        }
-        string[] ps;
-        if (UnixPathRegex.IsMatch(path))
-        {
-            ps = path.Split(DELIMITER_CHAR_SLASH);
-            bool isRooted = ps[0].Length == 0;
-            if (options.HasFlag(NormalizationOptions.StripEmptyPathSegments))
-            {
-                if (options.HasFlag(NormalizationOptions.NormalizeDotPathSegments))
-                    ps = NormalizeDotPathSegments(ps.Skip(1).Where(s => s.Length > 0));
-                else if (ps.Skip(1).Any(s => s.Length == 0))
-                    ps = ps.Skip(1).Where(s => s.Length > 0).ToArray();
-            }
-            else if (options.HasFlag(NormalizationOptions.NormalizeDotPathSegments))
-                ps = NormalizeDotPathSegments(ps);
-            if (options.HasFlag(NormalizationOptions.EnsureTrailingPathSeparator))
-                EnsureTrailingEmpty(ref ps);
-            else if (options.HasFlag(NormalizationOptions.StripTrailingPathSeparator))
-                StripTrailingEmpty(ref ps);
-            if (isRooted)
-                uri = ps.Length switch
-                {
-                    0 => new ParsedUri("file", "//", UriAuthority.Empty, PathSegment.EmptyRoot),
-                    1 => new ParsedUri("file", "//", UriAuthority.Empty, (ps[0].Length > 0) ? new PathSegment(DELIMITER_CHAR_SLASH, ps[0]) : PathSegment.EmptyRoot),
-                    _ => new ParsedUri("file", "//", UriAuthority.Empty, ((ps[0].Length > 0) ? ps : ps.Skip(1))
-                        .Select(p => (p.Length > 0) ? new PathSegment(DELIMITER_CHAR_SLASH, p) : PathSegment.EmptyRoot)),
-                };
-            else
-                uri = (ps.Length > 0) ? new ParsedUri(ps.Take(1).Select(p => new PathSegment(p)).Concat(ps.Skip(1).Select(p => new PathSegment(DELIMITER_CHAR_SLASH, p)))) : Empty;
-            return true;
-        }
-        uri = null;
-        return false;
-    }
+    /// <summary>
+    /// Tries to parse a string as a URI.
+    /// </summary>
+    /// <param name="uriString">The source URI string.</param>
+    /// <param name="options">Normalization options.</param>
+    /// <param name="uri">The parsed URI or <see langword="null" /> if the <paramref name="uriString" /> could not be parsed.</param>
+    /// <returns><see langword="true" /> if the <paramref name="uriString" /> could be parsed; otherwise, <see langword="false" />.</returns>
+    public static bool TryParse(string uriString, NormalizationOptions options, [NotNullWhen(true)] out ParsedUri? uri) => TryParse(uriString, UriKind.RelativeOrAbsolute, options, out uri);
 
-    private static string[] NormalizeDotPathSegments(IEnumerable<string> segments)
-    {
-        if (segments.Contains(".."))
-        {
-            List<string> s = segments.Where(p => p != ".").ToList();
-            int index = 0;
-            while (index < s.Count)
-            {
-                if (s[index] == "..")
-                {
-                    s.RemoveAt(index);
-                    if (index > 0)
-                    {
-                        index--;
-                        s.RemoveAt(index);
-                    }
-                }
-                else
-                    index++;
-            }
-            return segments.ToArray();
-        }
-        if (segments.Contains("."))
-            return segments.Where(p => p != ".").ToArray();
-        return (segments is string[] sArr) ? sArr : segments.ToArray();
-    }
-
-    private static void StripTrailingEmpty(ref string[] segments)
-    {
-        if (segments.Length > 1 && segments[^1].Length == 0)
-        {
-            int index = segments.Length - 2;
-            while (index > 0 && segments[index].Length == 0)
-                index--;
-            Array.Resize(ref segments, index + 1);
-        }
-    }
-
-    private static void EnsureTrailingEmpty(ref string[] segments)
-    {
-        if (segments.Length == 0 || segments[^1].Length > 0)
-        {
-            Array.Resize(ref segments, segments.Length + 1);
-            segments[^1] = string.Empty;
-        }
-    }
+    /// <summary>
+    /// Tries to parse a string as a URI.
+    /// </summary>
+    /// <param name="uriString">The source URI string.</param>
+    /// <param name="uri">The parsed URI or <see langword="null" /> if the <paramref name="uriString" /> could not be parsed.</param>
+    /// <returns><see langword="true" /> if the <paramref name="uriString" /> could be parsed; otherwise, <see langword="false" />.</returns>
+    public static bool TryParse(string uriString, [NotNullWhen(true)] out ParsedUri? uri) => TryParse(uriString, UriKind.RelativeOrAbsolute, NormalizationOptions.None, out uri);
 
     private static bool TryParseHttp(string scheme, string uriString, NormalizationOptions options, ushort defaultPort, out ParsedUri? uri)
     {
@@ -622,6 +632,209 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Tries to parse a UNIX path as a URI.
+    /// </summary>
+    /// <param name="path">The source unix path.</param>
+    /// <param name="options">Normalization options.</param>
+    /// <param name="uri">The parsed URI or <see langword="null" /> if the <paramref name="path" /> could not be parsed.</param>
+    /// <returns><see langword="true" /> if the <paramref name="path" /> could be parsed; otherwise, <see langword="false" />.</returns>
+    public static bool TryParseUnixPath(string? path, NormalizationOptions options, [NotNullWhen(true)] out ParsedUri? uri)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            uri = Empty;
+            return true;
+        }
+        string[] ps;
+        if (UnixPathRegex.IsMatch(path))
+        {
+            ps = path.Split(DELIMITER_CHAR_SLASH);
+            bool isRooted = ps[0].Length == 0;
+            if (options.HasFlag(NormalizationOptions.StripEmptyPathSegments))
+            {
+                if (options.HasFlag(NormalizationOptions.NormalizeDotPathSegments))
+                    ps = NormalizeDotPathSegments(ps.Take(1).Concat(ps.Skip(1).Where(s => s.Length > 0)));
+                else if (ps.Skip(1).Any(s => s.Length == 0))
+                    ps = ps.Take(1).Concat(ps.Skip(1).Where(s => s.Length > 0)).ToArray();
+            }
+            else if (options.HasFlag(NormalizationOptions.NormalizeDotPathSegments))
+                ps = NormalizeDotPathSegments(ps);
+            if (options.HasFlag(NormalizationOptions.EnsureTrailingPathSeparator))
+                EnsureTrailingEmpty(ref ps);
+            else if (options.HasFlag(NormalizationOptions.StripTrailingPathSeparator))
+                StripTrailingEmpty(ref ps);
+            if (isRooted)
+                uri = ps.Length switch
+                {
+                    0 => new ParsedUri("file", "//", UriAuthority.Empty, PathSegment.EmptyRoot),
+                    1 => new ParsedUri("file", "//", UriAuthority.Empty, (ps[0].Length > 0) ? new PathSegment(DELIMITER_CHAR_SLASH, ps[0]) : PathSegment.EmptyRoot),
+                    _ => new ParsedUri("file", "//", UriAuthority.Empty, ((ps[0].Length > 0) ? ps : ps.Skip(1))
+                        .Select(p => (p.Length > 0) ? new PathSegment(DELIMITER_CHAR_SLASH, p) : PathSegment.EmptyRoot)),
+                };
+            else
+                uri = (ps.Length > 0) ? new ParsedUri(ps.Take(1).Select(p => new PathSegment(p)).Concat(ps.Skip(1).Select(p => new PathSegment(DELIMITER_CHAR_SLASH, p)))) : Empty;
+            return true;
+        }
+        uri = null;
+        return false;
+    }
+
+    /// <summary>
+    /// Tries to parse a DOS path with a drive letter or a UNC path as a URI.
+    /// </summary>
+    /// <param name="path">The source windows path.</param>
+    /// <param name="options">Normalization options.</param>
+    /// <param name="includePsPath"><see langword="true" /> to attempt to parse a PowerShell path if a DOS or UNC path could not be parsed;
+    /// otherwise, <see langword="false" /> to only attempt to parse a DOS or UNC path.</param>
+    /// <param name="uri">The parsed URI or <see langword="null" /> if the <paramref name="path" /> could not be parsed.</param>
+    /// <returns><see langword="true" /> if the <paramref name="path" /> could be parsed; otherwise, <see langword="false" />.</returns>
+    public static bool TryParseWindowsPath(string? path, NormalizationOptions options, bool includePsPath, [NotNullWhen(true)] out ParsedUri? uri)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            uri = Empty;
+            return true;
+        }
+        Match match = DosPathRegex.Match(path);
+        Group g;
+        if (!match.Success)
+        {
+            if ((match = UncPathLooseRegex.Match(path)).Success)
+            {
+                uri = ParseUncPath(match, options);
+                return true;
+            }
+            if (!(includePsPath && (match = PsPathRegex.Match(path)).Success))
+            {
+                uri = null;
+                return false;
+            }
+        }
+        uri = ParseDosPath(match, options);
+        return true;
+    }
+
+    /// <summary>
+    /// Tries to parse a DOS path with a drive letter or a UNC path as a URI.
+    /// </summary>
+    /// <param name="path">The source windows path.</param>
+    /// <param name="options">Normalization options.</param>
+    /// <param name="uri">The parsed URI or <see langword="null" /> if the <paramref name="path" /> could not be parsed.</param>
+    /// <returns><see langword="true" /> if the <paramref name="path" /> could be parsed; otherwise, <see langword="false" />.</returns>
+    public static bool TryParseWindowsPath(string? path, NormalizationOptions options, [NotNullWhen(true)] out ParsedUri? uri) => TryParseWindowsPath(path, options, false, out uri);
+
+    private static ParsedUri ParseUncPath(Match match, NormalizationOptions options)
+    {
+        string hostName = match.Groups[GROUP_NAME_host].Value;
+        Group g = match.Groups[GROUP_NAME_path];
+        if (g.Success)
+        {
+            string[] segments = DosPathDelimiterRegex.Split(g.Value);
+            if (options.HasFlag(NormalizationOptions.StripEmptyPathSegments))
+            {
+                if (options.HasFlag(NormalizationOptions.NormalizeDotPathSegments))
+                {
+                    segments = NormalizeDotPathSegments(segments.Where(s => s.Length > 0));
+                    if (options.HasFlag(NormalizationOptions.EnsureTrailingPathSeparator))
+                        EnsureTrailingEmpty(ref segments);
+                    else if (options.HasFlag(NormalizationOptions.StripTrailingPathSeparator))
+                        StripTrailingEmpty(ref segments);
+                }
+                else if (segments.Any(s => s.Length == 0))
+                    segments = segments.Where(s => s.Length > 0).ToArray();
+            }
+            else if (options.HasFlag(NormalizationOptions.NormalizeDotPathSegments))
+                segments = NormalizeDotPathSegments(segments);
+            if (options.HasFlag(NormalizationOptions.EnsureTrailingPathSeparator))
+                EnsureTrailingEmpty(ref segments);
+            else if (options.HasFlag(NormalizationOptions.StripTrailingPathSeparator))
+                StripTrailingEmpty(ref segments);
+            if (segments.Length > 0)
+                return new("file", "//", new UriAuthority(hostName), segments.Select(s => (s.Length > 0) ? new PathSegment(DELIMITER_CHAR_SLASH, s) : PathSegment.EmptyRoot));
+        }
+        return new("file", "//", new UriAuthority(hostName), PathSegment.EmptyRoot);
+    }
+
+    private static ParsedUri ParseDosPath(Match match, NormalizationOptions options)
+    {
+        string drive = match.Groups[GROUP_NAME_drive].Value;
+        Group g = match.Groups[GROUP_NAME_path]; 
+        if (g.Success)
+        {
+            string[] segments = DosPathDelimiterRegex.Split(g.Value);
+            if (options.HasFlag(NormalizationOptions.StripEmptyPathSegments))
+            {
+                if (options.HasFlag(NormalizationOptions.NormalizeDotPathSegments))
+                {
+                    segments = NormalizeDotPathSegments(segments.Where(s => s.Length > 0));
+                    if (options.HasFlag(NormalizationOptions.EnsureTrailingPathSeparator))
+                        EnsureTrailingEmpty(ref segments);
+                    else if (options.HasFlag(NormalizationOptions.StripTrailingPathSeparator))
+                        StripTrailingEmpty(ref segments);
+                }
+                else if (segments.Any(s => s.Length == 0))
+                    segments = segments.Where(s => s.Length > 0).ToArray();
+            }
+            else if (options.HasFlag(NormalizationOptions.NormalizeDotPathSegments))
+                segments = NormalizeDotPathSegments(segments);
+            if (options.HasFlag(NormalizationOptions.EnsureTrailingPathSeparator))
+                EnsureTrailingEmpty(ref segments);
+            else if (options.HasFlag(NormalizationOptions.StripTrailingPathSeparator))
+                StripTrailingEmpty(ref segments);
+            if (segments.Length > 0)
+                return new("file", "//", UriAuthority.Empty, new string[] { drive }.Concat(segments).Select(s => (s.Length > 0) ? new PathSegment(DELIMITER_CHAR_SLASH, s) : PathSegment.EmptyRoot));
+        }
+        return new("file", "//", UriAuthority.Empty, new PathSegment(DELIMITER_CHAR_SLASH, drive), PathSegment.EmptyRoot);
+    }
+
+    private static string[] NormalizeDotPathSegments(IEnumerable<string> segments)
+    {
+        if (segments.Contains(".."))
+        {
+            List<string> s = segments.Where(p => p != ".").ToList();
+            int index = 0;
+            while (index < s.Count)
+            {
+                if (s[index] == "..")
+                {
+                    s.RemoveAt(index);
+                    if (index > 0)
+                    {
+                        index--;
+                        s.RemoveAt(index);
+                    }
+                }
+                else
+                    index++;
+            }
+            return segments.ToArray();
+        }
+        if (segments.Contains("."))
+            return segments.Where(p => p != ".").ToArray();
+        return (segments is string[] sArr) ? sArr : segments.ToArray();
+    }
+
+    private static void StripTrailingEmpty(ref string[] segments)
+    {
+        if (segments.Length > 1 && segments[^1].Length == 0)
+        {
+            int index = segments.Length - 2;
+            while (index > 0 && segments[index].Length == 0)
+                index--;
+            Array.Resize(ref segments, index + 1);
+        }
+    }
+
+    private static void EnsureTrailingEmpty(ref string[] segments)
+    {
+        if (segments.Length == 0 || segments[^1].Length > 0)
+        {
+            Array.Resize(ref segments, segments.Length + 1);
+            segments[^1] = string.Empty;
+        }
+    }
+
     private static string SplitFragment(string uriString, NormalizationOptions options, out string? fragment)
     {
         if (string.IsNullOrEmpty(uriString))
@@ -764,12 +977,6 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
         }
         return string.Empty;
     }
-
-    public static bool TryParse(string uriString, UriKind kind, [NotNullWhen(true)] out ParsedUri? uri) => TryParse(uriString, kind, NormalizationOptions.None, out uri);
-
-    public static bool TryParse(string uriString, NormalizationOptions options, [NotNullWhen(true)] out ParsedUri? uri) => TryParse(uriString, UriKind.RelativeOrAbsolute, options, out uri);
-
-    public static bool TryParse(string uriString, [NotNullWhen(true)] out ParsedUri? uri) => TryParse(uriString, UriKind.RelativeOrAbsolute, NormalizationOptions.None, out uri);
 
     public bool Equals(ParsedUri? other)
     {
