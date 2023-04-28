@@ -22,9 +22,6 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
     /// </summary>
     public static readonly StringComparer DefaultComponentComparer = StringComparer.InvariantCultureIgnoreCase;
 
-    /// <summary>
-    /// Delimiter character for 
-    /// </summary>
     private const char DELIMITER_CHAR_COLON = ':';
     private const char DELIMITER_CHAR_SLASH = '/';
     private const char DELIMITER_CHAR_BACKSLASH = '\\';
@@ -41,37 +38,37 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     #region Regular Expressions
 
-    public static readonly Regex QueryDelimiterRegex = new(@"[&?]", RegexOptions.Compiled);
+    private static readonly Regex QueryDelimiterRegex = new(@"[&?]", RegexOptions.Compiled);
 
     private const string GROUP_NAME_sep = "sep";
     private const string GROUP_NAME_sub = "sub";
-    public static readonly Regex QuerySubcomponentRegex = new($@"^[^&?]+|\G(?<{GROUP_NAME_sep}>[&?])(<{GROUP_NAME_sub}>[^&?]+)?", RegexOptions.Compiled);
+    private static readonly Regex QuerySubcomponentRegex = new($@"^[^&?]+|\G(?<{GROUP_NAME_sep}>[&?])(<{GROUP_NAME_sub}>[^&?]+)?", RegexOptions.Compiled);
 
-    public static readonly Regex PathDelimiterRegex = new(@"[/:\\]", RegexOptions.Compiled);
+    private static readonly Regex PathDelimiterRegex = new(@"[/:\\]", RegexOptions.Compiled);
 
-    public static readonly Regex DosPathDelimiterRegex = new(@"[\\/]", RegexOptions.Compiled);
+    private static readonly Regex DosPathDelimiterRegex = new(@"[\\/]", RegexOptions.Compiled);
 
-    public static readonly Regex PathSegmentRegex = new($@"^[^/:\\]+|\G(?<{GROUP_NAME_sep}>[/:\\])[^/:\\]*", RegexOptions.Compiled);
+    private static readonly Regex PathSegmentRegex = new($@"^[^/:\\]+|\G(?<{GROUP_NAME_sep}>[/:\\])[^/:\\]*", RegexOptions.Compiled);
     
     /// <summary>
     /// Matches a URI scheme name.
     /// </summary>
-    public static readonly Regex ValidSchemeNameRegex = new(@"^[a-z][a-z\d+.-]*$", RegexOptions.Compiled);
+    private static readonly Regex ValidSchemeNameRegex = new(@"^[a-z][a-z\d+.-]*$", RegexOptions.Compiled);
     
     /// <summary>
     /// Matches a URI scheme name.
     /// </summary>
-    public static readonly Regex ValidSchemeSeparatorRegex = new(@"^[:/]+$", RegexOptions.Compiled);
+    private static readonly Regex ValidSchemeSeparatorRegex = new(@"^[:/]+$", RegexOptions.Compiled);
     
     /// <summary>
     /// Matches a Host or UserName character that should be encoded.
     /// </summary>
-    public static readonly Regex NameEncodeRegex = new(@"[^!$&'()*+,;=\w.~-]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex NameEncodeRegex = new(@"[^!$&'()*+,;=\w.~-]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     
     /// <summary>
     /// Matches a URI-encoded character sequence.
     /// </summary>
-    public static readonly Regex EncodedSequenceRegex = new(@"%[\da-f]{2}", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex EncodedSequenceRegex = new(@"%[\da-f]{2}", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     private const string GROUP_NAME_user = "user";
     private const string GROUP_NAME_host = "host";
@@ -117,6 +114,9 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
     
     #endregion
 
+    /// <summary>
+    /// Represents an empty, relative URI.
+    /// </summary>
     public static readonly ParsedUri Empty = new();
 
     #endregion
