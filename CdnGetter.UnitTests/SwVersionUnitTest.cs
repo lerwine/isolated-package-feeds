@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Nodes;
 
 namespace CdnGetter.UnitTests;
 
@@ -59,8 +60,8 @@ public class SwVersionUnitTest
     /// <summary>
     /// Unit test for constructor <see cref="SwVersion.PreReleaseSegment(bool, string)" /> that will throw an excePATCHaion.
     /// </summary>
-    // [Theory]
-    // [ClassData(typeof(PreReleaseSegmentConstructor2TestData))]
+    [Theory]
+    [ClassData(typeof(PreReleaseSegmentConstructor2TestData))]
     public void PreReleaseSegmentConstructor2Test(bool altSeprator, string value)
     {
         Assert.Throws<ArgumentOutOfRangeException>(nameof(value), () => new SwVersion.PreReleaseSegment(altSeprator, value));
@@ -151,94 +152,323 @@ public class SwVersionUnitTest
     /// <summary>
     /// Generates test data for <see cref="ParsingConstructorTest(string?, VersionValues)" />
     /// </summary>
-    public class ParsingConstructorTestData : TheoryData<string?, VersionValues>
+    public class ParsingConstructorTestData : TheoryData<string?, string>
     {
         public ParsingConstructorTestData()
         {
-            Add(null,
-                new(null,   0,              null,   null,   null,   null,
-                null, null, SwVersion.VersionStringFormat.NonNumerical));
-            Add("",
-                new(null,   0,              null,   null,   null,   null,
-                null, null, SwVersion.VersionStringFormat.NonNumerical));
-            Add(" ",
-                new(null,   0,              null,   null,   null,   null, 
-                null, null, SwVersion.VersionStringFormat.NonNumerical));
-            Add("\t",
-                new(null,   0,              null,   null,   null,   null, 
-                null, null, SwVersion.VersionStringFormat.NonNumerical));
-            Add("\n",
-                new(null,   0,              null,   null,   null,   null, 
-                null, null, SwVersion.VersionStringFormat.NonNumerical));
-            Add("null",
-                new("null", 0,              null,   null,   null,   null, 
-                null, null, SwVersion.VersionStringFormat.NonNumerical));
-            Add("0",
-                new(null,   0,              null,   null,   null,   null, 
-                null, null, SwVersion.VersionStringFormat.Standard));
-            Add("-0",
-                new("-",    0,              null,   null,   null,   null, 
-                null, null, SwVersion.VersionStringFormat.Standard));
-            Add("1",
-                new(null,   1,              null,   null,   null,   null, 
-                null, null, SwVersion.VersionStringFormat.Standard));
-            Add(" 1 ",
-                new(null,   1,              null,   null,   null,   null, 
-                null, null, SwVersion.VersionStringFormat.Standard));
-            Add("2147483647",
-                new(null,   2147483647,     null,   null,   null,   null, 
-                null, null, SwVersion.VersionStringFormat.Standard));
-            Add("-2147483648",
-                new(null,   -2147483648,    null,   null,   null,   null, 
-                null, null, SwVersion.VersionStringFormat.Standard));
-            Add("-1",
-                new(null,   -1,             null,   null,   null,   null, 
-                null, null, SwVersion.VersionStringFormat.Standard));
-            Add("1.0",
-                new(null,   1,              0,      null,   null,   null, 
-                null, null, SwVersion.VersionStringFormat.Standard));
-            Add("1.0.0",
-                new(null,   1,              0,      0,      null,   null, 
-                null, null, SwVersion.VersionStringFormat.Standard));
-            Add("1.0.0.0",
-                new(null,   1,              0,      0,      0,      null, 
-                null,   null, SwVersion.VersionStringFormat.Standard));
-            Add("1.0.0.0.0",
-                new(null,   1,              0,      0,      0,      new int [] { 0 }, 
-                null,   null, SwVersion.VersionStringFormat.Standard));
-            Add("2.1.1-rc1",
-                new(null,   2,              1,      1,      null,   null,
-                new VersionValues.PreReleaseSegment[] { new(false, "rc1") }, null, SwVersion.VersionStringFormat.Standard));
-            Add("18.0.0-alpha-34308b5ad-20210729",
-                new(null,   18,             0,      0,      null,   null,
-                new VersionValues.PreReleaseSegment[] { new(false, "alpha"), new(false, "34308b5ad"), new(false, "20210729") }, null, SwVersion.VersionStringFormat.Standard));
-            Add("2.7-beta.2",
-                new(null,   2,              7,      null,   null,   null,
-                new VersionValues.PreReleaseSegment[] { new(false, "beta"), new(true, "2") }, null, SwVersion.VersionStringFormat.Standard));
-            Add("1.0.0rc10",
-                new(null,   1,              0,      0,      null,   null,
-                new VersionValues.PreReleaseSegment[] { new(true, "rc10") }, null, SwVersion.VersionStringFormat.Alt));
-            Add("1-pre",
-                new(null,   1,              null,   null,   null,   null,
-                new VersionValues.PreReleaseSegment[] { new(false, "pre") }, null, SwVersion.VersionStringFormat.Standard));
-            Add("r45",
-                new("r",    45,             null,   null,   null,   null, 
-                null, null, SwVersion.VersionStringFormat.Alt));
-            Add("Utah",
-                new("Utah", 0,              null,   null,   null,   null, 
-                null, null, SwVersion.VersionStringFormat.NonNumerical));
+            Add("-q*[E]o-^&gU$^A-Ma<!XS\"58.21.35.80*]/j", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-q*[E]o-^&gU$^A-Ma<!XS\"")
+                .AddProperty(nameof(SwVersion.Major), 58).AddProperty(nameof(SwVersion.Minor), 21).AddProperty(nameof(SwVersion.Patch), 35).AddProperty(nameof(SwVersion.Revision), 80)
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "*]/j").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("/m$]{en>\"/-P(Bj#\\70.75.5OT+0$L", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "/m$]{en>\"/-P(Bj#\\")
+                .AddProperty(nameof(SwVersion.Major), 70).AddProperty(nameof(SwVersion.Minor), 75).AddProperty(nameof(SwVersion.Patch), 5).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "OT").AddProperty(nameof(SwVersion.Build), "+0$L").ToJsonString());
+            Add("-q-Cv%\"-~_&!:,'-27.97b", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-q-Cv%\"-~_&!:,'")
+                .AddProperty(nameof(SwVersion.Major), -27).AddProperty(nameof(SwVersion.Minor), 97).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "b").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add(">LM']:U|fX~-Y\\rhDMV52.67b", new JsonObject().AddProperty(nameof(SwVersion.Prefix), ">LM']:U|fX~-Y\\rhDMV")
+                .AddProperty(nameof(SwVersion.Major), 52).AddProperty(nameof(SwVersion.Minor), 67).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "b").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("-O%JsT-c)j-DMH98.56I", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-O%JsT-c)j-DMH")
+                .AddProperty(nameof(SwVersion.Major), 98).AddProperty(nameof(SwVersion.Minor), 56).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "I").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("-}-itY'W'Hx-80.5-", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-}-itY'W'Hx")
+                .AddProperty(nameof(SwVersion.Major), -80).AddProperty(nameof(SwVersion.Minor), 5).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("|n?N,=* K{]#J*Ns-23.49t+u", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "|n?N,=* K{]#J*Ns")
+                .AddProperty(nameof(SwVersion.Major), -23).AddProperty(nameof(SwVersion.Minor), 49).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "t").AddProperty(nameof(SwVersion.Build), "+u").ToJsonString());
+            Add("U&y-THWKh=]|Gj(y;H68+Y", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "U&y-THWKh=]|Gj(y;H")
+                .AddProperty(nameof(SwVersion.Major), 68).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddNullProperty(nameof(SwVersion.PreRelease)).AddProperty(nameof(SwVersion.Build), "+Y").ToJsonString());
+            Add("-,-E\"w(-IfdUa12+", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-,-E\"w(-IfdUa")
+                .AddProperty(nameof(SwVersion.Major), 12).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddNullProperty(nameof(SwVersion.PreRelease)).AddProperty(nameof(SwVersion.Build), "+").ToJsonString());
+            Add("?%\\psP-}nb[NW*38.19n+Q-7:$", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "?%\\psP-}nb[NW*")
+                .AddProperty(nameof(SwVersion.Major), 38).AddProperty(nameof(SwVersion.Minor), 19).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "n").AddProperty(nameof(SwVersion.Build), "+Q-7:$").ToJsonString());
+            Add("-YEkQ$VEKv!T&27.60-", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-YEkQ$VEKv!T&")
+                .AddProperty(nameof(SwVersion.Major), 27).AddProperty(nameof(SwVersion.Minor), 60).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("->eH,<(b-=-J* qC\\a954woi+Kn", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "->eH,<(b-=-J* qC\\a")
+                .AddProperty(nameof(SwVersion.Major), 95).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "4woi").AddProperty(nameof(SwVersion.Build), "+Kn").ToJsonString());
+            Add("->h>-iJIh_b/-p'gUb-25.25.92.0.0.9.13.79d%\"h", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "->h>-iJIh_b/-p'gUb")
+                .AddProperty(nameof(SwVersion.Major), -25).AddProperty(nameof(SwVersion.Minor), 25).AddProperty(nameof(SwVersion.Patch), 92).AddProperty(nameof(SwVersion.Revision), 0)
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical), 0, 9, 13, 79).AddProperty(nameof(SwVersion.PreRelease), "d%\"h").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("-Jt-PICXVU-JF`o22.90-+Ok", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-Jt-PICXVU-JF`o")
+                .AddProperty(nameof(SwVersion.Major), 22).AddProperty(nameof(SwVersion.Minor), 90).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-").AddProperty(nameof(SwVersion.Build), "+Ok").ToJsonString());
+            Add("}<hm&iODMV#c:57.8.44]S", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "}<hm&iODMV#c:")
+                .AddProperty(nameof(SwVersion.Major), 57).AddProperty(nameof(SwVersion.Minor), 8).AddProperty(nameof(SwVersion.Patch), 44).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "]S").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("->k!\\>,-Ki[Y&yG(64.65-", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "->k!\\>,-Ki[Y&yG(")
+                .AddProperty(nameof(SwVersion.Major), 64).AddProperty(nameof(SwVersion.Minor), 65).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add(",^XN-|Mg/:xx]]/M-71.42{+O,", new JsonObject().AddProperty(nameof(SwVersion.Prefix), ",^XN-|Mg/:xx]]/M")
+                .AddProperty(nameof(SwVersion.Major), -71).AddProperty(nameof(SwVersion.Minor), 42).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "{").AddProperty(nameof(SwVersion.Build), "+O,").ToJsonString());
+            Add("-$g#k-P-(KM|/eV-80.90}", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-$g#k-P-(KM|/eV")
+                .AddProperty(nameof(SwVersion.Major), -80).AddProperty(nameof(SwVersion.Minor), 90).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "}").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("^Zpa*-\"kCY,HZzr~_$-19.21-r5ULG+[", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "^Zpa*-\"kCY,HZzr~_$")
+                .AddProperty(nameof(SwVersion.Major), -19).AddProperty(nameof(SwVersion.Minor), 21).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-r5ULG").AddProperty(nameof(SwVersion.Build), "+[").ToJsonString());
+            Add("JJA|B_<;[~U|Ia\"-55.91.18.27edTEpn%", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "JJA|B_<;[~U|Ia\"")
+                .AddProperty(nameof(SwVersion.Major), -55).AddProperty(nameof(SwVersion.Minor), 91).AddProperty(nameof(SwVersion.Patch), 18).AddProperty(nameof(SwVersion.Revision), 27)
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "edTEpn%").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("-U{-jq-m;z~h-20", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-U{-jq-m;z~h")
+                .AddProperty(nameof(SwVersion.Major), -20).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddNullProperty(nameof(SwVersion.PreRelease)).AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("-CDTO'XcDs&qz_-17.734+ej.JYZ", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-CDTO'XcDs&qz_")
+                .AddProperty(nameof(SwVersion.Major), -17).AddProperty(nameof(SwVersion.Minor), 73).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "4").AddProperty(nameof(SwVersion.Build), "+ej.JYZ").ToJsonString());
+            Add("v(Td-pPH$>SiE_\\32.75.76.779Ri+", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "v(Td-pPH$>SiE_\\")
+                .AddProperty(nameof(SwVersion.Major), 32).AddProperty(nameof(SwVersion.Minor), 75).AddProperty(nameof(SwVersion.Patch), 76).AddProperty(nameof(SwVersion.Revision), 77)
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "9Ri").AddProperty(nameof(SwVersion.Build), "+").ToJsonString());
+            Add("-|=xatnj-Z|u@-t-40.42-FnW|^7", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-|=xatnj-Z|u@-t")
+                .AddProperty(nameof(SwVersion.Major), -40).AddProperty(nameof(SwVersion.Minor), 42).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-FnW|^7").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("#obPg,-=/Bxfa10.51.27<q,", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "#obPg,-=/Bxfa")
+                .AddProperty(nameof(SwVersion.Major), 10).AddProperty(nameof(SwVersion.Minor), 51).AddProperty(nameof(SwVersion.Patch), 27).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "<q,").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("Ci_=CQT-kBjdO-10+hqH2J", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "Ci_=CQT-kBjdO")
+                .AddProperty(nameof(SwVersion.Major), -10).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddNullProperty(nameof(SwVersion.PreRelease)).AddProperty(nameof(SwVersion.Build), "+hqH2J").ToJsonString());
+            Add("p(aiaa-FmD~t[!-'65.16.", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "p(aiaa-FmD~t[!-'")
+                .AddProperty(nameof(SwVersion.Major), 65).AddProperty(nameof(SwVersion.Minor), 16).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), ".").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("-w'tm-*N_Q-):o]na-53.35?", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-w'tm-*N_Q-):o]na")
+                .AddProperty(nameof(SwVersion.Major), -53).AddProperty(nameof(SwVersion.Minor), 35).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "?").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("-[VfAj(N*&&-UYd47.30.47.12Qyd+h[I", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-[VfAj(N*&&-UYd")
+                .AddProperty(nameof(SwVersion.Major), 47).AddProperty(nameof(SwVersion.Minor), 30).AddProperty(nameof(SwVersion.Patch), 47).AddProperty(nameof(SwVersion.Revision), 12)
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "Qyd").AddProperty(nameof(SwVersion.Build), "+h[I").ToJsonString());
+            Add("-j-[-AL-86.61.88-+ x", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-j-[-AL")
+                .AddProperty(nameof(SwVersion.Major), -86).AddProperty(nameof(SwVersion.Minor), 61).AddProperty(nameof(SwVersion.Patch), 88).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-").AddProperty(nameof(SwVersion.Build), "+ x").ToJsonString());
+            Add("Z-{bB-AI\\]j19.10.32-", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "Z-{bB-AI\\]j")
+                .AddProperty(nameof(SwVersion.Major), 19).AddProperty(nameof(SwVersion.Minor), 10).AddProperty(nameof(SwVersion.Patch), 32).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("\\~x_gL-U~/X-unThB96.23.75D,", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "\\~x_gL-U~/X-unThB")
+                .AddProperty(nameof(SwVersion.Major), 96).AddProperty(nameof(SwVersion.Minor), 23).AddProperty(nameof(SwVersion.Patch), 75).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "D,").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("-B)[bIy-,([$wI43.39#+E6w;[9", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-B)[bIy-,([$wI")
+                .AddProperty(nameof(SwVersion.Major), 43).AddProperty(nameof(SwVersion.Minor), 39).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "#").AddProperty(nameof(SwVersion.Build), "+E6w;[9").ToJsonString());
+            Add("-u-?EImMnpD@g`72.17.94.63.51.83Zp", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-u-?EImMnpD@g`")
+                .AddProperty(nameof(SwVersion.Major), 72).AddProperty(nameof(SwVersion.Minor), 17).AddProperty(nameof(SwVersion.Patch), 94).AddProperty(nameof(SwVersion.Revision), 63)
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical), 51, 83).AddProperty(nameof(SwVersion.PreRelease), "Zp").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("-`'e>{q!`S-17.52.70.43i\"T", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-`'e>{q!`S")
+                .AddProperty(nameof(SwVersion.Major), -17).AddProperty(nameof(SwVersion.Minor), 52).AddProperty(nameof(SwVersion.Patch), 70).AddProperty(nameof(SwVersion.Revision), 43)
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "i\"T").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("-YOq}mcM-A-Z([`94.88.89.9-u", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-YOq}mcM-A-Z([`")
+                .AddProperty(nameof(SwVersion.Major), 94).AddProperty(nameof(SwVersion.Minor), 88).AddProperty(nameof(SwVersion.Patch), 89).AddProperty(nameof(SwVersion.Revision), 9)
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-u").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("OJBvb-~F-xs`(X86-vcYho5+", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "OJBvb-~F-xs`(X")
+                .AddProperty(nameof(SwVersion.Major), 86).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-vcYho5").AddProperty(nameof(SwVersion.Build), "+").ToJsonString());
+            Add("-<y-\\RwH`D{PF_g-50-]=x", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-<y-\\RwH`D{PF_g")
+                .AddProperty(nameof(SwVersion.Major), -50).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-]=x").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("-F\"M-Y%dO$Ti-SBd@$-90-}5+L", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-F\"M-Y%dO$Ti-SBd@$")
+                .AddProperty(nameof(SwVersion.Major), -90).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-}5").AddProperty(nameof(SwVersion.Build), "+L").ToJsonString());
+            Add("*d?;>?k-Fgx!-_35.24%+V{1", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "*d?;>?k-Fgx!-_")
+                .AddProperty(nameof(SwVersion.Major), 35).AddProperty(nameof(SwVersion.Minor), 24).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "%").AddProperty(nameof(SwVersion.Build), "+V{1").ToJsonString());
+            Add("-oS\"fU-=$EGfR-$zY11.60.49.22g>,+h", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-oS\"fU-=$EGfR-$zY")
+                .AddProperty(nameof(SwVersion.Major), 11).AddProperty(nameof(SwVersion.Minor), 60).AddProperty(nameof(SwVersion.Patch), 49).AddProperty(nameof(SwVersion.Revision), 22)
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "g>,").AddProperty(nameof(SwVersion.Build), "+h").ToJsonString());
+            Add("dJ*?B\\p-Je:-g;-91.80.61-Txv+|", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "dJ*?B\\p-Je:-g;")
+                .AddProperty(nameof(SwVersion.Major), -91).AddProperty(nameof(SwVersion.Minor), 80).AddProperty(nameof(SwVersion.Patch), 61).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-Txv").AddProperty(nameof(SwVersion.Build), "+|").ToJsonString());
+            Add("VqPORM-CXa-Fu>H30.82-Wpl2d+@3xb", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "VqPORM-CXa-Fu>H")
+                .AddProperty(nameof(SwVersion.Major), 30).AddProperty(nameof(SwVersion.Minor), 82).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-Wpl2d").AddProperty(nameof(SwVersion.Build), "+@3xb").ToJsonString());
+            Add("b(H$ou TlO-^;bw`D;-20^i@0+D", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "b(H$ou TlO-^;bw`D;")
+                .AddProperty(nameof(SwVersion.Major), -20).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "^i@0").AddProperty(nameof(SwVersion.Build), "+D").ToJsonString());
+            Add("-N?ggy-dGdpY-i56-$\"EkA7", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-N?ggy-dGdpY-i")
+                .AddProperty(nameof(SwVersion.Major), 56).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-$\"EkA7").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("yY*(@/-e][G}Gs-Vo]`\\X86.96b", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "yY*(@/-e][G}Gs-Vo]`\\X")
+                .AddProperty(nameof(SwVersion.Major), 86).AddProperty(nameof(SwVersion.Minor), 96).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "b").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("M*ePYtlm%[#:SUY`91", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "M*ePYtlm%[#:SUY`")
+                .AddProperty(nameof(SwVersion.Major), 91).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddNullProperty(nameof(SwVersion.PreRelease)).AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("-#}i#R-ao-85.22.83.62Wx/sr", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-#}i#R-ao")
+                .AddProperty(nameof(SwVersion.Major), -85).AddProperty(nameof(SwVersion.Minor), 22).AddProperty(nameof(SwVersion.Patch), 83).AddProperty(nameof(SwVersion.Revision), 62)
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "Wx/sr").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("<%-i)-q))R:a-13-sl%j", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "<%-i)-q))R:a")
+                .AddProperty(nameof(SwVersion.Major), -13).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-sl%j").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("or>pE=~}C%i73.89u+/\"ZO#", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "or>pE=~}C%i")
+                .AddProperty(nameof(SwVersion.Major), 73).AddProperty(nameof(SwVersion.Minor), 89).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "u").AddProperty(nameof(SwVersion.Build), "+/\"ZO#").ToJsonString());
+            Add("'xDb vS-FH<j'p-%#gv-99.496a+u>/cY:", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "'xDb vS-FH<j'p-%#gv")
+                .AddProperty(nameof(SwVersion.Major), -99).AddProperty(nameof(SwVersion.Minor), 49).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "6a").AddProperty(nameof(SwVersion.Build), "+u>/cY:").ToJsonString());
+            Add("L'X%R' ~|/U-58.1)jZEL", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "L'X%R' ~|/U")
+                .AddProperty(nameof(SwVersion.Major), -58).AddProperty(nameof(SwVersion.Minor), 1).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), ")jZEL").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("?,-;ot%ty-$27.83.44 .", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "?,-;ot%ty-$")
+                .AddProperty(nameof(SwVersion.Major), 27).AddProperty(nameof(SwVersion.Minor), 83).AddProperty(nameof(SwVersion.Patch), 44).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), " .").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("Dps-?XOcz-&^z>_>>-69+-iz", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "Dps-?XOcz-&^z>_>>")
+                .AddProperty(nameof(SwVersion.Major), -69).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddNullProperty(nameof(SwVersion.PreRelease)).AddProperty(nameof(SwVersion.Build), "+-iz").ToJsonString());
+            Add(" QzFqeaB-98-`Mvg;", new JsonObject().AddProperty(nameof(SwVersion.Prefix), " QzFqeaB")
+                .AddProperty(nameof(SwVersion.Major), -98).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-`Mvg;").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("-UTTMN-'Sb-7.47.59-+EC ", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-UTTMN-'Sb")
+                .AddProperty(nameof(SwVersion.Major), -7).AddProperty(nameof(SwVersion.Minor), 47).AddProperty(nameof(SwVersion.Patch), 59).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-").AddProperty(nameof(SwVersion.Build), "+EC ").ToJsonString());
+            Add("@eN;G&J,[rZ-55.9.57 >", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "@eN;G&J,[rZ")
+                .AddProperty(nameof(SwVersion.Major), -55).AddProperty(nameof(SwVersion.Minor), 9).AddProperty(nameof(SwVersion.Patch), 57).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), " >").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("-XtT(-g76.58.25.28oG1+&<j", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-XtT(-g")
+                .AddProperty(nameof(SwVersion.Major), 76).AddProperty(nameof(SwVersion.Minor), 58).AddProperty(nameof(SwVersion.Patch), 25).AddProperty(nameof(SwVersion.Revision), 28)
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "oG1").AddProperty(nameof(SwVersion.Build), "+&<j").ToJsonString());
+            Add("-&a,ejE-mK-30.19.48;e", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-&a,ejE-mK")
+                .AddProperty(nameof(SwVersion.Major), -30).AddProperty(nameof(SwVersion.Minor), 19).AddProperty(nameof(SwVersion.Patch), 48).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), ";e").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("-*#/uy{-WDPj \"-2;%Dk+yz!", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-*#/uy{-WDPj \"")
+                .AddProperty(nameof(SwVersion.Major), -2).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), ";%Dk").AddProperty(nameof(SwVersion.Build), "+yz!").ToJsonString());
+            Add("kV(U-|C;X-o?xM(Lp64.98U+V>z}", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "kV(U-|C;X-o?xM(Lp")
+                .AddProperty(nameof(SwVersion.Major), 64).AddProperty(nameof(SwVersion.Minor), 98).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "U").AddProperty(nameof(SwVersion.Build), "+V>z}").ToJsonString());
+            Add("-wK$_h=JzOLln(zvg*55.33.41.57.42-7U[", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-wK$_h=JzOLln(zvg*")
+                .AddProperty(nameof(SwVersion.Major), 55).AddProperty(nameof(SwVersion.Minor), 33).AddProperty(nameof(SwVersion.Patch), 41).AddProperty(nameof(SwVersion.Revision), 57)
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical), 42).AddProperty(nameof(SwVersion.PreRelease), "-7U[").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("',_?Z(hNq#r-_HcK_t-81.94u", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "',_?Z(hNq#r-_HcK_t")
+                .AddProperty(nameof(SwVersion.Major), -81).AddProperty(nameof(SwVersion.Minor), 94).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "u").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("-<re[Id> y,->g{XM78.71.46-+IL|pU/", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-<re[Id> y,->g{XM")
+                .AddProperty(nameof(SwVersion.Major), 78).AddProperty(nameof(SwVersion.Minor), 71).AddProperty(nameof(SwVersion.Patch), 46).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-").AddProperty(nameof(SwVersion.Build), "+IL|pU/").ToJsonString());
+            Add("Dk~-JFy?:u:h|-68-$JkS", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "Dk~-JFy?:u:h|")
+                .AddProperty(nameof(SwVersion.Major), -68).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-$JkS").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("]U!B-MYx%pR-|;i59.19.10eZ", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "]U!B-MYx%pR-|;i")
+                .AddProperty(nameof(SwVersion.Major), 59).AddProperty(nameof(SwVersion.Minor), 19).AddProperty(nameof(SwVersion.Patch), 10).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "eZ").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("-vqh[-jREa$h*-l-6.50.34KKs\\,V+h", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-vqh[-jREa$h*-l")
+                .AddProperty(nameof(SwVersion.Major), -6).AddProperty(nameof(SwVersion.Minor), 50).AddProperty(nameof(SwVersion.Patch), 34).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "KKs\\,V").AddProperty(nameof(SwVersion.Build), "+h").ToJsonString());
+            Add("}hg(O^C-@#xUG_21.44.994 ", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "}hg(O^C-@#xUG_")
+                .AddProperty(nameof(SwVersion.Major), 21).AddProperty(nameof(SwVersion.Minor), 44).AddProperty(nameof(SwVersion.Patch), 99).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "4 ").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("\";Gm;^- a,=68-3", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "\";Gm;^- a,=")
+                .AddProperty(nameof(SwVersion.Major), 68).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-3").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("?Si|R(To-xqgK\\_s-96.86Kn+v2\\p9Q`", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "?Si|R(To-xqgK\\_s")
+                .AddProperty(nameof(SwVersion.Major), -96).AddProperty(nameof(SwVersion.Minor), 86).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "Kn").AddProperty(nameof(SwVersion.Build), "+v2\\p9Q`").ToJsonString());
+            Add("^HV-J}V=MHupQu-15-ttc+!q", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "^HV-J}V=MHupQu")
+                .AddProperty(nameof(SwVersion.Major), -15).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-ttc").AddProperty(nameof(SwVersion.Build), "+!q").ToJsonString());
+            Add("-@uJBF-sQ-60.42-f[UvCh+`lis{", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-@uJBF-sQ")
+                .AddProperty(nameof(SwVersion.Major), -60).AddProperty(nameof(SwVersion.Minor), 42).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-f[UvCh").AddProperty(nameof(SwVersion.Build), "+`lis{").ToJsonString());
+            Add("-?[GI-S-e!w[-45.90.56*P", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-?[GI-S-e!w[")
+                .AddProperty(nameof(SwVersion.Major), -45).AddProperty(nameof(SwVersion.Minor), 90).AddProperty(nameof(SwVersion.Patch), 56).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "*P").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("-Mh-#/zxV;$_69+%%~Qs", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-Mh-#/zxV;$_")
+                .AddProperty(nameof(SwVersion.Major), 69).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddNullProperty(nameof(SwVersion.PreRelease)).AddProperty(nameof(SwVersion.Build), "+%%~Qs").ToJsonString());
+            Add("YJmH/{e(LOp|b~-|J32G/i#+;TP*.", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "YJmH/{e(LOp|b~-|J")
+                .AddProperty(nameof(SwVersion.Major), 32).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "G/i#").AddProperty(nameof(SwVersion.Build), "+;TP*.").ToJsonString());
+            Add(">>h-u-30-#{", new JsonObject().AddProperty(nameof(SwVersion.Prefix), ">>h-u")
+                .AddProperty(nameof(SwVersion.Major), -30).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-#{").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("[p-USz?-<K92.88.34-+p1Y?muO", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "[p-USz?-<K")
+                .AddProperty(nameof(SwVersion.Major), 92).AddProperty(nameof(SwVersion.Minor), 88).AddProperty(nameof(SwVersion.Patch), 34).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-").AddProperty(nameof(SwVersion.Build), "+p1Y?muO").ToJsonString());
+            Add(">E)zQihlHX[hv]}(-88.47j+", new JsonObject().AddProperty(nameof(SwVersion.Prefix), ">E)zQihlHX[hv]}(")
+                .AddProperty(nameof(SwVersion.Major), -88).AddProperty(nameof(SwVersion.Minor), 47).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "j").AddProperty(nameof(SwVersion.Build), "+").ToJsonString());
+            Add("]Jv%uvIZmt<-] b$70.43.59.0-XNT!.+-\"a8", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "]Jv%uvIZmt<-] b$")
+                .AddProperty(nameof(SwVersion.Major), 70).AddProperty(nameof(SwVersion.Minor), 43).AddProperty(nameof(SwVersion.Patch), 59).AddProperty(nameof(SwVersion.Revision), 0)
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-XNT!.").AddProperty(nameof(SwVersion.Build), "+-\"a8").ToJsonString());
+            Add("\"wHh-F$Qb_XtVgy-96.32.61z+>", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "\"wHh-F$Qb_XtVgy")
+                .AddProperty(nameof(SwVersion.Major), -96).AddProperty(nameof(SwVersion.Minor), 32).AddProperty(nameof(SwVersion.Patch), 61).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "z").AddProperty(nameof(SwVersion.Build), "+>").ToJsonString());
+            Add("Pm`WUvu-J#*#_,2+", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "Pm`WUvu-J#*#_,")
+                .AddProperty(nameof(SwVersion.Major), 2).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddNullProperty(nameof(SwVersion.PreRelease)).AddProperty(nameof(SwVersion.Build), "+").ToJsonString());
+            Add("-S[[-d(kiko-82-U^{v+", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-S[[-d(kiko")
+                .AddProperty(nameof(SwVersion.Major), -82).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-U^{v").AddProperty(nameof(SwVersion.Build), "+").ToJsonString());
+            Add("cfmHC#y|yQ??nr-81.67.16.68-{_wk&Q", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "cfmHC#y|yQ??nr")
+                .AddProperty(nameof(SwVersion.Major), -81).AddProperty(nameof(SwVersion.Minor), 67).AddProperty(nameof(SwVersion.Patch), 16).AddProperty(nameof(SwVersion.Revision), 68)
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-{_wk&Q").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("{jGS-m28", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "{jGS-m")
+                .AddProperty(nameof(SwVersion.Major), 28).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddNullProperty(nameof(SwVersion.PreRelease)).AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("-{TK_%}[-66IwC$KT", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-{TK_%}[")
+                .AddProperty(nameof(SwVersion.Major), -66).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "IwC$KT").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("UA-x-o57.41.92.52>g5", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "UA-x-o")
+                .AddProperty(nameof(SwVersion.Major), 57).AddProperty(nameof(SwVersion.Minor), 41).AddProperty(nameof(SwVersion.Patch), 92).AddProperty(nameof(SwVersion.Revision), 52)
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), ">g5").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("-yr{rZFP-*-2.28-", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-yr{rZFP-*")
+                .AddProperty(nameof(SwVersion.Major), -2).AddProperty(nameof(SwVersion.Minor), 28).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("-?/k-V%db>yC-o>jk-89.33#_/)f@P+0 co2", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-?/k-V%db>yC-o>jk")
+                .AddProperty(nameof(SwVersion.Major), -89).AddProperty(nameof(SwVersion.Minor), 33).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "#_/)f@P").AddProperty(nameof(SwVersion.Build), "+0 co2").ToJsonString());
+            Add("F,u}rk-lkPK46R", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "F,u}rk-lkPK")
+                .AddProperty(nameof(SwVersion.Major), 46).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "R").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("r!j_YEX]v}o-[S~19.71.969:", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "r!j_YEX]v}o-[S~")
+                .AddProperty(nameof(SwVersion.Major), 19).AddProperty(nameof(SwVersion.Minor), 71).AddProperty(nameof(SwVersion.Patch), 96).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "9:").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("-qd#,Sdj50-rF", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-qd#,Sdj")
+                .AddProperty(nameof(SwVersion.Major), 50).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-rF").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("-[HLsa-82.90.34J+ED%", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-[HLsa")
+                .AddProperty(nameof(SwVersion.Major), -82).AddProperty(nameof(SwVersion.Minor), 90).AddProperty(nameof(SwVersion.Patch), 34).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "J").AddProperty(nameof(SwVersion.Build), "+ED%").ToJsonString());
+            Add("-BcmyVJ-} LYTR69-<%PG2r", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-BcmyVJ-} LYTR")
+                .AddProperty(nameof(SwVersion.Major), 69).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-<%PG2r").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("tn_GN-KVqJ-knRCEbe-70.75-Vf+g*(\\", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "tn_GN-KVqJ-knRCEbe")
+                .AddProperty(nameof(SwVersion.Major), -70).AddProperty(nameof(SwVersion.Minor), 75).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "-Vf").AddProperty(nameof(SwVersion.Build), "+g*(\\").ToJsonString());
+            Add("-#-GjI-p-86+o2", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-#-GjI-p")
+                .AddProperty(nameof(SwVersion.Major), -86).AddNullProperty(nameof(SwVersion.Minor)).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddNullProperty(nameof(SwVersion.PreRelease)).AddProperty(nameof(SwVersion.Build), "+o2").ToJsonString());
+            Add("Q^ls->E?MaNr&O=T71.62.68OR", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "Q^ls->E?MaNr&O=T")
+                .AddProperty(nameof(SwVersion.Major), 71).AddProperty(nameof(SwVersion.Minor), 62).AddProperty(nameof(SwVersion.Patch), 68).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "OR").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("w]GMC>WO-uQ,53.69y+1I D<D", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "w]GMC>WO-uQ,")
+                .AddProperty(nameof(SwVersion.Major), 53).AddProperty(nameof(SwVersion.Minor), 69).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "y").AddProperty(nameof(SwVersion.Build), "+1I D<D").ToJsonString());
+            Add("GnKN-eY=< xdQZ-90.93.17}\"=Tcg=+sQEf2I;", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "GnKN-eY=< xdQZ")
+                .AddProperty(nameof(SwVersion.Major), -90).AddProperty(nameof(SwVersion.Minor), 93).AddProperty(nameof(SwVersion.Patch), 17).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "}\"=Tcg=").AddProperty(nameof(SwVersion.Build), "+sQEf2I;").ToJsonString());
+            Add("';KF?<-QTdKZ?-RTb$f:-74.45.41hl", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "';KF?<-QTdKZ?-RTb$f:")
+                .AddProperty(nameof(SwVersion.Major), -74).AddProperty(nameof(SwVersion.Minor), 45).AddProperty(nameof(SwVersion.Patch), 41).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "hl").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
+            Add("-PWb,dvk-;xO-c-56.53$M0RH", new JsonObject().AddProperty(nameof(SwVersion.Prefix), "-PWb,dvk-;xO-c")
+                .AddProperty(nameof(SwVersion.Major), -56).AddProperty(nameof(SwVersion.Minor), 53).AddNullProperty(nameof(SwVersion.Patch)).AddNullProperty(nameof(SwVersion.Revision))
+                .AddIntArrayProperty(nameof(SwVersion.AdditionalNumerical)).AddProperty(nameof(SwVersion.PreRelease), "$M0RH").AddNullProperty(nameof(SwVersion.Build)).ToJsonString());
         }
     }
 
     /// <summary>
     /// Unit test for constructor <see cref="SwVersion(string?)" />
     /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ParsingConstructorTestData))]
-    public void ParsingConstructorTest(string? versionString, VersionValues expected)
+    [Theory]
+    [ClassData(typeof(ParsingConstructorTestData))]
+    public void ParsingConstructorTest(string? versionString, string jsonData)
     {
         SwVersion target = new(versionString);
-        expected.AssertEquals(target);
+        JsonObject obj = (JsonObject)JsonNode.Parse(jsonData)!;
+        Assert.Equal(obj[nameof(SwVersion.Major)]!.GetValue<int>(), target.Major);
     }
 
     [Fact]
@@ -255,71 +485,6 @@ public class SwVersionUnitTest
         Assert.Null(result.Build);
     }
     
-    public static readonly Random _random = new();
-
-    private static IEnumerable<int> GetMajorValues()
-    {
-        yield return int.MinValue;
-        yield return _random.Next(int.MinValue + 1, -1);
-        yield return -1;
-        yield return 0;
-        yield return 1;
-        yield return _random.Next(2, int.MaxValue - 1);
-        yield return int.MaxValue;
-    }
-    
-    private static int GetRandomInt(int minValue, int maxValue, params int[] omit)
-    {
-        int result = _random.Next(minValue, maxValue);
-        if (omit is not null && omit.Length > 0)
-            while (omit.Contains(result))
-                result = _random.Next(minValue, maxValue);
-        return result;
-    }
-    private static IEnumerable<int> GetMinorValues(out IEnumerable<int> majorValues)
-    {
-        int sharedMajor = _random.Next(2, int.MaxValue - 1);
-        int uniqueMajor = GetRandomInt(2, int.MaxValue - 1, sharedMajor);
-        int uniqueMinor = GetRandomInt(2, int.MaxValue - 1, sharedMajor, uniqueMajor);
-        majorValues = (new int[] { int.MinValue, _random.Next(int.MinValue + 1, -1), -1, 0, 1, sharedMajor, uniqueMajor, int.MaxValue }).OrderBy(i => i);
-        return (new int[] { 0, 1, sharedMajor, uniqueMinor, int.MaxValue }).OrderBy(i => i);
-    }
-    
-    private static IEnumerable<int> GetPatchValues(out IEnumerable<int> majorValues, out IEnumerable<int> minorValues)
-    {
-        int sharedMajor = _random.Next(2, int.MaxValue - 1);
-        int uniqueMajor = GetRandomInt(2, int.MaxValue - 1, sharedMajor);
-        int sharedMinor = GetRandomInt(2, int.MaxValue - 1, sharedMajor, uniqueMajor);
-        int uniqueMinor = GetRandomInt(2, int.MaxValue - 1, sharedMajor, uniqueMajor, sharedMinor);
-        int uniquePatch = GetRandomInt(2, int.MaxValue - 1, sharedMajor, uniqueMajor, sharedMinor, uniqueMinor);
-        majorValues = (new int[] { int.MinValue, _random.Next(int.MinValue + 1, -1), -1, 0, 1, sharedMajor, uniqueMajor, int.MaxValue }).OrderBy(i => i);
-        minorValues = (new int[] { 0, 1, sharedMajor, sharedMinor, uniqueMinor, int.MaxValue }).OrderBy(i => i);
-        return (new int[] { 0, 1, sharedMajor, sharedMinor, uniquePatch, int.MaxValue }).OrderBy(i => i);
-    }
-    
-    private static IEnumerable<IEnumerable<int>> GetAdditionalNumericValues(out IEnumerable<int> majorValues, out IEnumerable<int> minorValues, out IEnumerable<int> patchValues,
-        out IEnumerable<int> revisionValues)
-    {
-        int sharedMajor = _random.Next(2, int.MaxValue - 1);
-        int uniqueMajor = GetRandomInt(2, int.MaxValue - 1, sharedMajor);
-        int sharedMinor = GetRandomInt(2, int.MaxValue - 1, sharedMajor, uniqueMajor);
-        int uniqueMinor = GetRandomInt(2, int.MaxValue - 1, sharedMajor, uniqueMajor, sharedMinor);
-        int sharedPatch = GetRandomInt(2, int.MaxValue - 1, sharedMajor, uniqueMajor, sharedMinor, uniqueMinor);
-        int uniquePatch = GetRandomInt(2, int.MaxValue - 1, sharedMajor, uniqueMajor, sharedMinor, uniqueMinor, sharedPatch);
-        int sharedRevision = GetRandomInt(2, int.MaxValue - 1, sharedMajor, uniqueMajor, sharedMinor, uniqueMinor, sharedPatch, uniquePatch);
-        int uniqueRevision = GetRandomInt(2, int.MaxValue - 1, sharedMajor, uniqueMajor, sharedMinor, uniqueMinor, sharedPatch, uniquePatch, sharedRevision);
-        int uniqueAddl = GetRandomInt(2, int.MaxValue - 1, sharedMajor, uniqueMajor, sharedMinor, uniqueMinor, sharedPatch, uniquePatch, sharedRevision, uniqueRevision);
-        majorValues = (new int[] { int.MinValue, _random.Next(int.MinValue + 1, -1), -1, 0, 1, sharedMajor, uniqueMajor, int.MaxValue }).OrderBy(i => i);
-        minorValues = (new int[] { 0, 1, sharedMajor, sharedMinor, uniqueMinor, int.MaxValue }).OrderBy(i => i);
-        patchValues = (new int[] { 0, 1, sharedMajor, sharedMinor, sharedPatch, uniquePatch, int.MaxValue }).OrderBy(i => i);
-        revisionValues = (new int[] { 0, 1, sharedMajor, sharedMinor, sharedPatch, sharedRevision, uniqueRevision, int.MaxValue }).OrderBy(i => i);
-        return (new int[] { sharedMajor, sharedMinor, sharedPatch, sharedRevision, uniqueAddl }).Select(i => new int[] { i })
-            .Concat((new int[] { sharedMajor, sharedMinor, sharedPatch, sharedRevision, uniqueAddl }).Select(i => new int[] { i, uniqueAddl }))
-            .Concat((new int[] { sharedMajor, sharedMinor, sharedPatch, sharedRevision, uniqueAddl }).Select(i => new int[] { uniqueAddl, i }))
-            .Concat(new int[][] { new int[] { uniqueAddl, sharedMajor, sharedMinor, sharedPatch, sharedRevision } });
-    }
-
-
     private static readonly char[] _letterChars = new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
         'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
     private static readonly char[] _numericChars =  new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
@@ -335,1415 +500,4 @@ public class SwVersionUnitTest
     private static readonly char[] _prefixCharsSource = _nonNumericCharsSource.Where(c => !_buildSeparatorChars.Contains(c)).ToArray();
     
     private static readonly StringComparer _comparer = StringComparer.OrdinalIgnoreCase;
-    private static string GetRandomString(char[] source, int minLength, int maxLength, params string[] omit)
-    {
-        if (maxLength < 1)
-            return string.Empty;
-        int length;
-        if (minLength > maxLength)
-            length = (maxLength < 0) ? 0 : maxLength;
-        else if (maxLength < 1)
-            length = 0;
-        else if (maxLength == 1)
-            length = (minLength > 0) ? 1 : _random.Next(0, 2);
-        else if (maxLength == minLength)
-            length = maxLength;
-        else
-            length = _random.Next((minLength < 0) ? 0 : minLength, maxLength);
-        int loopCheck;
-        string result;
-                int count;
-        switch (length)
-        {
-            case 0:
-                return string.Empty;
-            case 1:
-                result = new String(source[_random.Next(0, source.Length)], 1);
-                if (omit == null || omit.Length == 0 || !omit.Contains(result, _comparer))
-                    return result;
-                loopCheck = source.Length * 4;
-                count = 0;
-                do
-                {
-                    if (++count > loopCheck)
-                        break;
-                    result = new String(source[_random.Next(0, source.Length)], 1);
-                }
-                while (omit.Contains(result, _comparer));
-                return result;
-            default:
-                StringBuilder sb = new StringBuilder().Append(source[_random.Next(0, source.Length)]);
-                for (int i = 1; i < length; i++)
-                    sb.Append(source[_random.Next(0, source.Length)]);
-                result = sb.ToString();
-                if (omit == null || omit.Length == 0 || !omit.Contains(result, _comparer))
-                    return result;
-                loopCheck = source.Length * 4;
-                count = 0;
-                do
-                {
-                    if (++count > loopCheck)
-                        break;
-                    sb = new StringBuilder().Append(source[_random.Next(0, source.Length)]);
-                    for (int i = 1; i < length; i++)
-                        sb.Append(source[_random.Next(0, source.Length)]);
-                    result = sb.ToString();
-                }
-                while (omit.Contains(result, _comparer));
-                return result;
-        }
-    }
-    
-    private static IEnumerable<VersionValues.PreReleaseSegment[]> GetPreReleaseSegments(string shared1, string shared2, string unique1, string unique2, string[] otherShared, params string[] otherUnique)
-    {
-        foreach (string s in otherShared)
-            yield return new VersionValues.PreReleaseSegment[] { new VersionValues.PreReleaseSegment(false, s) };
-        string[] omit = otherShared.Concat(otherUnique).Concat(new string[] { shared1, shared2, unique1, unique2 }).ToArray();
-        yield return new VersionValues.PreReleaseSegment[] { new VersionValues.PreReleaseSegment(false, shared1) };
-        yield return new VersionValues.PreReleaseSegment[] { new VersionValues.PreReleaseSegment(true, shared2) };
-        yield return new VersionValues.PreReleaseSegment[] { new VersionValues.PreReleaseSegment(true, unique1) };
-        yield return new VersionValues.PreReleaseSegment[] { new VersionValues.PreReleaseSegment(true, unique2) };
-        foreach (string s in otherShared)
-            yield return new VersionValues.PreReleaseSegment[]
-            {
-                new VersionValues.PreReleaseSegment(false, s),
-                new VersionValues.PreReleaseSegment(false, GetRandomString(_prefixCharsSource, 2, 8, omit))
-            };
-        yield return new VersionValues.PreReleaseSegment[]
-        {
-            new VersionValues.PreReleaseSegment(false, shared1),
-            new VersionValues.PreReleaseSegment(false, GetRandomString(_prefixCharsSource, 2, 8, omit))
-        };
-        yield return new VersionValues.PreReleaseSegment[]
-        {
-            new VersionValues.PreReleaseSegment(true, shared2),
-            new VersionValues.PreReleaseSegment(false, GetRandomString(_prefixCharsSource, 2, 8,  omit))
-        };
-        yield return new VersionValues.PreReleaseSegment[]
-        {
-            new VersionValues.PreReleaseSegment(true, unique1),
-            new VersionValues.PreReleaseSegment(false, GetRandomString(_prefixCharsSource, 2, 8,  omit))
-        };
-        yield return new VersionValues.PreReleaseSegment[]
-        {
-            new VersionValues.PreReleaseSegment(true, unique2),
-            new VersionValues.PreReleaseSegment(false, GetRandomString(_prefixCharsSource, 2, 8,  omit))
-        };
-        foreach (string s in otherShared)
-            yield return new VersionValues.PreReleaseSegment[]
-            {
-                new VersionValues.PreReleaseSegment(false, s),
-                new VersionValues.PreReleaseSegment(false, shared1), new VersionValues.PreReleaseSegment(false, shared2)
-            };
-    }
-    
-    public static IEnumerable<VersionValues.PreReleaseSegment> GetPreReleaseSegments(string shared1, string shared2, string unique1, string unique2)
-    {
-        yield return new VersionValues.PreReleaseSegment(false, shared1);
-        if (unique2.Length > 0)
-        {
-            char c = shared1[0];
-            if (!(char.IsDigit(c) || _buildSeparatorChars.Contains(c)))
-                yield return new VersionValues.PreReleaseSegment(true, shared1);
-        }
-        yield return new VersionValues.PreReleaseSegment(false, shared2);
-        if (unique2.Length > 0)
-        {
-            char c = shared2[0];
-            if (!(char.IsDigit(c) || _buildSeparatorChars.Contains(c)))
-                yield return new VersionValues.PreReleaseSegment(true, shared2);
-        }
-        yield return new VersionValues.PreReleaseSegment(false, unique1);
-        if (unique2.Length > 0)
-        {
-            char c = unique1[0];
-            if (!(char.IsDigit(c) || _buildSeparatorChars.Contains(c)))
-                yield return new VersionValues.PreReleaseSegment(true, unique1);
-        }
-        yield return new VersionValues.PreReleaseSegment(false, unique2);
-        if (unique2.Length > 0)
-        {
-            char c = unique2[0];
-            if (!(char.IsDigit(c) || _buildSeparatorChars.Contains(c)))
-                yield return new VersionValues.PreReleaseSegment(true, unique2);
-        }
-    }
-    
-    public static IEnumerable<VersionValues.PreReleaseSegment[]> GetAdditonalPreReleaseSegments(string shared1, string shared2, string unique1, string unique2, string[] otherShared, params string[] otherUnique)
-    {
-        yield return new  VersionValues.PreReleaseSegment[] { new VersionValues.PreReleaseSegment(false, shared1) };
-        if (unique2.Length > 0)
-        {
-            char c = shared1[0];
-            if (!(char.IsDigit(c) || _buildSeparatorChars.Contains(c)))
-                yield return new  VersionValues.PreReleaseSegment[] { new VersionValues.PreReleaseSegment(true, shared1) };
-        }
-        yield return new  VersionValues.PreReleaseSegment[] { new VersionValues.PreReleaseSegment(false, shared2) };
-        if (unique2.Length > 0)
-        {
-            char c = shared2[0];
-            if (!(char.IsDigit(c) || _buildSeparatorChars.Contains(c)))
-                yield return new  VersionValues.PreReleaseSegment[] { new VersionValues.PreReleaseSegment(true, shared2) };
-        }
-        yield return new  VersionValues.PreReleaseSegment[] { new VersionValues.PreReleaseSegment(false, unique1) };
-        if (unique2.Length > 0)
-        {
-            char c = unique1[0];
-            if (!(char.IsDigit(c) || _buildSeparatorChars.Contains(c)))
-                yield return new  VersionValues.PreReleaseSegment[] { new VersionValues.PreReleaseSegment(true, unique1) };
-        }
-        yield return new  VersionValues.PreReleaseSegment[] { new VersionValues.PreReleaseSegment(false, unique2) };
-        if (unique2.Length > 0)
-        {
-            char c = unique2[0];
-            if (!(char.IsDigit(c) || _buildSeparatorChars.Contains(c)))
-                yield return new  VersionValues.PreReleaseSegment[] { new VersionValues.PreReleaseSegment(true, unique2) };
-        }
-        foreach (string s in otherShared)
-        {
-            yield return new VersionValues.PreReleaseSegment[] { new VersionValues.PreReleaseSegment(false, s) };
-            yield return new VersionValues.PreReleaseSegment[] { new VersionValues.PreReleaseSegment(true, s) };
-        }
-        
-        yield return new VersionValues.PreReleaseSegment[]
-        {
-            new VersionValues.PreReleaseSegment(false, unique1), new VersionValues.PreReleaseSegment(true, shared2),
-            new VersionValues.PreReleaseSegment(false, shared2), new VersionValues.PreReleaseSegment(true, GetRandomString(_buildCharsSource, 2, 8,
-                otherShared.Concat(otherUnique).Concat(new string[] { shared1, shared2, unique1, unique2}).ToArray()))
-        };
-    }
-    
-    public static IEnumerable<VersionValues.BuildSegment> GetBuildSegments(string shared1, string shared2, string unique1, string unique2)
-    {
-        yield return new VersionValues.BuildSegment(SwVersion.BuildSeparator.Plus, shared1);
-        yield return new VersionValues.BuildSegment(SwVersion.BuildSeparator.Plus, shared2);
-        yield return new VersionValues.BuildSegment(SwVersion.BuildSeparator.Plus, unique1);
-        yield return new VersionValues.BuildSegment(SwVersion.BuildSeparator.Plus, unique2);
-    }
-    
-    public static IEnumerable<VersionValues.BuildSegment[]> GetAdditonalBuildSegments(string shared1, string shared2, string unique1, string unique2, string[] otherShared, params string[] otherUnique)
-    {
-        yield return new  VersionValues.BuildSegment[] { new VersionValues.BuildSegment(SwVersion.BuildSeparator.Plus, shared1) };
-        yield return new  VersionValues.BuildSegment[] { new VersionValues.BuildSegment(SwVersion.BuildSeparator.Dash, shared1) };
-        yield return new VersionValues.BuildSegment[] { new VersionValues.BuildSegment(SwVersion.BuildSeparator.Dot, shared1) };
-        yield return new VersionValues.BuildSegment[] { new VersionValues.BuildSegment(SwVersion.BuildSeparator.Plus, shared2) };
-        yield return new VersionValues.BuildSegment[] { new VersionValues.BuildSegment(SwVersion.BuildSeparator.Dash, shared2) };
-        yield return new VersionValues.BuildSegment[] { new VersionValues.BuildSegment(SwVersion.BuildSeparator.Dot, shared2) };
-        foreach (string s in otherShared)
-            yield return new VersionValues.BuildSegment[] { new VersionValues.BuildSegment(SwVersion.BuildSeparator.Plus, s) };
-        
-        yield return new VersionValues.BuildSegment[]
-        {
-            new VersionValues.BuildSegment(SwVersion.BuildSeparator.Plus, unique1), new VersionValues.BuildSegment(SwVersion.BuildSeparator.Plus, shared2),
-            new VersionValues.BuildSegment(SwVersion.BuildSeparator.Dash, shared2), new VersionValues.BuildSegment(SwVersion.BuildSeparator.Dot, GetRandomString(_prefixCharsSource, 2, 8,
-                otherShared.Concat(otherUnique).Concat(new string[] { shared1, shared2, unique1, unique2}).ToArray()))
-        };
-    }
-
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor1Test(string, int, int, int, int, IEnumerable{int}, IEnumerable{VersionValues.PreReleaseSegment}, VersionValues.BuildSegment, VersionValues.BuildSegment[]?, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor1TestData : TheoryData<string, int, int, int, int, IEnumerable<int>, IEnumerable<VersionValues.PreReleaseSegment>, VersionValues.BuildSegment, VersionValues.BuildSegment[],
-        VersionValues>
-    {
-        public ComponentConstructor1TestData()
-        {
-            IEnumerable<IEnumerable<int>> additionalNumericalValues = GetAdditionalNumericValues(out IEnumerable<int> majorValues, out IEnumerable<int> minorValues, out IEnumerable<int> patchValues,
-                out IEnumerable<int> revisionValues);
-            string sharedPrefix1 = GetRandomString(_prefixCharsSource, 1, 1);
-            string sharedPrefix2 = GetRandomString(_prefixCharsSource, 2, 8);
-            string uniquePrefix1 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix1);
-            string uniquePrefix2 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            string uniquePrefix3 = "-" + GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            string sharedPreRelease1 = GetRandomString(_buildCharsSource, 1, 1, uniquePrefix1, sharedPrefix1);
-            string sharedPreRelease2 = GetRandomString(_buildCharsSource, 2, 8, uniquePrefix2, sharedPrefix2);
-            string uniquePreRelease1 = GetRandomString(_buildCharsSource, 1, 1, uniquePrefix1, sharedPrefix1, sharedPreRelease1);
-            string uniquePreRelease2 = GetRandomString(_buildCharsSource, 2, 8, uniquePrefix2, sharedPrefix2, sharedPreRelease2);
-            string sharedBuild1 = GetRandomString(_buildCharsSource, 1, 1, uniquePrefix1, sharedPrefix1, sharedPreRelease1, uniquePreRelease1);
-            string sharedBuild2 = GetRandomString(_buildCharsSource, 2, 8, uniquePrefix2, sharedPrefix2, sharedPreRelease2, uniquePreRelease2);
-            string uniqueBuild1 = GetRandomString(_buildCharsSource, 1, 1, uniquePrefix1, sharedPrefix1, sharedPreRelease1, uniquePreRelease1, sharedBuild1);
-            string uniqueBuild2 = GetRandomString(_buildCharsSource, 2, 8, uniquePrefix2, sharedPrefix2, sharedPreRelease2, uniquePreRelease2, sharedBuild2);
-            foreach (string prefix in new string[] { sharedPrefix1, sharedPrefix2, uniquePrefix1, uniquePrefix2, uniquePrefix3 })
-                foreach (int major in majorValues)
-                    foreach (int minor in minorValues)
-                        foreach (int patch in patchValues)
-                            foreach (int revision in revisionValues)
-                                foreach (IEnumerable<int> additionalNumerical in additionalNumericalValues)
-                                    foreach (VersionValues.PreReleaseSegment[] preRelease in GetPreReleaseSegments(sharedPreRelease1, sharedPreRelease2, uniquePreRelease1, uniquePreRelease2,
-                                            new string[] { sharedPrefix1, sharedPrefix2, sharedBuild1, sharedBuild2 }, uniquePrefix1, uniquePrefix2, uniqueBuild1, uniqueBuild2))
-                                        foreach (VersionValues.BuildSegment build in GetBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2))
-                                            foreach (VersionValues.BuildSegment[] additionalBuild in GetAdditonalBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2, 
-                                                    new string[] { sharedPrefix1, sharedPrefix2, sharedPreRelease1, sharedPreRelease2 }, uniquePrefix1, uniquePrefix2, uniquePreRelease1, uniquePreRelease2))
-                                                Add(prefix, major, minor, patch, revision, additionalNumerical, preRelease, build, additionalBuild,
-                                                    new(prefix, major, minor, patch, revision, additionalNumerical.ToArray(), preRelease, additionalBuild.Prepend(build).ToArray(),
-                                                        SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(string, int, int, int, int, IEnumerable{int}, IEnumerable{SwVersion.PreReleaseSegment}, SwVersion.BuildSegment, SwVersion.BuildSegment[])" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor1TestData))]
-    public void ComponentConstructor1Test(string prefix, int major, int minor, int patch, int revision, IEnumerable<int> additionalNumerical, IEnumerable<VersionValues.PreReleaseSegment> preRelease,
-        VersionValues.BuildSegment build, VersionValues.BuildSegment[]? additionalBuild, VersionValues expected)
-    {
-        SwVersion target = (additionalBuild is null) ? new(prefix, major, minor, patch, revision, additionalNumerical, preRelease.Select(p => new SwVersion.PreReleaseSegment(p.AltSeparator, p.Value)), new SwVersion.BuildSegment(build.Separator, build.Value)) : new(prefix, major, minor, patch, revision, additionalNumerical,
-            preRelease.Select(p => new SwVersion.PreReleaseSegment(p.AltSeparator, p.Value)), new SwVersion.BuildSegment(build.Separator, build.Value), additionalBuild.Select(b => new SwVersion.BuildSegment(b.Separator, b.Value)).ToArray());
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor2Test(int, int, int, int, IEnumerable{int}, IEnumerable{VersionValues.PreReleaseSegment}, VersionValues.BuildSegment, VersionValues.BuildSegment[]?, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor2TestData : TheoryData<int, int, int, int, IEnumerable<int>, IEnumerable<VersionValues.PreReleaseSegment>, VersionValues.BuildSegment, VersionValues.BuildSegment[], VersionValues>
-    {
-        public ComponentConstructor2TestData()
-        {
-            IEnumerable<IEnumerable<int>> additionalNumericalValues = GetAdditionalNumericValues(out IEnumerable<int> majorValues, out IEnumerable<int> minorValues, out IEnumerable<int> patchValues,
-                out IEnumerable<int> revisionValues);
-            string sharedPreRelease1 = GetRandomString(_buildCharsSource, 1, 1);
-            string sharedPreRelease2 = GetRandomString(_buildCharsSource, 2, 8);
-            string uniquePreRelease1 = GetRandomString(_buildCharsSource, 1, 1, sharedPreRelease1);
-            string uniquePreRelease2 = GetRandomString(_buildCharsSource, 2, 8, sharedPreRelease2);
-            string sharedBuild1 = GetRandomString(_buildCharsSource, 1, 1);
-            string sharedBuild2 = GetRandomString(_buildCharsSource, 2, 8, sharedPreRelease2, uniquePreRelease2);
-            string uniqueBuild1 = GetRandomString(_buildCharsSource, 1, 1, sharedPreRelease1, uniquePreRelease1, sharedBuild1);
-            string uniqueBuild2 = GetRandomString(_buildCharsSource, 2, 8, sharedPreRelease2, uniquePreRelease2, sharedBuild2);
-            foreach (int major in majorValues)
-                foreach (int minor in minorValues)
-                    foreach (int patch in patchValues)
-                        foreach (int revision in revisionValues)
-                            foreach (IEnumerable<int> additionalNumerical in additionalNumericalValues)
-                                foreach (VersionValues.PreReleaseSegment[] preRelease in GetPreReleaseSegments(sharedPreRelease1, sharedPreRelease2, uniquePreRelease1, uniquePreRelease2,
-                                        new string[] { sharedBuild1, sharedBuild2 }, uniqueBuild1, uniqueBuild2))
-                                    foreach (VersionValues.BuildSegment build in GetBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2))
-                                        foreach (VersionValues.BuildSegment[] additionalBuild in GetAdditonalBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2,
-                                                new string[] { sharedPreRelease1, sharedPreRelease2 }, uniquePreRelease1, uniquePreRelease2))
-                                            Add(major, minor, patch, revision, additionalNumerical, preRelease, build, additionalBuild,
-                                                new(null, major, minor, patch, revision, additionalNumerical.ToArray(), preRelease, additionalBuild.Prepend(build).ToArray(),
-                                                    SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(int, int, int, int, IEnumerable{int}, IEnumerable{SwVersion.PreReleaseSegment}, SwVersion.BuildSegment, SwVersion.BuildSegment[])" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor2TestData))]
-    public void ComponentConstructor2Test(int major, int minor, int patch, int revision, IEnumerable<int> additionalNumerical, IEnumerable<VersionValues.PreReleaseSegment> preRelease,
-        VersionValues.BuildSegment build, VersionValues.BuildSegment[]? additionalBuild, VersionValues expected)
-    {
-        SwVersion target = (additionalBuild is null) ? new(major, minor, patch, revision, additionalNumerical, preRelease.Select(p => new SwVersion.PreReleaseSegment(p.AltSeparator, p.Value)), new SwVersion.BuildSegment(build.Separator, build.Value)) :
-            new(major, minor, patch, revision, additionalNumerical, preRelease.Select(p => new SwVersion.PreReleaseSegment(p.AltSeparator, p.Value)),
-            new SwVersion.BuildSegment(build.Separator, build.Value), additionalBuild.Select(b => new SwVersion.BuildSegment(b.Separator, b.Value)).ToArray());
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor3Test(string, int, int, int, int, IEnumerable{int}, VersionValues.PreReleaseSegment, VersionValues.PreReleaseSegment[]?, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor3TestData : TheoryData<string, int, int, int, int, IEnumerable<int>, VersionValues.PreReleaseSegment, VersionValues.PreReleaseSegment[], VersionValues>
-    {
-        public ComponentConstructor3TestData()
-        {
-            IEnumerable<IEnumerable<int>> additionalNumericalValues = GetAdditionalNumericValues(out IEnumerable<int> majorValues, out IEnumerable<int> minorValues, out IEnumerable<int> patchValues,
-                out IEnumerable<int> revisionValues);
-            string sharedPrefix1 = GetRandomString(_prefixCharsSource, 1, 1);
-            string sharedPrefix2 = GetRandomString(_prefixCharsSource, 2, 8);
-            string uniquePrefix1 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix1);
-            string uniquePrefix2 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            string uniquePrefix3 = "-" + GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            string sharedPreRelease1 = GetRandomString(_buildCharsSource, 1, 1, uniquePrefix1, sharedPrefix1);
-            string sharedPreRelease2 = GetRandomString(_buildCharsSource, 2, 8, uniquePrefix2, sharedPrefix2);
-            string uniquePreRelease1 = GetRandomString(_buildCharsSource, 1, 1, uniquePrefix1, sharedPrefix1, sharedPreRelease1);
-            string uniquePreRelease2 = GetRandomString(_buildCharsSource, 2, 8, uniquePrefix2, sharedPrefix2, sharedPreRelease2);
-            foreach (string prefix in new string[] { sharedPrefix1, sharedPrefix2, uniquePrefix1, uniquePrefix2, uniquePrefix3 })
-                foreach (int major in majorValues)
-                    foreach (int minor in minorValues)
-                        foreach (int patch in patchValues)
-                            foreach (int revision in revisionValues)
-                                foreach (IEnumerable<int> additionalNumerical in additionalNumericalValues)
-                                    foreach (VersionValues.PreReleaseSegment preRelease in GetPreReleaseSegments(sharedPreRelease1, sharedPreRelease2, uniquePreRelease1, uniquePreRelease2))
-                                        foreach (VersionValues.PreReleaseSegment[] additionalPreRelease in GetAdditonalPreReleaseSegments(sharedPreRelease1, sharedPreRelease2, uniquePreRelease1,
-                                                    uniquePreRelease2, new string[] { sharedPrefix1, sharedPrefix2 }, uniquePrefix1, uniquePrefix2, uniquePrefix3))
-                                            Add(prefix, major, minor, patch, revision, additionalNumerical, preRelease, additionalPreRelease, new(prefix, major, minor, patch, revision,
-                                                additionalNumerical.ToArray(), additionalPreRelease.Prepend(preRelease).ToArray(), Array.Empty<VersionValues.BuildSegment>(),
-                                                SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(string, int, int, int, int, IEnumerable{int}, SwVersion.PreReleaseSegment, SwVersion.PreReleaseSegment[])" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor3TestData))]
-    public void ComponentConstructor3Test(string prefix, int major, int minor, int patch, int revision, IEnumerable<int> additionalNumerical, VersionValues.PreReleaseSegment preRelease,
-        VersionValues.PreReleaseSegment[]? additionalPreRelease, VersionValues expected)
-    {
-        SwVersion target = (additionalPreRelease is null) ? new(prefix, major, minor, patch, revision, additionalNumerical, new SwVersion.PreReleaseSegment(preRelease.AltSeparator, preRelease.Value)) :
-            new(prefix, major, minor, patch, revision, additionalNumerical, new SwVersion.PreReleaseSegment(preRelease.AltSeparator, preRelease.Value), additionalPreRelease.Select(p => new SwVersion.PreReleaseSegment(p.AltSeparator, p.Value)).ToArray());
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor4Test(int, int, int, int, IEnumerable{int}, VersionValues.PreReleaseSegment, VersionValues.PreReleaseSegment[]?, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor4TestData : TheoryData<int, int, int, int, IEnumerable<int>, VersionValues.PreReleaseSegment, VersionValues.PreReleaseSegment[], VersionValues>
-    {
-        public ComponentConstructor4TestData()
-        {
-            IEnumerable<IEnumerable<int>> additionalNumericalValues = GetAdditionalNumericValues(out IEnumerable<int> majorValues, out IEnumerable<int> minorValues, out IEnumerable<int> patchValues,
-                out IEnumerable<int> revisionValues);
-            string sharedPreRelease1 = GetRandomString(_buildCharsSource, 1, 1);
-            string sharedPreRelease2 = GetRandomString(_buildCharsSource, 2, 8);
-            string uniquePreRelease1 = GetRandomString(_buildCharsSource, 1, 1, sharedPreRelease1);
-            string uniquePreRelease2 = GetRandomString(_buildCharsSource, 2, 8, sharedPreRelease2);
-            foreach (int major in majorValues)
-                foreach (int minor in minorValues)
-                    foreach (int patch in patchValues)
-                        foreach (int revision in revisionValues)
-                            foreach (IEnumerable<int> additionalNumerical in additionalNumericalValues)
-                                foreach (VersionValues.PreReleaseSegment preRelease in GetPreReleaseSegments(sharedPreRelease1, sharedPreRelease2, uniquePreRelease1, uniquePreRelease2))
-                                    foreach (VersionValues.PreReleaseSegment[] additionalPreRelease in GetAdditonalPreReleaseSegments(sharedPreRelease1, sharedPreRelease2, uniquePreRelease1,
-                                                uniquePreRelease2, Array.Empty<string>()))
-                                        Add(major, minor, patch, revision, additionalNumerical, preRelease, additionalPreRelease, new(null, major, minor, patch, revision,
-                                            additionalNumerical.ToArray(), additionalPreRelease.Prepend(preRelease).ToArray(), Array.Empty<VersionValues.BuildSegment>(),
-                                            SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(int, int, int, int, IEnumerable{int}, SwVersion.PreReleaseSegment, SwVersion.PreReleaseSegment[])" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor4TestData))]
-    public void ComponentConstructor4Test(int major, int minor, int patch, int revision, IEnumerable<int> additionalNumerical, VersionValues.PreReleaseSegment preRelease, VersionValues.PreReleaseSegment[]? additionalPreRelease, VersionValues expected)
-    {
-        SwVersion target = (additionalPreRelease is null) ? new(major, minor, patch, revision, additionalNumerical, new SwVersion.PreReleaseSegment(preRelease.AltSeparator, preRelease.Value)) :
-            new(major, minor, patch, revision, additionalNumerical, new SwVersion.PreReleaseSegment(preRelease.AltSeparator, preRelease.Value),
-            additionalPreRelease.Select(p => new SwVersion.PreReleaseSegment(p.AltSeparator, p.Value)).ToArray());
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor5Test(string, int, int, int, int, IEnumerable{int}, VersionValues.BuildSegment, VersionValues.BuildSegment[]?, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor5TestData : TheoryData<string, int, int, int, int, IEnumerable<int>, VersionValues.BuildSegment, VersionValues.BuildSegment[], VersionValues>
-    {
-        public ComponentConstructor5TestData()
-        {
-            IEnumerable<IEnumerable<int>> additionalNumericalValues = GetAdditionalNumericValues(out IEnumerable<int> majorValues, out IEnumerable<int> minorValues, out IEnumerable<int> patchValues,
-                 out IEnumerable<int> revisionValues);
-            string sharedPrefix1 = GetRandomString(_prefixCharsSource, 1, 1);
-            string sharedPrefix2 = GetRandomString(_prefixCharsSource, 2, 8);
-            string uniquePrefix1 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix1);
-            string uniquePrefix2 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            string uniquePrefix3 = "-" + GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            string sharedBuild1 = GetRandomString(_buildCharsSource, 1, 1, uniquePrefix1, sharedPrefix1);
-            string sharedBuild2 = GetRandomString(_buildCharsSource, 2, 8, uniquePrefix2, sharedPrefix2);
-            string uniqueBuild1 = GetRandomString(_buildCharsSource, 1, 1, uniquePrefix1, sharedPrefix1, sharedBuild1);
-            string uniqueBuild2 = GetRandomString(_buildCharsSource, 2, 8, uniquePrefix2, sharedPrefix2, sharedBuild2);
-            foreach (string prefix in new string[] { sharedPrefix1, sharedPrefix2, uniquePrefix1, uniquePrefix2, uniquePrefix3 })
-                foreach (int major in majorValues)
-                    foreach (int minor in minorValues)
-                        foreach (int patch in patchValues)
-                            foreach (int revision in revisionValues)
-                                foreach (IEnumerable<int> additionalNumerical in additionalNumericalValues)
-                                    foreach (VersionValues.BuildSegment build in GetBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2))
-                                        foreach (VersionValues.BuildSegment[] additionalBuild in GetAdditonalBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2,
-                                                new string[] { sharedPrefix1, sharedPrefix2 }, uniquePrefix1, uniquePrefix2))
-                                            Add(prefix, major, minor, patch, revision, additionalNumerical, build, additionalBuild,
-                                                new(prefix, major, minor, patch, revision, additionalNumerical.ToArray(), Array.Empty<VersionValues.PreReleaseSegment>(),
-                                                additionalBuild.Prepend(build).ToArray(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(string, int, int, int, int, IEnumerable{int}, SwVersion.BuildSegment, SwVersion.BuildSegment[])" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor5TestData))]
-    public void ComponentConstructor5Test(string prefix, int major, int minor, int patch, int revision, IEnumerable<int> additionalNumerical, VersionValues.BuildSegment build,
-        VersionValues.BuildSegment[]? additionalBuild, VersionValues expected)
-    {
-        SwVersion target = (additionalBuild is null) ? new(prefix, major, minor, patch, revision, additionalNumerical, new SwVersion.BuildSegment(build.Separator, build.Value)) :
-            new(prefix, major, minor, patch, revision, additionalNumerical, new SwVersion.BuildSegment(build.Separator, build.Value),
-            additionalBuild.Select(b => new SwVersion.BuildSegment(b.Separator, b.Value)).ToArray());
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor6Test(int, int, int, int, IEnumerable{int}, VersionValues.BuildSegment, VersionValues.BuildSegment[]?, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor6TestData : TheoryData<int, int, int, int, IEnumerable<int>, VersionValues.BuildSegment, VersionValues.BuildSegment[], VersionValues>
-    {
-        public ComponentConstructor6TestData()
-        {
-            IEnumerable<IEnumerable<int>> additionalNumericalValues = GetAdditionalNumericValues(out IEnumerable<int> majorValues, out IEnumerable<int> minorValues, out IEnumerable<int> patchValues,
-                out IEnumerable<int> revisionValues);
-            string sharedBuild1 = GetRandomString(_buildCharsSource, 1, 1);
-            string sharedBuild2 = GetRandomString(_buildCharsSource, 2, 8);
-            string uniqueBuild1 = GetRandomString(_buildCharsSource, 1, 1);
-            string uniqueBuild2 = GetRandomString(_buildCharsSource, 2, 8);
-            foreach (int major in majorValues)
-                foreach (int minor in minorValues)
-                    foreach (int patch in patchValues)
-                        foreach (int revision in revisionValues)
-                            foreach (IEnumerable<int> additionalNumerical in additionalNumericalValues)
-                                foreach (VersionValues.BuildSegment build in GetBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2))
-                                    foreach (VersionValues.BuildSegment[] additionalBuild in GetAdditonalBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2, Array.Empty<string>()))
-                                        Add(major, minor, patch, revision, additionalNumerical, build, additionalBuild,
-                                            new(null, major, minor, patch, revision, additionalNumerical.ToArray(), Array.Empty<VersionValues.PreReleaseSegment>(),
-                                            additionalBuild.Prepend(build).ToArray(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(int, int, int, int, IEnumerable{int}, SwVersion.BuildSegment, SwVersion.BuildSegment[])" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor6TestData))]
-    public void ComponentConstructor6Test(int major, int minor, int patch, int revision, IEnumerable<int> additionalNumerical, VersionValues.BuildSegment build, VersionValues.BuildSegment[]? additionalBuild,
-        VersionValues expected)
-    {
-        SwVersion target = (additionalBuild is null) ? new(major, minor, patch, revision, additionalNumerical, new SwVersion.BuildSegment(build.Separator, build.Value)) :
-            new(major, minor, patch, revision, additionalNumerical, new SwVersion.BuildSegment(build.Separator, build.Value), additionalBuild.Select(b => new SwVersion.BuildSegment(b.Separator, b.Value)).ToArray());
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor7Test(string, int, int, int, IEnumerable{VersionValues.PreReleaseSegment}, VersionValues.BuildSegment, VersionValues.BuildSegment[]?, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor7TestData : TheoryData<string, int, int, int, IEnumerable<VersionValues.PreReleaseSegment>, VersionValues.BuildSegment, VersionValues.BuildSegment[], VersionValues>
-    {
-        public ComponentConstructor7TestData()
-        {
-            IEnumerable<int> patchValues = GetPatchValues(out IEnumerable<int> majorValues, out IEnumerable<int> minorValues);
-            string sharedPrefix1 = GetRandomString(_prefixCharsSource, 1, 1);
-            string sharedPrefix2 = GetRandomString(_prefixCharsSource, 2, 8);
-            string uniquePrefix1 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix1);
-            string uniquePrefix2 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            string uniquePrefix3 = "-" + GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            string sharedPreRelease1 = GetRandomString(_buildCharsSource, 1, 1, uniquePrefix1, sharedPrefix1);
-            string sharedPreRelease2 = GetRandomString(_buildCharsSource, 2, 8, uniquePrefix2, sharedPrefix2);
-            string uniquePreRelease1 = GetRandomString(_buildCharsSource, 1, 1, uniquePrefix1, sharedPrefix1, sharedPreRelease1);
-            string uniquePreRelease2 = GetRandomString(_buildCharsSource, 2, 8, uniquePrefix2, sharedPrefix2, sharedPreRelease2);
-            string sharedBuild1 = GetRandomString(_buildCharsSource, 1, 1, uniquePrefix1, sharedPrefix1, sharedPreRelease1, uniquePreRelease1);
-            string sharedBuild2 = GetRandomString(_buildCharsSource, 2, 8, uniquePrefix2, sharedPrefix2, sharedPreRelease2, uniquePreRelease2);
-            string uniqueBuild1 = GetRandomString(_buildCharsSource, 1, 1, uniquePrefix1, sharedPrefix1, sharedPreRelease1, uniquePreRelease1, sharedBuild1);
-            string uniqueBuild2 = GetRandomString(_buildCharsSource, 2, 8, uniquePrefix2, sharedPrefix2, sharedPreRelease2, uniquePreRelease2, sharedBuild2);
-            foreach (string prefix in new string[] { sharedPrefix1, sharedPrefix2, uniquePrefix1, uniquePrefix2, uniquePrefix3 })
-                foreach (int major in majorValues)
-                    foreach (int minor in minorValues)
-                        foreach (int patch in patchValues)
-                            foreach (VersionValues.PreReleaseSegment[] preRelease in GetPreReleaseSegments(sharedPreRelease1, sharedPreRelease2, uniquePreRelease1, uniquePreRelease2,
-                                    new string[] { sharedPrefix1, sharedPrefix2, sharedBuild1, sharedBuild2 }, uniquePrefix1, uniquePrefix2, uniqueBuild1, uniqueBuild2))
-                                foreach (VersionValues.BuildSegment build in GetBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2))
-                                    foreach (VersionValues.BuildSegment[] additionalBuild in GetAdditonalBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2,
-                                            new string[] { sharedPrefix1, sharedPrefix2, sharedPreRelease1, sharedPreRelease2 }, uniquePrefix1, uniquePrefix2, uniquePreRelease1, uniquePreRelease2))
-                                        Add(prefix, major, minor, patch, preRelease, build, additionalBuild, new(prefix, major, minor, patch, null, Array.Empty<int>(), preRelease,
-                                            additionalBuild.Prepend(build).ToArray(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(string, int, int, int, IEnumerable{SwVersion.PreReleaseSegment}, SwVersion.BuildSegment, SwVersion.BuildSegment[])" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor7TestData))]
-    public void ComponentConstructor7Test(string prefix, int major, int minor, int patch, IEnumerable<VersionValues.PreReleaseSegment> preRelease, VersionValues.BuildSegment build,
-        VersionValues.BuildSegment[]? additionalBuild, VersionValues expected)
-    {
-        SwVersion target = (additionalBuild is null) ? new(prefix, major, minor, patch, preRelease.Select(p => new SwVersion.PreReleaseSegment(p.AltSeparator, p.Value)), new SwVersion.BuildSegment(build.Separator, build.Value)) :
-            new(prefix, major, minor, patch, preRelease.Select(p => new SwVersion.PreReleaseSegment(p.AltSeparator, p.Value)), new SwVersion.BuildSegment(build.Separator, build.Value), additionalBuild.Select(b => new SwVersion.BuildSegment(b.Separator, b.Value)).ToArray());
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor8Test(string, int, int, int, int, int[]?, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor8TestData : TheoryData<string, int, int, int, int, int[], VersionValues>
-    {
-        public ComponentConstructor8TestData()
-        {
-            IEnumerable<IEnumerable<int>> additionalNumericalValues = GetAdditionalNumericValues(out IEnumerable<int> majorValues, out IEnumerable<int> minorValues, out IEnumerable<int> patchValues,
-                out IEnumerable<int> revisionValues);
-            string sharedPrefix1 = GetRandomString(_prefixCharsSource, 1, 1);
-            string sharedPrefix2 = GetRandomString(_prefixCharsSource, 2, 8);
-            string uniquePrefix1 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix1);
-            string uniquePrefix2 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            string uniquePrefix3 = "-" + GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            foreach (string prefix in new string[] { sharedPrefix1, sharedPrefix2, uniquePrefix1, uniquePrefix2, uniquePrefix3 })
-                foreach (int major in majorValues)
-                    foreach (int minor in minorValues)
-                        foreach (int patch in patchValues)
-                            foreach (int revision in revisionValues)
-                                foreach (IEnumerable<int> additionalNumerical in additionalNumericalValues) // TODO: See if additionalNumerical can be null
-                                    Add(prefix, major, minor, patch, revision, additionalNumerical.ToArray(), new(prefix, major, minor, patch, revision, additionalNumerical.ToArray(),
-                                        Array.Empty<VersionValues.PreReleaseSegment>(), Array.Empty<VersionValues.BuildSegment>(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(string, int, int, int, int, int[])" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor8TestData))]
-    public void ComponentConstructor8Test(string prefix, int major, int minor, int patch, int revision, int[]? additionalNumerical, VersionValues expected)
-    {
-        SwVersion target = (additionalNumerical is null) ? new(prefix, major, minor, patch, revision) : new(prefix, major, minor, patch, revision, additionalNumerical);
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor9Test(int, int, int, IEnumerable{VersionValues.PreReleaseSegment}, VersionValues.BuildSegment, VersionValues.BuildSegment[]?, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor9TestData : TheoryData<int, int, int, IEnumerable<VersionValues.PreReleaseSegment>, VersionValues.BuildSegment, VersionValues.BuildSegment[], VersionValues>
-    {
-        public ComponentConstructor9TestData()
-        {
-            IEnumerable<int> patchValues = GetPatchValues(out IEnumerable<int> majorValues, out IEnumerable<int> minorValues);
-            string sharedPreRelease1 = GetRandomString(_buildCharsSource, 1, 1);
-            string sharedPreRelease2 = GetRandomString(_buildCharsSource, 2, 8);
-            string uniquePreRelease1 = GetRandomString(_buildCharsSource, 1, 1, sharedPreRelease1);
-            string uniquePreRelease2 = GetRandomString(_buildCharsSource, 2, 8, sharedPreRelease2);
-            string sharedBuild1 = GetRandomString(_buildCharsSource, 1, 1, sharedPreRelease1, uniquePreRelease1);
-            string sharedBuild2 = GetRandomString(_buildCharsSource, 2, 8, sharedPreRelease2, uniquePreRelease2);
-            string uniqueBuild1 = GetRandomString(_buildCharsSource, 1, 1, sharedPreRelease1, uniquePreRelease1, sharedBuild1);
-            string uniqueBuild2 = GetRandomString(_buildCharsSource, 2, 8, sharedPreRelease2, uniquePreRelease2, sharedBuild2);
-            foreach (int major in majorValues)
-                foreach (int minor in minorValues)
-                    foreach (int patch in patchValues)
-                        foreach (VersionValues.PreReleaseSegment[] preRelease in GetPreReleaseSegments(sharedPreRelease1, sharedPreRelease2, uniquePreRelease1, uniquePreRelease2,
-                                new string[] { sharedBuild1, sharedBuild2 }, uniqueBuild1, uniqueBuild2))
-                            foreach (VersionValues.BuildSegment build in GetBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2))
-                                foreach (VersionValues.BuildSegment[] additionalBuild in GetAdditonalBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2,
-                                        new string[] { sharedPreRelease1, sharedPreRelease2 }, uniquePreRelease1, uniquePreRelease2))
-                                    Add( major, minor, patch, preRelease, build, additionalBuild, new(null, major, minor, patch, null, Array.Empty<int>(), preRelease,
-                                        additionalBuild.Prepend(build).ToArray(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(int, int, int, IEnumerable{SwVersion.PreReleaseSegment}, SwVersion.BuildSegment, SwVersion.BuildSegment[])" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor9TestData))]
-    public void ComponentConstructor9Test(int major, int minor, int patch, IEnumerable<VersionValues.PreReleaseSegment> preRelease, VersionValues.BuildSegment build, VersionValues.BuildSegment[]? additionalBuild,
-        VersionValues expected)
-    {
-        SwVersion target = (additionalBuild is null) ? new(major, minor, patch, preRelease.Select(p => new SwVersion.PreReleaseSegment(p.AltSeparator, p.Value)), new SwVersion.BuildSegment(build.Separator, build.Value)) :
-            new(major, minor, patch, preRelease.Select(p => new SwVersion.PreReleaseSegment(p.AltSeparator, p.Value)), new SwVersion.BuildSegment(build.Separator, build.Value), additionalBuild.Select(b => new SwVersion.BuildSegment(b.Separator, b.Value)).ToArray());
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor10Test(string, int, int, int, VersionValues.PreReleaseSegment, VersionValues.PreReleaseSegment[]?, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor10TestData : TheoryData<string, int, int, int, VersionValues.PreReleaseSegment, VersionValues.PreReleaseSegment[], VersionValues>
-    {
-        public ComponentConstructor10TestData()
-        {
-            IEnumerable<int> patchValues = GetPatchValues(out IEnumerable<int> majorValues, out IEnumerable<int> minorValues);
-            string sharedPrefix1 = GetRandomString(_prefixCharsSource, 1, 1);
-            string sharedPrefix2 = GetRandomString(_prefixCharsSource, 2, 8);
-            string uniquePrefix1 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix1);
-            string uniquePrefix2 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            string uniquePrefix3 = "-" + GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            string sharedPreRelease1 = GetRandomString(_buildCharsSource, 1, 1, uniquePrefix1, sharedPrefix1);
-            string sharedPreRelease2 = GetRandomString(_buildCharsSource, 2, 8, uniquePrefix2, sharedPrefix2);
-            string uniquePreRelease1 = GetRandomString(_buildCharsSource, 1, 1, uniquePrefix1, sharedPrefix1, sharedPreRelease1);
-            string uniquePreRelease2 = GetRandomString(_buildCharsSource, 2, 8, uniquePrefix2, sharedPrefix2, sharedPreRelease2);
-            foreach (string prefix in new string[] { sharedPrefix1, sharedPrefix2, uniquePrefix1, uniquePrefix2, uniquePrefix3 })
-                foreach (int major in majorValues)
-                    foreach (int minor in minorValues)
-                        foreach (int patch in patchValues)
-                            foreach (VersionValues.PreReleaseSegment preRelease in GetPreReleaseSegments(sharedPreRelease1, sharedPreRelease2, uniquePreRelease1, uniquePreRelease2))
-                                foreach (VersionValues.PreReleaseSegment[] additionalPreRelease in GetAdditonalPreReleaseSegments(sharedPreRelease1, sharedPreRelease2, uniquePreRelease1,
-                                        uniquePreRelease2, new string[] { sharedPrefix1, sharedPrefix2 }, uniquePrefix1, uniquePrefix2, uniquePrefix3))
-                                    Add(prefix, major, minor, patch, preRelease, additionalPreRelease, new(prefix, major, minor, patch, null, null, additionalPreRelease.Prepend(preRelease).ToArray(),
-                                        Array.Empty<VersionValues.BuildSegment>(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(string, int, int, int, SwVersion.PreReleaseSegment, SwVersion.PreReleaseSegment[])" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor10TestData))]
-    public void ComponentConstructor10Test(string prefix, int major, int minor, int patch, VersionValues.PreReleaseSegment preRelease, VersionValues.PreReleaseSegment[]? additionalPreRelease,
-        VersionValues expected)
-    {
-        SwVersion target = (additionalPreRelease is null) ? new(prefix, major, minor, patch, new SwVersion.PreReleaseSegment(preRelease.AltSeparator, preRelease.Value)) :
-            new(prefix, major, minor, patch, new SwVersion.PreReleaseSegment(preRelease.AltSeparator, preRelease.Value), additionalPreRelease.Select(p => new SwVersion.PreReleaseSegment(p.AltSeparator, p.Value)).ToArray());
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor11Test(int, int, int, VersionValues.PreReleaseSegment, VersionValues.PreReleaseSegment[]?, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor11TestData : TheoryData<int, int, int, VersionValues.PreReleaseSegment, VersionValues.PreReleaseSegment[], VersionValues>
-    {
-        public ComponentConstructor11TestData()
-        {
-            IEnumerable<int> patchValues = GetPatchValues(out IEnumerable<int> majorValues, out IEnumerable<int> minorValues);
-            string sharedPreRelease1 = GetRandomString(_buildCharsSource, 1, 1);
-            string sharedPreRelease2 = GetRandomString(_buildCharsSource, 2, 8);
-            string uniquePreRelease1 = GetRandomString(_buildCharsSource, 1, 1, sharedPreRelease1);
-            string uniquePreRelease2 = GetRandomString(_buildCharsSource, 2, 8, sharedPreRelease2);
-                foreach (int major in majorValues)
-                    foreach (int minor in minorValues)
-                        foreach (int patch in patchValues)
-                            foreach (VersionValues.PreReleaseSegment preRelease in GetPreReleaseSegments(sharedPreRelease1, sharedPreRelease2, uniquePreRelease1, uniquePreRelease2))
-                                foreach (VersionValues.PreReleaseSegment[] additionalPreRelease in GetAdditonalPreReleaseSegments(sharedPreRelease1, sharedPreRelease2, uniquePreRelease1,
-                                        uniquePreRelease2, Array.Empty<string>()))
-                                    Add(major, minor, patch, preRelease, additionalPreRelease, new(null, major, minor, patch, null, null, additionalPreRelease.Prepend(preRelease).ToArray(),
-                                        Array.Empty<VersionValues.BuildSegment>(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(int, int, int, SwVersion.PreReleaseSegment, SwVersion.PreReleaseSegment[])" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor11TestData))]
-    public void ComponentConstructor11Test(int major, int minor, int patch, VersionValues.PreReleaseSegment preRelease, VersionValues.PreReleaseSegment[]? additionalPreRelease, VersionValues expected)
-    {
-        SwVersion target = (additionalPreRelease is null) ? new(major, minor, patch, new SwVersion.PreReleaseSegment(preRelease.AltSeparator, preRelease.Value)) :
-            new(major, minor, patch, new SwVersion.PreReleaseSegment(preRelease.AltSeparator, preRelease.Value), additionalPreRelease.Select(p => new SwVersion.PreReleaseSegment(p.AltSeparator, p.Value)).ToArray());
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor12Test(string, int, int, int, VersionValues.BuildSegment, VersionValues.BuildSegment[]?, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor12TestData : TheoryData<string, int, int, int, VersionValues.BuildSegment, VersionValues.BuildSegment[], VersionValues>
-    {
-        public ComponentConstructor12TestData()
-        {
-            IEnumerable<int> patchValues = GetPatchValues(out IEnumerable<int> majorValues, out IEnumerable<int> minorValues);
-            string sharedPrefix1 = GetRandomString(_prefixCharsSource, 1, 1);
-            string sharedPrefix2 = GetRandomString(_prefixCharsSource, 2, 8);
-            string uniquePrefix1 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix1);
-            string uniquePrefix2 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            string uniquePrefix3 = "-" + GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            string sharedBuild1 = GetRandomString(_buildCharsSource, 1, 1, uniquePrefix1, sharedPrefix1);
-            string sharedBuild2 = GetRandomString(_buildCharsSource, 2, 8, uniquePrefix2, sharedPrefix2);
-            string uniqueBuild1 = GetRandomString(_buildCharsSource, 1, 1, uniquePrefix1, sharedPrefix1, sharedBuild1);
-            string uniqueBuild2 = GetRandomString(_buildCharsSource, 2, 8, uniquePrefix2, sharedPrefix2, sharedBuild2);
-            foreach (string prefix in new string[] { sharedPrefix1, sharedPrefix2, uniquePrefix1, uniquePrefix2, uniquePrefix3 })
-                foreach (int major in majorValues)
-                    foreach (int minor in minorValues)
-                        foreach (int patch in patchValues)
-                            foreach (VersionValues.BuildSegment build in GetBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2))
-                                foreach (VersionValues.BuildSegment[] additionalBuild in GetAdditonalBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2,
-                                        new string[] { sharedPrefix1, sharedPrefix2 }, uniquePrefix1, uniquePrefix2))
-                                    Add(prefix, major, minor, patch, build, additionalBuild, new(prefix, major, minor, patch, null, null, Array.Empty<VersionValues.PreReleaseSegment>(),
-                                        additionalBuild.Prepend(build).ToArray(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(string, int, int, int, SwVersion.BuildSegment, SwVersion.BuildSegment[])" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor12TestData))]
-    public void ComponentConstructor12Test(string prefix, int major, int minor, int patch, VersionValues.BuildSegment build, VersionValues.BuildSegment[]? additionalBuild, VersionValues expected)
-    {
-        SwVersion target = (additionalBuild is null) ? new(prefix, major, minor, patch, new SwVersion.BuildSegment(build.Separator, build.Value)) :
-            new(prefix, major, minor, patch, new SwVersion.BuildSegment(build.Separator, build.Value), additionalBuild.Select(b => new SwVersion.BuildSegment(b.Separator, b.Value)).ToArray());
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor13Test(string, int, int, IEnumerable{VersionValues.PreReleaseSegment}, VersionValues.BuildSegment, VersionValues.BuildSegment[]?, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor13TestData : TheoryData<string, int, int, IEnumerable<VersionValues.PreReleaseSegment>, VersionValues.BuildSegment, VersionValues.BuildSegment[], VersionValues>
-    {
-        public ComponentConstructor13TestData()
-        {
-            IEnumerable<int> minorValues = GetMinorValues(out IEnumerable<int> majorValues);
-            string sharedPrefix1 = GetRandomString(_prefixCharsSource, 1, 1);
-            string sharedPrefix2 = GetRandomString(_prefixCharsSource, 2, 8);
-            string uniquePrefix1 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix1);
-            string uniquePrefix2 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            string uniquePrefix3 = "-" + GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2, uniquePrefix2);
-            string sharedPreRelease1 = GetRandomString(_buildCharsSource, 1, 1, uniquePrefix1, sharedPrefix1);
-            string sharedPreRelease2 = GetRandomString(_buildCharsSource, 2, 8, uniquePrefix2, sharedPrefix2);
-            string uniquePreRelease1 = GetRandomString(_buildCharsSource, 1, 1, sharedPreRelease1, uniquePrefix1, sharedPrefix1);
-            string uniquePreRelease2 = GetRandomString(_buildCharsSource, 2, 8, sharedPreRelease2);
-            string sharedBuild1 = GetRandomString(_buildCharsSource, 1, 1, sharedPreRelease1, uniquePreRelease1, uniquePrefix1, sharedPrefix1);
-            string sharedBuild2 = GetRandomString(_buildCharsSource, 2, 8, sharedPreRelease2, uniquePreRelease2, uniquePrefix2, sharedPrefix2);
-            string uniqueBuild1 = GetRandomString(_buildCharsSource, 1, 1, sharedPreRelease1, uniquePreRelease1, sharedBuild1, uniquePrefix1, sharedPrefix1);
-            string uniqueBuild2 = GetRandomString(_buildCharsSource, 2, 8, sharedPreRelease2, uniquePreRelease2, sharedBuild2, uniquePrefix2, sharedPrefix2);
-            foreach (string prefix in new string[] { sharedPrefix1, sharedPrefix2, uniquePrefix1, uniquePrefix2, uniquePrefix3 })
-                foreach (int major in majorValues)
-                    foreach (int minor in minorValues)
-                        foreach (VersionValues.PreReleaseSegment[] preRelease in GetPreReleaseSegments(sharedPreRelease1, sharedPreRelease2, uniquePreRelease1, uniquePreRelease2,
-                                new string[] { sharedBuild1, sharedBuild2 }, uniqueBuild1, uniqueBuild2))
-                            foreach (VersionValues.BuildSegment build in GetBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2))
-                                foreach (VersionValues.BuildSegment[] additionalBuild in GetAdditonalBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2,
-                                        new string[] { sharedPreRelease1, sharedPreRelease2 }, uniquePreRelease1, uniquePreRelease2))
-                                    Add(prefix, major, minor, preRelease, build, additionalBuild, new(prefix, major, minor, null, null, null, preRelease,
-                                        additionalBuild.Prepend(build).ToArray(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(string, int, int, IEnumerable{SwVersion.PreReleaseSegment}, SwVersion.BuildSegment, SwVersion.BuildSegment[])" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor13TestData))]
-    public void ComponentConstructor13Test(string prefix, int major, int minor, IEnumerable<VersionValues.PreReleaseSegment> preRelease, VersionValues.BuildSegment build,
-        VersionValues.BuildSegment[]? additionalBuild, VersionValues expected)
-    {
-        SwVersion target = (additionalBuild is null) ? new(prefix, major, minor, preRelease.Select(p => new SwVersion.PreReleaseSegment(p.AltSeparator, p.Value)), new SwVersion.BuildSegment(build.Separator, build.Value)) :
-            new(prefix, major, minor, preRelease.Select(p => new SwVersion.PreReleaseSegment(p.AltSeparator, p.Value)), new SwVersion.BuildSegment(build.Separator, build.Value), additionalBuild.Select(b => new SwVersion.BuildSegment(b.Separator, b.Value)).ToArray());
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor14Test(int, int, int, int, int[]?, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor14TestData : TheoryData<int, int, int, int, int[], VersionValues>
-    {
-        public ComponentConstructor14TestData()
-        {
-            IEnumerable<IEnumerable<int>> additionalNumericalValues = GetAdditionalNumericValues(out IEnumerable<int> majorValues, out IEnumerable<int> minorValues, out IEnumerable<int> patchValues, 
-                out IEnumerable<int> revisionValues);
-            foreach (int major in majorValues)
-                foreach (int minor in minorValues)
-                    foreach (int patch in patchValues)
-                        foreach (int revision in revisionValues)
-                            foreach (IEnumerable<int> additionalNumerical in additionalNumericalValues) // TODO: See if additionalNumerical can be null
-                                Add(major, minor, patch, revision, additionalNumerical.ToArray(), new(null, major, minor, patch, revision, additionalNumerical.ToArray(),
-                                    Array.Empty<VersionValues.PreReleaseSegment>(), Array.Empty<VersionValues.BuildSegment>(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(int, int, int, int, int[])" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor14TestData))]
-    public void ComponentConstructor14Test(int major, int minor, int patch, int revision, int[]? additionalNumerical, VersionValues expected)
-    {
-        SwVersion target = (additionalNumerical is null) ? new(major, minor, patch, revision) : new(major, minor, patch, revision, additionalNumerical);
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor15Test(int, int, int, VersionValues.BuildSegment, VersionValues.BuildSegment[]?, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor15TestData : TheoryData<int, int, int, VersionValues.BuildSegment, VersionValues.BuildSegment[], VersionValues>
-    {
-        public ComponentConstructor15TestData()
-        {
-            IEnumerable<int> patchValues = GetPatchValues(out IEnumerable<int> majorValues, out IEnumerable<int> minorValues);
-            string sharedBuild1 = GetRandomString(_buildCharsSource, 1, 1);
-            string sharedBuild2 = GetRandomString(_buildCharsSource, 2, 8);
-            string uniqueBuild1 = GetRandomString(_buildCharsSource, 1, 1, sharedBuild1);
-            string uniqueBuild2 = GetRandomString(_buildCharsSource, 2, 8, sharedBuild2);
-            foreach (int major in majorValues)
-                foreach (int minor in minorValues)
-                    foreach (int patch in patchValues)
-                        foreach (VersionValues.BuildSegment build in GetBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2))
-                            foreach (VersionValues.BuildSegment[] additionalBuild in GetAdditonalBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2, Array.Empty<string>()))
-                                Add(major, minor, patch, build, additionalBuild, new(null, major, minor, patch, null, null, Array.Empty<VersionValues.PreReleaseSegment>(),
-                                    additionalBuild.Prepend(build).ToArray(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(int, int, int, SwVersion.BuildSegment, SwVersion.BuildSegment[])" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor15TestData))]
-    public void ComponentConstructor15Test(int major, int minor, int patch, VersionValues.BuildSegment build, VersionValues.BuildSegment[]? additionalBuild, VersionValues expected)
-    {
-        SwVersion target = (additionalBuild is null) ? new(major, minor, patch, new SwVersion.BuildSegment(build.Separator, build.Value)) :
-            new(major, minor, patch, new SwVersion.BuildSegment(build.Separator, build.Value), additionalBuild.Select(b => new SwVersion.BuildSegment(b.Separator, b.Value)).ToArray());
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor16Test(int, int, IEnumerable{VersionValues.PreReleaseSegment}, VersionValues.BuildSegment, VersionValues.BuildSegment[]?, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor16TestData : TheoryData<int, int, IEnumerable<VersionValues.PreReleaseSegment>, VersionValues.BuildSegment, VersionValues.BuildSegment[], VersionValues>
-    {
-        public ComponentConstructor16TestData()
-        {
-            IEnumerable<int> minorValues = GetMinorValues(out IEnumerable<int> majorValues);
-            string sharedPreRelease1 = GetRandomString(_buildCharsSource, 1, 1);
-            string sharedPreRelease2 = GetRandomString(_buildCharsSource, 2, 8);
-            string uniquePreRelease1 = GetRandomString(_buildCharsSource, 1, 1, sharedPreRelease1);
-            string uniquePreRelease2 = GetRandomString(_buildCharsSource, 2, 8, sharedPreRelease2);
-            string sharedBuild1 = GetRandomString(_buildCharsSource, 1, 1, sharedPreRelease1, uniquePreRelease1);
-            string sharedBuild2 = GetRandomString(_buildCharsSource, 2, 8, sharedPreRelease2, uniquePreRelease2);
-            string uniqueBuild1 = GetRandomString(_buildCharsSource, 1, 1, sharedPreRelease1, uniquePreRelease1, sharedBuild1);
-            string uniqueBuild2 = GetRandomString(_buildCharsSource, 2, 8, sharedPreRelease2, uniquePreRelease2, sharedBuild2);
-            foreach (int major in majorValues)
-                foreach (int minor in minorValues)
-                    foreach (VersionValues.PreReleaseSegment[] preRelease in GetPreReleaseSegments(sharedPreRelease1, sharedPreRelease2, uniquePreRelease1, uniquePreRelease2,
-                            new string[] { sharedBuild1, sharedBuild2 }, uniqueBuild1, uniqueBuild2))
-                        foreach (VersionValues.BuildSegment build in GetBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2))
-                            foreach (VersionValues.BuildSegment[] additionalBuild in GetAdditonalBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2,
-                                    new string[] { sharedPreRelease1, sharedPreRelease2 }, uniquePreRelease1, uniquePreRelease2))
-                                Add(major, minor, preRelease, build, additionalBuild, new(null, major, minor, null, null, null, preRelease,
-                                    additionalBuild.Prepend(build).ToArray(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(int, int, IEnumerable{SwVersion.PreReleaseSegment}, SwVersion.BuildSegment, SwVersion.BuildSegment[])" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor16TestData))]
-    public void ComponentConstructor16Test(int major, int minor, IEnumerable<VersionValues.PreReleaseSegment> preRelease, VersionValues.BuildSegment build, VersionValues.BuildSegment[]? additionalBuild,
-        VersionValues expected)
-    {
-        SwVersion target = (additionalBuild is null) ? new(major, minor, preRelease.Select(p => new SwVersion.PreReleaseSegment(p.AltSeparator, p.Value)), new SwVersion.BuildSegment(build.Separator, build.Value)) :
-            new(major, minor, preRelease.Select(p => new SwVersion.PreReleaseSegment(p.AltSeparator, p.Value)), new SwVersion.BuildSegment(build.Separator, build.Value), additionalBuild.Select(b => new SwVersion.BuildSegment(b.Separator, b.Value)).ToArray());
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor17Test(string, int, int, VersionValues.PreReleaseSegment, VersionValues.PreReleaseSegment[]?, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor17TestData : TheoryData<string, int, int, VersionValues.PreReleaseSegment, VersionValues.PreReleaseSegment[], VersionValues>
-    {
-        public ComponentConstructor17TestData()
-        {
-            IEnumerable<int> minorValues = GetMinorValues(out IEnumerable<int> majorValues);
-            string sharedPrefix1 = GetRandomString(_prefixCharsSource, 1, 1);
-            string sharedPrefix2 = GetRandomString(_prefixCharsSource, 2, 8);
-            string uniquePrefix1 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix1);
-            string uniquePrefix2 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            string uniquePrefix3 = "-" + GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            string sharedPreRelease1 = GetRandomString(_buildCharsSource, 1, 1, uniquePrefix1, sharedPrefix1);
-            string sharedPreRelease2 = GetRandomString(_buildCharsSource, 2, 8, uniquePrefix2, sharedPrefix2);
-            string uniquePreRelease1 = GetRandomString(_buildCharsSource, 1, 1, uniquePrefix1, sharedPrefix1, sharedPreRelease1);
-            string uniquePreRelease2 = GetRandomString(_buildCharsSource, 2, 8, uniquePrefix2, sharedPrefix2, sharedPreRelease2);
-            foreach (string prefix in new string[] { sharedPrefix1, sharedPrefix2, uniquePrefix1, uniquePrefix2, uniquePrefix3 })
-                foreach (int major in majorValues)
-                    foreach (int minor in minorValues)
-                        foreach (VersionValues.PreReleaseSegment preRelease in GetPreReleaseSegments(sharedPreRelease1, sharedPreRelease2, uniquePreRelease1, uniquePreRelease2))
-                            foreach (VersionValues.PreReleaseSegment[] additionalPreRelease in GetAdditonalPreReleaseSegments(sharedPreRelease1, sharedPreRelease2, uniquePreRelease1,
-                                    uniquePreRelease2, new string[] { sharedPrefix1, sharedPrefix2 }, uniquePrefix1, uniquePrefix2, uniquePrefix3))
-                                Add(prefix, major, minor, preRelease, additionalPreRelease, new(prefix, major, minor, null, null, null, additionalPreRelease.Prepend(preRelease).ToArray(),
-                                    Array.Empty<VersionValues.BuildSegment>(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(string, int, int, SwVersion.PreReleaseSegment, SwVersion.PreReleaseSegment[])" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor17TestData))]
-    public void ComponentConstructor17Test(string prefix, int major, int minor, VersionValues.PreReleaseSegment preRelease, VersionValues.PreReleaseSegment[]? additionalPreRelease, VersionValues expected)
-    {
-        SwVersion target = (additionalPreRelease is null) ? new(prefix, major, minor, new SwVersion.PreReleaseSegment(preRelease.AltSeparator, preRelease.Value)) :
-            new(prefix, major, minor, new SwVersion.PreReleaseSegment(preRelease.AltSeparator, preRelease.Value), additionalPreRelease.Select(p => new SwVersion.PreReleaseSegment(p.AltSeparator, p.Value)).ToArray());
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor18Test(int, int, VersionValues.PreReleaseSegment, VersionValues.PreReleaseSegment[]?, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor18TestData : TheoryData<int, int, VersionValues.PreReleaseSegment, VersionValues.PreReleaseSegment[], VersionValues>
-    {
-        public ComponentConstructor18TestData()
-        {
-            IEnumerable<int> minorValues = GetMinorValues(out IEnumerable<int> majorValues);
-            string sharedPreRelease1 = GetRandomString(_buildCharsSource, 1, 1);
-            string sharedPreRelease2 = GetRandomString(_buildCharsSource, 2, 8);
-            string uniquePreRelease1 = GetRandomString(_buildCharsSource, 1, 1, sharedPreRelease1);
-            string uniquePreRelease2 = GetRandomString(_buildCharsSource, 2, 8, sharedPreRelease2);
-            foreach (int major in majorValues)
-                foreach (int minor in minorValues)
-                    foreach (VersionValues.PreReleaseSegment preRelease in GetPreReleaseSegments(sharedPreRelease1, sharedPreRelease2, uniquePreRelease1, uniquePreRelease2))
-                        foreach (VersionValues.PreReleaseSegment[] additionalPreRelease in GetAdditonalPreReleaseSegments(sharedPreRelease1, sharedPreRelease2, uniquePreRelease1,
-                                uniquePreRelease2, Array.Empty<string>()))
-                            Add(major, minor, preRelease, additionalPreRelease, new(null, major, minor, null, null, null, additionalPreRelease.Prepend(preRelease).ToArray(),
-                                Array.Empty<VersionValues.BuildSegment>(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(int, int, SwVersion.PreReleaseSegment, SwVersion.PreReleaseSegment[])" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor18TestData))]
-    public void ComponentConstructor18Test(int major, int minor, VersionValues.PreReleaseSegment preRelease, VersionValues.PreReleaseSegment[]? additionalPreRelease, VersionValues expected)
-    {
-        SwVersion target = (additionalPreRelease is null) ? new(major, minor, new SwVersion.PreReleaseSegment(preRelease.AltSeparator, preRelease.Value)) :
-            new(major, minor, new SwVersion.PreReleaseSegment(preRelease.AltSeparator, preRelease.Value), additionalPreRelease.Select(p => new SwVersion.PreReleaseSegment(p.AltSeparator, p.Value)).ToArray());
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor19Test(string, int, int, VersionValues.BuildSegment, VersionValues.BuildSegment[]?, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor19TestData : TheoryData<string, int, int, VersionValues.BuildSegment, VersionValues.BuildSegment[], VersionValues>
-    {
-        public ComponentConstructor19TestData()
-        {
-            IEnumerable<int> minorValues = GetMinorValues(out IEnumerable<int> majorValues);
-            string sharedPrefix1 = GetRandomString(_prefixCharsSource, 1, 1);
-            string sharedPrefix2 = GetRandomString(_prefixCharsSource, 2, 8);
-            string uniquePrefix1 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix1);
-            string uniquePrefix2 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            string uniquePrefix3 = "-" + GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            string sharedBuild1 = GetRandomString(_buildCharsSource, 1, 1, uniquePrefix1, sharedPrefix1);
-            string sharedBuild2 = GetRandomString(_buildCharsSource, 2, 8, uniquePrefix2, sharedPrefix2);
-            string uniqueBuild1 = GetRandomString(_buildCharsSource, 1, 1, uniquePrefix1, sharedPrefix1, sharedBuild1);
-            string uniqueBuild2 = GetRandomString(_buildCharsSource, 2, 8, uniquePrefix2, sharedPrefix2, sharedBuild2);
-            foreach (string prefix in new string[] { sharedPrefix1, sharedPrefix2, uniquePrefix1, uniquePrefix2, uniquePrefix3 })
-                foreach (int major in majorValues)
-                    foreach (int minor in minorValues)
-                        foreach (VersionValues.BuildSegment build in GetBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2))
-                            foreach (VersionValues.BuildSegment[] additionalBuild in GetAdditonalBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2,
-                                    new string[] { sharedPrefix1, sharedPrefix2 }, uniquePrefix1, uniquePrefix2))
-                                Add(prefix, major, minor, build, additionalBuild, new(prefix, major, minor, null, null, null, Array.Empty<VersionValues.PreReleaseSegment>(),
-                                    additionalBuild.Prepend(build).ToArray(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(string, int, int, SwVersion.BuildSegment, SwVersion.BuildSegment[])" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor19TestData))]
-    public void ComponentConstructor19Test(string prefix, int major, int minor, VersionValues.BuildSegment build, VersionValues.BuildSegment[]? additionalBuild, VersionValues expected)
-    {
-        SwVersion target = (additionalBuild is null) ? new(prefix, major, minor, new SwVersion.BuildSegment(build.Separator, build.Value)) :
-            new(prefix, major, minor, new SwVersion.BuildSegment(build.Separator, build.Value), additionalBuild.Select(b => new SwVersion.BuildSegment(b.Separator, b.Value)).ToArray());
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor20Test(string, int, IEnumerable{VersionValues.PreReleaseSegment}, VersionValues.BuildSegment, VersionValues.BuildSegment[]?, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor20TestData : TheoryData<string, int, IEnumerable<VersionValues.PreReleaseSegment>, VersionValues.BuildSegment, VersionValues.BuildSegment[], VersionValues>
-    {
-        public ComponentConstructor20TestData()
-        {
-            string sharedPrefix1 = GetRandomString(_prefixCharsSource, 1, 1);
-            string sharedPrefix2 = GetRandomString(_prefixCharsSource, 2, 8);
-            string uniquePrefix1 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix1);
-            string uniquePrefix2 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            string uniquePrefix3 = "-" + GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2, uniquePrefix2);
-            string sharedPreRelease1 = GetRandomString(_buildCharsSource, 1, 1, uniquePrefix1, sharedPrefix1);
-            string sharedPreRelease2 = GetRandomString(_buildCharsSource, 2, 8, uniquePrefix2, sharedPrefix2);
-            string uniquePreRelease1 = GetRandomString(_buildCharsSource, 1, 1, sharedPreRelease1, uniquePrefix1, sharedPrefix1);
-            string uniquePreRelease2 = GetRandomString(_buildCharsSource, 2, 8, sharedPreRelease2);
-            string sharedBuild1 = GetRandomString(_buildCharsSource, 1, 1, sharedPreRelease1, uniquePreRelease1, uniquePrefix1, sharedPrefix1);
-            string sharedBuild2 = GetRandomString(_buildCharsSource, 2, 8, sharedPreRelease2, uniquePreRelease2, uniquePrefix2, sharedPrefix2);
-            string uniqueBuild1 = GetRandomString(_buildCharsSource, 1, 1, sharedPreRelease1, uniquePreRelease1, sharedBuild1, uniquePrefix1, sharedPrefix1);
-            string uniqueBuild2 = GetRandomString(_buildCharsSource, 2, 8, sharedPreRelease2, uniquePreRelease2, sharedBuild2, uniquePrefix2, sharedPrefix2);
-            foreach (string prefix in new string[] { sharedPrefix1, sharedPrefix2, uniquePrefix1, uniquePrefix2, uniquePrefix3 })
-                foreach (int major in GetMajorValues())
-                    foreach (VersionValues.PreReleaseSegment[] preRelease in GetPreReleaseSegments(sharedPreRelease1, sharedPreRelease2, uniquePreRelease1, uniquePreRelease2,
-                            new string[] { sharedBuild1, sharedBuild2 }, uniqueBuild1, uniqueBuild2))
-                        foreach (VersionValues.BuildSegment build in GetBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2))
-                            foreach (VersionValues.BuildSegment[] additionalBuild in GetAdditonalBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2,
-                                    new string[] { sharedPreRelease1, sharedPreRelease2 }, uniquePreRelease1, uniquePreRelease2))
-                                Add(prefix, major, preRelease, build, additionalBuild, new(prefix, major, null, null, null, null, preRelease,
-                                    additionalBuild.Prepend(build).ToArray(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(string, int, IEnumerable{SwVersion.PreReleaseSegment}, SwVersion.BuildSegment, SwVersion.BuildSegment[])" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor20TestData))]
-    public void ComponentConstructor20Test(string prefix, int major, IEnumerable<VersionValues.PreReleaseSegment> preRelease, VersionValues.BuildSegment build, VersionValues.BuildSegment[]? additionalBuild,
-        VersionValues expected)
-    {
-        SwVersion target = (additionalBuild is null) ? new(prefix, major, preRelease.Select(p => new SwVersion.PreReleaseSegment(p.AltSeparator, p.Value)), new SwVersion.BuildSegment(build.Separator, build.Value)) :
-            new(prefix, major, preRelease.Select(p => new SwVersion.PreReleaseSegment(p.AltSeparator, p.Value)), new SwVersion.BuildSegment(build.Separator, build.Value), additionalBuild.Select(b => new SwVersion.BuildSegment(b.Separator, b.Value)).ToArray());
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor21Test(int, int, VersionValues.BuildSegment, VersionValues.BuildSegment[]?, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor21TestData : TheoryData<int, int, VersionValues.BuildSegment, VersionValues.BuildSegment[], VersionValues>
-    {
-        public ComponentConstructor21TestData()
-        {
-            IEnumerable<int> minorValues = GetMinorValues(out IEnumerable<int> majorValues);
-            string sharedBuild1 = GetRandomString(_buildCharsSource, 1, 1);
-            string sharedBuild2 = GetRandomString(_buildCharsSource, 2, 8);
-            string uniqueBuild1 = GetRandomString(_buildCharsSource, 1, 1, sharedBuild1);
-            string uniqueBuild2 = GetRandomString(_buildCharsSource, 2, 8, sharedBuild2);
-            foreach (int major in majorValues)
-                foreach (int minor in minorValues)
-                    foreach (VersionValues.BuildSegment build in GetBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2))
-                        foreach (VersionValues.BuildSegment[] additionalBuild in GetAdditonalBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2, Array.Empty<string>()))
-                            Add(major, minor, build, additionalBuild, new(null, major, minor, null, null, null, Array.Empty<VersionValues.PreReleaseSegment>(),
-                                additionalBuild.Prepend(build).ToArray(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(int, int, SwVersion.BuildSegment, SwVersion.BuildSegment[])" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor21TestData))]
-    public void ComponentConstructor21Test(int major, int minor, VersionValues.BuildSegment build, VersionValues.BuildSegment[]? additionalBuild, VersionValues expected)
-    {
-        SwVersion target = (additionalBuild is null) ? new(major, minor, new SwVersion.BuildSegment(build.Separator, build.Value)) :
-            new(major, minor, new SwVersion.BuildSegment(build.Separator, build.Value), additionalBuild.Select(b => new SwVersion.BuildSegment(b.Separator, b.Value)).ToArray());
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor22Test(int, IEnumerable{VersionValues.PreReleaseSegment}, VersionValues.BuildSegment, VersionValues.BuildSegment[]?, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor22TestData : TheoryData<int, IEnumerable<VersionValues.PreReleaseSegment>, VersionValues.BuildSegment, VersionValues.BuildSegment[], VersionValues>
-    {
-        public ComponentConstructor22TestData()
-        {
-            string sharedPreRelease1 = GetRandomString(_buildCharsSource, 1, 1);
-            string sharedPreRelease2 = GetRandomString(_buildCharsSource, 2, 8);
-            string uniquePreRelease1 = GetRandomString(_buildCharsSource, 1, 1, sharedPreRelease1);
-            string uniquePreRelease2 = GetRandomString(_buildCharsSource, 2, 8, sharedPreRelease2);
-            string sharedBuild1 = GetRandomString(_buildCharsSource, 1, 1, sharedPreRelease1, uniquePreRelease1);
-            string sharedBuild2 = GetRandomString(_buildCharsSource, 2, 8, sharedPreRelease2, uniquePreRelease2);
-            string uniqueBuild1 = GetRandomString(_buildCharsSource, 1, 1, sharedPreRelease1, uniquePreRelease1, sharedBuild1);
-            string uniqueBuild2 = GetRandomString(_buildCharsSource, 2, 8, sharedPreRelease2, uniquePreRelease2, sharedBuild2);
-            foreach (int major in GetMajorValues())
-                foreach (VersionValues.PreReleaseSegment[] preRelease in GetPreReleaseSegments(sharedPreRelease1, sharedPreRelease2, uniquePreRelease1, uniquePreRelease2,
-                        new string[] { sharedBuild1, sharedBuild2 }, uniqueBuild1, uniqueBuild2))
-                    foreach (VersionValues.BuildSegment build in GetBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2))
-                        foreach (VersionValues.BuildSegment[] additionalBuild in GetAdditonalBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2,
-                                new string[] { sharedPreRelease1, sharedPreRelease2 }, uniquePreRelease1, uniquePreRelease2))
-                            Add(major, preRelease, build, additionalBuild, new(null, major, null, null, null, null, preRelease,
-                                additionalBuild.Prepend(build).ToArray(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(int, IEnumerable{SwVersion.PreReleaseSegment}, SwVersion.BuildSegment, SwVersion.BuildSegment[])" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor22TestData))]
-    public void ComponentConstructor22Test(int major, IEnumerable<VersionValues.PreReleaseSegment> preRelease, VersionValues.BuildSegment build, VersionValues.BuildSegment[]? additionalBuild, VersionValues expected)
-    {
-        SwVersion target = (additionalBuild is null) ? new(major, preRelease.Select(p => new SwVersion.PreReleaseSegment(p.AltSeparator, p.Value)), new SwVersion.BuildSegment(build.Separator, build.Value)) :
-            new(major, preRelease.Select(p => new SwVersion.PreReleaseSegment(p.AltSeparator, p.Value)), new SwVersion.BuildSegment(build.Separator, build.Value), additionalBuild.Select(b => new SwVersion.BuildSegment(b.Separator, b.Value)).ToArray());
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor23Test(string, int, VersionValues.PreReleaseSegment, VersionValues.PreReleaseSegment[]?, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor23TestData : TheoryData<string, int, VersionValues.PreReleaseSegment, VersionValues.PreReleaseSegment[], VersionValues>
-    {
-        public ComponentConstructor23TestData()
-        {
-            string sharedPrefix1 = GetRandomString(_prefixCharsSource, 1, 1);
-            string sharedPrefix2 = GetRandomString(_prefixCharsSource, 2, 8);
-            string uniquePrefix1 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix1);
-            string uniquePrefix2 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            string uniquePrefix3 = "-" + GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            string sharedPreRelease1 = GetRandomString(_buildCharsSource, 1, 1, uniquePrefix1, sharedPrefix1);
-            string sharedPreRelease2 = GetRandomString(_buildCharsSource, 2, 8, uniquePrefix2, sharedPrefix2);
-            string uniquePreRelease1 = GetRandomString(_buildCharsSource, 1, 1, uniquePrefix1, sharedPrefix1, sharedPreRelease1);
-            string uniquePreRelease2 = GetRandomString(_buildCharsSource, 2, 8, uniquePrefix2, sharedPrefix2, sharedPreRelease2);
-            foreach (string prefix in new string[] { sharedPrefix1, sharedPrefix2, uniquePrefix1, uniquePrefix2, uniquePrefix3 })
-                foreach (int major in GetMajorValues())
-                    foreach (VersionValues.PreReleaseSegment preRelease in GetPreReleaseSegments(sharedPreRelease1, sharedPreRelease2, uniquePreRelease1, uniquePreRelease2))
-                        foreach (VersionValues.PreReleaseSegment[] additionalPreRelease in GetAdditonalPreReleaseSegments(sharedPreRelease1, sharedPreRelease2, uniquePreRelease1,
-                                uniquePreRelease2, new string[] { sharedPrefix1, sharedPrefix2 }, uniquePrefix1, uniquePrefix2, uniquePrefix3))
-                            Add(prefix, major, preRelease, additionalPreRelease, new(prefix, major, null, null, null, null, additionalPreRelease.Prepend(preRelease).ToArray(),
-                                Array.Empty<VersionValues.BuildSegment>(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(string, int, SwVersion.PreReleaseSegment, SwVersion.PreReleaseSegment[])" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor23TestData))]
-    public void ComponentConstructor23Test(string prefix, int major, VersionValues.PreReleaseSegment preRelease, VersionValues.PreReleaseSegment[]? additionalPreRelease, VersionValues expected)
-    {
-        SwVersion target = (additionalPreRelease is null) ? new(prefix, major, new SwVersion.PreReleaseSegment(preRelease.AltSeparator, preRelease.Value)) :
-            new(prefix, major, new SwVersion.PreReleaseSegment(preRelease.AltSeparator, preRelease.Value), additionalPreRelease.Select(p => new SwVersion.PreReleaseSegment(p.AltSeparator, p.Value)).ToArray());
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor24Test(int, VersionValues.PreReleaseSegment, VersionValues.PreReleaseSegment[]?, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor24TestData : TheoryData<int, VersionValues.PreReleaseSegment, VersionValues.PreReleaseSegment[], VersionValues>
-    {
-        public ComponentConstructor24TestData()
-        {
-            string sharedPreRelease1 = GetRandomString(_buildCharsSource, 1, 1);
-            string sharedPreRelease2 = GetRandomString(_buildCharsSource, 2, 8);
-            string uniquePreRelease1 = GetRandomString(_buildCharsSource, 1, 1, sharedPreRelease1);
-            string uniquePreRelease2 = GetRandomString(_buildCharsSource, 2, 8, sharedPreRelease2);
-                foreach (int major in GetMajorValues())
-                    foreach (VersionValues.PreReleaseSegment preRelease in GetPreReleaseSegments(sharedPreRelease1, sharedPreRelease2, uniquePreRelease1, uniquePreRelease2))
-                        foreach (VersionValues.PreReleaseSegment[] additionalPreRelease in GetAdditonalPreReleaseSegments(sharedPreRelease1, sharedPreRelease2, uniquePreRelease1,
-                                uniquePreRelease2, Array.Empty<string>()))
-                            Add(major, preRelease, additionalPreRelease, new(null, major, null, null, null, null, additionalPreRelease.Prepend(preRelease).ToArray(),
-                                Array.Empty<VersionValues.BuildSegment>(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(int, SwVersion.PreReleaseSegment, SwVersion.PreReleaseSegment[])" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor24TestData))]
-    public void ComponentConstructor24Test(int major, VersionValues.PreReleaseSegment preRelease, VersionValues.PreReleaseSegment[]? additionalPreRelease, VersionValues expected)
-    {
-        SwVersion target = (additionalPreRelease is null) ? new(major, new SwVersion.PreReleaseSegment(preRelease.AltSeparator, preRelease.Value)) :
-            new(major, new SwVersion.PreReleaseSegment(preRelease.AltSeparator, preRelease.Value), additionalPreRelease.Select(p => new SwVersion.PreReleaseSegment(p.AltSeparator, p.Value)).ToArray());
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor25Test(string, int, VersionValues.BuildSegment, VersionValues.BuildSegment[]?, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor25TestData : TheoryData<string, int, VersionValues.BuildSegment, VersionValues.BuildSegment[], VersionValues>
-    {
-        public ComponentConstructor25TestData()
-        {
-            string sharedPrefix1 = GetRandomString(_prefixCharsSource, 1, 1);
-            string sharedPrefix2 = GetRandomString(_prefixCharsSource, 2, 8);
-            string uniquePrefix1 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix1);
-            string uniquePrefix2 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            string uniquePrefix3 = "-" + GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            string sharedBuild1 = GetRandomString(_buildCharsSource, 1, 1, uniquePrefix1, sharedPrefix1);
-            string sharedBuild2 = GetRandomString(_buildCharsSource, 2, 8, uniquePrefix2, sharedPrefix2);
-            string uniqueBuild1 = GetRandomString(_buildCharsSource, 1, 1, uniquePrefix1, sharedPrefix1, sharedBuild1);
-            string uniqueBuild2 = GetRandomString(_buildCharsSource, 2, 8, uniquePrefix2, sharedPrefix2, sharedBuild2);
-            foreach (string prefix in new string[] { sharedPrefix1, sharedPrefix2, uniquePrefix1, uniquePrefix2, uniquePrefix3 })
-                foreach (int major in GetMajorValues())
-                    foreach (VersionValues.BuildSegment build in GetBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2))
-                        foreach (VersionValues.BuildSegment[] additionalBuild in GetAdditonalBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2,
-                                new string[] { sharedPrefix1, sharedPrefix2 }, uniquePrefix1, uniquePrefix2))
-                            Add(prefix, major, build, additionalBuild, new(prefix, major, null, null, null, null, Array.Empty<VersionValues.PreReleaseSegment>(),
-                                additionalBuild.Prepend(build).ToArray(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(string, int, SwVersion.BuildSegment, SwVersion.BuildSegment[])" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor25TestData))]
-    public void ComponentConstructor25Test(string prefix, int major, VersionValues.BuildSegment build, VersionValues.BuildSegment[]? additionalBuild, VersionValues expected)
-    {
-        SwVersion target = (additionalBuild is null) ? new(prefix, major, new SwVersion.BuildSegment(build.Separator, build.Value)) :
-            new(prefix, major, new SwVersion.BuildSegment(build.Separator, build.Value), additionalBuild.Select(b => new SwVersion.BuildSegment(b.Separator, b.Value)).ToArray());
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor26Test(string, int, int, int, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor26TestData : TheoryData<string, int, int, int, VersionValues>
-    {
-        public ComponentConstructor26TestData()
-        {
-            IEnumerable<int> patchValues = GetPatchValues(out IEnumerable<int> majorValues, out IEnumerable<int> minorValues);
-            string sharedPrefix1 = GetRandomString(_prefixCharsSource, 1, 1);
-            string sharedPrefix2 = GetRandomString(_prefixCharsSource, 2, 8);
-            string uniquePrefix1 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix1);
-            string uniquePrefix2 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            string uniquePrefix3 = "-" + GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            foreach (string prefix in new string[] { sharedPrefix1, sharedPrefix2, uniquePrefix1, uniquePrefix2, uniquePrefix3 })
-                foreach (int major in majorValues)
-                    foreach (int minor in minorValues)
-                        foreach (int patch in patchValues)
-                            Add(prefix, major, minor, patch, new(prefix, major, minor, patch, null, Array.Empty<int>(),
-                                Array.Empty<VersionValues.PreReleaseSegment>(), Array.Empty<VersionValues.BuildSegment>(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(string, int, int, int)" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor26TestData))]
-    public void ComponentConstructor26Test(string prefix, int major, int minor, int patch, VersionValues expected)
-    {
-        SwVersion target = new(prefix, major, minor, patch);
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor27Test(int, int, int, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor27TestData : TheoryData<int, int, int, VersionValues>
-    {
-        public ComponentConstructor27TestData()
-        {
-            IEnumerable<int> patchValues = GetPatchValues(out IEnumerable<int> majorValues, out IEnumerable<int> minorValues);
-            foreach (int major in majorValues)
-                foreach (int minor in minorValues)
-                    foreach (int patch in patchValues)
-                        Add(major, minor, patch, new(null, major, minor, patch, null, Array.Empty<int>(),
-                            Array.Empty<VersionValues.PreReleaseSegment>(), Array.Empty<VersionValues.BuildSegment>(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(int, int, int)" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor27TestData))]
-    public void ComponentConstructor27Test(int major, int minor, int patch, VersionValues expected)
-    {
-        SwVersion target = new(major, minor, patch);
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor28Test(int, VersionValues.BuildSegment, VersionValues.BuildSegment[]?, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor28TestData : TheoryData<int, VersionValues.BuildSegment, VersionValues.BuildSegment[], VersionValues>
-    {
-        public ComponentConstructor28TestData()
-        {
-            string sharedBuild1 = GetRandomString(_buildCharsSource, 1, 1);
-            string sharedBuild2 = GetRandomString(_buildCharsSource, 2, 8);
-            string uniqueBuild1 = GetRandomString(_buildCharsSource, 1, 1, sharedBuild1);
-            string uniqueBuild2 = GetRandomString(_buildCharsSource, 2, 8, sharedBuild2);
-            foreach (int major in GetMajorValues())
-                foreach (VersionValues.BuildSegment build in GetBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2))
-                    foreach (VersionValues.BuildSegment[] additionalBuild in GetAdditonalBuildSegments(sharedBuild1, sharedBuild2, uniqueBuild1, uniqueBuild2, Array.Empty<string>()))
-                        Add(major, build, additionalBuild, new(null, major, null, null, null, null, Array.Empty<VersionValues.PreReleaseSegment>(),
-                            additionalBuild.Prepend(build).ToArray(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(int, SwVersion.BuildSegment, SwVersion.BuildSegment[])" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor28TestData))]
-    public void ComponentConstructor28Test(int major, VersionValues.BuildSegment build, VersionValues.BuildSegment[]? additionalBuild, VersionValues expected)
-    {
-        SwVersion target = (additionalBuild is null) ? new(major, new SwVersion.BuildSegment(build.Separator, build.Value)) : new(major, new SwVersion.BuildSegment(build.Separator, build.Value), additionalBuild.Select(b => new SwVersion.BuildSegment(b.Separator, b.Value)).ToArray());
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor29Test(string, int, int, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor29TestData : TheoryData<string, int, int, VersionValues>
-    {
-        public ComponentConstructor29TestData()
-        {
-            IEnumerable<int> minorValues = GetMinorValues(out IEnumerable<int> majorValues);
-            string sharedPrefix1 = GetRandomString(_prefixCharsSource, 1, 1);
-            string sharedPrefix2 = GetRandomString(_prefixCharsSource, 2, 8);
-            string uniquePrefix1 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix1);
-            string uniquePrefix2 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            string uniquePrefix3 = "-" + GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            foreach (string prefix in new string[] { sharedPrefix1, sharedPrefix2, uniquePrefix1, uniquePrefix2, uniquePrefix3 })
-                foreach (int major in majorValues)
-                    foreach (int minor in minorValues)
-                        Add(prefix, major, minor, new(prefix, major, minor, null, null, Array.Empty<int>(),
-                            Array.Empty<VersionValues.PreReleaseSegment>(), Array.Empty<VersionValues.BuildSegment>(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(string, int, int)" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor29TestData))]
-    public void ComponentConstructor29Test(string prefix, int major, int minor, VersionValues expected)
-    {
-        SwVersion target = new(prefix, major, minor);
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor30Test(int, int, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor30TestData : TheoryData<int, int, VersionValues>
-    {
-        public ComponentConstructor30TestData()
-        {
-            IEnumerable<int> minorValues = GetMinorValues(out IEnumerable<int> majorValues);
-            foreach (int major in majorValues)
-                foreach (int minor in minorValues)
-                    Add(major, minor, new(null, major, minor, null, null, Array.Empty<int>(),
-                        Array.Empty<VersionValues.PreReleaseSegment>(), Array.Empty<VersionValues.BuildSegment>(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(int, int)" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor30TestData))]
-    public void ComponentConstructor30Test(int major, int minor, VersionValues expected)
-    {
-        SwVersion target = new(major, minor);
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor31Test(string, int, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor31TestData : TheoryData<string, int, VersionValues>
-    {
-        public ComponentConstructor31TestData()
-        {
-            string sharedPrefix1 = GetRandomString(_prefixCharsSource, 1, 1);
-            string sharedPrefix2 = GetRandomString(_prefixCharsSource, 2, 8);
-            string uniquePrefix1 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix1);
-            string uniquePrefix2 = GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            string uniquePrefix3 = "-" + GetRandomString(_prefixCharsSource, 2, 8, sharedPrefix2);
-            foreach (string prefix in new string[] { sharedPrefix1, sharedPrefix2, uniquePrefix1, uniquePrefix2, uniquePrefix3 })
-                foreach (int major in GetMajorValues())
-                    Add(prefix, major, new(prefix, major, null, null, null, Array.Empty<int>(),
-                        Array.Empty<VersionValues.PreReleaseSegment>(), Array.Empty<VersionValues.BuildSegment>(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(string, int)" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor31TestData))]
-    public void ComponentConstructor31Test(string prefix, int major, VersionValues expected)
-    {
-        SwVersion target = new(prefix, major);
-        expected.AssertEquals(target);
-    }
-    
-    /// <summary>
-    /// Generates test data for <see cref="ComponentConstructor32Test(int, VersionValues)" />.
-    /// </summary>
-    public class ComponentConstructor32TestData : TheoryData<int, VersionValues>
-    {
-        public ComponentConstructor32TestData()
-        {
-            foreach (int major in GetMajorValues())
-                Add(major, new(null, major, null, null, null, Array.Empty<int>(), Array.Empty<VersionValues.PreReleaseSegment>(), Array.Empty<VersionValues.BuildSegment>(), SwVersion.VersionStringFormat.Standard));
-        }
-    }
-    
-    /// <summary>
-    /// Unit test for constructor <see cref="SwVersion(int)" />.
-    /// </summary>
-    // [Theory]
-    // [ClassData(typeof(ComponentConstructor32TestData))]
-    public void ComponentConstructor32Test(int major, VersionValues expected)
-    {
-        SwVersion target = new(major);
-        expected.AssertEquals(target);
-    }
 }
