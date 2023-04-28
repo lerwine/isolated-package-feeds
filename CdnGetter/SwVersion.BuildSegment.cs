@@ -17,7 +17,7 @@ public readonly partial struct SwVersion
         public BuildSeparator Separator { get; }
 
         /// <summary>
-        /// The text of the current <see cref="Build" /> component segment, not including the character indicated by the <see cref="Separator" /> property.
+        /// Gets the text of the current <see cref="Build" /> component segment, not including the character indicated by the <see cref="Separator" /> property.
         /// </summary>
         public string Value { get; }
 

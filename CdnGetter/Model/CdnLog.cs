@@ -13,7 +13,7 @@ public class CdnLog : CdnLogBase
 
     private Guid _upstreamCdnId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="UpstreamCdn" />.
+    /// Gets or sets the unique identifier of the parent <see cref="UpstreamCdn" />.
     /// </summary>
     public override Guid UpstreamCdnId
     {
@@ -23,7 +23,7 @@ public class CdnLog : CdnLogBase
 
     private UpstreamCdn? _cdn;
     /// <summary>
-    /// The parent upstream content delivery network.
+    /// Gets or sets the parent upstream content delivery network.
     /// </summary>
     public UpstreamCdn? Cdn
     {

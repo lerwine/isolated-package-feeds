@@ -17,7 +17,7 @@ public abstract class ContentGetterService
     private readonly IHostEnvironment _hostEnvironment;
 
     /// <summary>
-    /// The current database context.
+    /// Gets the current database context.
     /// </summary>
     protected ContentDb DbContext { get; }
 

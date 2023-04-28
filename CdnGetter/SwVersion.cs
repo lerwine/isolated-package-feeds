@@ -34,20 +34,20 @@ public readonly partial struct SwVersion : IEquatable<SwVersion>, IComparable<Sw
     public readonly StringComparer TextComparer = StringComparer.OrdinalIgnoreCase;
 
     /// <summary>
-    /// The text version component that precedes other version components.
+    /// Gets the text version component that precedes other version components.
     /// A <see langword="null" /> value indicates there is no prefixed version component.
     /// </summary>
     /// <remarks>This will never be a zero-length string.</remarks>
     public string? Prefix { get; }
 
     /// <summary>
-    /// The value of first numerical version component indicating the major version number.
+    /// Gets the value of first numerical version component indicating the major version number.
     /// </summary>
     /// <remarks>This will always be <c>0</c> when <see cref="Format" /> is <see cref="VersionStringFormat.NonNumerical" /> since non-standard version strings do not have parsable numerical components..</remarks>
     public int Major { get; }
 
     /// <summary>
-    /// The value of the second numerical version component indicating the minor version number.
+    /// Gets the value of the second numerical version component indicating the minor version number.
     /// A <see langword="null" /> value indicates an implied <c>0</c> value.
     /// </summary>
     /// <remarks>This will always be <see langword="null" /> when <see cref="Format" /> is <see cref="VersionStringFormat.NonNumerical" />.
@@ -55,7 +55,7 @@ public readonly partial struct SwVersion : IEquatable<SwVersion>, IComparable<Sw
     public int? Minor { get; }
 
     /// <summary>
-    /// The value of the third numerical version component indicating the patch number.
+    /// Gets the value of the third numerical version component indicating the patch number.
     /// A <see langword="null" /> value indicates an implied <c>0</c> value.
     /// </summary>
     /// <remarks>This will always be <see langword="null" /> when <see cref="Format" /> is <see cref="VersionStringFormat.NonNumerical" />.
@@ -63,7 +63,7 @@ public readonly partial struct SwVersion : IEquatable<SwVersion>, IComparable<Sw
     public int? Patch { get; }
 
     /// <summary>
-    /// The value of the fourth numerical version component indicating the revision number.
+    /// Gets the value of the fourth numerical version component indicating the revision number.
     /// A <see langword="null" /> value indicates an implied <c>0</c> value.
     /// </summary>
     /// <remarks>This will always be <see langword="null" /> when <see cref="Format" /> is <see cref="VersionStringFormat.NonNumerical" />.
@@ -71,28 +71,28 @@ public readonly partial struct SwVersion : IEquatable<SwVersion>, IComparable<Sw
     public int? Revision { get; }
 
     /// <summary>
-    /// The numerical version components that follow the <see cref="Revision" /> components.
+    /// Gets the numerical version components that follow the <see cref="Revision" /> components.
     /// A <see langword="null" /> value indicates there are no additinal numerical component.
     /// </summary>
     /// <remarks>This will never contain an empty collection; It will always have at least 1 element if it is not <see cref="null" />.</remarks>
     public ReadOnlyCollection<int>? AdditionalNumerical { get; }
 
     /// <summary>
-    /// The segments of the pre-release component, which follows the numerical components.
+    /// Gets the segments of the pre-release component, which follows the numerical components.
     /// A <see langword="null" /> value indicates there is no pre-release component.
     /// </summary>
     /// <remarks>This will never contain an empty collection; It will always have at least 1 element if it is not <see cref="null" />.</remarks>
     public ReadOnlyCollection<PreReleaseSegment>? PreRelease { get; }
 
     /// <summary>
-    /// The segments of the build component, which follows the numerical components.
+    /// Gets the segments of the build component, which follows the numerical components.
     /// A <see langword="null" /> value indicates there is no build component.
     /// </summary>
     /// <remarks>This will never contain an empty collection; It will always have at least 1 element if it is not <see cref="null" />.</remarks>
     public ReadOnlyCollection<BuildSegment>? Build { get; }
 
     /// <summary>
-    /// The format of the version string.
+    /// Gets the format of the version string.
     /// </summary>
     public VersionStringFormat Format { get; }
 

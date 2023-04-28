@@ -16,7 +16,7 @@ public class CdnLibrary : ModificationTrackingModelBase
 
     private Guid _localId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="LocalLibrary" />.
+    /// Gets or sets the unique identifier of the parent <see cref="LocalLibrary" />.
     /// </summary>
     public Guid LocalId
     {
@@ -26,7 +26,7 @@ public class CdnLibrary : ModificationTrackingModelBase
 
     private LocalLibrary? _local;
     /// <summary>
-    /// The upstream service for this content library.
+    /// Gets or sets the upstream service for this content library.
     /// </summary>
     public LocalLibrary? Local
     {
@@ -36,7 +36,7 @@ public class CdnLibrary : ModificationTrackingModelBase
 
     private Guid _cdnId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="Cdn" />.
+    /// Gets or sets the unique identifier of the parent <see cref="Cdn" />.
     /// </summary>
     public Guid CdnId
     {
@@ -46,7 +46,7 @@ public class CdnLibrary : ModificationTrackingModelBase
 
     private UpstreamCdn? _cdn;
     /// <summary>
-    /// The upstream service for this content library.
+    /// Gets or sets the upstream service for this content library.
     /// </summary>
     public UpstreamCdn? Cdn
     {
@@ -55,7 +55,7 @@ public class CdnLibrary : ModificationTrackingModelBase
     }
     
     /// <summary>
-    /// The preferential order override for the upstream CDN or <see langword="null" /> to use <see cref="UpstreamCdn.Priority" />.
+    /// Gets or sets the preferential order override for the upstream CDN or <see langword="null" /> to use <see cref="UpstreamCdn.Priority" />.
     /// </summary>
     public ushort? Priority { get; set; }
 

@@ -12,25 +12,25 @@ public class LocalVersion : ModificationTrackingModelBase
     private readonly object _syncRoot = new();
 
     /// <summary>
-    /// The unique identifier for the library version.
+    /// Gets or sets the unique identifier for the library version.
     /// </summary>
     public Guid Id { get; set; }
     
     public const int MAXLENGTH_Version = 1024;
     /// <summary>
-    /// The library version.
+    /// Gets or sets the library version.
     /// </summary>
     public SwVersion Version { get; set; }
     
     public const ushort DEFAULTVALUE_Order = ushort.MaxValue;
     /// <summary>
-    /// The release order for the library version.
+    /// Gets or sets the release order for the library version.
     /// </summary>
     public ushort Order { get; set; } = DEFAULTVALUE_Order;
 
     private Guid _libraryId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="LocalLibrary" />.
+    /// Gets or sets the unique identifier of the parent <see cref="LocalLibrary" />.
     /// </summary>
     public Guid LibraryId
     {
@@ -40,7 +40,7 @@ public class LocalVersion : ModificationTrackingModelBase
 
     private string _dirName = string.Empty;
     /// <summary>
-    /// The name of the local subdirectory where the content for this version is stored.
+    /// Gets or sets the name of the local subdirectory where the content for this version is stored.
     /// </summary>
     public string DirName
     {
@@ -50,7 +50,7 @@ public class LocalVersion : ModificationTrackingModelBase
 
     private LocalLibrary? _library;
     /// <summary>
-    /// The parent content library.
+    /// Gets or sets the parent content library.
     /// </summary>
     public LocalLibrary? Library
     {
@@ -59,7 +59,7 @@ public class LocalVersion : ModificationTrackingModelBase
     }
 
     /// <summary>
-    /// The files that belong to the current version of the content library.
+    /// Gets or sets the files that belong to the current version of the content library.
     /// </summary>
     public Collection<LocalFile> Files { get; set; } = new();
     

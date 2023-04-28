@@ -3,7 +3,7 @@ namespace CdnGetter.Config;
 public class CommandSettings
 {
     /// <summary>
-    /// The <see cref="Model.UpstreamCdn.Name" /> of the upstream content delivery service.
+    /// Gets or sets the <see cref="Model.UpstreamCdn.Name" /> of the upstream content delivery service.
     /// </summary>
     public List<string>? Upstream { get; set; }
 
@@ -160,7 +160,7 @@ public class CommandSettings
     public List<string>? ReloadExistingVersions { get; set; }
 
     /// <summary>
-    /// The <see cref="Model.LocalLibrary.Name" />(s) of the local librares.
+    /// Gets or sets the <see cref="Model.LocalLibrary.Name" />(s) of the local librares.
     /// </summary>
     public List<string>? Library { get; set; }
     

@@ -17,7 +17,7 @@ public class CdnFile : ModificationTrackingModelBase
 
     private Guid _localId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="LocalFile" />.
+    /// Gets or sets the unique identifier of the parent <see cref="LocalFile" />.
     /// </summary>
     public Guid LocalId
     {
@@ -27,7 +27,7 @@ public class CdnFile : ModificationTrackingModelBase
 
     private LocalFile? _local;
     /// <summary>
-    /// The content library version that the current file belongs to.
+    /// Gets or sets the content library version that the current file belongs to.
     /// </summary>
     public LocalFile? Local
     {
@@ -37,7 +37,7 @@ public class CdnFile : ModificationTrackingModelBase
 
     private Guid _versionId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="CdnVersion" />.
+    /// Gets or sets the unique identifier of the parent <see cref="CdnVersion" />.
     /// </summary>
     public Guid VersionId
     {
@@ -47,7 +47,7 @@ public class CdnFile : ModificationTrackingModelBase
 
     private Guid _libraryId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="CdnLibrary" />.
+    /// Gets or sets the unique identifier of the parent <see cref="CdnLibrary" />.
     /// </summary>
     public Guid LibraryId
     {
@@ -57,7 +57,7 @@ public class CdnFile : ModificationTrackingModelBase
 
     private Guid _upstreamCdnId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="UpstreamCdn" />.
+    /// Gets or sets the unique identifier of the parent <see cref="UpstreamCdn" />.
     /// </summary>
     public Guid UpstreamCdnId
     {
@@ -67,7 +67,7 @@ public class CdnFile : ModificationTrackingModelBase
 
     private CdnVersion? _version;
     /// <summary>
-    /// The content library version that the current file belongs to.
+    /// Gets or sets the content library version that the current file belongs to.
     /// </summary>
     public CdnVersion? Version
     {
@@ -76,7 +76,7 @@ public class CdnFile : ModificationTrackingModelBase
     }
     private string? _encoding;
     /// <summary>
-    /// The content encoding override for <see cref="LocalFile.Encoding" /> or <see langword="null" /> for no override.
+    /// Gets or sets the content encoding override for <see cref="LocalFile.Encoding" /> or <see langword="null" /> for no override.
     /// </summary>
     [MaxLength(MAXLENGTH_Encoding)]
     [MinLength(1)]
@@ -88,7 +88,7 @@ public class CdnFile : ModificationTrackingModelBase
 
     private string? _sri;
     /// <summary>
-    /// The cryptographic hash override for <see cref="LocalFile.SRI" /> or <see langword="null" /> for no override.
+    /// Gets or sets the cryptographic hash override for <see cref="LocalFile.SRI" /> or <see langword="null" /> for no override.
     /// </summary>
     [MaxLength(MAXLENGTH_SRI)]
     [MinLength(1)]
@@ -100,7 +100,7 @@ public class CdnFile : ModificationTrackingModelBase
 
     private string? _fileName = string.Empty;
     /// <summary>
-    /// The local file name override for <see cref="LocalFile.FileName" /> or <see langword="null" /> for no override.
+    /// Gets or sets the local file name override for <see cref="LocalFile.FileName" /> or <see langword="null" /> for no override.
     /// </summary>
     [MaxLength(MAXLENGTH_FileName)]
     [MinLength(1)]
@@ -111,7 +111,7 @@ public class CdnFile : ModificationTrackingModelBase
     }
 
     /// <summary>
-    /// The preferential order override for the upstream CDN or <see langword="null" /> to use <see cref="CdnVersion.Priority" />, <see cref="CdnLibrary.Priority" /> or <see cref="UpstreamCdn.Priority" />.
+    /// Gets or sets the preferential order override for the upstream CDN or <see langword="null" /> to use <see cref="CdnVersion.Priority" />, <see cref="CdnLibrary.Priority" /> or <see cref="UpstreamCdn.Priority" />.
     /// </summary>
     public ushort? Priority { get; set; }
 

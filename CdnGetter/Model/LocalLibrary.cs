@@ -11,14 +11,14 @@ namespace CdnGetter.Model;
 public class LocalLibrary : ModificationTrackingModelBase
 {
     /// <summary>
-    /// The unique identifier for the content library.
+    /// Gets or sets the unique identifier for the content library.
     /// </summary>
     public Guid Id { get; set; }
     
     public const int MAXLENGTH_Name = 1024;
     private string _name = string.Empty;
     /// <summary>
-    /// The name of the content library.
+    /// Gets or sets the name of the content library.
     /// </summary>
     [MaxLength(MAXLENGTH_Name)]
     [MinLength(1)]
@@ -30,7 +30,7 @@ public class LocalLibrary : ModificationTrackingModelBase
 
     private string _dirName = string.Empty;
     /// <summary>
-    /// The name of the local subdirectory where the content for this library is stored.
+    /// Gets or sets the name of the local subdirectory where the content for this library is stored.
     /// </summary>
     /// <remarks>The 
     /// </remarks>

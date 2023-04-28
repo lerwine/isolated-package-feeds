@@ -12,14 +12,14 @@ public class LocalFile : ModificationTrackingModelBase
     private readonly object _syncRoot = new();
 
     /// <summary>
-    /// The unique identifier for the library file.
+    /// Gets or sets the unique identifier for the library file.
     /// </summary>
     public Guid Id { get; set; }
     
     public const int MAXLENGTH_Name = 1024;
     private string _name = string.Empty;
     /// <summary>
-    /// The name of the library file.
+    /// Gets or sets the name of the library file.
     /// </summary>
     [MaxLength(MAXLENGTH_Name)]
     [MinLength(1)]
@@ -31,7 +31,7 @@ public class LocalFile : ModificationTrackingModelBase
 
     private string _sri = string.Empty;
     /// <summary>
-    /// The Cryptographic hash.
+    /// Gets or sets the Cryptographic hash.
     /// </summary>
     [MaxLength(MAXLENGTH_SRI)]
     [MinLength(1)]
@@ -43,13 +43,13 @@ public class LocalFile : ModificationTrackingModelBase
 
     public const ushort DEFAULTVALUE_Order = ushort.MaxValue;
     /// <summary>
-    /// The display order for the library file.
+    /// Gets or sets the display order for the library file.
     /// </summary>
     public ushort Order { get; set; } = DEFAULTVALUE_Order;
 
     private string _contentType = System.Net.Mime.MediaTypeNames.Application.Octet;
     /// <summary>
-    /// The library file MIME content type.
+    /// Gets or sets the library file MIME content type.
     /// </summary>
     [MaxLength(MAXLENGTH_ContentType)]
     [MinLength(MINLENGTH_ContentType)]
@@ -61,7 +61,7 @@ public class LocalFile : ModificationTrackingModelBase
 
     private string _encoding = string.Empty;
     /// <summary>
-    /// The content encoding for library file or <see cref="string.Empty" /> for binary files.
+    /// Gets or sets the content encoding for library file or <see cref="string.Empty" /> for binary files.
     /// </summary>
     [MaxLength(MAXLENGTH_Encoding)]
     public string Encoding
@@ -72,7 +72,7 @@ public class LocalFile : ModificationTrackingModelBase
 
     private string _fileName = string.Empty;
     /// <summary>
-    /// The name of the local file where the content is stored.
+    /// Gets or sets the name of the local file where the content is stored.
     /// </summary>
     [MaxLength(MAXLENGTH_FileName)]
     [MinLength(1)]
@@ -84,7 +84,7 @@ public class LocalFile : ModificationTrackingModelBase
 
     private Guid _versionId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="CdnVersion" />.
+    /// Gets or sets the unique identifier of the parent <see cref="CdnVersion" />.
     /// </summary>
     public Guid VersionId
     {
@@ -94,7 +94,7 @@ public class LocalFile : ModificationTrackingModelBase
 
     private LocalVersion? _version;
     /// <summary>
-    /// The content library version that the current file belongs to.
+    /// Gets or sets the content library version that the current file belongs to.
     /// </summary>
     public LocalVersion? Version
     {

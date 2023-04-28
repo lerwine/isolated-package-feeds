@@ -10,12 +10,12 @@ namespace CdnGetter.Model;
 public abstract class ModificationTrackingModelBase : IValidatableObject
 {
     /// <summary>
-    /// The date and time that the record was created.
+    /// Gets or sets the date and time that the record was created.
     /// </summary>
     public DateTime CreatedOn { get; set; } = DateTime.Now;
 
     /// <summary>
-    /// The date and time that the record was last modified.
+    /// Gets or sets the date and time that the record was last modified.
     /// </summary>
     public DateTime ModifiedOn { get; set; } = DateTime.Now;
     

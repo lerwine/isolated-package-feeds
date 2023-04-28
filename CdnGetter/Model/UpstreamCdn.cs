@@ -15,14 +15,14 @@ namespace CdnGetter.Model;
 public class UpstreamCdn : ModificationTrackingModelBase
 {
     /// <summary>
-    /// The unique identifier of the registered upstream service.
+    /// Gets or sets the unique identifier of the registered upstream service.
     /// </summary>
     public Guid Id { get; set; }
     
     public const int MAXLENGTH_Name = 1024;
     private string _name = string.Empty;
     /// <summary>
-    /// The display name of the registered registered upstream content delivery service.
+    /// Gets or sets the display name of the registered registered upstream content delivery service.
     /// </summary>
     [MaxLength(MAXLENGTH_Name)]
     [MinLength(1)]
@@ -34,7 +34,7 @@ public class UpstreamCdn : ModificationTrackingModelBase
 
     private string _dirName = string.Empty;
     /// <summary>
-    /// The name of the local subdirectory where the content for this library is stored.
+    /// Gets or sets the name of the local subdirectory where the content for this library is stored.
     /// </summary>
     [MaxLength(MAXLENGTH_FileName)]
     [MinLength(1)]
@@ -46,13 +46,13 @@ public class UpstreamCdn : ModificationTrackingModelBase
 
     public const ushort DEFAULTVALUE_Priority = ushort.MaxValue;
     /// <summary>
-    /// The preferential order for the upstream CDN.
+    /// Gets or sets the preferential order for the upstream CDN.
     /// </summary>
     public ushort Priority { get; set; } = DEFAULTVALUE_Priority;
 
     private string _description = string.Empty;
     /// <summary>
-    /// The verbose description of the upstream content delivery service.
+    /// Gets or sets the verbose description of the upstream content delivery service.
     /// </summary>
     public string Description
     {
@@ -61,7 +61,7 @@ public class UpstreamCdn : ModificationTrackingModelBase
     }
 
     /// <summary>
-    /// The content libraries that have been retrieved from the upstream content delivery service.
+    /// Gets or sets the content libraries that have been retrieved from the upstream content delivery service.
     /// </summary>
     public Collection<CdnLibrary> Libraries { get; set; } = new();
     

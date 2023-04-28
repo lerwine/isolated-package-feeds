@@ -16,7 +16,7 @@ public class CdnVersion : ModificationTrackingModelBase
 
     private Guid _localId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="LocalVersion" />.
+    /// Gets or sets the unique identifier of the parent <see cref="LocalVersion" />.
     /// </summary>
     public Guid LocalId
     {
@@ -26,7 +26,7 @@ public class CdnVersion : ModificationTrackingModelBase
 
     private LocalVersion? _local;
     /// <summary>
-    /// The content library version that the current file belongs to.
+    /// Gets or sets the content library version that the current file belongs to.
     /// </summary>
     public LocalVersion? Local
     {
@@ -36,7 +36,7 @@ public class CdnVersion : ModificationTrackingModelBase
 
     private Guid _libraryId;
     /// <summary>
-    /// The unique identifier of the ancestor <see cref="LocalLibrary" />.
+    /// Gets or sets the unique identifier of the ancestor <see cref="LocalLibrary" />.
     /// </summary>
     public Guid LibraryId
     {
@@ -46,7 +46,7 @@ public class CdnVersion : ModificationTrackingModelBase
 
     private Guid _upstreamCdnId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="UpstreamCdn" />.
+    /// Gets or sets the unique identifier of the parent <see cref="UpstreamCdn" />.
     /// </summary>
     public Guid UpstreamCdnId
     {
@@ -56,7 +56,7 @@ public class CdnVersion : ModificationTrackingModelBase
 
     private CdnLibrary? _library;
     /// <summary>
-    /// The parent content library.
+    /// Gets or sets the parent content library.
     /// </summary>
     public CdnLibrary? Library
     {
@@ -65,7 +65,7 @@ public class CdnVersion : ModificationTrackingModelBase
     }
     
     /// <summary>
-    /// The preferential order override for the upstream CDN or <see langword="null" /> to use <see cref="CdnLibrary.Priority" /> or <see cref="UpstreamCdn.Priority" />.
+    /// Gets or sets the preferential order override for the upstream CDN or <see langword="null" /> to use <see cref="CdnLibrary.Priority" /> or <see cref="UpstreamCdn.Priority" />.
     /// </summary>
     public ushort? Priority { get; set; }
 
@@ -75,7 +75,7 @@ public class CdnVersion : ModificationTrackingModelBase
     public JsonNode? ProviderData { get; set; }
 
     /// <summary>
-    /// The files that belong to the current version of the content library.
+    /// Gets or sets the files that belong to the current version of the content library.
     /// </summary>
     public Collection<CdnFile> Files { get; set; } = new();
     

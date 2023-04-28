@@ -13,7 +13,7 @@ public class LibraryLog : CdnLogBase
 
     private Guid _libraryId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="CdnLibrary" />.
+    /// Gets or sets the unique identifier of the parent <see cref="CdnLibrary" />.
     /// </summary>
     public Guid LibraryId
     {
@@ -23,7 +23,7 @@ public class LibraryLog : CdnLogBase
 
     private Guid _upstreamCdnId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="UpstreamCdn" />.
+    /// Gets or sets the unique identifier of the parent <see cref="UpstreamCdn" />.
     /// </summary>
     public override Guid UpstreamCdnId
     {
@@ -33,7 +33,7 @@ public class LibraryLog : CdnLogBase
 
     private CdnLibrary? _library;
     /// <summary>
-    /// The parent content library.
+    /// Gets or sets the parent content library.
     /// </summary>
     public CdnLibrary? Library
     {

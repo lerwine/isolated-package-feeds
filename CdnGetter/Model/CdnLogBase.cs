@@ -12,13 +12,13 @@ public abstract class CdnLogBase : ICdnLog, IValidatableObject
     private readonly object _syncRoot = new();
 
     /// <summary>
-    /// The unique identifier for the library version.
+    /// Gets or sets the unique identifier for the library version.
     /// </summary>
     public Guid Id { get; set; }
 
     private string _message = string.Empty;
     /// <summary>
-    /// The log message.
+    /// Gets or sets the log message.
     /// </summary>
     public string Message
     {
@@ -27,22 +27,22 @@ public abstract class CdnLogBase : ICdnLog, IValidatableObject
     }
 
     /// <summary>
-    /// The action being performed, which precipitated the log entry.
+    /// Gets or sets the action being performed, which precipitated the log entry.
     /// </summary>
     public LibraryAction Action { get; set; }
 
     /// <summary>
-    /// The severity level of the log entry.
+    /// Gets or sets the severity level of the log entry.
     /// </summary>
     public ErrorLevel Level { get; set; }
 
     /// <summary>
-    /// The numerical log event ID which corresponds to an event defined in <see cref="LoggerMessages" />.
+    /// Gets or sets the numerical log event ID which corresponds to an event defined in <see cref="LoggerMessages" />.
     /// </summary>
     public int? EventId { get; set; }
 
     /// <summary>
-    /// The URL of the upstream request associated with the event log entry.
+    /// Gets or sets the URL of the upstream request associated with the event log entry.
     /// </summary>
     public Uri? Url { get; set; }
 
@@ -52,12 +52,12 @@ public abstract class CdnLogBase : ICdnLog, IValidatableObject
     public JsonNode? ProviderData { get; set; }
 
     /// <summary>
-    /// The date and time that the log event happened.
+    /// Gets or sets the date and time that the log event happened.
     /// </summary>
     public DateTime Timestamp { get; set; } = DateTime.Now;
 
     /// <summary>
-    /// The unique identifier of the parent <see cref="UpstreamCdn" />.
+    /// Gets or sets the unique identifier of the parent <see cref="UpstreamCdn" />.
     /// </summary>
     public abstract Guid UpstreamCdnId { get; set; }
     

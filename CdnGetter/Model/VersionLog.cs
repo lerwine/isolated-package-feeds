@@ -13,7 +13,7 @@ public class VersionLog : CdnLogBase
 
     private Guid _versionId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="CdnVersion" />.
+    /// Gets or sets the unique identifier of the parent <see cref="CdnVersion" />.
     /// </summary>
     public Guid VersionId
     {
@@ -23,7 +23,7 @@ public class VersionLog : CdnLogBase
 
     private Guid _libraryId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="CdnLibrary" />.
+    /// Gets or sets the unique identifier of the parent <see cref="CdnLibrary" />.
     /// </summary>
     public Guid LibraryId
     {
@@ -33,7 +33,7 @@ public class VersionLog : CdnLogBase
 
     private Guid _upstreamCdnId;
     /// <summary>
-    /// The unique identifier of the parent <see cref="UpstreamCdn" />.
+    /// Gets or sets the unique identifier of the parent <see cref="UpstreamCdn" />.
     /// </summary>
     public override Guid UpstreamCdnId
     {
@@ -43,7 +43,7 @@ public class VersionLog : CdnLogBase
 
     private CdnVersion? _version;
     /// <summary>
-    /// The content library version that the current file belongs to.
+    /// Gets or sets the content library version that the current file belongs to.
     /// </summary>
     public CdnVersion? Version
     {

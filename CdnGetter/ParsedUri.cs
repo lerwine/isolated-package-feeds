@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -89,6 +90,31 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
     
     private static readonly Regex UnixPathRegex = new(@"^(((/+[^\x00/]+)+|[^\x00/]+(/+[^\x00/]+)*)/*|/+)$");
 
+    /// <summary>
+    /// Matches a valid IPv4 address.
+    /// </summary>
+    public static readonly Regex ValidIpV4Regex = new(@"^(([01](\d\d?)?|2([0-4]\d?|5[0-5]?|[6-9])?|[3-9]\d?)\.){3}([01](\d\d?)?|2([0-4]\d?|5[0-5]?|[6-9])?|[3-9]\d?)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    
+    /// <summary>
+    /// Matches a valid IPv6 address that is surrounded by square brackets.
+    /// </summary>
+    public static readonly Regex ValidUriIpV6Regex = new(@"^\[(:((:[\da-f]{1,4}){1,7}|:)|(?=([^:]+:)+((:[^:]+)+|:)$)([\da-f]{1,4}::?){1,6}(:|[\da-f]{0,4}(::)?)|([\da-f]{1,4}:){7}[\da-f]{1,4})\]$", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
+    
+    /// <summary>
+    /// Matches a valid IPv6 address.
+    /// </summary>
+    public static readonly Regex ValidIpV6Regex = new(@"^(:((:[\da-f]{1,4}){1,7}|:)|(?=([^:]+:)+((:[^:]+)+|:)$)([\da-f]{1,4}::?){1,6}(:|[\da-f]{0,4}(::)?)|([\da-f]{1,4}:){7}[\da-f]{1,4})$", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
+    
+    /// <summary>
+    /// Matches a valid IPv6 address with an embedded IPv4 address that is surrounded by square brackets.
+    /// </summary>
+    public static readonly Regex ValidUriIpV6wV4Regex = new(@"^\[(:(:[\da-f]{1,4}){0,5}:|[\da-f]{1,4}:(:([\da-f]{1,4}:){0,4}|[\da-f]{1,4}:(:([\da-f]{1,4}:){0,3}|[\da-f]{1,4}:(:([\da-f]{1,4}:){0,2}|[\da-f]{1,4}:(:([\da-f]{1,4}:)?|[\da-f]{1,4}:([\da-f]{1,4}?)?:)))))(([01](\d\d?)?|2([0-4]\d?|5[0-5]?|[6-9])?|[3-9]\d?)\.){3}([01](\d\d?)?|2([0-4]\d?|5[0-5]?|[6-9])?|[3-9]\d?)\]$", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
+    
+    /// <summary>
+    /// Matches a valid IPv6 address with an embedded IPv4 address.
+    /// </summary>
+    public static readonly Regex ValidIpV6wV4Regex = new(@"^(:(:[\da-f]{1,4}){0,5}:|[\da-f]{1,4}:(:([\da-f]{1,4}:){0,4}|[\da-f]{1,4}:(:([\da-f]{1,4}:){0,3}|[\da-f]{1,4}:(:([\da-f]{1,4}:){0,2}|[\da-f]{1,4}:(:([\da-f]{1,4}:)?|[\da-f]{1,4}:([\da-f]{1,4}?)?:)))))(([01](\d\d?)?|2([0-4]\d?|5[0-5]?|[6-9])?|[3-9]\d?)\.){3}([01](\d\d?)?|2([0-4]\d?|5[0-5]?|[6-9])?|[3-9]\d?)$", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
+    
     #endregion
 
     public static readonly ParsedUri Empty = new();
@@ -224,7 +250,16 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
     {
         if (string.IsNullOrEmpty(value))
             return string.Empty;
-        return EncodedSequenceRegex.Replace(value, m => new string((char)int.Parse(m.Value.AsSpan(1), System.Globalization.NumberStyles.HexNumber), 1));
+        return EncodedSequenceRegex.IsMatch(value) ? EncodedSequenceRegex.Replace(value, m => new string((char)int.Parse(m.Value.AsSpan(1), System.Globalization.NumberStyles.HexNumber), 1)) : value;
+    }
+
+    public static string UriQueryDecode(string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+            return string.Empty;
+        if (value.Contains('+'))
+            return EncodedSequenceRegex.Replace(value.Replace('+', ' '), m => new string((char)int.Parse(m.Value.AsSpan(1), System.Globalization.NumberStyles.HexNumber), 1));
+        return EncodedSequenceRegex.IsMatch(value) ? EncodedSequenceRegex.Replace(value, m => new string((char)int.Parse(m.Value.AsSpan(1), System.Globalization.NumberStyles.HexNumber), 1)) : value;
     }
 
     /// <summary>
@@ -248,7 +283,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
             uri = new ParsedUri(new PathSegment(UriDecode(uriString)));
             return true;
         }
-        string? query, fragment;
+        string? query;
         switch (uriString[index])
         {
             case '#':
@@ -281,18 +316,21 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
                     if (index == 0)
                     {
                         if ((index = uriString.IndexOf(DELIMITER_CHAR_HASH)) < 0) // uriString == "?query"
-                            uri = new ParsedUri(new PathSegment(uriString), QuerySubComponent.Parse(uriString[1..]));
+                            uri = new ParsedUri(new PathSegment(uriString), QuerySubComponent.Parse(uriString[1..], options));
                         else if (uriString.Length > 2)
                         {
                             if (index == 1) // uriString == "?#fragment"
-                                uri = new ParsedUri((IEnumerable<PathSegment>?)null, options.HasFlag(NormalizationOptions.StripEmptyQuery) ? null : Enumerable.Empty<QuerySubComponent>(), UriDecode(uriString[(index + 1)..]));
+                                uri = new ParsedUri((IEnumerable<PathSegment>?)null, options.HasFlag(NormalizationOptions.StripEmptyQuery) ? null : Enumerable.Empty<QuerySubComponent>(),
+                                    UriDecode(uriString[(index + 1)..]));
                             else if (index < uriString.Length - 1) // uriString == "?query#fragment"
-                                uri = new ParsedUri((IEnumerable<PathSegment>?)null, QuerySubComponent.Parse(uriString[..index]), UriDecode(uriString[(index + 1)..]));
+                                uri = new ParsedUri((IEnumerable<PathSegment>?)null, QuerySubComponent.Parse(uriString[..index], options), UriDecode(uriString[(index + 1)..]));
                             else  // uriString == "?query#"
-                                uri = new ParsedUri((IEnumerable<PathSegment>?)null, QuerySubComponent.Parse(uriString[..index]), options.HasFlag(NormalizationOptions.StripEmptyFragment) ? null : string.Empty);
+                                uri = new ParsedUri((IEnumerable<PathSegment>?)null, QuerySubComponent.Parse(uriString[..index], options), options.HasFlag(NormalizationOptions.StripEmptyFragment) ? null :
+                                    string.Empty);
                         }
                         else // uriString == "?#"
-                            uri = new ParsedUri((IEnumerable<PathSegment>?)null, options.HasFlag(NormalizationOptions.StripEmptyQuery) ? null : Enumerable.Empty<QuerySubComponent>(), options.HasFlag(NormalizationOptions.StripEmptyFragment) ? null : string.Empty);
+                            uri = new ParsedUri((IEnumerable<PathSegment>?)null, options.HasFlag(NormalizationOptions.StripEmptyQuery) ? null : Enumerable.Empty<QuerySubComponent>(),
+                                options.HasFlag(NormalizationOptions.StripEmptyFragment) ? null : string.Empty);
 
                     }
                     else if (index < uriString.Length - 1)
@@ -300,18 +338,20 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
                         query = uriString[(index + 1)..];
                         uriString = UriDecode(uriString[..index]);
                         if ((index = query.IndexOf(DELIMITER_CHAR_HASH)) < 0) // uriString == "path"; query = "query"
-                            uri = new ParsedUri(new PathSegment(uriString), QuerySubComponent.Parse(query));
+                            uri = new ParsedUri(new PathSegment(uriString), QuerySubComponent.Parse(query, options));
                         else if (query.Length > 1)
                         {
                             if (index == 0) // uriString == "path"; query = "#fragment"
                                 uri = new ParsedUri(new PathSegment(uriString), options.HasFlag(NormalizationOptions.StripEmptyQuery) ? null : Enumerable.Empty<QuerySubComponent>(), UriDecode(query[1..]));
                             else if (index < query.Length - 1) // uriString == "path"; query = "query#fragment"
-                                uri = new ParsedUri(new PathSegment(uriString), QuerySubComponent.Parse(query[..index]), UriDecode(query[(index + 1)..]));
+                                uri = new ParsedUri(new PathSegment(uriString), QuerySubComponent.Parse(query[..index], options), UriDecode(query[(index + 1)..]));
                             else // uriString == "path"; query = "query#"
-                                uri = new ParsedUri(new PathSegment(uriString), QuerySubComponent.Parse(query[..index]), options.HasFlag(NormalizationOptions.StripEmptyFragment) ? null :string.Empty);
+                                uri = new ParsedUri(new PathSegment(uriString), QuerySubComponent.Parse(query[..index], options), options.HasFlag(NormalizationOptions.StripEmptyFragment) ? null :
+                                    string.Empty);
                         }
                         else // uriString == "path"; query = "#"
-                            uri = new ParsedUri(new PathSegment(uriString), options.HasFlag(NormalizationOptions.StripEmptyQuery) ? null : Enumerable.Empty<QuerySubComponent>(), options.HasFlag(NormalizationOptions.StripEmptyFragment) ? null : string.Empty);
+                            uri = new ParsedUri(new PathSegment(uriString), options.HasFlag(NormalizationOptions.StripEmptyQuery) ? null : Enumerable.Empty<QuerySubComponent>(),
+                                options.HasFlag(NormalizationOptions.StripEmptyFragment) ? null : string.Empty);
                     }
                     else // uriString == "path?"
                         uri = new ParsedUri(new PathSegment(UriDecode(uriString[..index])), options.HasFlag(NormalizationOptions.StripEmptyQuery) ? null : Enumerable.Empty<QuerySubComponent>());
@@ -339,45 +379,26 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
                         uri = null;
                         return false;
                     }
-                    switch (scheme)
+                    return scheme switch
                     {
-                        case "http":
-                        case "ws":
-                            return TryParseHttp(scheme, uriString[(index + 1)..], options, 80, out uri);
-                        case "https":
-                        case "wss":
-                            return TryParseHttp(scheme, uriString[(index + 1)..], options, 443, out uri);
-                        case "ftp":
-                            return TryParseFtp(uriString[(index + 1)..], options, out uri);
-                        case "sftp":
-                            return TryParseSftp(uriString[(index + 1)..], options, out uri);
-                        case "file":
-                            return TryParseFile(uriString[(index + 1)..], options, out uri);
-                        case "gopher":
-                            return TryParseGopher(uriString[(index + 1)..], options, out uri);
-                        case "nntp":
-                            return TryParseNntp(uriString[(index + 1)..], options, out uri);
-                        case "news":
-                            return TryParseNews(uriString[(index + 1)..], options, out uri);
-                        case "mailto":
-                            return TryParseMailTo(uriString[(index + 1)..], options, out uri);
-                        case "uuid":
-                            return TryParseUuid(uriString[(index + 1)..], options, out uri);
-                        case "telnet":
-                            return TryParseTelnet(uriString[(index + 1)..], options, out uri);
-                        case "ssh":
-                            return TryParseSsh(uriString[(index + 1)..], options, out uri);
-                        case "ldap":
-                            return TryParseLdap(scheme, uriString[(index + 1)..], options, 389, out uri);
-                        case "ldaps":
-                            return TryParseLdap(scheme, uriString[(index + 1)..], options, 636, out uri);
-                        case "net.tcp":
-                            return TryParseNetTcp(uriString[(index + 1)..], options, out uri);
-                        case "net.pipe":
-                            return TryParseNetPipe(uriString[(index + 1)..], options, out uri);
-                        default:
-                            return TryParseGeneric(scheme, uriString[(index + 1)..], options, out uri);
-                    }
+                        "http" or "ws" => TryParseHttp(scheme, uriString[(index + 1)..], options, 80, out uri),
+                        "https" or "wss" => TryParseHttp(scheme, uriString[(index + 1)..], options, 443, out uri),
+                        "ftp" => TryParseFtp(uriString[(index + 1)..], options, out uri),
+                        "sftp" => TryParseSftp(uriString[(index + 1)..], options, out uri),
+                        "file" => TryParseFile(uriString[(index + 1)..], options, out uri),
+                        "gopher" => TryParseGopher(uriString[(index + 1)..], options, out uri),
+                        "nntp" => TryParseNntp(uriString[(index + 1)..], options, out uri),
+                        "news" => TryParseNews(uriString[(index + 1)..], options, out uri),
+                        "mailto" => TryParseMailTo(uriString[(index + 1)..], options, out uri),
+                        "uuid" => TryParseUuid(uriString[(index + 1)..], options, out uri),
+                        "telnet" => TryParseTelnet(uriString[(index + 1)..], options, out uri),
+                        "ssh" => TryParseSsh(uriString[(index + 1)..], options, out uri),
+                        "ldap" => TryParseLdap(scheme, uriString[(index + 1)..], options, 389, out uri),
+                        "ldaps" => TryParseLdap(scheme, uriString[(index + 1)..], options, 636, out uri),
+                        "net.tcp" => TryParseNetTcp(uriString[(index + 1)..], options, out uri),
+                        "net.pipe" => TryParseNetPipe(uriString[(index + 1)..], options, out uri),
+                        _ => TryParseGeneric(scheme, uriString[(index + 1)..], options, out uri),
+                    };
                 }
                 break;
         }
@@ -401,43 +422,38 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
                 return true;
             }
         }
-        // uriString == "/";	index == 0
-        // uriString == "/path";	index == 0
-        // uriString == "/?";	index == 0
-        // uriString == "/path?";	index == 0
-        // uriString == "/?query";	index == 0
-        // uriString == "/path?query";	index == 0
-        // uriString == "/#";	index == 0
-        // uriString == "/path#";	index == 0
-        // uriString == "/?#";	index == 0
-        // uriString == "/path?#";	index == 0
-        // uriString == "/?query#";	index == 0
-        // uriString == "/path?query#";	index == 0
-        // uriString == "/#fragment";	index == 0
-        // uriString == "/path#fragment";	index == 0
-        // uriString == "/?#fragment";	index == 0
-        // uriString == "/path?#fragment";	index == 0
-        // uriString == "/?query#fragment";	index == 0
-        // uriString == "/path?query#fragment";	index == 0
-        // uriString == "path/subpath";	index < uriString.Length - 1
-        // uriString == "path/?";	index < uriString.Length - 1
-        // uriString == "path/subpath?";	index < uriString.Length - 1
-        // uriString == "path/?query";	index < uriString.Length - 1
-        // uriString == "path/subpath?query";	index < uriString.Length - 1
-        // uriString == "path/#";	index < uriString.Length - 1
-        // uriString == "path/subpath#";	index < uriString.Length - 1
-        // uriString == "path/?#";	index < uriString.Length - 1
-        // uriString == "path/subpath?#";	index < uriString.Length - 1
-        // uriString == "path/?query#";	index < uriString.Length - 1
-        // uriString == "path/subpath?query#";	index < uriString.Length - 1
-        // uriString == "path/#fragment";	index < uriString.Length - 1
-        // uriString == "path/subpath#fragment";	index < uriString.Length - 1
-        // uriString == "path/?#fragment";	index < uriString.Length - 1
-        // uriString == "path/subpath?#fragment";	index < uriString.Length - 1
-        // uriString == "path/?query#fragment";	index < uriString.Length - 1
-        // uriString == "path/subpath?query#fragment";	index < uriString.Length - 1
-        // uriString == "path/";	index == uriString.Length - 1
-        throw new NotImplementedException();
+        string[] segments = PathDelimiterRegex.Split(uriString);
+        bool isRooted = segments[0].Length == 0;
+        if (options.HasFlag(NormalizationOptions.StripEmptyPathSegments))
+        {
+            if (options.HasFlag(NormalizationOptions.NormalizeDotPathSegments))
+            {
+                segments = NormalizeDotPathSegments((isRooted ? segments.Skip(1) : segments).Where(s => s.Length > 0));
+                if (options.HasFlag(NormalizationOptions.EnsureTrailingPathSeparator))
+                    EnsureTrailingEmpty(ref segments);
+                else if (options.HasFlag(NormalizationOptions.StripTrailingPathSeparator))
+                    StripTrailingEmpty(ref segments);
+            }
+            else if ((isRooted ? segments.Skip(1) : segments).Any(s => s.Length == 0))
+                segments = segments.Where(s => s.Length > 0).ToArray();
+            else if (isRooted)
+                segments = segments.Skip(1).ToArray();
+        }
+        else if (options.HasFlag(NormalizationOptions.NormalizeDotPathSegments))
+            segments = NormalizeDotPathSegments(isRooted ? segments.Skip(1) : segments);
+        else if (isRooted)
+            segments = segments.Skip(1).ToArray();
+        if (options.HasFlag(NormalizationOptions.EnsureTrailingPathSeparator))
+            EnsureTrailingEmpty(ref segments);
+        else if (options.HasFlag(NormalizationOptions.StripTrailingPathSeparator))
+            StripTrailingEmpty(ref segments);
+        if (segments.Length == 0)
+            uri = isRooted ? new(PathSegment.EmptyRoot) : Empty;
+        else if (isRooted)
+            uri = new(segments.Select(p => (p.Length > 0) ? new PathSegment(DELIMITER_CHAR_SLASH, p) : PathSegment.EmptyRoot));
+        else
+            uri = new(new PathSegment[] { new PathSegment(segments[0])}.Concat(segments.Skip(1).Select(p => (p.Length > 0) ? new PathSegment(DELIMITER_CHAR_SLASH, p) : PathSegment.EmptyRoot)));
+        return true;
     }
 
     /// <summary>
@@ -482,13 +498,14 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
         uri = new(scheme, SCHEME_SEPARATOR_DSLASH, (userInfo is null) ?
             (port.HasValue ? new(UriDecode(hostName), port.Value) : new(hostName, defaultPort, true)) :
             port.HasValue ? new(UserInfo.Parse(userInfo, true), UriDecode(hostName), port.Value) : new(UserInfo.Parse(userInfo, true), UriDecode(hostName), defaultPort, true),
-            PathSegment.Parse(path, options, true, true), (query is null) ? null : QuerySubComponent.Parse(query, true), fragment);
+            PathSegment.Parse(path, options, true, true), (query is null) ? null : QuerySubComponent.Parse(query, options, true), fragment);
         return true;
     }
 
     private static bool TryParseFtp(string uriString, NormalizationOptions options, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_SLASH || uriString[1] != DELIMITER_CHAR_SLASH || !TrySplitPathAndFragment(uriString[2..], options, out string? userInfo, out string hostName, out ushort? port, out string path, out string? fragment))
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_SLASH || uriString[1] != DELIMITER_CHAR_SLASH || !TrySplitPathAndFragment(uriString[2..], options, out string? userInfo,
+            out string hostName, out ushort? port, out string path, out string? fragment))
         {
             uri = null;
             return false;
@@ -500,7 +517,8 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     private static bool TryParseSftp(string uriString, NormalizationOptions options, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_SLASH || uriString[1] != DELIMITER_CHAR_SLASH || !TrySplitPathAndFragment(uriString[2..], options, out string? userInfo, out string hostName, out ushort? port, out string path, out string? fragment))
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_SLASH || uriString[1] != DELIMITER_CHAR_SLASH || !TrySplitPathAndFragment(uriString[2..], options, out string? userInfo,
+            out string hostName, out ushort? port, out string path, out string? fragment))
         {
             uri = null;
             return false;
@@ -512,7 +530,8 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     private static bool TryParseFile(string uriString, NormalizationOptions options, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_SLASH || uriString[1] != DELIMITER_CHAR_SLASH || (uriString = SplitPathAndFragment(uriString, options, out string? userInfo, out string hostName, out string? fragment)).Length == 0)
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_SLASH || uriString[1] != DELIMITER_CHAR_SLASH || (uriString = SplitPathAndFragment(uriString, options, out string? userInfo,
+            out string hostName, out string? fragment)).Length == 0)
         {
             uri = null;
             return false;
@@ -523,7 +542,8 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     private static bool TryParseGopher(string uriString, NormalizationOptions options, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_SLASH || uriString[1] != DELIMITER_CHAR_SLASH || !TrySplitPathAndFragment(uriString[2..], options, out string? userInfo, out string hostName, out ushort? port, out string path, out string? fragment) || hostName.Length == 0)
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_SLASH || uriString[1] != DELIMITER_CHAR_SLASH || !TrySplitPathAndFragment(uriString[2..], options, out string? userInfo,
+            out string hostName, out ushort? port, out string path, out string? fragment) || hostName.Length == 0)
         {
             uri = null;
             return false;
@@ -535,7 +555,8 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     private static bool TryParseNntp(string uriString, NormalizationOptions options, out ParsedUri? uri)
     {
-        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_SLASH || uriString[1] != DELIMITER_CHAR_SLASH || !TrySplitPathAndFragment(uriString[2..], options, out string? userInfo, out string hostName, out ushort? port, out string path, out string? fragment) || hostName.Length == 0)
+        if (uriString.Length < 3 || uriString[0] != DELIMITER_CHAR_SLASH || uriString[1] != DELIMITER_CHAR_SLASH || !TrySplitPathAndFragment(uriString[2..], options, out string? userInfo,
+            out string hostName, out ushort? port, out string path, out string? fragment) || hostName.Length == 0)
         {
             uri = null;
             return false;
@@ -697,7 +718,6 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
             return true;
         }
         Match match = DosPathRegex.Match(path);
-        Group g;
         if (!match.Success)
         {
             if ((match = UncPathLooseRegex.Match(path)).Success)
@@ -980,24 +1000,247 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     public bool Equals(ParsedUri? other)
     {
-        throw new NotImplementedException();
+        if (other is null)
+            return false;
+        if (ReferenceEquals(this, other))
+            return true;
+        if (SchemeName is null)
+        {
+            if (other.SchemeName is not null)
+                return false;
+        }
+        else if (SchemeName != other.SchemeName || SchemeSeparator != other.SchemeSeparator || !Authority!.Equals(other.Authority))
+            return false;
+        using (IEnumerator<PathSegment> pX = PathSegments.GetEnumerator())
+        {
+            using IEnumerator<PathSegment> pY = other.PathSegments.GetEnumerator();
+            while (pX.MoveNext())
+                if (!(pY.MoveNext() && pX.Current.Equals(pY.Current)))
+                    return false;
+            if (pY.MoveNext())
+                return false;
+        }
+        if (Query is null)
+        {
+            if (other.Query is not null)
+                return false;
+        }
+        else
+        {
+            if (other.Query is null)
+                return false;
+            using IEnumerator<QuerySubComponent> x = Query.GetEnumerator();
+            using IEnumerator<QuerySubComponent> y = other.Query.GetEnumerator();
+            while (x.MoveNext())
+                if (!(y.MoveNext() && x.Current.Equals(y.Current)))
+                    return false;
+            if (y.MoveNext())
+                return false;
+        }
+        return (Fragment is null) ? other.Fragment is null : other.Fragment is not null && DefaultComponentComparer.Equals(Fragment, other.Fragment);
     }
 
     public override bool Equals(object? obj) => Equals(obj as ParsedUri);
 
     public int CompareTo(ParsedUri? other)
     {
-        throw new NotImplementedException();
+        if (other is null)
+            return 1;
+        if (ReferenceEquals(this, other))
+            return 0;
+        int result;
+        if (SchemeName is null)
+        {
+            if (other.SchemeName is not null)
+                return -1;
+        }
+        else
+        {
+            if (other.SchemeName is null)
+                return 1;
+            if ((result = DefaultComponentComparer.Compare(SchemeName, other.SchemeName)) != 0 || (result = SchemeSeparator!.CompareTo(other.SchemeSeparator)) != 0 ||
+                    (result = Authority!.CompareTo(other.Authority)) != 0)
+                return result;
+        }
+        using (IEnumerator<PathSegment> pX = PathSegments.GetEnumerator())
+        {
+            using IEnumerator<PathSegment> pY = other.PathSegments.GetEnumerator();
+            while (pX.MoveNext())
+            {
+                if (pY.MoveNext())
+                {
+                    if ((result = pX.Current.CompareTo(pY.Current)) != 0)
+                        return result;
+                }
+            }
+            if (pY.MoveNext())
+                return -1;
+        }
+        if (Query is null)
+        {
+            if (other.Query is not null)
+                return -1;
+        }
+        else
+        {
+            if (other.Query is null)
+                return 1;
+            using IEnumerator<QuerySubComponent> x = Query.GetEnumerator();
+            using IEnumerator<QuerySubComponent> y = other.Query.GetEnumerator();
+            while (x.MoveNext())
+            {
+                if (y.MoveNext())
+                {
+                    if ((result = x.Current.CompareTo(y.Current)) != 0)
+                        return result;
+                }
+            }
+            if (y.MoveNext())
+                return -1;
+        }
+        if (Fragment is null)
+            return (other.Fragment is null) ? 0 : -1;
+        return (other.Fragment is null) ? 1 : DefaultComponentComparer.Compare(Fragment, other.Fragment);
     }
 
     public override int GetHashCode()
     {
-        throw new NotImplementedException();
+        int hash = 13;
+        unchecked
+        {
+            if (SchemeName is not null)
+            {
+                hash = (hash * 19) + DefaultComponentComparer.GetHashCode(SchemeName);
+                hash = (hash * 19) + SchemeSeparator!.GetHashCode();
+                hash = (hash * 19) + Authority!.GetHashCode();
+            }
+            if (PathSegments.Count > 0)
+            {
+                int h = 3;
+                foreach (PathSegment p in PathSegments)
+                    h = (h * 7) + p.GetHashCode();
+                hash = (hash * 19) + h;
+            }
+            if (Query is not null)
+            {
+                int h = 3;
+                foreach (QuerySubComponent q in Query)
+                    h = (h * 7) + q.GetHashCode();
+                hash = (hash * 19) + h;
+            }
+            return (Fragment is null) ? hash : (hash * 17) + DefaultComponentComparer.GetHashCode(Fragment);
+        }
+    }
+
+    public static readonly Regex PasswordEncodeRegex = new(@"[^!$&'()*+,;=\w.~:-]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    public static readonly Regex PathSegmentEncodeRegex = new(@"[^!$&'()*+,:;@=\w.~-]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    
+    public static readonly Regex QueryKeyEncodeRegex = new(@"[^ !$'()*+,:;@/\w.~-]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    
+    public static readonly Regex QueryValueEncodeRegex = new(@"[^ !$'()*+,:;@=/\w.~-]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    
+    public static readonly Regex QuerySpaceEncodeRegex = new(@" |%20", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    
+    public static readonly Regex FragmentEncodeRegex = new(@"[^!$&'()*+,:;@=/?\w.~-]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    private static string Encode(string value, Regex regex) => regex.IsMatch(value) ? regex.Replace(value, match => Uri.HexEscape(match.Value[0])) : value;
+
+    private static string EncodeQueryKey(string value, Regex regex)
+    {
+        if (QueryKeyEncodeRegex.IsMatch(value))
+            value = QueryKeyEncodeRegex.Replace(value, match => Uri.HexEscape(match.Value[0]));
+        return QuerySpaceEncodeRegex.IsMatch(value) ? QuerySpaceEncodeRegex.Replace(value, "+") : value;
+    }
+
+    private static string EncodeQueryValue(string value, Regex regex)
+    {
+        if (QueryValueEncodeRegex.IsMatch(value))
+            value = QueryValueEncodeRegex.Replace(value, match => Uri.HexEscape(match.Value[0]));
+        return QuerySpaceEncodeRegex.IsMatch(value) ? QuerySpaceEncodeRegex.Replace(value, "+") : value;
     }
 
     public override string ToString()
     {
-        throw new NotImplementedException();
+        StringBuilder sb;
+        if (SchemeName is null)
+        {
+            if (Query is null)
+            {
+                if (Fragment is null)
+                    switch (PathSegments.Count)
+                    {
+                        case 0:
+                            return string.Empty;
+                        case 1:
+                            return PathSegments[0].ToString();
+                        default:
+                            sb = new StringBuilder();
+                            foreach (PathSegment ps in PathSegments)
+                                ps.AppendTo(sb);
+                            return sb.ToString();
+                    }
+                switch (PathSegments.Count)
+                {
+                    case 0:
+                        return (Fragment.Length > 0) ? $"#{Encode(Fragment, FragmentEncodeRegex)}" : "#";
+                    case 1:
+                        return (Fragment.Length > 0) ? $"{PathSegments[0]}#{Encode(Fragment, FragmentEncodeRegex)}" : $"{PathSegments[0]}#";
+                    default:
+                        sb = new StringBuilder();
+                        foreach (PathSegment ps in PathSegments)
+                            ps.AppendTo(sb);
+                        sb.Append('#');
+                        return (Fragment.Length > 0) ? sb.Append(Encode(Fragment, FragmentEncodeRegex)).ToString() : sb.ToString();
+                }
+            }
+            if (Query.Count == 0)
+            {
+                if (Fragment is null)
+                    switch (PathSegments.Count)
+                    {
+                        case 0:
+                            return "?";
+                        case 1:
+                            return $"{PathSegments[0]}?";
+                        default:
+                            sb = new StringBuilder();
+                            foreach (PathSegment ps in PathSegments)
+                                ps.AppendTo(sb);
+                            return sb.Append('?').ToString();
+                    }
+                switch (PathSegments.Count)
+                {
+                    case 0:
+                        return (Fragment.Length > 0) ? $"?#{Encode(Fragment, FragmentEncodeRegex)}" : "?#";
+                    case 1:
+                        return (Fragment.Length > 0) ? $"{PathSegments[0]}?#{Encode(Fragment, FragmentEncodeRegex)}" : $"{PathSegments[0]}?#";
+                    default:
+                        sb = new StringBuilder();
+                        foreach (PathSegment ps in PathSegments)
+                            ps.AppendTo(sb);
+                        sb.Append("?#");
+                        return (Fragment.Length > 0) ? sb.Append(Encode(Fragment, FragmentEncodeRegex)).ToString() : sb.ToString();
+                }
+            }
+            sb = new StringBuilder();
+        }
+        else
+        {
+            sb = new StringBuilder(SchemeName).Append(':');
+            if (SchemeSeparator!.Length > 0)
+                sb.Append(SchemeSeparator);
+            Authority!.AppendTo(sb);
+        }
+        foreach (PathSegment ps in PathSegments)
+            ps.AppendTo(sb);
+        if (Query is not null)
+            foreach (QuerySubComponent qc in Query)
+                qc.AppendTo(sb);
+        if (Fragment is null)
+            return sb.ToString();
+        sb.Append('#');
+        return (Fragment.Length > 0) ? sb.Append(Encode(Fragment, FragmentEncodeRegex)).ToString() : sb.ToString();
     }
 
     public static bool operator ==(ParsedUri? left, ParsedUri? right) => (left is null) ? right is null : left is not null && left.Equals(right);

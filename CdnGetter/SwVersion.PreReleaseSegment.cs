@@ -18,7 +18,7 @@ public readonly partial struct SwVersion
         public bool AltSeparator { get; }
 
         /// <summary>
-        /// The text of the current <see cref="PreRelease" /> component segment, not including the character indicated by the <see cref="AltSeparator" /> property.
+        /// Gets the text of the current <see cref="PreRelease" /> component segment, not including the character indicated by the <see cref="AltSeparator" /> property.
         /// </summary>
         public string Value { get; }
 
