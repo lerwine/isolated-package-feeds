@@ -188,7 +188,9 @@ public class CdnFile : ModificationTrackingModelBase
 )");
     }
 
+#pragma warning disable CS1998
     internal static async Task ShowAsync(IEnumerable<string> libraryNames, IEnumerable<string> versionStrings, IEnumerable<string> upstreamNames, Services.ContentDb dbContext, ILogger<Services.MainService> logger, CancellationToken cancellationToken)
+#pragma warning restore CS1998
     {
         throw new NotImplementedException("Show files functionality not implemented");
     }
