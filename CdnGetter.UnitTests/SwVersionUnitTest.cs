@@ -98,15 +98,15 @@ public partial class SwVersionUnitTest
         }
     }
 
-    public class Pep440RegexTestData : TheoryData<string, string?, string?, char?, string?, string?, string?, string?>
+    public class Pep440RegexTestData : TheoryData<string, string?, string?, string?, char?, string?, string?, string?, string?>
     {
         public Pep440RegexTestData()
         {
-            Add(string.Empty, /*epoch*/null, /*numeric*/null, /*delim*/null, /*pre*/null, /*modname*/null, /*modnum*/null, /*build*/null);
-            Add("glide-rome-06-23-2021__patch0-07-07-2021", /*epoch*/null, /*numeric*/null, /*delim*/null, /*pre*/null, /*modname*/null, /*modnum*/null, /*build*/null);
-            Add("pip-1.3.1-py33-none-any.whl", /*epoch*/null, /*numeric*/null, /*delim*/null, /*pre*/null, /*modname*/null, /*modnum*/null, /*build*/null);
-            Add("1!2.0", /*epoch*/null, /*numeric*/null, /*delim*/null, /*pre*/null, /*modname*/null, /*modnum*/null, /*build*/null);
-            Add("1.2.3-164-g6f10c", /*epoch*/null, /*numeric*/null, /*delim*/null, /*pre*/null, /*modname*/null, /*modnum*/null, /*build*/null);
+            Add(string.Empty, /*pfx*/null, /*epoch*/null, /*numeric*/null, /*delim*/null, /*pre*/null, /*modname*/null, /*modnum*/null, /*build*/null);
+            Add("glide-rome-06-23-2021__patch0-07-07-2021", /*pfx*/"glide-rome-", /*epoch*/null, /*numeric*/"06", /*delim*/'-', /*pre*/"23", /*modname*/null, /*modnum*/null, /*build*/"2021__patch0-07-07-2021");
+            Add("pip-1.3.1-py33-none-any.whl", /*pfx*/"pip-", /*epoch*/null, /*numeric*/"1.3.1", /*delim*/'-', /*pre*/"py33", /*modname*/"py", /*modnum*/"33", /*build*/"none-any.whl");
+            Add("1!2.0", /*pfx*/null, /*epoch*/"1", /*numeric*/"2.0", /*delim*/null, /*pre*/null, /*modname*/null, /*modnum*/null, /*build*/null);
+            Add("1.2.3-164-g6f10c", /*pfx*/null, /*epoch*/null, /*numeric*/"1.2.3", /*delim*/'-', /*pre*/"164", /*modname*/null, /*modnum*/null, /*build*/"g6f10c");
         }
     }
 
@@ -115,7 +115,7 @@ public partial class SwVersionUnitTest
     /// </summary>
     [Theory]
     [ClassData(typeof(Pep440RegexTestData))]
-    public void Pep440RegexTest(string value, string? epoch, string? numeric, char? delim, string? pre, string? modname, string? modnum, string? build)
+    public void Pep440RegexTest(string value, string? pfx, string? epoch, string? numeric, char? delim, string? pre, string? modname, string? modnum, string? build)
     {
         _output.WriteLine("value = \"{0}\"", value.Replace("\\", "\\\\").Replace("\"", "\\\""));
         Match match = SwVersion.SemanticLikeRegex.Match(value);
@@ -124,7 +124,15 @@ public partial class SwVersionUnitTest
         else
         {
             Assert.True(match.Success);
-            Group g = match.Groups[SwVersion.REGEX_GROUP_epoch];
+            Group g = match.Groups[SwVersion.REGEX_GROUP_pfx];
+            if (pfx is null)
+                Assert.False(g.Success);
+            else
+            {
+                Assert.True(g.Success);
+                Assert.Equal(pfx, g.Value);
+            }
+            g = match.Groups[SwVersion.REGEX_GROUP_epoch];
             if (epoch is null)
                 Assert.False(g.Success);
             else
