@@ -62,14 +62,14 @@ public readonly partial struct SwVersion : IEquatable<SwVersion>, IComparable<Sw
 (
     (?<{REGEX_GROUP_DELIM}>[-_\.])?
     (?<{REGEX_GROUP_PRE}>
-        (?<{REGEX_GROUP_modname}>a|b|c|rc|alpha|beta|pre|preview|post|rev|r|dev)
+        (?<{REGEX_GROUP_modname}>[a-z]+)
         [-_\.]?(?<{REGEX_GROUP_modnum}>\d+)?
     )
     |
     (?<{REGEX_GROUP_DELIM}>-)(?<{REGEX_GROUP_PRE}>\d+) # post
 )?
 (
-    +(?<{REGEX_GROUP_BUILD}>.*)
+    [+.-](?<{REGEX_GROUP_BUILD}>.*)
     |
     (?<{REGEX_GROUP_BUILD}>[^\d+_.-].*)
 )?
