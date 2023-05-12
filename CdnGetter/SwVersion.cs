@@ -11,14 +11,16 @@ namespace CdnGetter;
 /// </summary>
 public readonly partial struct SwVersion : IEquatable<SwVersion>, IComparable<SwVersion>
 {
-    // Semantic Versioning: https://semver.org/
-
+    [Obsolete("Use SemanticLikeRegex")]
     private const string GRP_p = "p";
 
+    [Obsolete("Use SemanticLikeRegex")]
     private const string GRP_n = "n";
 
+    [Obsolete("Use SemanticLikeRegex")]
     private const string GRP_r = "r";
 
+    [Obsolete("Use SemanticLikeRegex")]
     private const string GRP_b = "b";
 
     public const string REGEX_GROUP_pfx = "pfx";
