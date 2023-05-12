@@ -78,7 +78,6 @@ $", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePattern
     /// <summary>
     /// Matches a date-based version string
     /// </summary>
-    /// <see href="https://peps.python.org/pep-0440/" />
     public static readonly Regex DatedVersionRegex = new(@$"^
 (?<{REGEX_GROUP_pfx}>\D+)?
 (
