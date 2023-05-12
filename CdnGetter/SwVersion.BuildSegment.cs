@@ -28,7 +28,7 @@ public readonly partial struct SwVersion
                 Value = "";
             else
             {
-                if (value.Contains(LEADCHAR_PreRelease) || value.Contains(SEPARATOR_Dot) || value.Contains(LEADCHAR_Build))
+                if (value.Contains(DELIMITER_PRERELEASE) || value.Contains(SEPARATOR_DOT) || value.Contains(DELIMITER_BUILD))
                     throw new ArgumentOutOfRangeException(nameof(value));
                 Value = value;
             }

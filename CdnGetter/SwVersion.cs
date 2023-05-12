@@ -11,6 +11,8 @@ namespace CdnGetter;
 /// </summary>
 public readonly partial struct SwVersion : IEquatable<SwVersion>, IComparable<SwVersion>
 {
+    // Semantic Versioning: https://semver.org/
+
     private const string GRP_p = "p";
 
     private const string GRP_n = "n";
@@ -19,19 +21,120 @@ public readonly partial struct SwVersion : IEquatable<SwVersion>, IComparable<Sw
 
     private const string GRP_b = "b";
 
-    private static readonly Regex _versionRegex = new(@$"^(?<{GRP_p}>(-?[^\d.+-]+)+)?(?<{GRP_n}>-?\d+(\.\d+)*)(?<{GRP_r}>-[^+]*|[^+]+)?(?<{GRP_b}>\+.*)?", RegexOptions.Compiled);
+    public const string REGEX_GROUP_pfx = "pfx";
 
-    public const char SEPARATOR_Dot = '.';
+    public const string REGEX_GROUP_major = "major";
 
-    public const char LEADCHAR_PreRelease = '-';
+    public const string REGEX_GROUP_minor = "minor";
 
-    public const char LEADCHAR_Build = '+';
+    public const string REGEX_GROUP_rel = "rel";
 
-    private static readonly char[] SEPARATOR_PreRelease = new char[] { LEADCHAR_PreRelease, SEPARATOR_Dot };
+    public const string REGEX_GROUP_patch = "patch";
 
-    private static readonly char[] SEPARATOR_Build = new char[] { LEADCHAR_Build, SEPARATOR_Dot, LEADCHAR_PreRelease };
+    public const string REGEX_GROUP_rev = "rev";
 
-    public readonly StringComparer TextComparer = StringComparer.OrdinalIgnoreCase;
+    public const string REGEX_GROUP_xnum = "xnum";
+
+    public const string REGEX_GROUP_endday = "endday";
+
+    public const string REGEX_GROUP_endyr = "endyr";
+
+    public const string REGEX_GROUP_modname = "modname";
+
+    public const string REGEX_GROUP_modnum = "modnum";
+
+    public const string REGEX_GROUP_DELIM = "delim";
+
+    public const string REGEX_GROUP_PRE = "pre";
+
+    public const string REGEX_GROUP_BUILD = "build";
+
+    public const string REGEX_GROUP_epoch = "epoch";
+
+    /// <summary>
+    /// Matches a version string similar to the PEP 440 format.
+    /// </summary>
+    /// <see href="https://peps.python.org/pep-0440/" />
+    public static readonly Regex Pep440Regex = new(@$"^
+(?<{REGEX_GROUP_pfx}>\D+)?
+((?<{REGEX_GROUP_epoch}>\d+)!)?
+(?<{REGEX_GROUP_major}>\d+)(\.(?<{REGEX_GROUP_minor}>\d+)(\.(?<{REGEX_GROUP_patch}>\d+)(\.(?<{REGEX_GROUP_rev}>\d+)(\.(?<{REGEX_GROUP_xnum}>\d+(\.\d+)*))?)?)?)?
+(
+    (?<{REGEX_GROUP_DELIM}>[-_\.])?
+    (?<{REGEX_GROUP_PRE}>
+        (?<{REGEX_GROUP_modname}>a|b|c|rc|alpha|beta|pre|preview|post|rev|r|dev)
+        [-_\.]?(?<{REGEX_GROUP_modnum}>\d+)?
+    )
+    |
+    (?<{REGEX_GROUP_DELIM}>-)(?<{REGEX_GROUP_PRE}>\d+) # post
+)?
+(
+    +(?<{REGEX_GROUP_BUILD}>.*)
+    |
+    (?<{REGEX_GROUP_BUILD}>[^\d+_.-].*)
+)?
+$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
+    
+    /// <summary>
+    /// Matches a date-based version string
+    /// </summary>
+    /// <see href="https://peps.python.org/pep-0440/" />
+    public static readonly Regex DatedVersionRegex = new(@$"^
+(?<{REGEX_GROUP_pfx}>\D+)?
+(
+    (?<{REGEX_GROUP_minor}>1[012]|0?\d)-(?<{REGEX_GROUP_rel}>3[01]|[012]?\d)-(?<{REGEX_GROUP_major}>\d{{4}})
+    |
+    (?<{REGEX_GROUP_major}>\d{{2}}|\d{{4}})-(?<{REGEX_GROUP_minor}>1[012]|0?\d)-(?<{REGEX_GROUP_rel}>3[01]|[012]?\d)
+)
+(
+    (?<{REGEX_GROUP_DELIM}>(\.|_+)([^\d._]\D*)?|[^\d._]\D*)
+    (
+        (?<{REGEX_GROUP_patch}>\d+)
+        [_+-]*
+    )?
+    (
+        (?<{REGEX_GROUP_xnum}>(1[012]|0?\d)-(3[01]|[012]?\d))-(?<{REGEX_GROUP_rev}>\d{{4}})
+        |
+        (?<{REGEX_GROUP_rev}>\d{{2}}|\d{{4}})-(?<{REGEX_GROUP_xnum}>(1[012]|0?\d)-(3[01]|[012]?\d))
+    )
+    (
+        [_-]+
+        (
+            (?<{REGEX_GROUP_endday}>(1[012]|0?\d)-(3[01]|[012]?\d))-(?<{REGEX_GROUP_endyr}>\d{{4}})
+            |
+            (?<{REGEX_GROUP_endyr}>\d{{2}}|\d{{4}})-(?<{REGEX_GROUP_endday}>(1[012]|0?\d)-(3[01]|[012]?\d))
+        )
+    )
+)?
+(
+    [_+-](?<{REGEX_GROUP_BUILD}>.*)
+    |
+    (?<{REGEX_GROUP_BUILD}>\D.*)
+)?
+$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
+    
+    /// <summary>
+    /// Matches a version string similar to the SemVer format.
+    /// </summary>
+    /// <see href="https://semver.org/" />
+    public static readonly Regex SemanticLikeRegex = new(@$"^(?<{REGEX_GROUP_pfx}>[+-]*[^\d+-]+([+-]+[^\d+-]+)*-*)?(?<{REGEX_GROUP_major}>-?\d+)(\.(?<{REGEX_GROUP_minor}>-?\d+)(\.(?<{REGEX_GROUP_patch}>-?\d+)(\.(?<{REGEX_GROUP_rev}>-?\d+)(\.(?<{REGEX_GROUP_xnum}>-?\d+(\.-?\d+)*))?)?)?)?((?<{REGEX_GROUP_DELIM}>\.)(?<{REGEX_GROUP_PRE}>([^\d+][^+]*)?)|(?<{REGEX_GROUP_DELIM}>-)(?<{REGEX_GROUP_PRE}>[^+]*)|(?<{REGEX_GROUP_PRE}>[^\d.+-][^+]*))?(\+(?<{REGEX_GROUP_BUILD}>.*))?$", RegexOptions.Compiled);
+
+    [Obsolete("Use SemanticLikeRegex")]
+    private static readonly Regex _versionRegex = new(@$"^(?<{GRP_p}>(-?[^\d.+-]+)+)?(?<{GRP_n}>-?\d+(\.\d+)*)(?<{GRP_r}>-[^+]*|[^+]+)?(?<{GRP_b}>\+.*)?$", RegexOptions.Compiled);
+
+    public const char SEPARATOR_DOT = '.';
+
+    public const char DELIMITER_PRERELEASE = '-';
+
+    public const char DELIMITER_BUILD = '+';
+
+    private static readonly char[] FIRST_VERSION_TOKEN_CHARS = new char[] { SEPARATOR_DOT, '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+
+    private static readonly char[] SEPARATOR_PreRelease = new char[] { DELIMITER_PRERELEASE, SEPARATOR_DOT };
+
+    private static readonly char[] SEPARATOR_Build = new char[] { DELIMITER_BUILD, SEPARATOR_DOT, DELIMITER_PRERELEASE };
+
+    public static readonly StringComparer TextComparer = StringComparer.OrdinalIgnoreCase;
 
     /// <summary>
     /// Gets the text version component that precedes other version components.
@@ -237,22 +340,118 @@ public readonly partial struct SwVersion : IEquatable<SwVersion>, IComparable<Sw
 
     public SwVersion(string? versionString)
     {
-        if (string.IsNullOrEmpty(versionString))
+        if (versionString is null)
         {
             Format = VersionStringFormat.NonNumerical;
             Major = 0;
             Minor = Patch = Revision = null;
             AdditionalNumerical = null;
             Build = null;
-            Prefix = null;
+            Prefix = string.Empty;
             PreRelease = null;
             return;
         }
+        bool tryParseIntAt(int index, out string? nonNumeric, out int value, out int zeroPadCount, out int nextIndex)
+        {
+            int start = index;
+            nextIndex = versionString!.Length;
+            while (start < nextIndex)
+            {
+                if (char.IsNumber(versionString![start]))
+                {
+                    int end = start + 1;
+                    while (end < versionString!.Length)
+                    {
+                        if (!char.IsNumber(versionString![end]))
+                            break;
+                    }
+                    int nzi = start;
+                    string v;
+                    if (end < versionString!.Length)
+                    {
+                        while (versionString![nzi] == '0')
+                        {
+                            nzi++;
+                            if (nzi == end)
+                            {
+                                zeroPadCount = (end - start) + 1;
+                                value = 0;
+                                nonNumeric = (start > index) ? versionString[index..start] : null;
+                                nextIndex = end;
+                                return true;
+                            }
+                        }
+                        v = versionString[start..end];
+                        if (int.TryParse(v, out value) && v.ToString() == v)
+                        {
+                            zeroPadCount = (end - start) + 1;
+                            nonNumeric = (start > index) ? versionString[index..start] : null;
+                            nextIndex = end;
+                            return true;
+                        }
+                        start = end;
+                    }
+                    else
+                    {
+                        end = versionString!.Length;
+                        while (versionString![nzi] == '0')
+                        {
+                            nzi++;
+                            if (nzi == end)
+                            {
+                                zeroPadCount = (end - start) + 1;
+                                value = 0;
+                                nonNumeric = (start > index) ? versionString[index..start] : null;
+                                return true;
+                            }
+                        }
+                        v = (start == 0) ? versionString : versionString[start..];
+                        if (int.TryParse(v, out value) && v.ToString() == v)
+                        {
+                            zeroPadCount = (end - start) + 1;
+                            nonNumeric = (start > index) ? versionString[index..start] : null;
+                            return true;
+                        }
+                        break;
+                    }
+                }
+                else
+                    start++;
+            }
+            nonNumeric = (start > index) ? versionString[index..start] : null;
+            zeroPadCount = 0;
+            value = 0;
+            return false;
+        }
+        for (int startIndex = 0; startIndex < versionString.Length; startIndex++)
+        {
+            if (char.IsNumber(versionString[startIndex]))
+            {
+                int endIndex = startIndex + 1;
+                if (endIndex < versionString.Length)
+                {
+                    while (char.IsNumber(versionString[endIndex]))
+                    {
+                        endIndex++;
+                        if (endIndex == versionString.Length)
+                            break;
+                    }
+
+                }
+            }
+        }
+        Format = VersionStringFormat.NonNumerical;
+        Major = 0;
+        Minor = Patch = Revision = null;
+        AdditionalNumerical = null;
+        Build = null;
+        Prefix = versionString;
+        PreRelease = null;
         Match m = _versionRegex.Match(versionString);
         if (m.Success)
         {
             Collection<int> nv = new();
-            string[] sv = m.Groups[GRP_n].Value.Split(SEPARATOR_Dot);
+            string[] sv = m.Groups[GRP_n].Value.Split(SEPARATOR_DOT);
             foreach (string s in sv)
             {
                 if (int.TryParse(s, out int n))
@@ -265,7 +464,7 @@ public readonly partial struct SwVersion : IEquatable<SwVersion>, IComparable<Sw
             }
             var grp = m.Groups[GRP_p];
             string? preRelease;
-            if (nv.Count == 0 || (nv[0] == 0 && sv[0][0] == LEADCHAR_PreRelease))
+            if (nv.Count == 0 || (nv[0] == 0 && sv[0][0] == DELIMITER_PRERELEASE))
             {
                 Prefix = grp.Success ? grp.Value + m.Groups[GRP_n].Value : m.Groups[GRP_n].Value;
                 Major = 0;
@@ -322,7 +521,7 @@ public readonly partial struct SwVersion : IEquatable<SwVersion>, IComparable<Sw
                 if ((grp = m.Groups[GRP_r]).Success)
                 {
                     preRelease = grp.Value;
-                    Format = (preRelease[0] == LEADCHAR_PreRelease) ? VersionStringFormat.Standard : VersionStringFormat.Alt;
+                    Format = (preRelease[0] == DELIMITER_PRERELEASE) ? VersionStringFormat.Standard : VersionStringFormat.Alt;
                 }
                 else
                 {
@@ -345,114 +544,283 @@ public readonly partial struct SwVersion : IEquatable<SwVersion>, IComparable<Sw
             Major = 0;
             Minor = Patch = Revision = null;
             AdditionalNumerical = null;
-            int index = versionString.IndexOf(LEADCHAR_Build);
-            if (index < 0 || index == versionString.Length - 1)
+            int index = versionString.IndexOf(DELIMITER_BUILD);
+            if (index < 0)
                 Build = null;
             else
             {
-                Build = new(ParseBuildSegments(versionString[..index]).ToArray());
-                versionString = versionString[index..];
+                Build = new(ParseBuildSegments(versionString[index..]).ToArray());
+                versionString = versionString[..index];
             }
-            if ((index = versionString.IndexOf(LEADCHAR_PreRelease)) < 0)
+            if ((index = versionString.IndexOf(DELIMITER_PRERELEASE)) < 1)
             {
                 Prefix = versionString;
                 PreRelease = null;
             }
             else
             {
-                Prefix = (index > 0) ? versionString[..index] : null;
+                Prefix = versionString[..index];
                 PreRelease = new(ParsePreReleaseSegments(versionString[index..]).ToArray());
             }
         }
     }
 
+    private IEnumerable<int> GetSubVersionNumberValues()
+    {
+        if (Minor.HasValue)
+        {
+            yield return Minor.Value;
+            if (Patch.HasValue)
+            {
+                yield return Patch.Value;
+                if (Revision.HasValue)
+                {
+                    yield return Revision.Value;
+                    if (AdditionalNumerical is not null)
+                        foreach (int v in AdditionalNumerical)
+                            yield return v;
+                }
+            }
+        }
+    }
     private static IEnumerable<BuildSegment> ParseBuildSegments(string text)
     {
-        int previousSeparator = text.IndexOfAny(SEPARATOR_Build, 1);
-        if (previousSeparator < 0)
+        if (text.Length == 1)
         {
-            yield return new BuildSegment(BuildSeparator.Plus, text[1..]);
+            yield return new BuildSegment(BuildSeparator.Plus, string.Empty);
             yield break;
         }
-        yield return new BuildSegment(BuildSeparator.Plus, (previousSeparator > 1) ? text[1..previousSeparator] : "");
-        int startIndex = previousSeparator + 1;
-        while (startIndex < text.Length)
+        int previousSeparator = 0;
+        int startIndex = 1;
+        int nextSeparator = text.IndexOfAny(SEPARATOR_Build, 1);
+        while (nextSeparator > 0)
         {
-            int nextSeparator = text.IndexOfAny(SEPARATOR_PreRelease, startIndex);
-            if (nextSeparator < 0)
-                switch (text[previousSeparator])
-                {
-                    case SEPARATOR_Dot:
-                        yield return new BuildSegment(BuildSeparator.Dot, (startIndex < text.Length - 1) ? text[startIndex..] : "");
-                        yield break;
-                    case LEADCHAR_PreRelease:
-                        yield return new BuildSegment(BuildSeparator.Dash, (startIndex < text.Length - 1) ? text[startIndex..] : "");
-                        yield break;
-                    default:
-                        yield return new BuildSegment(BuildSeparator.Plus, (startIndex < text.Length - 1) ? text[startIndex..] : "");
-                        yield break;
-                }
-
-            switch (text[previousSeparator])
+            yield return new BuildSegment(text[previousSeparator] switch
             {
-                case SEPARATOR_Dot:
-                    yield return new BuildSegment(BuildSeparator.Dot, (startIndex < nextSeparator - 1) ? text[startIndex..nextSeparator] : "");
-                    break;
-                case LEADCHAR_PreRelease:
-                    yield return new BuildSegment(BuildSeparator.Dash, (startIndex < nextSeparator - 1) ? text[startIndex..nextSeparator] : "");
-                    break;
-                default:
-                    yield return new BuildSegment(BuildSeparator.Plus, (startIndex < nextSeparator - 1) ? text[startIndex..nextSeparator] : "");
-                    break;
+                SEPARATOR_DOT => BuildSeparator.Dot,
+                DELIMITER_PRERELEASE => BuildSeparator.Dash,
+                _ => BuildSeparator.Plus,
+            }, (startIndex < nextSeparator) ? text[startIndex..nextSeparator] : string.Empty);
+            if ((startIndex = (previousSeparator = nextSeparator) + 1) == text.Length)
+            {
+                yield return new BuildSegment(text[previousSeparator] switch
+                {
+                    SEPARATOR_DOT => BuildSeparator.Dot,
+                    DELIMITER_PRERELEASE => BuildSeparator.Dash,
+                    _ => BuildSeparator.Plus,
+                }, string.Empty);
+                yield break;
             }
-            startIndex = nextSeparator + 1;
+            nextSeparator = text.IndexOfAny(SEPARATOR_Build, startIndex);
         }
+
+        yield return new BuildSegment(text[previousSeparator] switch
+        {
+            SEPARATOR_DOT => BuildSeparator.Dot,
+            DELIMITER_PRERELEASE => BuildSeparator.Dash,
+            _ => BuildSeparator.Plus,
+        }, text[startIndex..]);
     }
 
     private static IEnumerable<PreReleaseSegment> ParsePreReleaseSegments(string text)
     {
-        int previousSeparator;
-        if (text[0] == LEADCHAR_PreRelease)
-            previousSeparator = 0;
-        else if ((previousSeparator = text.IndexOfAny(SEPARATOR_PreRelease)) < 0)
+        int previousSeparator = text.IndexOfAny(SEPARATOR_PreRelease);
+        if (previousSeparator < 0)
         {
             yield return new PreReleaseSegment(true, text);
             yield break;
         }
+        if (previousSeparator == 0)
+        {
+            if (text.Length == 1)
+            {
+                if (text[0] == DELIMITER_PRERELEASE)
+                    yield return new PreReleaseSegment(true, text);
+                else
+                    yield return new PreReleaseSegment(false, string.Empty);
+                yield break;
+            }
+            if (text[0] != DELIMITER_PRERELEASE)
+            {
+                if ((previousSeparator = text.IndexOfAny(SEPARATOR_PreRelease)) < 0)
+                {
+                    yield return new PreReleaseSegment(true, text);
+                    yield break;
+                }
+                yield return new PreReleaseSegment(true, text[..previousSeparator]);
+            }
+        }
+        else
+            yield return new PreReleaseSegment(true, text[..previousSeparator]);
         int startIndex = previousSeparator + 1;
         while (startIndex < text.Length)
         {
             int nextSeparator = text.IndexOfAny(SEPARATOR_PreRelease, startIndex);
             if (nextSeparator < 0)
             {
-                yield return new PreReleaseSegment(text[previousSeparator] != LEADCHAR_PreRelease, (startIndex < text.Length - 1) ? text[startIndex..] : "");
+                yield return new PreReleaseSegment(text[previousSeparator] != DELIMITER_PRERELEASE, text[startIndex..]);
                 yield break;
             }
-            yield return new PreReleaseSegment(text[previousSeparator] != LEADCHAR_PreRelease, (startIndex < nextSeparator - 1) ? text[startIndex..nextSeparator] : "");
+            yield return new PreReleaseSegment(text[previousSeparator] != DELIMITER_PRERELEASE, (startIndex < nextSeparator) ? text[startIndex..nextSeparator] : string.Empty);
             startIndex = nextSeparator + 1;
+            previousSeparator = nextSeparator;
         }
+        yield return new PreReleaseSegment(text[previousSeparator] != DELIMITER_PRERELEASE, string.Empty);
+    }
+
+    private static int FirstNonZero(IEnumerable<int> source) => source.Where(i => i != 0).DefaultIfEmpty(0).First();
+
+    private static int CompareVersionNumbers(IEnumerable<int> x, IEnumerable<int> y)
+    {
+        using IEnumerator<int> a = x.GetEnumerator();
+        using IEnumerator<int> b = y.GetEnumerator();
+        int result;
+        while (a.MoveNext())
+        {
+            if (b.MoveNext())
+                if ((result = a.Current - b.Current) != 0)
+                    return result;
+            else
+            {
+                do if (a.Current != 0) return 1; while (a.MoveNext());
+                return 0;
+            }
+        }
+        while (b.MoveNext())
+            if (b.Current != 0)
+                return -1;
+        return 0;
+    }
+
+    private static bool VersionNumbersEqual(IEnumerable<int> x, IEnumerable<int> y)
+    {
+        using IEnumerator<int> a = x.GetEnumerator();
+        using IEnumerator<int> b = y.GetEnumerator();
+        while (a.MoveNext())
+        {
+            if (b.MoveNext())
+                if (a.Current != b.Current)
+                    return false;
+            else
+            {
+                do if (a.Current != 0) return false; while (a.MoveNext());
+                return true;
+            }
+        }
+        while (b.MoveNext())
+            if (b.Current != 0)
+                return false;
+        return true;
+    }
+
+    private static int CompareValues<T>(IEnumerable<T>? x, IEnumerable<T>? y) where T : struct, IComparable<T>
+    {
+        if (x is null)
+            return (y is null) ? 0 : -1;
+        if (y is null)
+            return 1;
+        using IEnumerator<T> a = x.GetEnumerator();
+        using IEnumerator<T> b = y.GetEnumerator();
+        while (a.MoveNext())
+        {
+            if (b.MoveNext())
+            {
+                int result = a.Current.CompareTo(b.Current);
+                if (result != 0)
+                    return result;
+            }
+            else
+                return 1;
+        }
+        return b.MoveNext() ? -1 : 0;
+    }
+
+    private static bool ValuesEqual<T>(IEnumerable<T>? x, IEnumerable<T>? y) where T : struct, IEquatable<T>
+    {
+        if (x is null)
+            return y is null;
+        if (y is null)
+            return false;
+        using IEnumerator<T> a = x.GetEnumerator();
+        using IEnumerator<T> b = y.GetEnumerator();
+        while (a.MoveNext())
+        {
+            if (b.MoveNext())
+                if (!a.Current.Equals(b.Current))
+                    return false;
+            else
+                return false;
+        }
+        return !b.MoveNext();
     }
 
     public int CompareTo(SwVersion other)
     {
-        throw new NotImplementedException();
+        int diff = Major - other.Major;
+        if (diff != 0 || (diff = CompareVersionNumbers(GetSubVersionNumberValues(), other.GetSubVersionNumberValues())) != 0 ||
+                (diff = CompareValues(PreRelease, other.PreRelease)) != 0 || (diff = CompareValues(Build, other.Build)) != 0)
+            return diff;
+        if (Prefix is null)
+            return (other.Prefix is null) ? 0 : -1;
+        return (other.Prefix is null) ? 1 : TextComparer.Compare(Prefix, other.Prefix);
     }
 
     public bool Equals(SwVersion other)
     {
-        throw new NotImplementedException();
+        if (Major == other.Major && VersionNumbersEqual(GetSubVersionNumberValues(), other.GetSubVersionNumberValues()) && ValuesEqual(PreRelease, other.PreRelease) && ValuesEqual(Build, other.Build))
+        {
+            if (Prefix is null)
+                return other.Prefix is null;
+            return other.Prefix is not null && TextComparer.Equals(Prefix, other.Prefix);
+        }
+        return false;
     }
 
-    public override bool Equals([NotNullWhen(true)] object? obj)
-    {
-        // TODO: Implement Equals(object?)
-        return base.Equals(obj);
-    }
+    public override bool Equals([NotNullWhen(true)] object? obj) => obj is SwVersion other && Equals(other);
 
     public override int GetHashCode()
     {
-        // TODO: Implement GetHashCode()
-        return base.GetHashCode();
+        // 1  2  3  4   5   6   7   8
+        // 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59
+        int hash = 23;
+        unchecked
+        {
+            hash = (hash * 31) + Major;
+            if (Minor.HasValue)
+            {
+                hash = (hash * 31) + Minor.Value;
+                if (Patch.HasValue)
+                {
+                    hash = (hash * 31) + Patch.Value;
+                    if (Revision.HasValue)
+                    {
+                        hash = (hash * 31) + Revision.Value;
+                        if (AdditionalNumerical is not null)
+                        {
+                            int h = 3;
+                            foreach (int n in AdditionalNumerical)
+                                h = (h * 7) + n;
+                            hash = (hash * 31) + h;
+                        }
+                    }
+                }
+            }
+            if (PreRelease is not null)
+            {
+                int h = 3;
+                foreach (PreReleaseSegment s in PreRelease)
+                    h = (h * 7) + s.GetHashCode();
+                hash = (hash * 31) + h;
+            }
+            if (Build is not null)
+            {
+                int h = 3;
+                foreach (BuildSegment s in Build)
+                    h = (h * 7) + s.GetHashCode();
+                hash = (hash * 31) + h;
+            }
+            return (Prefix is null) ? hash : (hash * 31) + TextComparer.GetHashCode(Prefix);
+        }
     }
 
     /// <summary>
@@ -461,11 +829,111 @@ public readonly partial struct SwVersion : IEquatable<SwVersion>, IComparable<Sw
     /// <param name="minDigitCount">The minimum number of numerical components to display or <c>0</c> to only display the defined numerical components.</param>
     /// <param name="omitBuild">If <see langword="true" />, the <see cref="Build" /> components are omitted. The default is <see langword="false" />./param>
     /// <param name="omitPreRelease">If <see langword="true" />, the <see cref="PreRelease" /> components are omitted. The default is <see langword="false" />.</param>
+    /// <param name="omitPrefix">If <see langword="true" />, the <see cref="Prefix" /> component is omitted. The default is <see langword="false" />.</param>
     /// <returns>A formatted version string according to the current <see cref="Format" />.</returns>
-    public string ToString(int minDigitCount, bool omitBuild = false, bool omitPreRelease = false)
+    public string ToString(int minDigitCount, bool omitBuild = false, bool omitPreRelease = false, bool omitPrefix = false)
     {
-        // TODO: Implement ToString(int, bool, bool)
-        return base.ToString()!;
+        StringBuilder sb;
+        PreReleaseSegment prs;
+        if (omitBuild || Build is null)
+        {
+            if (omitPreRelease || PreRelease is null)
+            {
+                if (AdditionalNumerical is null)
+                {
+                    if (Revision.HasValue)
+                    {
+                        if (minDigitCount < 5)
+                        {
+                            if (Prefix is null)
+                                return $"{Major}.{Minor!.Value}.{Patch!.Value}.{Revision.Value}";
+                            return $"{Prefix}{Major}.{Minor!.Value}.{Patch!.Value}.{Revision.Value}";
+                        }
+                        sb = ((Prefix is null) ? new StringBuilder() : new StringBuilder(Prefix)).Append(Major).Append('.').Append(Minor!.Value).Append('.').Append(Patch!.Value).Append('.').Append(Revision.Value);
+                        for (int i = 4; i < minDigitCount; i++)
+                            sb.Append(".0");
+                        return sb.ToString();
+                    }
+                    if (Patch.HasValue)
+                    {
+                        if (minDigitCount < 4)
+                        {
+                            if (Prefix is null)
+                                return $"{Major}.{Minor!.Value}.{Patch.Value}";
+                            return $"{Prefix}{Major}.{Minor!.Value}.{Patch.Value}";
+                        }
+                        sb = ((Prefix is null) ? new StringBuilder() : new StringBuilder(Prefix)).Append(Major).Append('.').Append(Minor!.Value).Append('.').Append(Patch.Value);
+                        for (int i = 3; i < minDigitCount; i++)
+                            sb.Append(".0");
+                        return sb.ToString();
+                    }
+                    if (Minor.HasValue)
+                    {
+                        if (minDigitCount < 3)
+                        {
+                            if (Prefix is null)
+                                return $"{Major}.{Minor.Value}";
+                            return $"{Prefix}{Major}.{Minor.Value}";
+                        }
+                        sb = ((Prefix is null) ? new StringBuilder() : new StringBuilder(Prefix)).Append(Major).Append('.').Append(Minor!.Value);
+                        for (int i = 2; i < minDigitCount; i++)
+                            sb.Append(".0");
+                        return sb.ToString();
+                    }
+                    if (minDigitCount < 2)
+                    {
+                        if (Prefix is null)
+                            return Major.ToString();
+                        return $"{Prefix}{Major}";
+                    }
+                    sb = ((Prefix is null) ? new StringBuilder() : new StringBuilder(Prefix)).Append(Major);
+                    for (int i = 2; i < minDigitCount; i++)
+                        sb.Append(".0");
+                    return sb.ToString();
+                }
+            }
+            // if (prs.AltSeparator != PreRelease[0].AltSeparator)
+            //     sb.Append('-');
+            // sb.Append(prs.Value);
+            // foreach (PreReleaseSegment p in PreRelease.Skip(1))
+            // {
+            //     sb.Append(p.AltSeparator ? '.' : '-');
+            //     if (p.Value.Length > 0)
+            //         sb.Append(p);
+            // }
+        }
+        else
+        {
+            // if (omitPreRelease || PreRelease is null)
+            // {
+
+            // }
+            // else
+            // {
+            //     if (!prs = PreRelease[0].AltSeparator)
+            //         sb.Append('-');
+            //     sb.Append(prs.Value);
+            //     foreach (PreReleaseSegment p in PreRelease.Skip(1))
+            //     {
+            //         sb.Append(p.AltSeparator ? '.' : '-');
+            //         if (p.Value.Length > 0)
+            //             sb.Append(p);
+            //     }
+            // }
+        }
+        // foreach (BuildSegment bs in Build)
+        // {
+        //     sb.Append(bs.Separator switch
+        //     {
+        //         BuildSeparator.Dot => '.',
+        //         BuildSeparator.Dash => '-',
+        //         _ => '+',
+        //     });
+        //     if (bs.Value.Length > 0)
+        //         sb.Append(bs.Value);
+        // }
+        // return sb.ToString();
+        throw new NotImplementedException();
     }
 
     public override string ToString() => ToString(0);
@@ -481,4 +949,5 @@ public readonly partial struct SwVersion : IEquatable<SwVersion>, IComparable<Sw
     public static bool operator >(SwVersion left, SwVersion right) => left.CompareTo(right) > 0;
 
     public static bool operator >=(SwVersion left, SwVersion right) => left.CompareTo(right) >= 0;
+
 }
