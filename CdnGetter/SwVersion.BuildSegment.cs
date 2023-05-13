@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
@@ -8,7 +10,7 @@ public readonly partial struct SwVersion
     /// <summary>
     /// Represents a segment of the <see cref="Build" /> component.
     /// </summary>
-    public readonly struct BuildSegment : IEquatable<BuildSegment>, IComparable<BuildSegment>
+    public readonly struct BuildSegment : IDelimitedTokenList<IToken>
     {
         /// <summary>
         /// Indicates either the leading character of the <see cref="Build" /> component or the separating character of subsequent segments.
@@ -16,38 +18,55 @@ public readonly partial struct SwVersion
         /// <remarks>This value for the first segment of the <see cref="Build" /> component is always <see cref="BuildSeparator.Plus" />.</remarks>
         public BuildSeparator Separator { get; }
 
+        public ReadOnlyCollection<IToken> Tokens { get; }
+
         /// <summary>
         /// Gets the text of the current <see cref="Build" /> component segment, not including the character indicated by the <see cref="Separator" /> property.
         /// </summary>
+        [Obsolete("Use Tokens property")]
         public string Value { get; }
+
+        ISeparatorToken? IDelimitedTokenList<IToken>.Delimiter => throw new NotImplementedException();
+
+        public int Count => throw new NotImplementedException();
 
         public BuildSegment(BuildSeparator separator, string value)
         {
             Separator = separator;
             if (value is null)
+            {
+                Tokens = new(Array.Empty<IToken>());
                 Value = "";
+            }
             else
             {
-                if (value.Contains(DELIMITER_PRERELEASE) || value.Contains(SEPARATOR_DOT) || value.Contains(DELIMITER_BUILD))
+                if (value.Contains(SEPARATOR_DASH) || value.Contains(SEPARATOR_DOT) || value.Contains(SEPARATOR_PLUS))
                     throw new ArgumentOutOfRangeException(nameof(value));
+                Tokens = new(Tokenize(value));
                 Value = value;
             }
         }
 
-        public int CompareTo(BuildSegment other)
+        public bool Equals([NotNullWhen(true)] IDelimitedTokenList<IToken>? other)
         {
             throw new NotImplementedException();
         }
 
-        public bool Equals(BuildSegment other)
+        public bool Equals([NotNullWhen(true)] IDelimitedTokenList<IToken>? other, ISeparatorToken defaultLeadDelimiter)
         {
             throw new NotImplementedException();
         }
 
-        public override bool Equals([NotNullWhen(true)] object? obj)
+        public override bool Equals([NotNullWhen(true)] object? obj) => Equals(obj as IDelimitedTokenList<IToken>);
+
+        public int CompareTo(IDelimitedTokenList<IToken>? other)
         {
-            // TODO: Implement Equals(object?)
-            return base.Equals(obj);
+            throw new NotImplementedException();
+        }
+
+        public int CompareTo(IDelimitedTokenList<IToken>? other, ISeparatorToken defaultDelimiter)
+        {
+            throw new NotImplementedException();
         }
 
         public override int GetHashCode()
@@ -86,6 +105,16 @@ public readonly partial struct SwVersion
             StringBuilder stringBuilder = new(enumerator.Current.ToString());
             do stringBuilder.Append(enumerator.Current.ToString()); while (enumerator.MoveNext());
             return stringBuilder.ToString();
+        }
+
+        public IEnumerator<IToken> GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            throw new NotImplementedException();
         }
 
         public static bool operator <(BuildSegment left, BuildSegment right) => left.CompareTo(right) < 0;

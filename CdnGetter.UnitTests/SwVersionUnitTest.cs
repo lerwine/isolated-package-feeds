@@ -364,11 +364,11 @@ public partial class SwVersionUnitTest
     {
         SwVersion target = new(versionString);
         JsonObject obj = (JsonObject)JsonNode.Parse(jsonData)!;
-        Assert.Equal(obj[nameof(SwVersion.Major)]!.GetValue<int>(), target.Major);
-        if (obj.TryGetPropertyInt(nameof(SwVersion.Minor), out int minor))
+        Assert.Equal(obj[nameof(SwVersion.Major_obs)]!.GetValue<int>(), target.Major_obs);
+        if (obj.TryGetPropertyInt(nameof(SwVersion.Minor_obs), out int minor))
         {
-            Assert.True(target.Minor.HasValue);
-            Assert.Equal(minor, target.Minor!.Value);
+            Assert.True(target.Minor_obs.HasValue);
+            Assert.Equal(minor, target.Minor_obs!.Value);
             if (obj.TryGetPropertyInt(nameof(SwVersion.Patch), out int patch))
             {
                 Assert.True(target.Patch.HasValue);
@@ -377,35 +377,35 @@ public partial class SwVersionUnitTest
                 {
                     Assert.True(target.Revision.HasValue);
                     Assert.Equal(revision, target.Revision!.Value);
-                    if (obj.TryGetPropertyArray(nameof(SwVersion.AdditionalNumerical), out JsonArray? additionalNumerical))
+                    if (obj.TryGetPropertyArray(nameof(SwVersion.AdditionalNumerical_obs), out JsonArray? additionalNumerical))
                     {
-                        Assert.NotNull(target.AdditionalNumerical);
-                        Assert.Equal(additionalNumerical.Count, target.AdditionalNumerical!.Count);
+                        Assert.NotNull(target.AdditionalNumerical_obs);
+                        Assert.Equal(additionalNumerical.Count, target.AdditionalNumerical_obs!.Count);
                         for (int i = 0; i < additionalNumerical.Count; i++)
-                            Assert.Equal(additionalNumerical[i]!.GetValue<int>(), target.AdditionalNumerical[i]);
+                            Assert.Equal(additionalNumerical[i]!.GetValue<int>(), target.AdditionalNumerical_obs[i]);
                     }
                     else
-                        Assert.Null(target.AdditionalNumerical);
+                        Assert.Null(target.AdditionalNumerical_obs);
                 }
                 else
                 {
                     Assert.False(target.Revision.HasValue);
-                    Assert.Null(target.AdditionalNumerical);
+                    Assert.Null(target.AdditionalNumerical_obs);
                 }
             }
             else
             {
                 Assert.False(target.Patch.HasValue);
                 Assert.False(target.Revision.HasValue);
-                Assert.Null(target.AdditionalNumerical);
+                Assert.Null(target.AdditionalNumerical_obs);
             }
         }
         else
         {
-            Assert.False(target.Minor.HasValue);
+            Assert.False(target.Minor_obs.HasValue);
             Assert.False(target.Patch.HasValue);
             Assert.False(target.Revision.HasValue);
-            Assert.Null(target.AdditionalNumerical);
+            Assert.Null(target.AdditionalNumerical_obs);
         }
         if (obj.TryGetPropertyArray(nameof(SwVersion.PreRelease), out JsonArray? preRelease))
         {
@@ -445,12 +445,12 @@ public partial class SwVersionUnitTest
     public void ComponentConstructor0Test()
     {
         SwVersion result = new();
-        Assert.Null(result.Prefix);
-        Assert.Equal(0, result.Major);
-        Assert.Null(result.Minor);
+        Assert.Null(result.Prefix_obs);
+        Assert.Equal(0, result.Major_obs);
+        Assert.Null(result.Minor_obs);
         Assert.Null(result.Patch);
         Assert.Null(result.Revision);
-        Assert.Null(result.AdditionalNumerical);
+        Assert.Null(result.AdditionalNumerical_obs);
         Assert.Null(result.PreRelease);
         Assert.Null(result.Build);
     }
