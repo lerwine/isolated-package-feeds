@@ -58,11 +58,10 @@ public partial class ParsedUri
 
         public override int GetHashCode()
         {
-            int hash = 3;
             unchecked
             {
-                hash = (hash * 7) + DefaultComponentComparer.GetHashCode(UserName);
-                return (Password is null) ? hash : (hash * 7) + DefaultComponentComparer.GetHashCode(Password);
+                int hash = 21 + DefaultComponentComparer.GetHashCode(UserName);
+                return (Password is null) ? hash : hash * 7 + DefaultComponentComparer.GetHashCode(Password);
             }
         }
 

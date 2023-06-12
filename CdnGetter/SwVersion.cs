@@ -710,22 +710,22 @@ $", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePattern
         int hash = 23;
         unchecked
         {
-            hash = (hash * 31) + Major_obs;
+            hash = hash * 31 + Major_obs;
             if (Minor_obs.HasValue)
             {
-                hash = (hash * 31) + Minor_obs.Value;
+                hash = hash * 31 + Minor_obs.Value;
                 if (Patch.HasValue)
                 {
-                    hash = (hash * 31) + Patch.Value;
+                    hash = hash * 31 + Patch.Value;
                     if (Revision.HasValue)
                     {
-                        hash = (hash * 31) + Revision.Value;
+                        hash = hash * 31 + Revision.Value;
                         if (AdditionalNumerical_obs is not null)
                         {
                             int h = 3;
                             foreach (int n in AdditionalNumerical_obs)
                                 h = (h * 7) + n;
-                            hash = (hash * 31) + h;
+                            hash = hash * 31 + h;
                         }
                     }
                 }
@@ -735,16 +735,16 @@ $", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePattern
                 int h = 3;
                 foreach (PreReleaseSegment s in PreRelease)
                     h = (h * 7) + s.GetHashCode();
-                hash = (hash * 31) + h;
+                hash = hash * 31 + h;
             }
             if (Build is not null)
             {
                 int h = 3;
                 foreach (BuildSegment s in Build)
                     h = (h * 7) + s.GetHashCode();
-                hash = (hash * 31) + h;
+                hash = hash * 31 + h;
             }
-            return (Prefix_obs is null) ? hash : (hash * 31) + TextComparer.GetHashCode(Prefix_obs);
+            return (Prefix_obs is null) ? hash : hash * 31 + TextComparer.GetHashCode(Prefix_obs);
         }
     }
 

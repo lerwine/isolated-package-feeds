@@ -199,14 +199,10 @@ public partial class ParsedUri
 
         public override int GetHashCode()
         {
-            int hash = 5;
             unchecked
             {
-                if (Separator.HasValue)
-                    hash = (hash * 11) + Separator.Value.GetHashCode();
-                if (Key is not null)
-                    hash = (hash * 11) + DefaultComponentComparer.GetHashCode(Key);
-                return (hash * 11) + DefaultComponentComparer.GetHashCode(Value);
+                int hash = Separator.HasValue ? 55 + Separator.Value.GetHashCode() : 5;
+                return ((Key is null) ? hash : hash * 11 + DefaultComponentComparer.GetHashCode(Key)) * 11 + DefaultComponentComparer.GetHashCode(Value);
             }
         }
 

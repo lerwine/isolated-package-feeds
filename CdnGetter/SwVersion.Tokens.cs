@@ -309,13 +309,7 @@ public readonly partial struct SwVersion
 
         public override string ToString() => (ZeroPadLength > 0) ? new(Enumerable.Repeat('0', ZeroPadLength).Concat(Value.ToString()).ToArray()) : Value.ToString();
 
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return (21 + Value.GetHashCode()) * 7 + ZeroPadLength;
-            }
-        }
+        public override int GetHashCode() { unchecked { return (21 + Value.GetHashCode()) * 7 + ZeroPadLength; } }
     }
 
     class Int64Token : IInt64Token
@@ -370,13 +364,7 @@ public readonly partial struct SwVersion
 
         public override string ToString() => (ZeroPadLength > 0) ? new(Enumerable.Repeat('0', ZeroPadLength).Concat(Value.ToString()).ToArray()) : Value.ToString();
 
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return (21 + Value.GetHashCode()) * 7 + ZeroPadLength;
-            }
-        }
+        public override int GetHashCode() { unchecked { return (21 + Value.GetHashCode()) * 7 + ZeroPadLength; } }
     }
 
     class Int32Token : IInt32Token
@@ -431,13 +419,7 @@ public readonly partial struct SwVersion
 
         public override string ToString() => (ZeroPadLength > 0) ? new(Enumerable.Repeat('0', ZeroPadLength).Concat(Value.ToString()).ToArray()) : Value.ToString();
 
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return (21 + Value) * 7 + ZeroPadLength;
-            }
-        }
+        public override int GetHashCode() { unchecked { return (21 + Value) * 7 + ZeroPadLength; } }
     }
 
     class Int16Token : IInt16Token
@@ -492,13 +474,7 @@ public readonly partial struct SwVersion
 
         public override string ToString() => (ZeroPadLength > 0) ? new(Enumerable.Repeat('0', ZeroPadLength).Concat(Value.ToString()).ToArray()) : Value.ToString();
 
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return (21 + Value) * 7 + ZeroPadLength;
-            }
-        }
+        public override int GetHashCode() { unchecked { return (21 + Value) * 7 + ZeroPadLength; } }
     }
 
     class ByteToken : IByteToken
@@ -533,13 +509,7 @@ public readonly partial struct SwVersion
 
         public override string ToString() => (ZeroPadLength > 0) ? new(Enumerable.Repeat('0', ZeroPadLength).Concat(Value.ToString()).ToArray()) : Value.ToString();
 
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return (21 + Value) * 7 + ZeroPadLength;
-            }
-        }
+        public override int GetHashCode() { unchecked { return (21 + Value) * 7 + ZeroPadLength; } }
     }
 
     class AlphaToken : IStringToken
@@ -604,13 +574,7 @@ public readonly partial struct SwVersion
 
         public override string ToString() => (Length > 1) ? new string(Value, Length) : Value.ToString();
 
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return (21 + Value.GetHashCode()) * 7 + Length;
-            }
-        }
+        public override int GetHashCode() { unchecked { return (21 + Value.GetHashCode()) * 7 + Length; } }
 
         internal static readonly SeparatorToken Dot = new(SEPARATOR_DOT, 1);
 
@@ -648,13 +612,7 @@ public readonly partial struct SwVersion
 
         public override string ToString() => Value;
 
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return (21 + Value.GetHashCode()) * 7 + Type.GetHashCode();
-            }
-        }
+        public override int GetHashCode() { unchecked { return (21 + Value.GetHashCode()) * 7 + Type.GetHashCode(); } }
 
         internal static readonly OtherToken Empty = new();
     }
@@ -851,11 +809,7 @@ public readonly partial struct SwVersion
             throw new NotImplementedException();
         }
 
-        public override int GetHashCode()
-        {
-            // TODO: Implement GetHashCode()
-            return base.GetHashCode();
-        }
+        public override int GetHashCode() { unchecked { return (21 + Value.GetHashCode()) * 7 + Delimiter.GetHashCode(); } }
     }
 
     public class DefaultDelimitedToken<T> : IDelimitedToken<T> where T : IToken
@@ -888,11 +842,7 @@ public readonly partial struct SwVersion
             throw new NotImplementedException();
         }
 
-        public override int GetHashCode()
-        {
-            // TODO: Implement GetHashCode()
-            return base.GetHashCode();
-        }
+        public override int GetHashCode() => Value.GetHashCode();
     }
 
     public interface IDelimitedTokenList<T> : IReadOnlyCollection<T>, IEquatable<IDelimitedTokenList<T>>, IComparable<IDelimitedTokenList<T>>
@@ -936,8 +886,14 @@ public readonly partial struct SwVersion
 
         public override int GetHashCode()
         {
-            // TODO: Implement GetHashCode()
-            return base.GetHashCode();
+            unchecked
+            {
+                int hash = 21 + Delimiter.GetHashCode();
+                int h = 3;
+                foreach (T token in this)
+                    h = h * 7 + token.GetHashCode();
+                return hash * 7 + h;
+            }
         }
     }
 
@@ -972,8 +928,13 @@ public readonly partial struct SwVersion
 
         public override int GetHashCode()
         {
-            // TODO: Implement GetHashCode()
-            return base.GetHashCode();
+            unchecked
+            {
+                int hash = 3;
+                foreach (T token in this)
+                    hash = hash * 7 + token.GetHashCode();
+                return hash;
+            }
         }
     }
 

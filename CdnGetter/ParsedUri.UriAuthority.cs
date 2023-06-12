@@ -114,13 +114,10 @@ public partial class ParsedUri
 
         public override int GetHashCode()
         {
-            int hash = 5;
             unchecked
             {
-                if (UserInfo is not null)
-                    hash = (hash * 11) + UserInfo.GetHashCode();
-                hash = (hash * 11) + HostName.GetHashCode();
-                return Port.HasValue ? (hash * 11) + Port.GetHashCode() : hash;
+                int hash = ((UserInfo is null) ? 5 : 55 + UserInfo.GetHashCode()) * 11 + HostName.GetHashCode();
+                return Port.HasValue ? hash * 11 + Port.GetHashCode() : hash;
             }
         }
 
