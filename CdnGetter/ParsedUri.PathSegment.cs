@@ -97,16 +97,7 @@ public partial class ParsedUri
             return DefaultComponentComparer.Compare(Name, other.Name);
         }
 
-        public override int GetHashCode()
-        {
-            int hash = 3;
-            unchecked
-            {
-                if (Separator.HasValue)
-                    hash = (hash * 7) + Separator.Value.GetHashCode();
-                return (hash * 7) + DefaultComponentComparer.GetHashCode(Name);
-            }
-        }
+        public override int GetHashCode() { unchecked { return (Separator.HasValue ? (21 + Separator.Value.GetHashCode()) * 7 : 21) + DefaultComponentComparer.GetHashCode(Name); } }
 
         public override string ToString()
         {

@@ -1105,30 +1105,24 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     public override int GetHashCode()
     {
-        int hash = 13;
         unchecked
         {
-            if (SchemeName is not null)
-            {
-                hash = (hash * 19) + DefaultComponentComparer.GetHashCode(SchemeName);
-                hash = (hash * 19) + SchemeSeparator!.GetHashCode();
-                hash = (hash * 19) + Authority!.GetHashCode();
-            }
+            int hash = (SchemeName is null) ? 13 : ((247 + DefaultComponentComparer.GetHashCode(SchemeName)) * 19 + SchemeSeparator!.GetHashCode()) * 19 + Authority!.GetHashCode();
             if (PathSegments.Count > 0)
             {
                 int h = 3;
                 foreach (PathSegment p in PathSegments)
                     h = (h * 7) + p.GetHashCode();
-                hash = (hash * 19) + h;
+                hash = hash * 19 + h;
             }
             if (Query is not null)
             {
                 int h = 3;
                 foreach (QuerySubComponent q in Query)
                     h = (h * 7) + q.GetHashCode();
-                hash = (hash * 19) + h;
+                hash = hash * 19 + h;
             }
-            return (Fragment is null) ? hash : (hash * 17) + DefaultComponentComparer.GetHashCode(Fragment);
+            return (Fragment is null) ? hash : hash * 19 + DefaultComponentComparer.GetHashCode(Fragment);
         }
     }
 
