@@ -7,11 +7,15 @@ namespace CdnGetter.Versioning;
 /// <summary>
 /// Represents an arbitrarily large numerical token.
 /// </summary>
+#pragma warning disable CA2231
 public readonly struct BigNumericalToken : INumericalToken
+#pragma warning restore CA2231
 {
     internal static readonly BigInteger MAX_8BIT;
 
     internal static readonly BigInteger MAX_16BIT;
+
+    internal static readonly BigInteger MAX_ROMAN_NUM;
 
     internal static readonly BigInteger MAX_32BIT;
 
@@ -44,9 +48,12 @@ public readonly struct BigNumericalToken : INumericalToken
     /// <value>The postfixed non-numerical characters or <see langword="null" /> if there aren't any.</value>
     public string? NonNumerical { get; }
 
+    bool INumericalToken.IsZero => Value.Equals(0);
+
     static BigNumericalToken()
     {
         MAX_8BIT = new BigInteger(byte.MaxValue);
+        MAX_ROMAN_NUM = new BigInteger(RomanNumeralToken.MAX_VALUE);
         MAX_16BIT = new BigInteger(ushort.MaxValue);
         MAX_32BIT = new BigInteger(uint.MaxValue);
         MAX_64BIT = new BigInteger(ulong.MaxValue);
@@ -146,29 +153,38 @@ public readonly struct BigNumericalToken : INumericalToken
         int result;
         if (other is INumericalToken n)
         {
-            if (n.HasNegativeSign)
-            {
-                if (!HasNegativeSign)
-                    return 1;
-                if ((result = n.AsUnsignedBigInteger().CompareTo(Value)) != 0)
-                    return result;
-                if (string.IsNullOrEmpty(n.NonNumerical))
-                    return (NonNumerical is null) ? 0 : -1;
-                return (NonNumerical is null) ? 1 : n.NonNumerical.CompareTo(NonNumerical);
-            }
-            
-            if (HasNegativeSign)
-                return -1;
-            if (other is Numerical8BitToken t8b)
-                result = Value.CompareTo(t8b.Value);
-            else if (other is Numerical16BitToken t16)
-                result = Value.CompareTo(t16.Value);
-            else if (other is Numerical32BitToken t32)
-                result = Value.CompareTo(t32.Value);
-            else if (other is Numerical64BitToken t64)
-                result = Value.CompareTo(t64.Value);
+            if (n.IsZero)
+                result = Value.CompareTo(0);
             else
-                result = Value.CompareTo(n.AsUnsignedBigInteger());
+            {
+                if (Value.Equals(0))
+                    return n.HasNegativeSign ? 1 : -1;
+                if (n.HasNegativeSign)
+                {
+                    if (!HasNegativeSign)
+                        return 1;
+                    if ((result = n.AsUnsignedBigInteger().CompareTo(Value)) != 0)
+                        return result;
+                    if (string.IsNullOrEmpty(n.NonNumerical))
+                        return (NonNumerical is null) ? 0 : -1;
+                    return (NonNumerical is null) ? 1 : n.NonNumerical.CompareTo(NonNumerical);
+                }
+                
+                if (HasNegativeSign)
+                    return -1;
+                if (other is Numerical8BitToken t8b)
+                    result = Value.CompareTo(t8b.Value);
+                else if (other is RomanNumeralToken r)
+                    result = (Value > RomanNumeralToken.MAX_VALUE) ? 1 : Value.CompareTo(r.GetNumericalValue());
+                else if (other is Numerical16BitToken t16)
+                    result = Value.CompareTo(t16.Value);
+                else if (other is Numerical32BitToken t32)
+                    result = Value.CompareTo(t32.Value);
+                else if (other is Numerical64BitToken t64)
+                    result = Value.CompareTo(t64.Value);
+                else
+                    result = Value.CompareTo(n.AsUnsignedBigInteger());
+            }
             if (result != 0)
                 return result;
         }
@@ -186,9 +202,17 @@ public readonly struct BigNumericalToken : INumericalToken
             return false;
         if (other is INumericalToken n)
         {
-            if (n.HasNegativeSign != HasNegativeSign || !((n is Numerical8BitToken t8b) ? Value.Equals(t8b.Value) : (n is Numerical16BitToken t16) ? Value.Equals(t16.Value) : (n is Numerical32BitToken t32) ? Value.Equals(t32.Value) :
-                    (n is Numerical64BitToken t64) ? Value.Equals(t64.Value) : Value.Equals(n.AsUnsignedBigInteger())))
-                return false;
+            if (n.IsZero)
+            {
+                if (Value != 0)
+                    return false;
+            }
+            else
+            {
+                if (Value == 0 || n.HasNegativeSign != HasNegativeSign || !((n is Numerical8BitToken t8b) ? Value.Equals(t8b.Value) : (n is RomanNumeralToken r) ? (Value <= RomanNumeralToken.MAX_VALUE && Value.Equals(r.GetNumericalValue())) :
+                        (n is Numerical16BitToken t16) ? Value.Equals(t16.Value) : (n is Numerical32BitToken t32) ? Value.Equals(t32.Value) : (n is Numerical64BitToken t64) ? Value.Equals(t64.Value) : Value.Equals(n.AsUnsignedBigInteger())))
+                    return false;
+            }
         }
         else if (!NoCaseComparer.Equals(GetValue(), other.GetValue()))
             return false;

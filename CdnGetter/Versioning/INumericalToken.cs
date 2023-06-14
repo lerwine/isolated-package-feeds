@@ -20,6 +20,11 @@ public interface INumericalToken : IToken
     bool HasNegativeSign { get; }
 
     /// <summary>
+    /// Gets a value indicating whether the numeric value is zero.
+    /// </summary>
+    bool IsZero { get; }
+
+    /// <summary>
     /// Gets the number of padded zeros that precede the token value.
     /// </summary>
     int ZeroPadCount { get; }
