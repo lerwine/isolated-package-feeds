@@ -3,7 +3,9 @@ using static CdnGetter.Versioning.VersioningConstants;
 
 namespace CdnGetter.Versioning;
 
+#pragma warning disable CA2231
 public readonly struct TokenCharacter : ITokenCharacters
+#pragma warning restore CA2231
 {
     public static readonly TokenCharacter Dot = new(DELIMITER_DOT);
 

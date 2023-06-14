@@ -3,7 +3,9 @@ using static CdnGetter.Versioning.VersioningConstants;
 
 namespace CdnGetter.Versioning;
 
+#pragma warning disable CA2231
 public readonly struct TokenString : ITokenCharacters
+#pragma warning restore CA2231
 {
     public static readonly TokenString Empty = new();
     
@@ -16,6 +18,13 @@ public readonly struct TokenString : ITokenCharacters
     public TokenString() => Value = string.Empty;
 
     public TokenString(string value) => Value = value ?? string.Empty;
+
+    public TokenString(ReadOnlySpan<char> value) => Value = (value.Length > 0) ? new(value) : string.Empty;
+
+    public TokenString(ReadOnlySpan<char> value, int startIndex) => Value = (startIndex >= value.Length) ? string.Empty : new((startIndex < 1) ? value : value[startIndex..]);
+
+    public TokenString(ReadOnlySpan<char> value, int startIndex, int endIndex) => Value = (endIndex <= startIndex || startIndex >= value.Length) ? string.Empty : new((startIndex < 1) ?
+        ((endIndex >= value.Length) ? value : value[..endIndex]) : (endIndex >= value.Length) ? value[startIndex..] : value[startIndex..endIndex]);
 
     ReadOnlySpan<char> ITokenCharacters.AsSpan() => Value.AsSpan();
 
