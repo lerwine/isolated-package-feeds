@@ -38,20 +38,20 @@ public static class VersioningConstants
 
     internal const char ROMAN_NUM_1000_UC = 'M';
     internal const char ROMAN_NUM_1000_LC = 'm';
-    internal const int ROMAN_NUM_MMM = 3000;
+    internal const ushort ROMAN_NUM_MMM = 3000;
     internal const string ROMAN_NUM_3000 = "MMM";
-    internal const int ROMAN_NUM_MM = 2000;
+    internal const ushort ROMAN_NUM_MM = 2000;
     internal const string ROMAN_NUM_2000 = "MM";
     internal const ushort ROMAN_NUM_M = 1000;
     internal const string ROMAN_NUM_1000 = "M";
 
-    internal const int ROMAN_NUM_CM = 900;
+    internal const ushort ROMAN_NUM_CM = 900;
     internal const string ROMAN_NUM_900 = "CM";
-    internal const int ROMAN_NUM_DCCC = 800;
+    internal const ushort ROMAN_NUM_DCCC = 800;
     internal const string ROMAN_NUM_800 = "DCCC";
-    internal const int ROMAN_NUM_DCC = 700;
+    internal const ushort ROMAN_NUM_DCC = 700;
     internal const string ROMAN_NUM_700 = "DCC";
-    internal const int ROMAN_NUM_DC = 600;
+    internal const ushort ROMAN_NUM_DC = 600;
     internal const string ROMAN_NUM_600 = "DC";
 
     internal const char ROMAN_NUM_500_UC = 'D';
@@ -59,11 +59,11 @@ public static class VersioningConstants
     internal const ushort ROMAN_NUM_D = 500;
     internal const string ROMAN_NUM_500 = "D";
 
-    internal const int ROMAN_NUM_CD = 400;
+    internal const ushort ROMAN_NUM_CD = 400;
     internal const string ROMAN_NUM_400 = "CD";
-    internal const int ROMAN_NUM_CCC = 300;
+    internal const ushort ROMAN_NUM_CCC = 300;
     internal const string ROMAN_NUM_300 = "CCC";
-    internal const int ROMAN_NUM_CC = 200;
+    internal const ushort ROMAN_NUM_CC = 200;
     internal const string ROMAN_NUM_200 = "CC";
 
     internal const char ROMAN_NUM_100_UC = 'C';
@@ -71,13 +71,13 @@ public static class VersioningConstants
     internal const ushort ROMAN_NUM_C = 100;
     internal const string ROMAN_NUM_100 = "C";
 
-    internal const int ROMAN_NUM_XC = 90;
+    internal const ushort ROMAN_NUM_XC = 90;
     internal const string ROMAN_NUM_90 = "XC";
-    internal const int ROMAN_NUM_LXXX = 80;
+    internal const ushort ROMAN_NUM_LXXX = 80;
     internal const string ROMAN_NUM_80 = "LXXX";
-    internal const int ROMAN_NUM_LXX = 70;
+    internal const ushort ROMAN_NUM_LXX = 70;
     internal const string ROMAN_NUM_70 = "LXX";
-    internal const int ROMAN_NUM_LX = 60;
+    internal const ushort ROMAN_NUM_LX = 60;
     internal const string ROMAN_NUM_60 = "LX";
 
     internal const char ROMAN_NUM_50_UC = 'L';
@@ -85,11 +85,11 @@ public static class VersioningConstants
     internal const ushort ROMAN_NUM_L = 50;
     internal const string ROMAN_NUM_50 = "L";
 
-    internal const int ROMAN_NUM_XL = 40;
+    internal const ushort ROMAN_NUM_XL = 40;
     internal const string ROMAN_NUM_40 = "XL";
-    internal const int ROMAN_NUM_XXX = 30;
+    internal const ushort ROMAN_NUM_XXX = 30;
     internal const string ROMAN_NUM_30 = "XXX";
-    internal const int ROMAN_NUM_XX = 20;
+    internal const ushort ROMAN_NUM_XX = 20;
     internal const string ROMAN_NUM_20 = "XX";
     
     internal const char ROMAN_NUM_10_UC = 'X';
@@ -97,13 +97,13 @@ public static class VersioningConstants
     internal const ushort ROMAN_NUM_X = 10;
     internal const string ROMAN_NUM_10 = "X";
 
-    internal const int ROMAN_NUM_IX = 9;
+    internal const ushort ROMAN_NUM_IX = 9;
     internal const string ROMAN_NUM_9 = "IX";
-    internal const int ROMAN_NUM_VIII = 8;
+    internal const ushort ROMAN_NUM_VIII = 8;
     internal const string ROMAN_NUM_8 = "VIII";
-    internal const int ROMAN_NUM_VII = 7;
+    internal const ushort ROMAN_NUM_VII = 7;
     internal const string ROMAN_NUM_7 = "VII";
-    internal const int ROMAN_NUM_VI = 6;
+    internal const ushort ROMAN_NUM_VI = 6;
     internal const string ROMAN_NUM_6 = "VI";
     
     internal const char ROMAN_NUM_5_UC = 'V';
@@ -111,17 +111,760 @@ public static class VersioningConstants
     internal const ushort ROMAN_NUM_V = 5;
     internal const string ROMAN_NUM_5 = "V";
 
-    internal const int ROMAN_NUM_IV = 4;
+    internal const ushort ROMAN_NUM_IV = 4;
     internal const string ROMAN_NUM_4 = "IV";
-    internal const int ROMAN_NUM_III = 3;
+    internal const ushort ROMAN_NUM_III = 3;
     internal const string ROMAN_NUM_3 = "III";
-    internal const int ROMAN_NUM_II = 2;
+    internal const ushort ROMAN_NUM_II = 2;
     internal const string ROMAN_NUM_2 = "II";
     
     internal const char ROMAN_NUM_1_UC = 'I';
     internal const char ROMAN_NUM_1_LC = 'i';
     internal const ushort ROMAN_NUM_I = 1;
     internal const string ROMAN_NUM_1 = "I";
+
+    /// <summary>
+    /// Gets the index after the last character of the current roman numeral which starts with <c>'I'</c>.
+    /// </summary>
+    /// <param name="source">The characters being parsed.</param>
+    /// <param name="startIndex">The index of the current <c>'I'</c> character.</param>
+    /// <param name="endIndex">The exclusive end index of the parsing character range.</param>
+    /// <returns>The next index after the last roman numeral character.</returns>
+    /// <remarks>This only assumes that the character at the <paramref name="startIndex" /> of the <paramref name="source" /> is the <c>'I'</c> character, and only checks following characters.
+    /// <para>This will stop parsing when it reaches the first character that's not part of a valid roman numeral, irregardless of what follows.</para></remarks>
+    public static int MoveFromI(ReadOnlySpan<char> source, int startIndex, int endIndex) => (++startIndex < endIndex) ? source[startIndex] switch
+    {
+        ROMAN_NUM_10_UC or ROMAN_NUM_10_LC or ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => startIndex + 1,
+        ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => (++startIndex < endIndex) ? source[startIndex] switch
+        {
+            ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => startIndex + 1,
+            _ => startIndex
+        } : startIndex,
+        _ => startIndex
+    } : startIndex;
+    
+    /// <summary>
+    /// Gets the index after the last character of the current roman numeral which starts with <c>'V'</c>.
+    /// </summary>
+    /// <param name="source">The characters being parsed.</param>
+    /// <param name="startIndex">The index of the current <c>'V'</c> character.</param>
+    /// <param name="endIndex">The exclusive end index of the parsing character range.</param>
+    /// <returns>The next index after the last roman numeral character.</returns>
+    /// <remarks>This only assumes that the character at the <paramref name="startIndex" /> of the <paramref name="source" /> is the <c>'V'</c> character, and only checks following characters.
+    /// <para>This will stop parsing when it reaches the first character that's not part of a valid roman numeral, irregardless of what follows.</para></remarks>
+    public static int MoveFromV(ReadOnlySpan<char> source, int startIndex, int endIndex) => (++startIndex < endIndex) ? source[startIndex] switch
+    {
+        ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => (++startIndex < endIndex) ? source[startIndex] switch
+        {
+            ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => (++startIndex < endIndex) ? source[startIndex] switch
+            {
+                ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => startIndex + 1,
+                _ => startIndex
+            } : startIndex,
+            _ => startIndex
+        } : startIndex,
+        _ => startIndex
+    } : startIndex;
+    
+    /// <summary>
+    /// Gets the index after the last character of the current roman numeral which starts with <c>'X'</c>.
+    /// </summary>
+    /// <param name="source">The characters being parsed.</param>
+    /// <param name="startIndex">The index of the current <c>'X'</c> character.</param>
+    /// <param name="endIndex">The exclusive end index of the parsing character range.</param>
+    /// <returns>The next index after the last roman numeral character.</returns>
+    /// <remarks>This only assumes that the character at the <paramref name="startIndex" /> of the <paramref name="source" /> is the <c>'X'</c> character, and only checks following characters.
+    /// <para>This will stop parsing when it reaches the first character that's not part of a valid roman numeral, irregardless of what follows.</para></remarks>
+    public static int MoveFromX(ReadOnlySpan<char> source, int startIndex, int endIndex) => (++startIndex < endIndex) ? source[startIndex] switch
+    {
+        ROMAN_NUM_100_UC or ROMAN_NUM_100_LC or ROMAN_NUM_50_UC or ROMAN_NUM_50_LC => (++startIndex < endIndex) ? source[startIndex] switch
+        {
+            ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => MoveFromV(source, startIndex, endIndex),
+            ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => MoveFromI(source, startIndex, endIndex),
+            _ => startIndex
+        } : startIndex,
+        ROMAN_NUM_10_UC or ROMAN_NUM_10_LC => (++startIndex < endIndex) ? source[startIndex] switch
+        {
+            ROMAN_NUM_10_UC or ROMAN_NUM_10_LC => (++startIndex < endIndex) ? source[startIndex] switch
+            {
+                ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => MoveFromV(source, startIndex, endIndex),
+                ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => MoveFromI(source, startIndex, endIndex),
+                _ => startIndex
+            } : startIndex,
+            ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => MoveFromV(source, startIndex, endIndex),
+            ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => MoveFromI(source, startIndex, endIndex),
+            _ => startIndex
+        } : startIndex,
+        ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => MoveFromV(source, startIndex, endIndex),
+        ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => MoveFromI(source, startIndex, endIndex),
+        _ => startIndex
+    } : startIndex;
+    
+    /// <summary>
+    /// Gets the index after the last character of the current roman numeral which starts with <c>'L'</c>.
+    /// </summary>
+    /// <param name="source">The characters being parsed.</param>
+    /// <param name="startIndex">The index of the current <c>'L'</c> character.</param>
+    /// <param name="endIndex">The exclusive end index of the parsing character range.</param>
+    /// <returns>The next index after the last roman numeral character.</returns>
+    /// <remarks>This only assumes that the character at the <paramref name="startIndex" /> of the <paramref name="source" /> is the <c>'L'</c> character, and only checks following characters.
+    /// <para>This will stop parsing when it reaches the first character that's not part of a valid roman numeral, irregardless of what follows.</para></remarks>
+    public static int MoveFromL(ReadOnlySpan<char> source, int startIndex, int endIndex) => (++startIndex < endIndex) ? source[startIndex] switch
+    {
+        ROMAN_NUM_10_UC or ROMAN_NUM_10_LC => (++startIndex < endIndex) ? source[startIndex] switch
+        {
+            ROMAN_NUM_10_UC or ROMAN_NUM_10_LC => (++startIndex < endIndex) ? source[startIndex] switch
+            {
+                ROMAN_NUM_10_UC or ROMAN_NUM_10_LC => (++startIndex < endIndex) ? source[startIndex] switch
+                {
+                    ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => MoveFromV(source, startIndex, endIndex),
+                    ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => MoveFromI(source, startIndex, endIndex),
+                    _ => startIndex
+                } : startIndex,
+                ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => MoveFromV(source, startIndex, endIndex),
+                ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => MoveFromI(source, startIndex, endIndex),
+                _ => startIndex
+            } : startIndex,
+            ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => MoveFromV(source, startIndex, endIndex),
+            ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => MoveFromI(source, startIndex, endIndex),
+            _ => startIndex
+        } : startIndex,
+        ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => MoveFromV(source, startIndex, endIndex),
+        ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => MoveFromI(source, startIndex, endIndex),
+        _ => startIndex
+    } : startIndex;
+    
+    /// <summary>
+    /// Gets the index after the last character of the current roman numeral which starts with <c>'C'</c>.
+    /// </summary>
+    /// <param name="source">The characters being parsed.</param>
+    /// <param name="startIndex">The index of the current <c>'C'</c> character.</param>
+    /// <param name="endIndex">The exclusive end index of the parsing character range.</param>
+    /// <returns>The next index after the last roman numeral character.</returns>
+    /// <remarks>This only assumes that the character at the <paramref name="startIndex" /> of the <paramref name="source" /> is the <c>'C'</c> character, and only checks following characters.
+    /// <para>This will stop parsing when it reaches the first character that's not part of a valid roman numeral, irregardless of what follows.</para></remarks>
+    public static int MoveFromC(ReadOnlySpan<char> source, int startIndex, int endIndex) => (++startIndex < endIndex) ? source[startIndex] switch
+    {
+        ROMAN_NUM_1000_UC or ROMAN_NUM_1000_LC or ROMAN_NUM_500_UC or ROMAN_NUM_500_LC => (++startIndex < endIndex) ? source[startIndex] switch
+        {
+            ROMAN_NUM_50_UC or ROMAN_NUM_50_LC => MoveFromL(source, startIndex, endIndex),
+            ROMAN_NUM_10_UC or ROMAN_NUM_10_LC => MoveFromX(source, startIndex, endIndex),
+            ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => MoveFromV(source, startIndex, endIndex),
+            ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => MoveFromI(source, startIndex, endIndex),
+            _ => startIndex
+        } : startIndex,
+        ROMAN_NUM_100_UC or ROMAN_NUM_100_LC => (++startIndex < endIndex) ? source[startIndex] switch
+        {
+            ROMAN_NUM_100_UC or ROMAN_NUM_100_LC => (++startIndex < endIndex) ? source[startIndex] switch
+            {
+                ROMAN_NUM_50_UC or ROMAN_NUM_50_LC => MoveFromL(source, startIndex, endIndex),
+                ROMAN_NUM_10_UC or ROMAN_NUM_10_LC => MoveFromX(source, startIndex, endIndex),
+                ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => MoveFromV(source, startIndex, endIndex),
+                ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => MoveFromI(source, startIndex, endIndex),
+                _ => startIndex
+            } : startIndex,
+            ROMAN_NUM_50_UC or ROMAN_NUM_50_LC => MoveFromL(source, startIndex, endIndex),
+            ROMAN_NUM_10_UC or ROMAN_NUM_10_LC => MoveFromX(source, startIndex, endIndex),
+            ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => MoveFromV(source, startIndex, endIndex),
+            ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => MoveFromI(source, startIndex, endIndex),
+            _ => startIndex
+        } : startIndex,
+        ROMAN_NUM_50_UC or ROMAN_NUM_50_LC => MoveFromL(source, startIndex, endIndex),
+        ROMAN_NUM_10_UC or ROMAN_NUM_10_LC => MoveFromX(source, startIndex, endIndex),
+        ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => MoveFromV(source, startIndex, endIndex),
+        ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => MoveFromI(source, startIndex, endIndex),
+        _ => startIndex
+    } : startIndex;
+    
+    /// <summary>
+    /// Gets the index after the last character of the current roman numeral which starts with <c>'D'</c>.
+    /// </summary>
+    /// <param name="source">The characters being parsed.</param>
+    /// <param name="startIndex">The index of the current <c>'D'</c> character.</param>
+    /// <param name="endIndex">The exclusive end index of the parsing character range.</param>
+    /// <returns>The next index after the last roman numeral character.</returns>
+    /// <remarks>This only assumes that the character at the <paramref name="startIndex" /> of the <paramref name="source" /> is the <c>'D'</c> character, and only checks following characters.
+    /// <para>This will stop parsing when it reaches the first character that's not part of a valid roman numeral, irregardless of what follows.</para></remarks>
+    public static int MoveFromD(ReadOnlySpan<char> source, int startIndex, int endIndex) => (++startIndex < endIndex) ? source[startIndex] switch
+    {
+        ROMAN_NUM_100_UC or ROMAN_NUM_100_LC => (++startIndex < endIndex) ? source[startIndex] switch
+        {
+            ROMAN_NUM_100_UC or ROMAN_NUM_100_LC => (++startIndex < endIndex) ? source[startIndex] switch
+            {
+                ROMAN_NUM_100_UC or ROMAN_NUM_100_LC => (++startIndex < endIndex) ? source[startIndex] switch
+                {
+                    ROMAN_NUM_50_UC or ROMAN_NUM_50_LC => MoveFromL(source, startIndex, endIndex),
+                    ROMAN_NUM_10_UC or ROMAN_NUM_10_LC => MoveFromX(source, startIndex, endIndex),
+                    ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => MoveFromV(source, startIndex, endIndex),
+                    ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => MoveFromI(source, startIndex, endIndex),
+                    _ => startIndex
+                } : startIndex,
+                ROMAN_NUM_50_UC or ROMAN_NUM_50_LC => MoveFromL(source, startIndex, endIndex),
+                ROMAN_NUM_10_UC or ROMAN_NUM_10_LC => MoveFromX(source, startIndex, endIndex),
+                ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => MoveFromV(source, startIndex, endIndex),
+                ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => MoveFromI(source, startIndex, endIndex),
+                _ => startIndex
+            } : startIndex,
+            ROMAN_NUM_50_UC or ROMAN_NUM_50_LC => MoveFromL(source, startIndex, endIndex),
+            ROMAN_NUM_10_UC or ROMAN_NUM_10_LC => MoveFromX(source, startIndex, endIndex),
+            ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => MoveFromV(source, startIndex, endIndex),
+            ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => MoveFromI(source, startIndex, endIndex),
+            _ => startIndex
+        } : startIndex,
+        ROMAN_NUM_50_UC or ROMAN_NUM_50_LC => MoveFromL(source, startIndex, endIndex),
+        ROMAN_NUM_10_UC or ROMAN_NUM_10_LC => MoveFromX(source, startIndex, endIndex),
+        ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => MoveFromV(source, startIndex, endIndex),
+        ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => MoveFromI(source, startIndex, endIndex),
+        _ => startIndex
+    } : startIndex;
+    
+    /// <summary>
+    /// Gets the index after the last character of the current roman numeral which starts with <c>'M'</c>.
+    /// </summary>
+    /// <param name="source">The characters being parsed.</param>
+    /// <param name="startIndex">The index of the current <c>'M'</c> character.</param>
+    /// <param name="endIndex">The exclusive end index of the parsing character range.</param>
+    /// <returns>The next index after the last roman numeral character.</returns>
+    /// <remarks>This only assumes that the character at the <paramref name="startIndex" /> of the <paramref name="source" /> is the <c>'M'</c> character, and only checks following characters.
+    /// <para>This will stop parsing when it reaches the first character that's not part of a valid roman numeral, irregardless of what follows.</para></remarks>
+    public static int MoveFromM(ReadOnlySpan<char> source, int startIndex, int endIndex) => (++startIndex < endIndex) ? source[startIndex] switch
+    {
+        ROMAN_NUM_1000_UC or ROMAN_NUM_1000_LC => (++startIndex < endIndex) ? source[startIndex] switch
+        {
+            ROMAN_NUM_1000_UC or ROMAN_NUM_1000_LC => (++startIndex < endIndex) ? source[startIndex] switch
+            {
+                // ROMAN_NUM_1000_UC or ROMAN_NUM_1000_LC => (++startIndex < endIndex) ? source[startIndex] switch
+                // {
+                //     ROMAN_NUM_500_UC or ROMAN_NUM_500_LC => MoveFromD(source, startIndex, endIndex),
+                //     ROMAN_NUM_100_UC or ROMAN_NUM_100_LC => MoveFromC(source, startIndex, endIndex),
+                //     ROMAN_NUM_50_UC or ROMAN_NUM_50_LC => MoveFromL(source, startIndex, endIndex),
+                //     ROMAN_NUM_10_UC or ROMAN_NUM_10_LC => MoveFromX(source, startIndex, endIndex),
+                //     ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => MoveFromV(source, startIndex, endIndex),
+                //     ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => MoveFromI(source, startIndex, endIndex),
+                //     _ => startIndex
+                // } : startIndex,
+                ROMAN_NUM_500_UC or ROMAN_NUM_500_LC => MoveFromD(source, startIndex, endIndex),
+                ROMAN_NUM_100_UC or ROMAN_NUM_100_LC => MoveFromC(source, startIndex, endIndex),
+                ROMAN_NUM_50_UC or ROMAN_NUM_50_LC => MoveFromL(source, startIndex, endIndex),
+                ROMAN_NUM_10_UC or ROMAN_NUM_10_LC => MoveFromX(source, startIndex, endIndex),
+                ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => MoveFromV(source, startIndex, endIndex),
+                ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => MoveFromI(source, startIndex, endIndex),
+                _ => startIndex
+            } : startIndex,
+            ROMAN_NUM_500_UC or ROMAN_NUM_500_LC => MoveFromD(source, startIndex, endIndex),
+            ROMAN_NUM_100_UC or ROMAN_NUM_100_LC => MoveFromC(source, startIndex, endIndex),
+            ROMAN_NUM_50_UC or ROMAN_NUM_50_LC => MoveFromL(source, startIndex, endIndex),
+            ROMAN_NUM_10_UC or ROMAN_NUM_10_LC => MoveFromX(source, startIndex, endIndex),
+            ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => MoveFromV(source, startIndex, endIndex),
+            ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => MoveFromI(source, startIndex, endIndex),
+            _ => startIndex
+        } : startIndex,
+        ROMAN_NUM_500_UC or ROMAN_NUM_500_LC => MoveFromD(source, startIndex, endIndex),
+        ROMAN_NUM_100_UC or ROMAN_NUM_100_LC => MoveFromC(source, startIndex, endIndex),
+        ROMAN_NUM_50_UC or ROMAN_NUM_50_LC => MoveFromL(source, startIndex, endIndex),
+        ROMAN_NUM_10_UC or ROMAN_NUM_10_LC => MoveFromX(source, startIndex, endIndex),
+        ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => MoveFromV(source, startIndex, endIndex),
+        ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => MoveFromI(source, startIndex, endIndex),
+        _ => startIndex
+    } : startIndex;
+
+    /// <summary>
+    /// Gets the value of the current roman numeral starting with the <c>'I'</c> character.
+    /// </summary>
+    /// <param name="source">The characters being parsed.</param>
+    /// <param name="startIndex">The index of the current <c>'I'</c> character.</param>
+    /// <param name="endIndex">The exclusive end index of the parsing character range.</param>
+    /// <param name="nextIndex">Returns the next index after the last roman numeral character.</param>
+    /// <returns>The numeric value of the parsed roman numeral.</returns>
+    /// <remarks>This only assumes that the character at the <paramref name="startIndex" /> of the <paramref name="source" /> is the <c>'I'</c> character, and only checks following characters.
+    /// <para>This will stop parsing when it reaches the first character that's not part of a valid roman numeral, irregardless of what follows.</para></remarks>
+    public static ushort ParseFromI(ReadOnlySpan<char> source, int startIndex, int endIndex, out int nextIndex)
+    {
+        if ((nextIndex = startIndex + 1) < endIndex)
+            switch (source[nextIndex])
+            {
+                case ROMAN_NUM_10_UC:
+                case ROMAN_NUM_10_LC:
+                    nextIndex++;
+                    return ROMAN_NUM_IX;
+                case ROMAN_NUM_5_UC:
+                case ROMAN_NUM_5_LC:
+                    nextIndex++;
+                    return ROMAN_NUM_IV;
+                case ROMAN_NUM_1_UC:
+                case ROMAN_NUM_1_LC:
+                    if (++nextIndex < endIndex)
+                        switch (source[nextIndex])
+                        {
+                            case ROMAN_NUM_1_UC:
+                            case ROMAN_NUM_1_LC:
+                                nextIndex++;
+                                return ROMAN_NUM_III;
+                        }
+                    return ROMAN_NUM_II;
+            }
+        return ROMAN_NUM_I;
+    }
+
+    /// <summary>
+    /// Gets the value of the current roman numeral starting with the <c>'V'</c> character.
+    /// </summary>
+    /// <param name="source">The characters being parsed.</param>
+    /// <param name="startIndex">The index of the current <c>'V'</c> character.</param>
+    /// <param name="endIndex">The exclusive end index of the parsing character range.</param>
+    /// <param name="nextIndex">Returns the next index after the last roman numeral character.</param>
+    /// <returns>The numeric value of the parsed roman numeral.</returns>
+    /// <remarks>This only assumes that the character at the <paramref name="startIndex" /> of the <paramref name="source" /> is the <c>'V'</c> character, and only checks following characters.
+    /// <para>This will stop parsing when it reaches the first character that's not part of a valid roman numeral, irregardless of what follows.</para></remarks>
+    public static ushort ParseFromV(ReadOnlySpan<char> source, int startIndex, int endIndex, out int nextIndex)
+    {
+        if ((nextIndex = startIndex + 1) < endIndex)
+            switch (source[nextIndex])
+            {
+                case ROMAN_NUM_1_UC:
+                case ROMAN_NUM_1_LC:
+                    if (++nextIndex < endIndex)
+                        switch (source[nextIndex])
+                        {
+                            case ROMAN_NUM_1_UC:
+                            case ROMAN_NUM_1_LC:
+                                if (++nextIndex < endIndex)
+                                    switch (source[nextIndex])
+                                    {
+                                        case ROMAN_NUM_1_UC:
+                                        case ROMAN_NUM_1_LC:
+                                            nextIndex++;
+                                            return ROMAN_NUM_VIII;
+                                    }
+                                return ROMAN_NUM_VII;
+                        }
+                    return ROMAN_NUM_VI;
+            }
+        return ROMAN_NUM_V;
+    }
+
+    /// <summary>
+    /// Gets the value of the current roman numeral starting with the <c>'X'</c> character.
+    /// </summary>
+    /// <param name="source">The characters being parsed.</param>
+    /// <param name="startIndex">The index of the current <c>'X'</c> character.</param>
+    /// <param name="endIndex">The exclusive end index of the parsing character range.</param>
+    /// <param name="nextIndex">Returns the next index after the last roman numeral character.</param>
+    /// <returns>The numeric value of the parsed roman numeral.</returns>
+    /// <remarks>This only assumes that the character at the <paramref name="startIndex" /> of the <paramref name="source" /> is the <c>'X'</c> character, and only checks following characters.
+    /// <para>This will stop parsing when it reaches the first character that's not part of a valid roman numeral, irregardless of what follows.</para></remarks>
+    public static ushort ParseFromX(ReadOnlySpan<char> source, int startIndex, int endIndex, out int nextIndex)
+    {
+        if ((nextIndex = startIndex + 1) < endIndex)
+            switch (source[nextIndex])
+            {
+                case ROMAN_NUM_100_UC:
+                case ROMAN_NUM_100_LC:
+                    if (++nextIndex < endIndex)
+                        switch (source[nextIndex])
+                        {
+                            case ROMAN_NUM_5_UC:
+                            case ROMAN_NUM_5_LC:
+                                return (ushort)(ROMAN_NUM_XC + ParseFromV(source, nextIndex, endIndex, out nextIndex));
+                            case ROMAN_NUM_1_UC:
+                            case ROMAN_NUM_1_LC:
+                                return (ushort)(ROMAN_NUM_XC + ParseFromI(source, nextIndex, endIndex, out nextIndex));
+                        }
+                    return ROMAN_NUM_XC;
+                case ROMAN_NUM_50_UC:
+                case ROMAN_NUM_50_LC:
+                    if (++nextIndex < endIndex)
+                        switch (source[nextIndex])
+                        {
+                            case ROMAN_NUM_5_UC:
+                            case ROMAN_NUM_5_LC:
+                                return (ushort)(ROMAN_NUM_XL + ParseFromV(source, nextIndex, endIndex, out nextIndex));
+                            case ROMAN_NUM_1_UC:
+                            case ROMAN_NUM_1_LC:
+                                return (ushort)(ROMAN_NUM_XL + ParseFromI(source, nextIndex, endIndex, out nextIndex));
+                        }
+                    return ROMAN_NUM_XL;
+                case ROMAN_NUM_10_UC:
+                case ROMAN_NUM_10_LC:
+                    if (++nextIndex < endIndex)
+                        switch (source[nextIndex])
+                        {
+                            case ROMAN_NUM_10_UC:
+                            case ROMAN_NUM_10_LC:
+                                if (++nextIndex < endIndex)
+                                    switch (source[nextIndex])
+                                    {
+                                        case ROMAN_NUM_5_UC:
+                                        case ROMAN_NUM_5_LC:
+                                            return (ushort)(ROMAN_NUM_XXX + ParseFromV(source, nextIndex, endIndex, out nextIndex));
+                                        case ROMAN_NUM_1_UC:
+                                        case ROMAN_NUM_1_LC:
+                                            return (ushort)(ROMAN_NUM_XXX + ParseFromI(source, nextIndex, endIndex, out nextIndex));
+                                    }
+                                return ROMAN_NUM_XXX;
+                            case ROMAN_NUM_5_UC:
+                            case ROMAN_NUM_5_LC:
+                                return (ushort)(ROMAN_NUM_XX + ParseFromV(source, nextIndex, endIndex, out nextIndex));
+                            case ROMAN_NUM_1_UC:
+                            case ROMAN_NUM_1_LC:
+                                return (ushort)(ROMAN_NUM_XX + ParseFromI(source, nextIndex, endIndex, out nextIndex));
+                        }
+                    return ROMAN_NUM_XX;
+                case ROMAN_NUM_5_UC:
+                case ROMAN_NUM_5_LC:
+                    return (ushort)(ROMAN_NUM_X + ParseFromV(source, nextIndex, endIndex, out nextIndex));
+                case ROMAN_NUM_1_UC:
+                case ROMAN_NUM_1_LC:
+                    return (ushort)(ROMAN_NUM_X + ParseFromI(source, nextIndex, endIndex, out nextIndex));
+            }
+        return ROMAN_NUM_X;
+    }
+
+    /// <summary>
+    /// Gets the value of the current roman numeral starting with the <c>'L'</c> character.
+    /// </summary>
+    /// <param name="source">The characters being parsed.</param>
+    /// <param name="startIndex">The index of the current <c>'L'</c> character.</param>
+    /// <param name="endIndex">The exclusive end index of the parsing character range.</param>
+    /// <param name="nextIndex">Returns the next index after the last roman numeral character.</param>
+    /// <returns>The numeric value of the parsed roman numeral.</returns>
+    /// <remarks>This only assumes that the character at the <paramref name="startIndex" /> of the <paramref name="source" /> is the <c>'L'</c> character, and only checks following characters.
+    /// <para>This will stop parsing when it reaches the first character that's not part of a valid roman numeral, irregardless of what follows.</para></remarks>
+    public static ushort ParseFromL(ReadOnlySpan<char> source, int startIndex, int endIndex, out int nextIndex)
+    {
+        if ((nextIndex = startIndex + 1) < endIndex)
+            switch (source[nextIndex])
+            {
+                case ROMAN_NUM_10_UC:
+                case ROMAN_NUM_10_LC:
+                    if (++nextIndex < endIndex)
+                        switch (source[nextIndex])
+                        {
+                            case ROMAN_NUM_10_UC:
+                            case ROMAN_NUM_10_LC:
+                                if (++nextIndex < endIndex)
+                                    switch (source[nextIndex])
+                                    {
+                                        case ROMAN_NUM_10_UC:
+                                        case ROMAN_NUM_10_LC:
+                                            if (++nextIndex < endIndex)
+                                                switch (source[nextIndex])
+                                                {
+                                                    case ROMAN_NUM_5_UC:
+                                                    case ROMAN_NUM_5_LC:
+                                                        return (ushort)(ROMAN_NUM_LXXX + ParseFromV(source, nextIndex, endIndex, out nextIndex));
+                                                    case ROMAN_NUM_1_UC:
+                                                    case ROMAN_NUM_1_LC:
+                                                        return (ushort)(ROMAN_NUM_LXXX + ParseFromI(source, nextIndex, endIndex, out nextIndex));
+                                                }
+                                            return ROMAN_NUM_LXXX;
+                                        case ROMAN_NUM_5_UC:
+                                        case ROMAN_NUM_5_LC:
+                                            return (ushort)(ROMAN_NUM_LXX + ParseFromV(source, nextIndex, endIndex, out nextIndex));
+                                        case ROMAN_NUM_1_UC:
+                                        case ROMAN_NUM_1_LC:
+                                            return (ushort)(ROMAN_NUM_LXX + ParseFromI(source, nextIndex, endIndex, out nextIndex));
+                                    }
+                                return ROMAN_NUM_LXX;
+                            case ROMAN_NUM_5_UC:
+                            case ROMAN_NUM_5_LC:
+                                return (ushort)(ROMAN_NUM_LX + ParseFromV(source, nextIndex, endIndex, out nextIndex));
+                            case ROMAN_NUM_1_UC:
+                            case ROMAN_NUM_1_LC:
+                                return (ushort)(ROMAN_NUM_LX + ParseFromI(source, nextIndex, endIndex, out nextIndex));
+                        }
+                    return ROMAN_NUM_LX;
+                case ROMAN_NUM_5_UC:
+                case ROMAN_NUM_5_LC:
+                    return (ushort)(ROMAN_NUM_L + ParseFromV(source, nextIndex, endIndex, out nextIndex));
+                case ROMAN_NUM_1_UC:
+                case ROMAN_NUM_1_LC:
+                    return (ushort)(ROMAN_NUM_L + ParseFromI(source, nextIndex, endIndex, out nextIndex));
+            }
+        return ROMAN_NUM_L;
+    }
+
+    /// <summary>
+    /// Gets the value of the current roman numeral starting with the <c>'C'</c> character.
+    /// </summary>
+    /// <param name="source">The characters being parsed.</param>
+    /// <param name="startIndex">The index of the current <c>'C'</c> character.</param>
+    /// <param name="endIndex">The exclusive end index of the parsing character range.</param>
+    /// <param name="nextIndex">Returns the next index after the last roman numeral character.</param>
+    /// <returns>The numeric value of the parsed roman numeral.</returns>
+    /// <remarks>This only assumes that the character at the <paramref name="startIndex" /> of the <paramref name="source" /> is the <c>'C'</c> character, and only checks following characters.
+    /// <para>This will stop parsing when it reaches the first character that's not part of a valid roman numeral, irregardless of what follows.</para></remarks>
+    public static ushort ParseFromC(ReadOnlySpan<char> source, int startIndex, int endIndex, out int nextIndex)
+    {
+        if ((nextIndex = startIndex + 1) < endIndex)
+            switch (source[nextIndex])
+            {
+                case ROMAN_NUM_1000_UC:
+                case ROMAN_NUM_1000_LC:
+                    if (++nextIndex < endIndex)
+                        switch (source[nextIndex])
+                        {
+                            case ROMAN_NUM_50_UC:
+                            case ROMAN_NUM_50_LC:
+                                return (ushort)(ROMAN_NUM_CM + ParseFromL(source, nextIndex, endIndex, out nextIndex));
+                            case ROMAN_NUM_10_UC:
+                            case ROMAN_NUM_10_LC:
+                                return (ushort)(ROMAN_NUM_CM + ParseFromX(source, nextIndex, endIndex, out nextIndex));
+                            case ROMAN_NUM_5_UC:
+                            case ROMAN_NUM_5_LC:
+                                return (ushort)(ROMAN_NUM_CM + ParseFromV(source, nextIndex, endIndex, out nextIndex));
+                            case ROMAN_NUM_1_UC:
+                            case ROMAN_NUM_1_LC:
+                                return (ushort)(ROMAN_NUM_CM + ParseFromI(source, nextIndex, endIndex, out nextIndex));
+                        }
+                    return ROMAN_NUM_CM;
+                case ROMAN_NUM_500_UC:
+                case ROMAN_NUM_500_LC:
+                    if (++nextIndex < endIndex)
+                        switch (source[nextIndex])
+                        {
+                            case ROMAN_NUM_50_UC:
+                            case ROMAN_NUM_50_LC:
+                                return (ushort)(ROMAN_NUM_CD + ParseFromL(source, nextIndex, endIndex, out nextIndex));
+                            case ROMAN_NUM_10_UC:
+                            case ROMAN_NUM_10_LC:
+                                return (ushort)(ROMAN_NUM_CD + ParseFromX(source, nextIndex, endIndex, out nextIndex));
+                            case ROMAN_NUM_5_UC:
+                            case ROMAN_NUM_5_LC:
+                                return (ushort)(ROMAN_NUM_CD + ParseFromV(source, nextIndex, endIndex, out nextIndex));
+                            case ROMAN_NUM_1_UC:
+                            case ROMAN_NUM_1_LC:
+                                return (ushort)(ROMAN_NUM_CD + ParseFromI(source, nextIndex, endIndex, out nextIndex));
+                        }
+                    return ROMAN_NUM_CD;
+                case ROMAN_NUM_100_UC:
+                case ROMAN_NUM_100_LC:
+                    if (++nextIndex < endIndex)
+                        switch (source[nextIndex])
+                        {
+                            case ROMAN_NUM_100_UC:
+                            case ROMAN_NUM_100_LC:
+                                if (++nextIndex < endIndex)
+                                    switch (source[nextIndex])
+                                    {
+                                        case ROMAN_NUM_50_UC:
+                                        case ROMAN_NUM_50_LC:
+                                            return (ushort)(ROMAN_NUM_CCC + ParseFromL(source, nextIndex, endIndex, out nextIndex));
+                                        case ROMAN_NUM_10_UC:
+                                        case ROMAN_NUM_10_LC:
+                                            return (ushort)(ROMAN_NUM_CCC + ParseFromX(source, nextIndex, endIndex, out nextIndex));
+                                        case ROMAN_NUM_5_UC:
+                                        case ROMAN_NUM_5_LC:
+                                            return (ushort)(ROMAN_NUM_CCC + ParseFromV(source, nextIndex, endIndex, out nextIndex));
+                                        case ROMAN_NUM_1_UC:
+                                        case ROMAN_NUM_1_LC:
+                                            return (ushort)(ROMAN_NUM_CCC + ParseFromI(source, nextIndex, endIndex, out nextIndex));
+                                    }
+                                return ROMAN_NUM_CCC;
+                            case ROMAN_NUM_50_UC:
+                            case ROMAN_NUM_50_LC:
+                                return (ushort)(ROMAN_NUM_CC + ParseFromL(source, nextIndex, endIndex, out nextIndex));
+                            case ROMAN_NUM_10_UC:
+                            case ROMAN_NUM_10_LC:
+                                return (ushort)(ROMAN_NUM_CC + ParseFromX(source, nextIndex, endIndex, out nextIndex));
+                            case ROMAN_NUM_5_UC:
+                            case ROMAN_NUM_5_LC:
+                                return (ushort)(ROMAN_NUM_CC + ParseFromV(source, nextIndex, endIndex, out nextIndex));
+                            case ROMAN_NUM_1_UC:
+                            case ROMAN_NUM_1_LC:
+                                return (ushort)(ROMAN_NUM_CC + ParseFromI(source, nextIndex, endIndex, out nextIndex));
+                        }
+                    return ROMAN_NUM_CC;
+                case ROMAN_NUM_50_UC:
+                case ROMAN_NUM_50_LC:
+                    return (ushort)(ROMAN_NUM_C + ParseFromL(source, nextIndex, endIndex, out nextIndex));
+                case ROMAN_NUM_10_UC:
+                case ROMAN_NUM_10_LC:
+                    return (ushort)(ROMAN_NUM_C + ParseFromX(source, nextIndex, endIndex, out nextIndex));
+                case ROMAN_NUM_5_UC:
+                case ROMAN_NUM_5_LC:
+                    return (ushort)(ROMAN_NUM_C + ParseFromV(source, nextIndex, endIndex, out nextIndex));
+                case ROMAN_NUM_1_UC:
+                case ROMAN_NUM_1_LC:
+                    return (ushort)(ROMAN_NUM_C + ParseFromI(source, nextIndex, endIndex, out nextIndex));
+            }
+        return ROMAN_NUM_C;
+    }
+
+    /// <summary>
+    /// Gets the value of the current roman numeral starting with the <c>'D'</c> character.
+    /// </summary>
+    /// <param name="source">The characters being parsed.</param>
+    /// <param name="startIndex">The index of the current <c>'D'</c> character.</param>
+    /// <param name="endIndex">The exclusive end index of the parsing character range.</param>
+    /// <param name="nextIndex">Returns the next index after the last roman numeral character.</param>
+    /// <returns>The numeric value of the parsed roman numeral.</returns>
+    /// <remarks>This only assumes that the character at the <paramref name="startIndex" /> of the <paramref name="source" /> is the <c>'D'</c> character, and only checks following characters.
+    /// <para>This will stop parsing when it reaches the first character that's not part of a valid roman numeral, irregardless of what follows.</para></remarks>
+    public static ushort ParseFromD(ReadOnlySpan<char> source, int startIndex, int endIndex, out int nextIndex)
+    {
+        if ((nextIndex = startIndex + 1) < endIndex)
+            switch (source[nextIndex])
+            {
+                case ROMAN_NUM_100_UC:
+                case ROMAN_NUM_100_LC:
+                    if (++nextIndex < endIndex)
+                        switch (source[nextIndex])
+                        {
+                            case ROMAN_NUM_100_UC:
+                            case ROMAN_NUM_100_LC:
+                                if (++nextIndex < endIndex)
+                                    switch (source[nextIndex])
+                                    {
+                                        case ROMAN_NUM_100_UC:
+                                        case ROMAN_NUM_100_LC:
+                                            if (++nextIndex < endIndex)
+                                                switch (source[nextIndex])
+                                                {
+                                                    case ROMAN_NUM_50_UC:
+                                                    case ROMAN_NUM_50_LC:
+                                                        return (ushort)(ROMAN_NUM_DCCC + ParseFromL(source, nextIndex, endIndex, out nextIndex));
+                                                    case ROMAN_NUM_10_UC:
+                                                    case ROMAN_NUM_10_LC:
+                                                        return (ushort)(ROMAN_NUM_DCCC + ParseFromX(source, nextIndex, endIndex, out nextIndex));
+                                                    case ROMAN_NUM_5_UC:
+                                                    case ROMAN_NUM_5_LC:
+                                                        return (ushort)(ROMAN_NUM_DCCC + ParseFromV(source, nextIndex, endIndex, out nextIndex));
+                                                    case ROMAN_NUM_1_UC:
+                                                    case ROMAN_NUM_1_LC:
+                                                        return (ushort)(ROMAN_NUM_DCCC + ParseFromI(source, nextIndex, endIndex, out nextIndex));
+                                                }
+                                            return ROMAN_NUM_DCCC;
+                                        case ROMAN_NUM_50_UC:
+                                        case ROMAN_NUM_50_LC:
+                                            return (ushort)(ROMAN_NUM_DCC + ParseFromL(source, nextIndex, endIndex, out nextIndex));
+                                        case ROMAN_NUM_10_UC:
+                                        case ROMAN_NUM_10_LC:
+                                            return (ushort)(ROMAN_NUM_DCC + ParseFromX(source, nextIndex, endIndex, out nextIndex));
+                                        case ROMAN_NUM_5_UC:
+                                        case ROMAN_NUM_5_LC:
+                                            return (ushort)(ROMAN_NUM_DCC + ParseFromV(source, nextIndex, endIndex, out nextIndex));
+                                        case ROMAN_NUM_1_UC:
+                                        case ROMAN_NUM_1_LC:
+                                            return (ushort)(ROMAN_NUM_DCC + ParseFromI(source, nextIndex, endIndex, out nextIndex));
+                                    }
+                                return ROMAN_NUM_DCC;
+                            case ROMAN_NUM_50_UC:
+                            case ROMAN_NUM_50_LC:
+                                return (ushort)(ROMAN_NUM_DC + ParseFromL(source, nextIndex, endIndex, out nextIndex));
+                            case ROMAN_NUM_10_UC:
+                            case ROMAN_NUM_10_LC:
+                                return (ushort)(ROMAN_NUM_DC + ParseFromX(source, nextIndex, endIndex, out nextIndex));
+                            case ROMAN_NUM_5_UC:
+                            case ROMAN_NUM_5_LC:
+                                return (ushort)(ROMAN_NUM_DC + ParseFromV(source, nextIndex, endIndex, out nextIndex));
+                            case ROMAN_NUM_1_UC:
+                            case ROMAN_NUM_1_LC:
+                                return (ushort)(ROMAN_NUM_DC + ParseFromI(source, nextIndex, endIndex, out nextIndex));
+                        }
+                    return ROMAN_NUM_DC;
+                case ROMAN_NUM_50_UC:
+                case ROMAN_NUM_50_LC:
+                    return (ushort)(ROMAN_NUM_D + ParseFromL(source, nextIndex, endIndex, out nextIndex));
+                case ROMAN_NUM_10_UC:
+                case ROMAN_NUM_10_LC:
+                    return (ushort)(ROMAN_NUM_D + ParseFromX(source, nextIndex, endIndex, out nextIndex));
+                case ROMAN_NUM_5_UC:
+                case ROMAN_NUM_5_LC:
+                    return (ushort)(ROMAN_NUM_D + ParseFromV(source, nextIndex, endIndex, out nextIndex));
+                case ROMAN_NUM_1_UC:
+                case ROMAN_NUM_1_LC:
+                    return (ushort)(ROMAN_NUM_D + ParseFromI(source, nextIndex, endIndex, out nextIndex));
+            }
+        return ROMAN_NUM_D;
+    }
+
+    /// <summary>
+    /// Gets the value of the current roman numeral starting with the <c>'M'</c> character.
+    /// </summary>
+    /// <param name="source">The characters being parsed.</param>
+    /// <param name="startIndex">The index of the current <c>'M'</c> character.</param>
+    /// <param name="endIndex">The exclusive end index of the parsing character range.</param>
+    /// <param name="nextIndex">Returns the next index after the last roman numeral character.</param>
+    /// <returns>The numeric value of the parsed roman numeral.</returns>
+    /// <remarks>This only assumes that the character at the <paramref name="startIndex" /> of the <paramref name="source" /> is the <c>'M'</c> character, and only checks following characters.
+    /// <para>This will stop parsing when it reaches the first character that's not part of a valid roman numeral, irregardless of what follows.</para></remarks>
+    public static ushort ParseFromM(ReadOnlySpan<char> source, int startIndex, int endIndex, out int nextIndex)
+    {
+        if ((nextIndex = startIndex + 1) < endIndex)
+            switch (source[nextIndex])
+            {
+                case ROMAN_NUM_1000_UC:
+                case ROMAN_NUM_1000_LC:
+                    if (++nextIndex < endIndex)
+                        switch (source[nextIndex])
+                        {
+                            case ROMAN_NUM_1000_UC:
+                            case ROMAN_NUM_1000_LC:
+                                if (++nextIndex < endIndex)
+                                    switch (source[nextIndex])
+                                    {
+                                        case ROMAN_NUM_500_UC:
+                                        case ROMAN_NUM_500_LC:
+                                            return (ushort)(ROMAN_NUM_MMM + ParseFromD(source, nextIndex, endIndex, out nextIndex));
+                                        case ROMAN_NUM_100_UC:
+                                        case ROMAN_NUM_100_LC:
+                                            return (ushort)(ROMAN_NUM_MMM + ParseFromC(source, nextIndex, endIndex, out nextIndex));
+                                        case ROMAN_NUM_50_UC:
+                                        case ROMAN_NUM_50_LC:
+                                            return (ushort)(ROMAN_NUM_MMM + ParseFromL(source, nextIndex, endIndex, out nextIndex));
+                                        case ROMAN_NUM_10_UC:
+                                        case ROMAN_NUM_10_LC:
+                                            return (ushort)(ROMAN_NUM_MMM + ParseFromX(source, nextIndex, endIndex, out nextIndex));
+                                        case ROMAN_NUM_5_UC:
+                                        case ROMAN_NUM_5_LC:
+                                            return (ushort)(ROMAN_NUM_MMM + ParseFromV(source, nextIndex, endIndex, out nextIndex));
+                                        case ROMAN_NUM_1_UC:
+                                        case ROMAN_NUM_1_LC:
+                                            return (ushort)(ROMAN_NUM_MMM + ParseFromI(source, nextIndex, endIndex, out nextIndex));
+                                    }
+                                return ROMAN_NUM_MMM;
+                            case ROMAN_NUM_500_UC:
+                            case ROMAN_NUM_500_LC:
+                                return (ushort)(ROMAN_NUM_MM + ParseFromD(source, nextIndex, endIndex, out nextIndex));
+                            case ROMAN_NUM_100_UC:
+                            case ROMAN_NUM_100_LC:
+                                return (ushort)(ROMAN_NUM_MM + ParseFromC(source, nextIndex, endIndex, out nextIndex));
+                            case ROMAN_NUM_50_UC:
+                            case ROMAN_NUM_50_LC:
+                                return (ushort)(ROMAN_NUM_MM + ParseFromL(source, nextIndex, endIndex, out nextIndex));
+                            case ROMAN_NUM_10_UC:
+                            case ROMAN_NUM_10_LC:
+                                return (ushort)(ROMAN_NUM_MM + ParseFromX(source, nextIndex, endIndex, out nextIndex));
+                            case ROMAN_NUM_5_UC:
+                            case ROMAN_NUM_5_LC:
+                                return (ushort)(ROMAN_NUM_MM + ParseFromV(source, nextIndex, endIndex, out nextIndex));
+                            case ROMAN_NUM_1_UC:
+                            case ROMAN_NUM_1_LC:
+                                return (ushort)(ROMAN_NUM_MM + ParseFromI(source, nextIndex, endIndex, out nextIndex));
+                        }
+                    return ROMAN_NUM_MM;
+                case ROMAN_NUM_500_UC:
+                case ROMAN_NUM_500_LC:
+                    return (ushort)(ROMAN_NUM_M + ParseFromD(source, nextIndex, endIndex, out nextIndex));
+                case ROMAN_NUM_100_UC:
+                case ROMAN_NUM_100_LC:
+                    return (ushort)(ROMAN_NUM_M + ParseFromC(source, nextIndex, endIndex, out nextIndex));
+                case ROMAN_NUM_50_UC:
+                case ROMAN_NUM_50_LC:
+                    return (ushort)(ROMAN_NUM_M + ParseFromL(source, nextIndex, endIndex, out nextIndex));
+                case ROMAN_NUM_10_UC:
+                case ROMAN_NUM_10_LC:
+                    return (ushort)(ROMAN_NUM_M + ParseFromX(source, nextIndex, endIndex, out nextIndex));
+                case ROMAN_NUM_5_UC:
+                case ROMAN_NUM_5_LC:
+                    return (ushort)(ROMAN_NUM_M + ParseFromV(source, nextIndex, endIndex, out nextIndex));
+                case ROMAN_NUM_1_UC:
+                case ROMAN_NUM_1_LC:
+                    return (ushort)(ROMAN_NUM_M + ParseFromI(source, nextIndex, endIndex, out nextIndex));
+            }
+        return ROMAN_NUM_M;
+    }
 
     public static bool IsValidValidNumericDelimiter(ITokenCharacters? delimiter)
     {
@@ -317,6 +1060,7 @@ public static class VersioningConstants
         }
         char c = target[nextIndex];
         bool isNegative = c == DELIMITER_DASH;
+
         if (isNegative)
         {
             int index = nextIndex + 1;
@@ -329,38 +1073,56 @@ public static class VersioningConstants
         }
         else if (!char.IsDigit(c))
         {
-            if (IsRomanNumeralLetter(c))
+            if (RomanNumeralToken.TryParse(target, delimiterStart, nextIndex, endIndex, out RomanNumeralToken rnt, out nextIndex))
             {
-                int end = startIndex + RomanNumeralToken.MAX_STRING_LENGTH;
-                if (end > target.Length)
-                    end = target.Length;
-                while (++nextIndex < end)
-                {
-                    if (!IsRomanNumeralLetter(c))
-                        break;
-                }
-                int diff = startIndex - delimiterStart;
-                if (diff > 0)
-                {
-                    if (IsValidValidRomanNumericDelimiter(target, delimiterStart, startIndex))
-                    {
-                        if (diff == 1)
-                            result = new RomanNumeralToken(new TokenCharacter(target[delimiterStart]), target, startIndex, nextIndex);
-                        else
-                            result = new RomanNumeralToken(new TokenString(target, delimiterStart, startIndex), target, startIndex, nextIndex);
-                        return true;
-                    }
-                }
-                else
-                {
-                    result = new RomanNumeralToken(target, startIndex, nextIndex);
-                    return true;
-                }
+                result = rnt;
+                return true;
             }
             result = null;
             return false;
         }
-        throw new NotImplementedException();
+        int leadingZeroCount;
+        if (target[nextIndex] == '0')
+        {
+            if (++nextIndex == endIndex)
+            {
+                result = new Numerical8BitToken(0);
+                return true;
+            }
+            leadingZeroCount = 1;
+            while (target[nextIndex] == '0')
+            {
+                leadingZeroCount++;
+                if (++nextIndex == endIndex)
+                {
+                    result = new Numerical8BitToken(0, leadingZeroCount - 1);
+                    return true;
+                }
+            }
+            if (!char.IsNumber(target[nextIndex]))
+            {
+                result = new Numerical8BitToken(0, leadingZeroCount - 1);
+                return true;
+            }
+        }
+        else
+            leadingZeroCount = 0;
+        while (++nextIndex < endIndex)
+        {
+            if (!char.IsDigit(target[nextIndex]))
+                break;
+        }
+        int length = nextIndex - startIndex;
+        if (length <= Numerical8BitToken.MAX_STRING_LENGTH && byte.TryParse(new string(target[startIndex..nextIndex]), out byte b))
+            result = new Numerical8BitToken(b, leadingZeroCount, null, isNegative);
+        else if (length <= Numerical16BitToken.MAX_STRING_LENGTH && ushort.TryParse(new string(target[startIndex..nextIndex]), out ushort s))
+            result = new Numerical16BitToken(s, leadingZeroCount, null, isNegative);
+        else
+        {
+            result = null;
+            return false;
+        }
+        return true;
     }
 
     [Obsolete("Use ParseRomanNumeral(ReadOnlySpan<char>, int, int, out int)")]
@@ -533,185 +1295,62 @@ public static class VersioningConstants
         return result;
     }
 
+    /// <summary>
+    /// Tries to parse a roman numeral.
+    /// </summary>
+    /// <param name="target">The characters being parsed.</param>
+    /// <param name="nextIndex">Returns the index after the last character of the parsed roman numeral, if a roman numeral was found;
+    /// otherwise, returns <c>0</c> if no roman numeral character was found at the <paramref name="startIndex" />.</param>
+    /// <returns>The value of the parsed roman numeral; othwerwise <c>0</c> if no roman numeral character was found at the <paramref name="startIndex" />.</returns>
+    /// <remarks>This will stop parsing when it reaches the first character that's not part of a valid roman numeral, irregardless of what follows.</remarks>
     public static ushort ParseRomanNumeral(ReadOnlySpan<char> target, out int nextIndex) => ParseRomanNumeral(target, 0, target.Length, out nextIndex);
     
+    /// <summary>
+    /// Tries to parse a roman numeral starting at a given index.
+    /// </summary>
+    /// <param name="target">The characters being parsed.</param>
+    /// <param name="startIndex">The starting index at which to begin trying to parse a roman numeral.</param>
+    /// <param name="nextIndex">Returns the index after the last character of the parsed roman numeral, if a roman numeral was found;
+    /// otherwise, returns the value of <see cref="startIndex" /> if no roman numeral character was found at the <paramref name="startIndex" />.</param>
+    /// <returns>The value of the parsed roman numeral; othwerwise <c>0</c> if no roman numeral character was found at the <paramref name="startIndex" />.</returns>
+    /// <remarks>This will stop parsing when it reaches the first character that's not part of a valid roman numeral, irregardless of what follows.</remarks>
     public static ushort ParseRomanNumeral(ReadOnlySpan<char> target, int startIndex, out int nextIndex) => ParseRomanNumeral(target, startIndex, target.Length, out nextIndex);
     
+    /// <summary>
+    /// Tries to parse a roman numeral starting at a given index.
+    /// </summary>
+    /// <param name="target">The characters being parsed.</param>
+    /// <param name="startIndex">The starting index at which to begin trying to parse a roman numeral.</param>
+    /// <param name="endIndex">The exclusive end index of the parsing character range.</param>
+    /// <param name="nextIndex">Returns the index after the last character of the parsed roman numeral, if a roman numeral was found;
+    /// otherwise, returns the value of <see cref="startIndex" /> if no roman numeral character was found at the <paramref name="startIndex" />.</param>
+    /// <returns>The value of the parsed roman numeral; othwerwise <c>0</c> if no roman numeral character was found at the <paramref name="startIndex" />.</returns>
+    /// <remarks>This will stop parsing when it reaches the first character that's not part of a valid roman numeral, irregardless of what follows.</remarks>
     public static ushort ParseRomanNumeral(ReadOnlySpan<char> target, int startIndex, int endIndex, out int nextIndex)
     {
         if (startIndex < 0)
             throw new ArgumentOutOfRangeException(nameof(startIndex));
         if ((nextIndex = startIndex) >= target.Length)
-        {
             nextIndex = target.Length;
-            return 0;
-        }
-        if (endIndex <= startIndex)
-        {
+        else if (endIndex <= startIndex)
             nextIndex = startIndex;
-            return 0;
-        }
-        if (endIndex > target.Length)
-            endIndex = target.Length;
-
-        static bool is1000(char c) => c == ROMAN_NUM_1000_UC || c == ROMAN_NUM_1000_LC;
-        ushort result;
-        if (is1000(target[nextIndex]))
-        {
-            if (++nextIndex == endIndex)
-                return ROMAN_NUM_M; 
-            result = ROMAN_NUM_M;
-            if (is1000(target[nextIndex]))
-            {
-                result += ROMAN_NUM_M;
-                if (++nextIndex == endIndex)
-                    return result; 
-                if (is1000(target[nextIndex]))
-                {
-                    result += ROMAN_NUM_M;
-                    if (++nextIndex == endIndex)
-                        return result; 
-                }
-            }
-        }
         else
-            result = 0;
-        
-        static bool is500(char c) => c == ROMAN_NUM_500_UC || c == ROMAN_NUM_500_LC;
-        static bool is100(char c) => c == ROMAN_NUM_100_UC || c == ROMAN_NUM_100_LC;
-
-        if (is500(target[nextIndex]))
         {
-            result += ROMAN_NUM_D;
-            if (++nextIndex == endIndex)
-                return result; 
-            for (int i = 0; i < 3 && is100(target[nextIndex]); i++)
+            if (endIndex > target.Length)
+                endIndex = target.Length;
+            return target[startIndex] switch
             {
-                result += ROMAN_NUM_C;
-                if (++nextIndex == endIndex)
-                    return result;
-            }
+                ROMAN_NUM_1000_UC or ROMAN_NUM_1000_LC => ParseFromM(target, startIndex, endIndex, out nextIndex),
+                ROMAN_NUM_500_UC or ROMAN_NUM_500_LC => ParseFromD(target, startIndex, endIndex, out nextIndex),
+                ROMAN_NUM_100_UC or ROMAN_NUM_100_LC => ParseFromC(target, startIndex, endIndex, out nextIndex),
+                ROMAN_NUM_50_UC or ROMAN_NUM_50_LC => ParseFromL(target, startIndex, endIndex, out nextIndex),
+                ROMAN_NUM_10_UC or ROMAN_NUM_10_LC => ParseFromX(target, startIndex, endIndex, out nextIndex),
+                ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => ParseFromV(target, startIndex, endIndex, out nextIndex),
+                ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => ParseFromI(target, startIndex, endIndex, out nextIndex),
+                _ => 0
+            };
         }
-        else if (is100(target[nextIndex]))
-        {
-            result += ROMAN_NUM_C;
-            if (++nextIndex == endIndex)
-                return result;
-            if (is500(target[nextIndex]))
-            {
-                result += ROMAN_NUM_CCC;
-                if (++nextIndex == endIndex)
-                    return result;
-            }
-            else if (is1000(target[nextIndex]))
-            {
-                result += ROMAN_NUM_DCCC;
-                if (++nextIndex == endIndex)
-                    return result;
-            }
-            else if (is100(target[nextIndex]))
-            {
-                result += ROMAN_NUM_C;
-                if (++nextIndex == endIndex)
-                    return result;
-                if (is100(target[nextIndex]))
-                {
-                    result += ROMAN_NUM_C;
-                    if (++nextIndex == endIndex)
-                        return result;
-                }
-            }
-        }
-
-        static bool is50(char c) => c == ROMAN_NUM_50_UC || c == ROMAN_NUM_50_LC;
-        static bool is10(char c) => c == ROMAN_NUM_10_UC || c == ROMAN_NUM_10_LC;
-        
-        if (is50(target[nextIndex]))
-        {
-            result += ROMAN_NUM_L;
-            if (++nextIndex == endIndex)
-                return result; 
-            for (int i = 0; i < 3 && is10(target[nextIndex]); i++)
-            {
-                result += ROMAN_NUM_X;
-                if (++nextIndex == endIndex)
-                    return result;
-            }
-        }
-        else if (is10(target[nextIndex]))
-        {
-            result += ROMAN_NUM_X;
-            if (++nextIndex == endIndex)
-                return result;
-            if (is50(target[nextIndex]))
-            {
-                result += ROMAN_NUM_XXX;
-                if (++nextIndex == endIndex)
-                    return result;
-            }
-            else if (is100(target[nextIndex]))
-            {
-                result += ROMAN_NUM_LXXX;
-                if (++nextIndex == endIndex)
-                    return result;
-            }
-            else if (is10(target[nextIndex]))
-            {
-                result += ROMAN_NUM_X;
-                if (++nextIndex == endIndex)
-                    return result;
-                if (is10(target[nextIndex]))
-                {
-                    result += ROMAN_NUM_X;
-                    if (++nextIndex == endIndex)
-                        return result;
-                }
-            }
-        }
-
-        static bool is5(char c) => c == ROMAN_NUM_5_UC || c == ROMAN_NUM_5_LC;
-        static bool is1(char c) => c == ROMAN_NUM_1_UC || c == ROMAN_NUM_1_LC;
-        
-        if (is5(target[nextIndex]))
-        {
-            result += ROMAN_NUM_V;
-            if (++nextIndex == endIndex)
-                return result; 
-            for (int i = 0; i < 3 && is1(target[nextIndex]); i++)
-            {
-                result++;
-                if (++nextIndex == endIndex)
-                    return result;
-            }
-        }
-        else if (is1(target[nextIndex]))
-        {
-            result++;
-            if (++nextIndex == endIndex)
-                return result;
-            if (is5(target[nextIndex]))
-            {
-                result += ROMAN_NUM_III;
-                nextIndex++;
-            }
-            else if (is10(target[nextIndex]))
-            {
-                result += ROMAN_NUM_VIII;
-                nextIndex++;
-            }
-            else if (is1(target[nextIndex]))
-            {
-                result++;
-                if (++nextIndex == endIndex)
-                    return result;
-                if (is1(target[nextIndex]))
-                {
-                    result++;
-                    nextIndex++;
-                }
-            }
-        }
-        return result;
+        return 0;
     }
 
     [Obsolete("Use TestRomanNumeral(ReadOnlySpan<char>, int, int, out int)")]
@@ -832,132 +1471,59 @@ public static class VersioningConstants
         return result;
     }
 
+    /// <summary>
+    /// Determines whether the sequence of characters starting at the specified index is a roman numeral.
+    /// </summary>
+    /// <param name="target">The characters being parsed.</param>
+    /// <param name="nextIndex">Returns the index after the last character of the parsed roman numeral, if a roman numeral was found;
+    /// otherwise, returns <c>0</c> if the first character of <paramref name="startIndex" /> was not a roman numeral character.</param>
+    /// <returns><see langword="true" /> if at least 1 roman numeral character was found; otherwise <see langword="false" />.</returns>
     public static bool TestRomanNumeral(ReadOnlySpan<char> target, out int nextIndex) => TestRomanNumeral(target, 0, target.Length, out nextIndex);
     
+    /// <summary>
+    /// Determines whether the sequence of characters starting at the specified index is a roman numeral.
+    /// </summary>
+    /// <param name="target">The characters being parsed.</param>
+    /// <param name="startIndex">The starting index at which to begin trying to parse a roman numeral.</param>
+    /// <param name="nextIndex">Returns the index after the last character of the parsed roman numeral, if a roman numeral was found;
+    /// otherwise, returns the value of <see cref="startIndex" /> if no roman numeral character was found at the <paramref name="startIndex" />.</param>
+    /// <returns><see langword="true" /> if at least 1 roman numeral character was found at the <paramref name="startIndex" />; otherwise <see langword="false" />.</returns>
     public static bool TestRomanNumeral(ReadOnlySpan<char> target, int startIndex, out int nextIndex) => TestRomanNumeral(target, startIndex, target.Length, out nextIndex);
     
+    /// <summary>
+    /// Determines whether the sequence of characters starting at the specified index is a roman numeral.
+    /// </summary>
+    /// <param name="target">The characters being parsed.</param>
+    /// <param name="startIndex">The starting index at which to begin trying to parse a roman numeral.</param>
+    /// <param name="endIndex">The exclusive end index of the parsing character range.</param>
+    /// <param name="nextIndex">Returns the index after the last character of the parsed roman numeral, if a roman numeral was found;
+    /// otherwise, returns the value of <see cref="startIndex" /> if no roman numeral character was found at the <paramref name="startIndex" />.</param>
+    /// <returns><see langword="true" /> if at least 1 roman numeral character was found at the <paramref name="startIndex" />; otherwise <see langword="false" />.</returns>
     public static bool TestRomanNumeral(ReadOnlySpan<char> target, int startIndex, int endIndex, out int nextIndex)
     {
         if (startIndex < 0)
             throw new ArgumentOutOfRangeException(nameof(startIndex));
         if ((nextIndex = startIndex) >= target.Length)
-        {
             nextIndex = target.Length;
-            return false;
-        }
-        if (endIndex <= startIndex)
-        {
+        else if (endIndex <= startIndex)
             nextIndex = startIndex;
-            return false;
-        }
-        if (endIndex > target.Length)
-            endIndex = target.Length;
-        static bool is1000(char c) => c == ROMAN_NUM_1000_UC || c == ROMAN_NUM_1000_LC;
-        bool result = is1000(target[nextIndex]);
-        if (result)
+        else
         {
-            if (++nextIndex == endIndex)
-                return true; 
-            if (is1000(target[nextIndex]))
+            if (endIndex > target.Length)
+                endIndex = target.Length;
+            return target[startIndex] switch
             {
-                if (++nextIndex == endIndex)
-                    return true; 
-                if (is1000(target[nextIndex]) && ++nextIndex == endIndex)
-                    return true; 
-            }
+                ROMAN_NUM_1000_UC or ROMAN_NUM_1000_LC => MoveFromM(target, startIndex, endIndex) != startIndex,
+                ROMAN_NUM_500_UC or ROMAN_NUM_500_LC => MoveFromD(target, startIndex, endIndex) != startIndex,
+                ROMAN_NUM_100_UC or ROMAN_NUM_100_LC => MoveFromC(target, startIndex, endIndex) != startIndex,
+                ROMAN_NUM_50_UC or ROMAN_NUM_50_LC => MoveFromL(target, startIndex, endIndex) != startIndex,
+                ROMAN_NUM_10_UC or ROMAN_NUM_10_LC => MoveFromX(target, startIndex, endIndex) != startIndex,
+                ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => MoveFromV(target, startIndex, endIndex) != startIndex,
+                ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => MoveFromI(target, startIndex, endIndex) != startIndex,
+                _ => false
+            };
         }
-        
-        static bool is500(char c) => c == ROMAN_NUM_500_UC || c == ROMAN_NUM_500_LC;
-        static bool is100(char c) => c == ROMAN_NUM_100_UC || c == ROMAN_NUM_100_LC;
-
-        if (is500(target[nextIndex]))
-        {
-            if (++nextIndex == endIndex)
-                return true; 
-            for (int i = 0; i < 3 && is100(target[nextIndex]); i++)
-            {
-                if (++nextIndex == endIndex)
-                    return true; 
-            }
-            result = true;
-        }
-        else if (is100(target[nextIndex]))
-        {
-            if (++nextIndex == endIndex)
-                return true; 
-            if (is500(target[nextIndex]) || is1000(target[nextIndex]))
-            {
-                if (++nextIndex == endIndex)
-                    return true; 
-            }
-            else if (is100(target[nextIndex]))
-            {
-                if (++nextIndex == endIndex)
-                    return true; 
-                if (is100(target[nextIndex]))
-                {
-                    if (++nextIndex == endIndex)
-                        return true; 
-                }
-            }
-            result = true;
-        }
-
-        static bool is50(char c) => c == ROMAN_NUM_50_UC || c == ROMAN_NUM_50_LC;
-        static bool is10(char c) => c == ROMAN_NUM_10_UC || c == ROMAN_NUM_10_LC;
-        
-        if (is50(target[nextIndex]))
-        {
-            if (++nextIndex == endIndex)
-                return true; 
-            for (int i = 0; i < 3 && is10(target[nextIndex]); i++)
-            {
-                if (++nextIndex == endIndex)
-                    return true; 
-            }
-            result = true;
-        }
-        else if (is10(target[nextIndex]))
-        {
-            if (++nextIndex == endIndex)
-                return true; 
-            if (is50(target[nextIndex]) || is100(target[nextIndex]))
-            {
-                if (++nextIndex == endIndex)
-                    return true; 
-            }
-            else if (is10(target[nextIndex]))
-            {
-                if (++nextIndex == endIndex)
-                    return true; 
-                if (is10(target[nextIndex]))
-                {
-                    if (++nextIndex == endIndex)
-                        return true; 
-                }
-            }
-            result = true;
-        }
-
-        static bool is5(char c) => c == ROMAN_NUM_5_UC || c == ROMAN_NUM_5_LC;
-        static bool is1(char c) => c == ROMAN_NUM_1_UC || c == ROMAN_NUM_1_LC;
-        
-        if (is5(target[nextIndex]))
-        {
-            if (++nextIndex == endIndex)
-                return true; 
-            for (int i = 0; i < 3 && is1(target[nextIndex]); i++)
-                if (++nextIndex == endIndex)
-                    return true;
-            return true;
-        }
-        if (is1(target[nextIndex]))
-        {
-            if (++nextIndex < endIndex && (is5(target[nextIndex]) || is10(target[nextIndex]) || (is1(target[nextIndex]) && ++nextIndex < endIndex && is1(target[nextIndex]))))
-                nextIndex++;
-            return true;
-        }
-        return result;
+        return false;
     }
 
 }
