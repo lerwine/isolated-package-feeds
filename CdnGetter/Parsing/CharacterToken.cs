@@ -3,8 +3,11 @@ using static CdnGetter.Parsing.ParsingExtensionMethods;
 
 namespace CdnGetter.Parsing;
 
+/// <summary>
+/// Represents a parsed token containing a single character.
+/// </summary>
 #pragma warning disable CA2231
-public readonly struct TokenCharacter : ITokenCharacters
+public readonly struct CharacterToken : ITokenCharacters
 #pragma warning restore CA2231
 {
     public readonly char Value { get; }
@@ -21,7 +24,7 @@ public readonly struct TokenCharacter : ITokenCharacters
         }
     }
 
-    public TokenCharacter(char value) => Value = value;
+    public CharacterToken(char value) => Value = value;
     
     public int CompareTo(IToken? other) => (other is null) ? 1 : NoCaseComparer.Compare(ToString(), other.GetValue());
 

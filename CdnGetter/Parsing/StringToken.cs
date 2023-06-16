@@ -2,11 +2,15 @@ using System.Collections;
 using static CdnGetter.Parsing.ParsingExtensionMethods;
 
 namespace CdnGetter.Parsing;
+
+/// <summary>
+/// Represents a parsed token containing a string of characters.
+/// </summary>
 #pragma warning disable CA2231
-public readonly struct TokenString : ITokenCharacters
+public readonly struct StringToken : ITokenCharacters
 #pragma warning restore CA2231
 {
-    public static readonly TokenString Empty = new();
+    public static readonly StringToken Empty = new();
     
     public readonly string Value { get; }
 
@@ -14,15 +18,15 @@ public readonly struct TokenString : ITokenCharacters
 
     char IReadOnlyList<char>.this[int index] => Value[index];
 
-    public TokenString() => Value = string.Empty;
+    public StringToken() => Value = string.Empty;
 
-    public TokenString(string value) => Value = value ?? string.Empty;
+    public StringToken(string value) => Value = value ?? string.Empty;
 
-    public TokenString(ReadOnlySpan<char> value) => Value = (value.Length > 0) ? new(value) : string.Empty;
+    public StringToken(ReadOnlySpan<char> value) => Value = (value.Length > 0) ? new(value) : string.Empty;
 
-    public TokenString(ReadOnlySpan<char> value, int startIndex) => Value = (startIndex >= value.Length) ? string.Empty : new((startIndex < 1) ? value : value[startIndex..]);
+    public StringToken(ReadOnlySpan<char> value, int startIndex) => Value = (startIndex >= value.Length) ? string.Empty : new((startIndex < 1) ? value : value[startIndex..]);
 
-    public TokenString(ReadOnlySpan<char> value, int startIndex, int endIndex) => Value = (endIndex <= startIndex || startIndex >= value.Length) ? string.Empty : new((startIndex < 1) ?
+    public StringToken(ReadOnlySpan<char> value, int startIndex, int endIndex) => Value = (endIndex <= startIndex || startIndex >= value.Length) ? string.Empty : new((startIndex < 1) ?
         ((endIndex >= value.Length) ? value : value[..endIndex]) : (endIndex >= value.Length) ? value[startIndex..] : value[startIndex..endIndex]);
 
     public int CompareTo(IToken? other) => (other is null) ? 1 : NoCaseComparer.Compare(Value, other.GetValue());
