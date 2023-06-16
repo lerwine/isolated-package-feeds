@@ -960,8 +960,46 @@ public readonly partial struct RomanNumeral
         throw new NotImplementedException();
     }
     
+    [Obsolete("Use Matcher.Instance.TryParse")]
+    public static ushort ParseValue(ReadOnlySpan<char> target, out int nextIndex) => ParseValue(target, 0, target.Length, out nextIndex);
+    
+    [Obsolete("Use Matcher.Instance.TryParse")]
+    public static ushort ParseValue(ReadOnlySpan<char> target, int startIndex, out int nextIndex) => ParseValue(target, startIndex, target.Length, out nextIndex);
+    
+    [Obsolete("Use MatcherTryParse")]
+    public static ushort ParseValue(ReadOnlySpan<char> target, int startIndex, int endIndex, out int nextIndex)
+    {
+        if (startIndex < 0)
+            throw new ArgumentOutOfRangeException(nameof(startIndex));
+        if ((nextIndex = startIndex) >= target.Length)
+            nextIndex = target.Length;
+        else if (endIndex <= startIndex)
+            nextIndex = startIndex;
+        else
+        {
+            if (endIndex > target.Length)
+                endIndex = target.Length;
+            return target[startIndex] switch
+            {
+                ROMAN_NUM_1000_UC or ROMAN_NUM_1000_LC => ParseFromM(target, startIndex, endIndex, out nextIndex),
+                ROMAN_NUM_500_UC or ROMAN_NUM_500_LC => ParseFromD(target, startIndex, endIndex, out nextIndex),
+                ROMAN_NUM_100_UC or ROMAN_NUM_100_LC => ParseFromC(target, startIndex, endIndex, out nextIndex),
+                ROMAN_NUM_50_UC or ROMAN_NUM_50_LC => ParseFromL(target, startIndex, endIndex, out nextIndex),
+                ROMAN_NUM_10_UC or ROMAN_NUM_10_LC => ParseFromX(target, startIndex, endIndex, out nextIndex),
+                ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => ParseFromV(target, startIndex, endIndex, out nextIndex),
+                ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => ParseFromI(target, startIndex, endIndex, out nextIndex),
+                _ => 0
+            };
+        }
+        return 0;
+    }
+
     public sealed class Matcher : IMatcher<char, RomanNumeral>
     {
+        public static readonly Matcher Instance = new();
+
+        private Matcher() { }
+
         public bool Match(ReadOnlySpan<char> span, int startIndex, int endIndex, out int nextIndex)
         {
             if (span.ValidateExtentsIsEmpty(ref startIndex, ref endIndex))

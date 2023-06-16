@@ -10,19 +10,19 @@ public readonly partial struct RomanNumeral : INumericalToken
 {
     public static readonly RomanNumeral MaxValue = new(ROMAN_NUMERAL_MAX_VALUE);
     
-    public string Value { get; }
+    public static readonly RomanNumeral Empty = new();
+    
+    public string? Value { get; }
 
     bool INumericalToken.HasNegativeSign => false;
 
     int INumericalToken.ZeroPadLength => 0;
 
-    public bool IsZero => Value.Length == 0;
+    public bool IsZero => Value is null;
 
-    public RomanNumeral() => Value = string.Empty;
-    
     public RomanNumeral(ushort value) => Value = ToString(value);
     
-    private RomanNumeral(string value) => Value = value;
+    private RomanNumeral(string? value) => Value = value;
     
     public BigInteger AsBigInteger() => new(GetValue());
 
@@ -32,7 +32,7 @@ public readonly partial struct RomanNumeral : INumericalToken
             return 1;
         if (other is INumericalToken numericalToken)
         {
-            if (Value.Length == 0)
+            if (Value is null)
                 return numericalToken.IsZero ? 0 : numericalToken.HasNegativeSign ? 1 : -1;
             return (numericalToken.IsZero || numericalToken.HasNegativeSign) ? 1 : (numericalToken.TryGet16Bit(out ushort s) && s <= ROMAN_NUMERAL_MAX_VALUE) ? GetValue().CompareTo(s) : -1;
         }
@@ -44,7 +44,7 @@ public readonly partial struct RomanNumeral : INumericalToken
         if (other is null)
             return false;
         if (other is INumericalToken numericalToken)
-            return (Value.Length == 0) ? numericalToken.IsZero : !numericalToken.IsZero && !numericalToken.HasNegativeSign && numericalToken.TryGet16Bit(out ushort value) &&
+            return (Value is null) ? numericalToken.IsZero : !numericalToken.IsZero && !numericalToken.HasNegativeSign && numericalToken.TryGet16Bit(out ushort value) &&
                 value <= ROMAN_NUMERAL_MAX_VALUE && GetValue() == value;
         return NoCaseComparer.Equals(GetValue(), other.GetValue());
     }
@@ -68,13 +68,25 @@ public readonly partial struct RomanNumeral : INumericalToken
         _ => ParseFromI(Value.AsSpan(), 0, Value.Length, out _)
     };
 
-    string IToken.GetValue() => Value;
+    string IToken.GetValue() => Value ?? "";
 
-    public override string ToString() => Value;
+    public override string ToString() => Value ?? "";
 
     public bool TryGet8Bit(out byte value)
     {
-        throw new NotImplementedException();
+        if (Value is null)
+        {
+            value = 0;
+            return true;
+        }
+        ushort v = GetValue();
+        if (v <= byte.MaxValue)
+        {
+            value = (byte)v;
+            return true;
+        }
+        value = 0;
+        return false;
     }
 
     bool INumericalToken.TryGet16Bit(out ushort value)
@@ -95,6 +107,58 @@ public readonly partial struct RomanNumeral : INumericalToken
         return true;
     }
 
+    public static RomanNumeral Parse(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return Empty;
+        if (Matcher.Instance.TryParse(text.AsSpan(), 0, text.Length, out RomanNumeral result, out int nextIndex))
+        {
+            if (nextIndex == text.Length)
+                return result;
+        }
+        else
+            nextIndex = 0;
+        throw new ArgumentException($"Invalid roman numeral at index {nextIndex}.", nameof(text));
+    }
+    
+    public static RomanNumeral Parse(ReadOnlySpan<char> text)
+    {
+        if (text.IsEmpty)
+            return Empty;
+        if (Matcher.Instance.TryParse(text, 0, text.Length, out RomanNumeral result, out int nextIndex))
+        {
+            if (nextIndex == text.Length)
+                return result;
+        }
+        else
+            nextIndex = 0;
+        throw new ArgumentException($"Invalid roman numeral at index {nextIndex}.", nameof(text));
+    }
+    
+    public static bool TryParse(string text, out RomanNumeral result)
+    {
+        if (string.IsNullOrEmpty(text))
+            result = Empty;
+        else if (!Matcher.Instance.TryParse(text.AsSpan(), 0, text.Length, out result, out int nextIndex) || nextIndex < text.Length)
+        {
+            result = Empty;
+            return false;
+        }
+        return true;
+    }
+    
+    public static bool TryParse(ReadOnlySpan<char> text, out RomanNumeral result)
+    {
+        if (text.IsEmpty)
+            result = Empty;
+        else if (!Matcher.Instance.TryParse(text, 0, text.Length, out result, out int nextIndex) || nextIndex < text.Length)
+        {
+            result = Empty;
+            return false;
+        }
+        return true;
+    }
+    
     int INumericalToken.CompareAbs(BigInteger other) => (other.CompareTo(ROMAN_NUMERAL_MAX_VALUE) > 0) ? 1: GetValue().CompareTo((ushort)other);
 
     int INumericalToken.CompareAbs(ulong other) => (other > ROMAN_NUMERAL_MAX_VALUE) ? 1 : GetValue().CompareTo((ushort)other);
@@ -103,7 +167,7 @@ public readonly partial struct RomanNumeral : INumericalToken
 
     int INumericalToken.CompareAbs(ushort other) => (other > ROMAN_NUMERAL_MAX_VALUE) ? 1 : GetValue().CompareTo((ushort)other);
 
-    int INumericalToken.CompareAbs(byte other) => Value.CompareTo(other);
+    int INumericalToken.CompareAbs(byte other) => GetValue().CompareTo(other);
 
     bool INumericalToken.EqualsAbs(BigInteger other) => other.CompareTo(ROMAN_NUMERAL_MAX_VALUE) <= 0 && GetValue().Equals((ushort)other);
 
