@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace CdnGetter.Versioning;
 
+[Obsolete("Use types from CdnGetter.Parsing namespace")]
 public interface IToken : IComparable<IToken>, IEquatable<IToken>
 {
     ITokenCharacters? GetDelimiter();

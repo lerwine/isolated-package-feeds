@@ -4,6 +4,7 @@ using static CdnGetter.Versioning.VersioningConstants;
 namespace CdnGetter.Versioning;
 
 #pragma warning disable CA2231
+[Obsolete("Use types from CdnGetter.Parsing namespace")]
 public readonly struct TokenCharacter : ITokenCharacters
 #pragma warning restore CA2231
 {

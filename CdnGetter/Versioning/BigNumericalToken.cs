@@ -8,6 +8,7 @@ namespace CdnGetter.Versioning;
 /// Represents an arbitrarily large numerical token.
 /// </summary>
 #pragma warning disable CA2231
+[Obsolete("Use types from CdnGetter.Parsing namespace")]
 public readonly struct BigNumericalToken : INumericalToken
 #pragma warning restore CA2231
 {

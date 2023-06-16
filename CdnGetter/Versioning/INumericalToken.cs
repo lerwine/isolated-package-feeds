@@ -6,6 +6,7 @@ namespace CdnGetter.Versioning;
 /// <summary>
 /// Represents a token that represents a numerical value.
 /// </summary>
+[Obsolete("Use types from CdnGetter.Parsing namespace")]
 public interface INumericalToken : IToken
 {
     /// <summary>

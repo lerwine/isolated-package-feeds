@@ -9,6 +9,52 @@ public static class ExtensionMethods
 
     public static readonly Regex LineBreakRegex = new(@"\r?\n|\n", RegexOptions.Compiled);
     
+    public static bool ValidateExtentsIsEmpty<T>(this ReadOnlySpan<T> span, ref int startIndex, ref int endIndex)
+    {
+        if (span.IsEmpty)
+            startIndex = endIndex = 0;
+        else if (startIndex >= span.Length)
+            startIndex = endIndex = span.Length;
+        else if (endIndex <= startIndex)
+        {
+            if (startIndex < 0)
+                startIndex = 0;
+            endIndex = startIndex;
+        }
+        else
+        {
+            if (startIndex < 0)
+                startIndex = 0;
+            if (endIndex > span.Length)
+                endIndex = span.Length;
+            return false;
+        }
+        return true;
+    }
+
+    public static bool ValidateExtentsNotEmpty<T>(this ReadOnlySpan<T> span, ref int startIndex, ref int endIndex)
+    {
+        if (span.IsEmpty)
+            startIndex = endIndex = 0;
+        else if (startIndex >= span.Length)
+            startIndex = endIndex = span.Length;
+        else if (endIndex <= startIndex)
+        {
+            if (startIndex < 0)
+                startIndex = 0;
+            endIndex = startIndex;
+        }
+        else
+        {
+            if (startIndex < 0)
+                startIndex = 0;
+            if (endIndex > span.Length)
+                endIndex = span.Length;
+            return true;
+        }
+        return false;
+    }
+
     public static DateTime AsLocalDateTime(this DateTime value) => value.Kind switch
     {
         DateTimeKind.Unspecified => value,

@@ -1,13 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace CdnGetter.Versioning;
+namespace CdnGetter.Parsing;
 
-[Obsolete("Use types from CdnGetter.Parsing namespace")]
-public interface ISoftwareVersion : IComparable<ISoftwareVersion>, IEquatable<ISoftwareVersion>
+public interface ISoftwareVersion
 {
     IToken? Prefix { get; }
 

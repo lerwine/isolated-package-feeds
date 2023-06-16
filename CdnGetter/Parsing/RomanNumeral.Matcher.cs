@@ -1,42 +1,12 @@
 using System.Text;
-using System.Text.RegularExpressions;
+using static CdnGetter.Parsing.ParsingExtensionMethods;
 
-namespace CdnGetter.Versioning;
+namespace CdnGetter.Parsing;
 
-[Obsolete("Use types from CdnGetter.Parsing namespace")]
-public static class VersioningConstants
+#pragma warning disable CA2231
+public readonly partial struct RomanNumeral
+#pragma warning restore CA2231
 {
-    internal static readonly StringComparer NoCaseComparer = StringComparer.InvariantCultureIgnoreCase;
-
-    internal const char DELIMITER_DOT = '.';
-    internal const char DELIMITER_DASH = '-';
-    internal const char DELIMITER_SLASH = '/';
-    internal const char DELIMITER_COLON = ':';
-    internal const char DELIMITER_SEMICOLON = ';';
-    internal const char DELIMITER_PLUS = '+';
-    internal const char DELIMITER_UNDERSCORE = '_';
-
-    public static bool IsRomanNumeralLetter(char c) => c switch
-    {
-        ROMAN_NUM_1000_UC or ROMAN_NUM_1000_LC or ROMAN_NUM_500_UC or ROMAN_NUM_500_LC or ROMAN_NUM_100_UC or ROMAN_NUM_100_LC or ROMAN_NUM_50_UC or ROMAN_NUM_50_LC or
-            ROMAN_NUM_10_UC or ROMAN_NUM_10_LC or ROMAN_NUM_5_UC or ROMAN_NUM_5_LC or ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => true,
-        _ => false
-    };
-
-    public static bool IsVersionPrefixOrBuildSeparator(char c) => c switch
-    {
-        DELIMITER_DOT or DELIMITER_DASH or DELIMITER_PLUS or ROMAN_NUM_500_LC or ROMAN_NUM_100_UC or ROMAN_NUM_100_LC or ROMAN_NUM_50_UC or ROMAN_NUM_50_LC or
-            ROMAN_NUM_10_UC or ROMAN_NUM_10_LC or ROMAN_NUM_5_UC or ROMAN_NUM_5_LC or ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => true,
-        _ => false
-    };
-
-    public static bool IsPrefixOrBuildSeparator(char c) => c switch
-    {
-        ROMAN_NUM_1000_UC or ROMAN_NUM_1000_LC or ROMAN_NUM_500_UC or ROMAN_NUM_500_LC or ROMAN_NUM_100_UC or ROMAN_NUM_100_LC or ROMAN_NUM_50_UC or ROMAN_NUM_50_LC or
-            ROMAN_NUM_10_UC or ROMAN_NUM_10_LC or ROMAN_NUM_5_UC or ROMAN_NUM_5_LC or ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => true,
-        _ => false
-    };
-
     internal const char ROMAN_NUM_1000_UC = 'M';
     internal const char ROMAN_NUM_1000_LC = 'm';
     internal const ushort ROMAN_NUM_MMM = 3000;
@@ -63,7 +33,6 @@ public static class VersioningConstants
     internal const string ROMAN_NUM_300 = "CCC";
     internal const ushort ROMAN_NUM_CC = 200;
     internal const string ROMAN_NUM_200 = "CC";
-
     internal const char ROMAN_NUM_100_UC = 'C';
     internal const char ROMAN_NUM_100_LC = 'c';
     internal const ushort ROMAN_NUM_C = 100;
@@ -86,7 +55,6 @@ public static class VersioningConstants
     internal const string ROMAN_NUM_30 = "XXX";
     internal const ushort ROMAN_NUM_XX = 20;
     internal const string ROMAN_NUM_20 = "XX";
-    
     internal const char ROMAN_NUM_10_UC = 'X';
     internal const char ROMAN_NUM_10_LC = 'x';
     internal const ushort ROMAN_NUM_X = 10;
@@ -109,11 +77,11 @@ public static class VersioningConstants
     internal const string ROMAN_NUM_3 = "III";
     internal const ushort ROMAN_NUM_II = 2;
     internal const string ROMAN_NUM_2 = "II";
-    
     internal const char ROMAN_NUM_1_UC = 'I';
     internal const char ROMAN_NUM_1_LC = 'i';
     internal const ushort ROMAN_NUM_I = 1;
     internal const string ROMAN_NUM_1 = "I";
+    internal const int MAX_STRING_LENGTH = 15;
 
     /// <summary>
     /// Gets the index after the last character of the current roman numeral which starts with <c>'I'</c>.
@@ -858,66 +826,11 @@ public static class VersioningConstants
         return ROMAN_NUM_M;
     }
 
-    public static bool IsValidValidNumericDelimiter(ITokenCharacters? delimiter)
-    {
-        if (delimiter is null || delimiter.Count == 0)
-            return true;
-        char c = delimiter[^1];
-        return c != DELIMITER_DASH && !char.IsLetterOrDigit(c);
-    }
-
-    public static ITokenCharacters? AssertValidNumericDelimiter(ITokenCharacters? delimiter)
-    {
-        if (delimiter is null || delimiter.Count == 0)
-            return null;
-        char c = delimiter[^1];
-        if (c == DELIMITER_DASH || char.IsLetterOrDigit(c))
-            throw new ArgumentException($"Delimiter for a numeric value cannot be a digit, letter or a dash (-).", nameof(delimiter));
-        return delimiter;
-    }
-
-    public static bool IsValidNumericalPostfix(string? nonNumerical)
-    {
-        if (string.IsNullOrEmpty(nonNumerical))
-            return true;
-        char c = nonNumerical[0];
-        return c != DELIMITER_DOT && !char.IsDigit(c);
-    }
-    
-    public static bool IsValidNumericalPostfix(ReadOnlySpan<char> nonNumerical)
-    {
-        if (nonNumerical.Length == 0)
-            return true;
-        char c = nonNumerical[0];
-        return c != DELIMITER_DOT && !char.IsDigit(c);
-    }
-    
-    public static string? AssertValidNumericalPostfix(string? nonNumerical)
-    {
-        if (string.IsNullOrEmpty(nonNumerical))
-            return null;
-        char c = nonNumerical[0];
-        if (c == DELIMITER_DOT || char.IsDigit(c))
-            throw new ArgumentException($"Delimiter for a numeric value cannot be a digit or a period (.).", nameof(nonNumerical));
-        return nonNumerical;
-    }
-
-    public static bool IsValidValidRomanNumericDelimiter(ReadOnlySpan<char> target, int startIndex, int endIndex) => target.Length == 0 || !char.IsLetterOrDigit(target[^1]);
-
-    public static ITokenCharacters? AssertValidRomanNumericDelimiter(ITokenCharacters? delimiter)
-    {
-        if (delimiter is null || delimiter.Count == 0)
-            return null;
-        if (char.IsLetterOrDigit(delimiter[^1]))
-            throw new ArgumentException($"Delimiter for a roman numeral cannot be a digit or letter.", nameof(delimiter));
-        return delimiter;
-    }
-
     public static string ToRomanNumeral(ushort value)
     {
         if (value == 0)
             return string.Empty;
-        if (value > RomanNumeralToken.MAX_VALUE)
+        if (value > ROMAN_NUMERAL_MAX_VALUE)
             throw new ArgumentOutOfRangeException(nameof(value));
         switch (value)
         {
@@ -1037,485 +950,107 @@ public static class VersioningConstants
         return sb.ToString();
     }
 
-    public static bool TryParseNumericalToken(ReadOnlySpan<char> target, int delimiterStart, int startIndex, int endIndex, out int nextIndex, out INumericalToken? result)
-    {
-        if ((nextIndex = startIndex) >= target.Length)
-        {
-            nextIndex = target.Length;
-            result = null;
-            return false;
-        }
-        if (endIndex <= startIndex)
-        {
-            result = null;
-            return false;
-        }
-        char c = target[nextIndex];
-        bool isNegative = c == DELIMITER_DASH;
 
-        if (isNegative)
+    private static string ToString(ushort value)
+    {
+        if (value > ROMAN_NUMERAL_MAX_VALUE)
+            throw new ArgumentOutOfRangeException(nameof(value));
+        if (value == 0)
+            return string.Empty;
+        throw new NotImplementedException();
+    }
+    
+    public sealed class Matcher : IMatcher<char, RomanNumeral>
+    {
+        public bool Match(ReadOnlySpan<char> span, int startIndex, int endIndex, out int nextIndex)
         {
-            int index = nextIndex + 1;
-            if (index == target.Length || !char.IsNumber(target[index]))
+            if (span.ValidateExtentsIsEmpty(ref startIndex, ref endIndex))
             {
-                result = null;
+                nextIndex = startIndex;
                 return false;
             }
-            nextIndex = index + 1;
-        }
-        else if (!char.IsDigit(c))
-        {
-            if (RomanNumeralToken.TryParse(target, delimiterStart, nextIndex, endIndex, out RomanNumeralToken rnt, out nextIndex))
+            switch (span[startIndex])
             {
-                result = rnt;
-                return true;
+                case ROMAN_NUM_1000_UC:
+                case ROMAN_NUM_1000_LC:
+                    nextIndex = MoveFromM(span, startIndex, endIndex);
+                    break;
+                case ROMAN_NUM_500_UC:
+                case ROMAN_NUM_500_LC:
+                    nextIndex = MoveFromD(span, startIndex, endIndex);
+                    break;
+                case ROMAN_NUM_100_UC:
+                case ROMAN_NUM_100_LC:
+                    nextIndex = MoveFromC(span, startIndex, endIndex);
+                    break;
+                case ROMAN_NUM_50_UC:
+                case ROMAN_NUM_50_LC:
+                    nextIndex = MoveFromL(span, startIndex, endIndex);
+                    break;
+                case ROMAN_NUM_10_UC:
+                case ROMAN_NUM_10_LC:
+                    nextIndex = MoveFromX(span, startIndex, endIndex);
+                    break;
+                case ROMAN_NUM_5_UC:
+                case ROMAN_NUM_5_LC:
+                    nextIndex = MoveFromV(span, startIndex, endIndex);
+                    break;
+                case ROMAN_NUM_1_UC:
+                case ROMAN_NUM_1_LC:
+                    nextIndex = MoveFromI(span, startIndex, endIndex);
+                    break;
+                default:
+                    nextIndex = startIndex;
+                    return false;
             }
-            result = null;
-            return false;
-        }
-        int leadingZeroCount;
-        if (target[nextIndex] == '0')
-        {
-            if (++nextIndex == endIndex)
-            {
-                result = new Numerical8BitToken(0);
-                return true;
-            }
-            leadingZeroCount = 1;
-            while (target[nextIndex] == '0')
-            {
-                leadingZeroCount++;
-                if (++nextIndex == endIndex)
-                {
-                    result = new Numerical8BitToken(0, leadingZeroCount - 1);
-                    return true;
-                }
-            }
-            if (!char.IsNumber(target[nextIndex]))
-            {
-                result = new Numerical8BitToken(0, leadingZeroCount - 1);
-                return true;
-            }
-        }
-        else
-            leadingZeroCount = 0;
-        while (++nextIndex < endIndex)
-        {
-            if (!char.IsDigit(target[nextIndex]))
-                break;
-        }
-        int length = nextIndex - startIndex;
-        if (length <= Numerical8BitToken.MAX_STRING_LENGTH && byte.TryParse(new string(target[startIndex..nextIndex]), out byte b))
-            result = new Numerical8BitToken(b, leadingZeroCount, null, isNegative);
-        else if (length <= Numerical16BitToken.MAX_STRING_LENGTH && ushort.TryParse(new string(target[startIndex..nextIndex]), out ushort s))
-            result = new Numerical16BitToken(s, leadingZeroCount, null, isNegative);
-        else
-        {
-            result = null;
-            return false;
-        }
-        return true;
-    }
-
-    [Obsolete("Use ParseRomanNumeral(ReadOnlySpan<char>, int, int, out int)")]
-    public static ushort ParseRomanNumeral(int startIndex, ReadOnlySpan<char> target, out int nextIndex)
-    {
-        if (startIndex < 0)
-            throw new ArgumentOutOfRangeException(nameof(startIndex));
-        if ((nextIndex = startIndex) >= target.Length)
-        {
-            nextIndex = target.Length;
-            return 0;
-        }
-        static bool is1000(char c) => c == ROMAN_NUM_1000_UC || c == ROMAN_NUM_1000_LC;
-        ushort result;
-        if (is1000(target[nextIndex]))
-        {
-            if (++nextIndex == target.Length)
-                return ROMAN_NUM_M; 
-            result = ROMAN_NUM_M;
-            if (is1000(target[nextIndex]))
-            {
-                result += ROMAN_NUM_M;
-                if (++nextIndex == target.Length)
-                    return result; 
-                if (is1000(target[nextIndex]))
-                {
-                    result += ROMAN_NUM_M;
-                    if (++nextIndex == target.Length)
-                        return result; 
-                }
-            }
-        }
-        else
-            result = 0;
-        
-        static bool is500(char c) => c == ROMAN_NUM_500_UC || c == ROMAN_NUM_500_LC;
-        static bool is100(char c) => c == ROMAN_NUM_100_UC || c == ROMAN_NUM_100_LC;
-
-        if (is500(target[nextIndex]))
-        {
-            result += ROMAN_NUM_D;
-            if (++nextIndex == target.Length)
-                return result; 
-            for (int i = 0; i < 3 && is100(target[nextIndex]); i++)
-            {
-                result += ROMAN_NUM_C;
-                if (++nextIndex == target.Length)
-                    return result;
-            }
-        }
-        else if (is100(target[nextIndex]))
-        {
-            result += ROMAN_NUM_C;
-            if (++nextIndex == target.Length)
-                return result;
-            if (is500(target[nextIndex]))
-            {
-                result += ROMAN_NUM_CCC;
-                if (++nextIndex == target.Length)
-                    return result;
-            }
-            else if (is1000(target[nextIndex]))
-            {
-                result += ROMAN_NUM_DCCC;
-                if (++nextIndex == target.Length)
-                    return result;
-            }
-            else if (is100(target[nextIndex]))
-            {
-                result += ROMAN_NUM_C;
-                if (++nextIndex == target.Length)
-                    return result;
-                if (is100(target[nextIndex]))
-                {
-                    result += ROMAN_NUM_C;
-                    if (++nextIndex == target.Length)
-                        return result;
-                }
-            }
-        }
-
-        static bool is50(char c) => c == ROMAN_NUM_50_UC || c == ROMAN_NUM_50_LC;
-        static bool is10(char c) => c == ROMAN_NUM_10_UC || c == ROMAN_NUM_10_LC;
-        
-        if (is50(target[nextIndex]))
-        {
-            result += ROMAN_NUM_L;
-            if (++nextIndex == target.Length)
-                return result; 
-            for (int i = 0; i < 3 && is10(target[nextIndex]); i++)
-            {
-                result += ROMAN_NUM_X;
-                if (++nextIndex == target.Length)
-                    return result;
-            }
-        }
-        else if (is10(target[nextIndex]))
-        {
-            result += ROMAN_NUM_X;
-            if (++nextIndex == target.Length)
-                return result;
-            if (is50(target[nextIndex]))
-            {
-                result += ROMAN_NUM_XXX;
-                if (++nextIndex == target.Length)
-                    return result;
-            }
-            else if (is100(target[nextIndex]))
-            {
-                result += ROMAN_NUM_LXXX;
-                if (++nextIndex == target.Length)
-                    return result;
-            }
-            else if (is10(target[nextIndex]))
-            {
-                result += ROMAN_NUM_X;
-                if (++nextIndex == target.Length)
-                    return result;
-                if (is10(target[nextIndex]))
-                {
-                    result += ROMAN_NUM_X;
-                    if (++nextIndex == target.Length)
-                        return result;
-                }
-            }
-        }
-
-        static bool is5(char c) => c == ROMAN_NUM_5_UC || c == ROMAN_NUM_5_LC;
-        static bool is1(char c) => c == ROMAN_NUM_1_UC || c == ROMAN_NUM_1_LC;
-        
-        if (is5(target[nextIndex]))
-        {
-            result += ROMAN_NUM_V;
-            if (++nextIndex == target.Length)
-                return result; 
-            for (int i = 0; i < 3 && is1(target[nextIndex]); i++)
-            {
-                result++;
-                if (++nextIndex == target.Length)
-                    return result;
-            }
-        }
-        else if (is1(target[nextIndex]))
-        {
-            result++;
-            if (++nextIndex == target.Length)
-                return result;
-            if (is5(target[nextIndex]))
-            {
-                result += ROMAN_NUM_III;
-                nextIndex++;
-            }
-            else if (is10(target[nextIndex]))
-            {
-                result += ROMAN_NUM_VIII;
-                nextIndex++;
-            }
-            else if (is1(target[nextIndex]))
-            {
-                result++;
-                if (++nextIndex == target.Length)
-                    return result;
-                if (is1(target[nextIndex]))
-                {
-                    result++;
-                    nextIndex++;
-                }
-            }
-        }
-        return result;
-    }
-
-    /// <summary>
-    /// Tries to parse a roman numeral.
-    /// </summary>
-    /// <param name="target">The characters being parsed.</param>
-    /// <param name="nextIndex">Returns the index after the last character of the parsed roman numeral, if a roman numeral was found;
-    /// otherwise, returns <c>0</c> if no roman numeral character was found at the <paramref name="startIndex" />.</param>
-    /// <returns>The value of the parsed roman numeral; othwerwise <c>0</c> if no roman numeral character was found at the <paramref name="startIndex" />.</returns>
-    /// <remarks>This will stop parsing when it reaches the first character that's not part of a valid roman numeral, irregardless of what follows.</remarks>
-    public static ushort ParseRomanNumeral(ReadOnlySpan<char> target, out int nextIndex) => ParseRomanNumeral(target, 0, target.Length, out nextIndex);
-    
-    /// <summary>
-    /// Tries to parse a roman numeral starting at a given index.
-    /// </summary>
-    /// <param name="target">The characters being parsed.</param>
-    /// <param name="startIndex">The starting index at which to begin trying to parse a roman numeral.</param>
-    /// <param name="nextIndex">Returns the index after the last character of the parsed roman numeral, if a roman numeral was found;
-    /// otherwise, returns the value of <see cref="startIndex" /> if no roman numeral character was found at the <paramref name="startIndex" />.</param>
-    /// <returns>The value of the parsed roman numeral; othwerwise <c>0</c> if no roman numeral character was found at the <paramref name="startIndex" />.</returns>
-    /// <remarks>This will stop parsing when it reaches the first character that's not part of a valid roman numeral, irregardless of what follows.</remarks>
-    public static ushort ParseRomanNumeral(ReadOnlySpan<char> target, int startIndex, out int nextIndex) => ParseRomanNumeral(target, startIndex, target.Length, out nextIndex);
-    
-    /// <summary>
-    /// Tries to parse a roman numeral starting at a given index.
-    /// </summary>
-    /// <param name="target">The characters being parsed.</param>
-    /// <param name="startIndex">The starting index at which to begin trying to parse a roman numeral.</param>
-    /// <param name="endIndex">The exclusive end index of the parsing character range.</param>
-    /// <param name="nextIndex">Returns the index after the last character of the parsed roman numeral, if a roman numeral was found;
-    /// otherwise, returns the value of <see cref="startIndex" /> if no roman numeral character was found at the <paramref name="startIndex" />.</param>
-    /// <returns>The value of the parsed roman numeral; othwerwise <c>0</c> if no roman numeral character was found at the <paramref name="startIndex" />.</returns>
-    /// <remarks>This will stop parsing when it reaches the first character that's not part of a valid roman numeral, irregardless of what follows.</remarks>
-    public static ushort ParseRomanNumeral(ReadOnlySpan<char> target, int startIndex, int endIndex, out int nextIndex)
-    {
-        if (startIndex < 0)
-            throw new ArgumentOutOfRangeException(nameof(startIndex));
-        if ((nextIndex = startIndex) >= target.Length)
-            nextIndex = target.Length;
-        else if (endIndex <= startIndex)
-            nextIndex = startIndex;
-        else
-        {
-            if (endIndex > target.Length)
-                endIndex = target.Length;
-            return target[startIndex] switch
-            {
-                ROMAN_NUM_1000_UC or ROMAN_NUM_1000_LC => ParseFromM(target, startIndex, endIndex, out nextIndex),
-                ROMAN_NUM_500_UC or ROMAN_NUM_500_LC => ParseFromD(target, startIndex, endIndex, out nextIndex),
-                ROMAN_NUM_100_UC or ROMAN_NUM_100_LC => ParseFromC(target, startIndex, endIndex, out nextIndex),
-                ROMAN_NUM_50_UC or ROMAN_NUM_50_LC => ParseFromL(target, startIndex, endIndex, out nextIndex),
-                ROMAN_NUM_10_UC or ROMAN_NUM_10_LC => ParseFromX(target, startIndex, endIndex, out nextIndex),
-                ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => ParseFromV(target, startIndex, endIndex, out nextIndex),
-                ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => ParseFromI(target, startIndex, endIndex, out nextIndex),
-                _ => 0
-            };
-        }
-        return 0;
-    }
-
-    [Obsolete("Use TestRomanNumeral(ReadOnlySpan<char>, int, int, out int)")]
-    public static bool TestRomanNumeral(int startIndex, ReadOnlySpan<char> target, out int nextIndex)
-    {
-        if (startIndex < 0)
-            throw new ArgumentOutOfRangeException(nameof(startIndex));
-        if ((nextIndex = startIndex) >= target.Length)
-        {
-            nextIndex = target.Length;
-            return false;
-        }
-        static bool is1000(char c) => c == ROMAN_NUM_1000_UC || c == ROMAN_NUM_1000_LC;
-        bool result = is1000(target[nextIndex]);
-        if (result)
-        {
-            if (++nextIndex == target.Length)
-                return true; 
-            if (is1000(target[nextIndex]))
-            {
-                if (++nextIndex == target.Length)
-                    return true; 
-                if (is1000(target[nextIndex]) && ++nextIndex == target.Length)
-                    return true; 
-            }
-        }
-        
-        static bool is500(char c) => c == ROMAN_NUM_500_UC || c == ROMAN_NUM_500_LC;
-        static bool is100(char c) => c == ROMAN_NUM_100_UC || c == ROMAN_NUM_100_LC;
-
-        if (is500(target[nextIndex]))
-        {
-            if (++nextIndex == target.Length)
-                return true; 
-            for (int i = 0; i < 3 && is100(target[nextIndex]); i++)
-            {
-                if (++nextIndex == target.Length)
-                    return true; 
-            }
-            result = true;
-        }
-        else if (is100(target[nextIndex]))
-        {
-            if (++nextIndex == target.Length)
-                return true; 
-            if (is500(target[nextIndex]) || is1000(target[nextIndex]))
-            {
-                if (++nextIndex == target.Length)
-                    return true; 
-            }
-            else if (is100(target[nextIndex]))
-            {
-                if (++nextIndex == target.Length)
-                    return true; 
-                if (is100(target[nextIndex]))
-                {
-                    if (++nextIndex == target.Length)
-                        return true; 
-                }
-            }
-            result = true;
-        }
-
-        static bool is50(char c) => c == ROMAN_NUM_50_UC || c == ROMAN_NUM_50_LC;
-        static bool is10(char c) => c == ROMAN_NUM_10_UC || c == ROMAN_NUM_10_LC;
-        
-        if (is50(target[nextIndex]))
-        {
-            if (++nextIndex == target.Length)
-                return true; 
-            for (int i = 0; i < 3 && is10(target[nextIndex]); i++)
-            {
-                if (++nextIndex == target.Length)
-                    return true; 
-            }
-            result = true;
-        }
-        else if (is10(target[nextIndex]))
-        {
-            if (++nextIndex == target.Length)
-                return true; 
-            if (is50(target[nextIndex]) || is100(target[nextIndex]))
-            {
-                if (++nextIndex == target.Length)
-                    return true; 
-            }
-            else if (is10(target[nextIndex]))
-            {
-                if (++nextIndex == target.Length)
-                    return true; 
-                if (is10(target[nextIndex]))
-                {
-                    if (++nextIndex == target.Length)
-                        return true; 
-                }
-            }
-            result = true;
-        }
-
-        static bool is5(char c) => c == ROMAN_NUM_5_UC || c == ROMAN_NUM_5_LC;
-        static bool is1(char c) => c == ROMAN_NUM_1_UC || c == ROMAN_NUM_1_LC;
-        
-        if (is5(target[nextIndex]))
-        {
-            if (++nextIndex == target.Length)
-                return true; 
-            for (int i = 0; i < 3 && is1(target[nextIndex]); i++)
-                if (++nextIndex == target.Length)
-                    return true;
             return true;
         }
-        if (is1(target[nextIndex]))
+
+        public bool TryParse(ReadOnlySpan<char> span, int startIndex, int endIndex, out RomanNumeral result, out int nextIndex)
         {
-            if (++nextIndex < target.Length && (is5(target[nextIndex]) || is10(target[nextIndex]) || (is1(target[nextIndex]) && ++nextIndex < target.Length && is1(target[nextIndex]))))
-                nextIndex++;
+            if (span.ValidateExtentsIsEmpty(ref startIndex, ref endIndex))
+            {
+                nextIndex = startIndex;
+                result = default;
+                return false;
+            }
+            switch (span[startIndex])
+            {
+                case ROMAN_NUM_1000_UC:
+                case ROMAN_NUM_1000_LC:
+                    nextIndex = MoveFromM(span, startIndex, endIndex);
+                    break;
+                case ROMAN_NUM_500_UC:
+                case ROMAN_NUM_500_LC:
+                    nextIndex = MoveFromD(span, startIndex, endIndex);
+                    break;
+                case ROMAN_NUM_100_UC:
+                case ROMAN_NUM_100_LC:
+                    nextIndex = MoveFromC(span, startIndex, endIndex);
+                    break;
+                case ROMAN_NUM_50_UC:
+                case ROMAN_NUM_50_LC:
+                    nextIndex = MoveFromL(span, startIndex, endIndex);
+                    break;
+                case ROMAN_NUM_10_UC:
+                case ROMAN_NUM_10_LC:
+                    nextIndex = MoveFromX(span, startIndex, endIndex);
+                    break;
+                case ROMAN_NUM_5_UC:
+                case ROMAN_NUM_5_LC:
+                    nextIndex = MoveFromV(span, startIndex, endIndex);
+                    break;
+                case ROMAN_NUM_1_UC:
+                case ROMAN_NUM_1_LC:
+                    nextIndex = MoveFromI(span, startIndex, endIndex);
+                    break;
+                default:
+                    nextIndex = startIndex;
+                    result = default;
+                    return false;
+            }
+            result = new(new string(span[startIndex..nextIndex]));
             return true;
         }
-        return result;
     }
-
-    /// <summary>
-    /// Determines whether the sequence of characters starting at the specified index is a roman numeral.
-    /// </summary>
-    /// <param name="target">The characters being parsed.</param>
-    /// <param name="nextIndex">Returns the index after the last character of the parsed roman numeral, if a roman numeral was found;
-    /// otherwise, returns <c>0</c> if the first character of <paramref name="startIndex" /> was not a roman numeral character.</param>
-    /// <returns><see langword="true" /> if at least 1 roman numeral character was found; otherwise <see langword="false" />.</returns>
-    public static bool TestRomanNumeral(ReadOnlySpan<char> target, out int nextIndex) => TestRomanNumeral(target, 0, target.Length, out nextIndex);
-    
-    /// <summary>
-    /// Determines whether the sequence of characters starting at the specified index is a roman numeral.
-    /// </summary>
-    /// <param name="target">The characters being parsed.</param>
-    /// <param name="startIndex">The starting index at which to begin trying to parse a roman numeral.</param>
-    /// <param name="nextIndex">Returns the index after the last character of the parsed roman numeral, if a roman numeral was found;
-    /// otherwise, returns the value of <see cref="startIndex" /> if no roman numeral character was found at the <paramref name="startIndex" />.</param>
-    /// <returns><see langword="true" /> if at least 1 roman numeral character was found at the <paramref name="startIndex" />; otherwise <see langword="false" />.</returns>
-    public static bool TestRomanNumeral(ReadOnlySpan<char> target, int startIndex, out int nextIndex) => TestRomanNumeral(target, startIndex, target.Length, out nextIndex);
-    
-    /// <summary>
-    /// Determines whether the sequence of characters starting at the specified index is a roman numeral.
-    /// </summary>
-    /// <param name="target">The characters being parsed.</param>
-    /// <param name="startIndex">The starting index at which to begin trying to parse a roman numeral.</param>
-    /// <param name="endIndex">The exclusive end index of the parsing character range.</param>
-    /// <param name="nextIndex">Returns the index after the last character of the parsed roman numeral, if a roman numeral was found;
-    /// otherwise, returns the value of <see cref="startIndex" /> if no roman numeral character was found at the <paramref name="startIndex" />.</param>
-    /// <returns><see langword="true" /> if at least 1 roman numeral character was found at the <paramref name="startIndex" />; otherwise <see langword="false" />.</returns>
-    public static bool TestRomanNumeral(ReadOnlySpan<char> target, int startIndex, int endIndex, out int nextIndex)
-    {
-        if (startIndex < 0)
-            throw new ArgumentOutOfRangeException(nameof(startIndex));
-        if ((nextIndex = startIndex) >= target.Length)
-            nextIndex = target.Length;
-        else if (endIndex <= startIndex)
-            nextIndex = startIndex;
-        else
-        {
-            if (endIndex > target.Length)
-                endIndex = target.Length;
-            return target[startIndex] switch
-            {
-                ROMAN_NUM_1000_UC or ROMAN_NUM_1000_LC => MoveFromM(target, startIndex, endIndex) != startIndex,
-                ROMAN_NUM_500_UC or ROMAN_NUM_500_LC => MoveFromD(target, startIndex, endIndex) != startIndex,
-                ROMAN_NUM_100_UC or ROMAN_NUM_100_LC => MoveFromC(target, startIndex, endIndex) != startIndex,
-                ROMAN_NUM_50_UC or ROMAN_NUM_50_LC => MoveFromL(target, startIndex, endIndex) != startIndex,
-                ROMAN_NUM_10_UC or ROMAN_NUM_10_LC => MoveFromX(target, startIndex, endIndex) != startIndex,
-                ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => MoveFromV(target, startIndex, endIndex) != startIndex,
-                ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => MoveFromI(target, startIndex, endIndex) != startIndex,
-                _ => false
-            };
-        }
-        return false;
-    }
-
 }

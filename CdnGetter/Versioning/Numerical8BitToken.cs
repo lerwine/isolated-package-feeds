@@ -7,6 +7,7 @@ namespace CdnGetter.Versioning;
 /// <summary>
 /// Represents a signed 8-bit numerical token.
 /// </summary>
+[Obsolete("Use types from CdnGetter.Parsing namespace")]
 #pragma warning disable CA2231
 public readonly struct Numerical8BitToken : INumericalToken
 #pragma warning restore CA2231

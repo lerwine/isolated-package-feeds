@@ -1,10 +1,8 @@
 using System.Collections;
-using static CdnGetter.Versioning.VersioningConstants;
+using static CdnGetter.Parsing.ParsingExtensionMethods;
 
-namespace CdnGetter.Versioning;
-
+namespace CdnGetter.Parsing;
 #pragma warning disable CA2231
-[Obsolete("Use types from CdnGetter.Parsing namespace")]
 public readonly struct TokenString : ITokenCharacters
 #pragma warning restore CA2231
 {
@@ -27,17 +25,19 @@ public readonly struct TokenString : ITokenCharacters
     public TokenString(ReadOnlySpan<char> value, int startIndex, int endIndex) => Value = (endIndex <= startIndex || startIndex >= value.Length) ? string.Empty : new((startIndex < 1) ?
         ((endIndex >= value.Length) ? value : value[..endIndex]) : (endIndex >= value.Length) ? value[startIndex..] : value[startIndex..endIndex]);
 
-    ReadOnlySpan<char> ITokenCharacters.AsSpan() => Value.AsSpan();
+    public int CompareTo(IToken? other) => (other is null) ? 1 : NoCaseComparer.Compare(Value, other.GetValue());
 
-    public int CompareTo(ITokenCharacters? other) => (other is null) ? 1 : NoCaseComparer.Compare(Value, other.ToString());
-
-    public bool Equals(ITokenCharacters? other) => other is not null && NoCaseComparer.Equals(Value, other.ToString());
+    public bool Equals(IToken? other) => other is not null && NoCaseComparer.Equals(Value, other.GetValue());
 
     public override bool Equals(object? obj) => obj is IToken other && Equals(other);
 
-    public IEnumerator<char> GetEnumerator() => Value.GetEnumerator();
+    IEnumerator<char> IEnumerable<char>.GetEnumerator() => Value.GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)Value).GetEnumerator();
+
+    int IToken.GetLength(bool allChars) => Value.Length;
+
+    string IToken.GetValue() => Value;
 
     public override int GetHashCode() => NoCaseComparer.GetHashCode(Value);
 
