@@ -4,8 +4,12 @@ using static CdnGetter.Parsing.ParsingExtensionMethods;
 
 namespace CdnGetter.Parsing;
 
-public class DigitsMatcher : IMatcher<char, INumericalToken>
+public class DigitsMatcher : IMatcher<char>
 {
+    public static readonly DigitsMatcher Instance = new();
+    
+    private DigitsMatcher() { }
+
     public bool Match(ReadOnlySpan<char> span, int startIndex, int endIndex, out int nextIndex)
     {
         if (span.ValidateExtentsIsEmpty(ref startIndex, ref endIndex))
@@ -38,7 +42,7 @@ public class DigitsMatcher : IMatcher<char, INumericalToken>
         return true;
     }
 
-    public bool TryParse(ReadOnlySpan<char> span, int startIndex, int endIndex, [NotNullWhen(true)] out INumericalToken? result, out int nextIndex)
+    public static bool TryParse(ReadOnlySpan<char> span, int startIndex, int endIndex, [NotNullWhen(true)] out INumericalToken? result, out int nextIndex)
     {
         if (span.ValidateExtentsIsEmpty(ref startIndex, ref endIndex))
         {
@@ -109,5 +113,16 @@ public class DigitsMatcher : IMatcher<char, INumericalToken>
             return false;
         }
         return true;
+    }
+
+    bool IMatcher<char>.TryParse(ReadOnlySpan<char> span, int startIndex, int endIndex, [NotNullWhen(true)] out IToken? result, out int nextIndex)
+    {
+        if (TryParse(span, startIndex, endIndex, out INumericalToken? token, out nextIndex))
+        {
+            result = token;
+            return true;
+        }
+        result = null;
+        return false;
     }
 }

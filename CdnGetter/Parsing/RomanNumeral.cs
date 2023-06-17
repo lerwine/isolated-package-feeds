@@ -20,7 +20,7 @@ public readonly partial struct RomanNumeral : INumericalToken
 
     public bool IsZero => Value is null;
 
-    public RomanNumeral(ushort value) => Value = ToString(value);
+    public RomanNumeral(ushort value) => Value = ToRomanNumeral(value);
     
     private RomanNumeral(string? value) => Value = value;
     
@@ -111,7 +111,7 @@ public readonly partial struct RomanNumeral : INumericalToken
     {
         if (string.IsNullOrEmpty(text))
             return Empty;
-        if (Matcher.Instance.TryParse(text.AsSpan(), 0, text.Length, out RomanNumeral result, out int nextIndex))
+        if (TryParse(text.AsSpan(), 0, text.Length, out RomanNumeral result, out int nextIndex))
         {
             if (nextIndex == text.Length)
                 return result;
@@ -125,7 +125,7 @@ public readonly partial struct RomanNumeral : INumericalToken
     {
         if (text.IsEmpty)
             return Empty;
-        if (Matcher.Instance.TryParse(text, 0, text.Length, out RomanNumeral result, out int nextIndex))
+        if (TryParse(text, 0, text.Length, out RomanNumeral result, out int nextIndex))
         {
             if (nextIndex == text.Length)
                 return result;
@@ -139,7 +139,7 @@ public readonly partial struct RomanNumeral : INumericalToken
     {
         if (string.IsNullOrEmpty(text))
             result = Empty;
-        else if (!Matcher.Instance.TryParse(text.AsSpan(), 0, text.Length, out result, out int nextIndex) || nextIndex < text.Length)
+        else if (!TryParse(text.AsSpan(), 0, text.Length, out result, out int nextIndex) || nextIndex < text.Length)
         {
             result = Empty;
             return false;
@@ -151,7 +151,7 @@ public readonly partial struct RomanNumeral : INumericalToken
     {
         if (text.IsEmpty)
             result = Empty;
-        else if (!Matcher.Instance.TryParse(text, 0, text.Length, out result, out int nextIndex) || nextIndex < text.Length)
+        else if (!TryParse(text, 0, text.Length, out result, out int nextIndex) || nextIndex < text.Length)
         {
             result = Empty;
             return false;

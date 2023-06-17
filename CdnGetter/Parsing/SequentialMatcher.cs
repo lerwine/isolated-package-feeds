@@ -7,14 +7,13 @@ namespace CdnGetter.Parsing;
 /// Matches a sequence of matchers.
 /// </summary>
 /// <typeparam name="TInput">The input element type.</typeparam>
-/// <typeparam name="TOutput">The output element type.</typeparam>
-public class SequentialMatcher<TInput, TOutput> : IMatcher<TInput, IList<TOutput>>
+public class SequentialMatcher<TInput> : IMatcher<TInput>
 {
-    public ReadOnlyCollection<IMatcher<TInput, TOutput>> ElementMatchers { get; }
+    public ReadOnlyCollection<IMatcher<TInput>> ElementMatchers { get; }
     
-    public SequentialMatcher(params IMatcher<TInput, TOutput>[] elementMatchers) => ElementMatchers = new(elementMatchers?.Where(p => p is not null).ToArray() ?? Array.Empty<IMatcher<TInput, TOutput>>());
+    public SequentialMatcher(params IMatcher<TInput>[] elementMatchers) => ElementMatchers = new(elementMatchers?.Where(p => p is not null).ToArray() ?? Array.Empty<IMatcher<TInput>>());
     
-    public SequentialMatcher(IEnumerable<IMatcher<TInput, TOutput>> elementMatchers) => ElementMatchers = new(elementMatchers?.Where(p => p is not null).ToArray() ?? Array.Empty<IMatcher<TInput, TOutput>>());
+    public SequentialMatcher(IEnumerable<IMatcher<TInput>> elementMatchers) => ElementMatchers = new(elementMatchers?.Where(p => p is not null).ToArray() ?? Array.Empty<IMatcher<TInput>>());
     
     public bool Match(ReadOnlySpan<TInput> span, int startIndex, int endIndex, out int nextIndex)
     {
@@ -24,7 +23,7 @@ public class SequentialMatcher<TInput, TOutput> : IMatcher<TInput, IList<TOutput
             return false;
         }
         nextIndex = startIndex;
-        foreach (IMatcher<TInput, TOutput> matcher in ElementMatchers)
+        foreach (IMatcher<TInput> matcher in ElementMatchers)
         {
             if (!matcher.Match(span, nextIndex, endIndex, out nextIndex))
             {
@@ -39,7 +38,7 @@ public class SequentialMatcher<TInput, TOutput> : IMatcher<TInput, IList<TOutput
         return true;
     }
 
-    public bool TryParse(ReadOnlySpan<TInput> span, int startIndex, int endIndex, [NotNullWhen(true)] out IList<TOutput>? result, out int nextIndex)
+    public bool TryParse(ReadOnlySpan<TInput> span, int startIndex, int endIndex, [NotNullWhen(true)] out TokenList? result, out int nextIndex)
     {
         if (span.ValidateExtentsIsEmpty(ref startIndex, ref endIndex))
         {
@@ -47,35 +46,47 @@ public class SequentialMatcher<TInput, TOutput> : IMatcher<TInput, IList<TOutput
             result = null;
             return false;
         }
-        result = new Collection<TOutput>();
+        Collection<IToken> items = new();
         nextIndex = startIndex;
-        foreach (IMatcher<TInput, TOutput> matcher in ElementMatchers)
+        foreach (IMatcher<TInput> matcher in ElementMatchers)
         {
-            if (!matcher.TryParse(span, nextIndex, endIndex, out TOutput? item, out nextIndex))
+            if (!matcher.TryParse(span, nextIndex, endIndex, out IToken? item, out nextIndex))
             {
                 nextIndex = startIndex;
                 result = null;
                 return false;
             }
-            result.Add(item);
+            items.Add(item);
             if (nextIndex < startIndex)
                 nextIndex = startIndex;
             else if (nextIndex > endIndex)
                 nextIndex = endIndex;
         }
+        result = new TokenList(items);
         return true;
+    }
+
+    bool IMatcher<TInput>.TryParse(ReadOnlySpan<TInput> span, int startIndex, int endIndex, [NotNullWhen(true)] out IToken? result, out int nextIndex)
+    {
+        if (TryParse(span, startIndex, endIndex, out TokenList? list, out nextIndex))
+        {
+            result = list;
+            return true;
+        }
+        result = null;
+        return false;
     }
 }
 
-public class SequentialMatcher<TInput, TOutput, TAggregate> : IMatcher<TInput, TAggregate>
+public class SequentialMatcher<TInput, TAggregate> : IMatcher<TInput> where TAggregate : IToken
 {
-    public ReadOnlyCollection<IMatcher<TInput, TOutput>> ElementMatchers { get; }
+    public ReadOnlyCollection<IMatcher<TInput>> ElementMatchers { get; }
 
-    public Func<IList<TOutput>, TAggregate> Aggregator { get; }
+    public Func<IList<IToken>, TAggregate> Aggregator { get; }
     
-    public SequentialMatcher(Func<IList<TOutput>, TAggregate> aggregator, params IMatcher<TInput, TOutput>[] elementMatchers) => (Aggregator, ElementMatchers) = (aggregator, new(elementMatchers?.Where(p => p is not null).ToArray() ?? Array.Empty<IMatcher<TInput, TOutput>>()));
+    public SequentialMatcher(Func<IList<IToken>, TAggregate> aggregator, params IMatcher<TInput>[] elementMatchers) => (Aggregator, ElementMatchers) = (aggregator, new(elementMatchers?.Where(p => p is not null).ToArray() ?? Array.Empty<IMatcher<TInput>>()));
     
-    public SequentialMatcher(IEnumerable<IMatcher<TInput, TOutput>> elementMatchers, Func<IList<TOutput>, TAggregate> aggregator) => (ElementMatchers, Aggregator) = (new(elementMatchers?.Where(p => p is not null).ToArray() ?? Array.Empty<IMatcher<TInput, TOutput>>()), aggregator);
+    public SequentialMatcher(IEnumerable<IMatcher<TInput>> elementMatchers, Func<IList<IToken>, TAggregate> aggregator) => (ElementMatchers, Aggregator) = (new(elementMatchers?.Where(p => p is not null).ToArray() ?? Array.Empty<IMatcher<TInput>>()), aggregator);
     
     public bool Match(ReadOnlySpan<TInput> span, int startIndex, int endIndex, out int nextIndex)
     {
@@ -85,7 +96,7 @@ public class SequentialMatcher<TInput, TOutput, TAggregate> : IMatcher<TInput, T
             return false;
         }
         nextIndex = startIndex;
-        foreach (IMatcher<TInput, TOutput> matcher in ElementMatchers)
+        foreach (IMatcher<TInput> matcher in ElementMatchers)
         {
             if (!matcher.Match(span, nextIndex, endIndex, out nextIndex))
             {
@@ -108,11 +119,11 @@ public class SequentialMatcher<TInput, TOutput, TAggregate> : IMatcher<TInput, T
             result = default;
             return false;
         }
-        Collection<TOutput> items = new();
+        Collection<IToken> items = new();
         nextIndex = startIndex;
-        foreach (IMatcher<TInput, TOutput> matcher in ElementMatchers)
+        foreach (IMatcher<TInput> matcher in ElementMatchers)
         {
-            if (!matcher.TryParse(span, nextIndex, endIndex, out TOutput? item, out nextIndex))
+            if (!matcher.TryParse(span, nextIndex, endIndex, out IToken? item, out nextIndex))
             {
                 nextIndex = startIndex;
                 result = default;
@@ -126,5 +137,16 @@ public class SequentialMatcher<TInput, TOutput, TAggregate> : IMatcher<TInput, T
         }
         result = Aggregator(items);
         return true;
+    }
+
+    bool IMatcher<TInput>.TryParse(ReadOnlySpan<TInput> span, int startIndex, int endIndex, [NotNullWhen(true)] out IToken? result, out int nextIndex)
+    {
+        if (TryParse(span, startIndex, endIndex, out TAggregate? aggregate, out nextIndex))
+        {
+            result = aggregate;
+            return true;
+        }
+        result = null;
+        return false;
     }
 }

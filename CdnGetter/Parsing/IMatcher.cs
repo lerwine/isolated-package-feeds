@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace CdnGetter.Parsing;
 
-public interface IMatcher<TInput, TOutput>
+public interface IMatcher<TInput>
 {
     bool Match(ReadOnlySpan<TInput> span, int startIndex, int endIndex, out int nextIndex);
 
-    bool TryParse(ReadOnlySpan<TInput> span, int startIndex, int endIndex, [MaybeNullWhen(false)] out TOutput result, out int nextIndex);
+    bool TryParse(ReadOnlySpan<TInput> span, int startIndex, int endIndex, [NotNullWhen(true)] out IToken? result, out int nextIndex);
 }

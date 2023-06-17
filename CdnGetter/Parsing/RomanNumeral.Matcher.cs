@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using static CdnGetter.Parsing.ParsingExtensionMethods;
 
@@ -826,15 +827,13 @@ public readonly partial struct RomanNumeral
         return ROMAN_NUM_M;
     }
 
-    public static string ToRomanNumeral(ushort value)
+    public static string? ToRomanNumeral(ushort value)
     {
-        if (value == 0)
-            return string.Empty;
         if (value > ROMAN_NUMERAL_MAX_VALUE)
             throw new ArgumentOutOfRangeException(nameof(value));
         switch (value)
         {
-            case 0: return string.Empty;
+            case 0: return null;
             case ROMAN_NUM_I: return ROMAN_NUM_1;
             case ROMAN_NUM_II: return ROMAN_NUM_2;
             case ROMAN_NUM_III: return ROMAN_NUM_3;
@@ -949,52 +948,55 @@ public readonly partial struct RomanNumeral
         }
         return sb.ToString();
     }
-
-
-    private static string ToString(ushort value)
+    
+    public static bool TryParse(ReadOnlySpan<char> span, int startIndex, int endIndex, out RomanNumeral result, out int nextIndex)
     {
-        if (value > ROMAN_NUMERAL_MAX_VALUE)
-            throw new ArgumentOutOfRangeException(nameof(value));
-        if (value == 0)
-            return string.Empty;
-        throw new NotImplementedException();
-    }
-    
-    [Obsolete("Use Matcher.Instance.TryParse")]
-    public static ushort ParseValue(ReadOnlySpan<char> target, out int nextIndex) => ParseValue(target, 0, target.Length, out nextIndex);
-    
-    [Obsolete("Use Matcher.Instance.TryParse")]
-    public static ushort ParseValue(ReadOnlySpan<char> target, int startIndex, out int nextIndex) => ParseValue(target, startIndex, target.Length, out nextIndex);
-    
-    [Obsolete("Use MatcherTryParse")]
-    public static ushort ParseValue(ReadOnlySpan<char> target, int startIndex, int endIndex, out int nextIndex)
-    {
-        if (startIndex < 0)
-            throw new ArgumentOutOfRangeException(nameof(startIndex));
-        if ((nextIndex = startIndex) >= target.Length)
-            nextIndex = target.Length;
-        else if (endIndex <= startIndex)
-            nextIndex = startIndex;
-        else
+        if (span.ValidateExtentsIsEmpty(ref startIndex, ref endIndex))
         {
-            if (endIndex > target.Length)
-                endIndex = target.Length;
-            return target[startIndex] switch
-            {
-                ROMAN_NUM_1000_UC or ROMAN_NUM_1000_LC => ParseFromM(target, startIndex, endIndex, out nextIndex),
-                ROMAN_NUM_500_UC or ROMAN_NUM_500_LC => ParseFromD(target, startIndex, endIndex, out nextIndex),
-                ROMAN_NUM_100_UC or ROMAN_NUM_100_LC => ParseFromC(target, startIndex, endIndex, out nextIndex),
-                ROMAN_NUM_50_UC or ROMAN_NUM_50_LC => ParseFromL(target, startIndex, endIndex, out nextIndex),
-                ROMAN_NUM_10_UC or ROMAN_NUM_10_LC => ParseFromX(target, startIndex, endIndex, out nextIndex),
-                ROMAN_NUM_5_UC or ROMAN_NUM_5_LC => ParseFromV(target, startIndex, endIndex, out nextIndex),
-                ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => ParseFromI(target, startIndex, endIndex, out nextIndex),
-                _ => 0
-            };
+            nextIndex = startIndex;
+            result = default;
+            return false;
         }
-        return 0;
+        switch (span[startIndex])
+        {
+            case ROMAN_NUM_1000_UC:
+            case ROMAN_NUM_1000_LC:
+                nextIndex = MoveFromM(span, startIndex, endIndex);
+                break;
+            case ROMAN_NUM_500_UC:
+            case ROMAN_NUM_500_LC:
+                nextIndex = MoveFromD(span, startIndex, endIndex);
+                break;
+            case ROMAN_NUM_100_UC:
+            case ROMAN_NUM_100_LC:
+                nextIndex = MoveFromC(span, startIndex, endIndex);
+                break;
+            case ROMAN_NUM_50_UC:
+            case ROMAN_NUM_50_LC:
+                nextIndex = MoveFromL(span, startIndex, endIndex);
+                break;
+            case ROMAN_NUM_10_UC:
+            case ROMAN_NUM_10_LC:
+                nextIndex = MoveFromX(span, startIndex, endIndex);
+                break;
+            case ROMAN_NUM_5_UC:
+            case ROMAN_NUM_5_LC:
+                nextIndex = MoveFromV(span, startIndex, endIndex);
+                break;
+            case ROMAN_NUM_1_UC:
+            case ROMAN_NUM_1_LC:
+                nextIndex = MoveFromI(span, startIndex, endIndex);
+                break;
+            default:
+                nextIndex = startIndex;
+                result = default;
+                return false;
+        }
+        result = new(new string(span[startIndex..nextIndex]));
+        return true;
     }
-
-    public sealed class Matcher : IMatcher<char, RomanNumeral>
+    
+    public sealed class Matcher : IMatcher<char>
     {
         public static readonly Matcher Instance = new();
 
@@ -1044,51 +1046,15 @@ public readonly partial struct RomanNumeral
             return true;
         }
 
-        public bool TryParse(ReadOnlySpan<char> span, int startIndex, int endIndex, out RomanNumeral result, out int nextIndex)
+        public bool TryParse(ReadOnlySpan<char> span, int startIndex, int endIndex, [NotNullWhen(true)] out IToken? result, out int nextIndex)
         {
-            if (span.ValidateExtentsIsEmpty(ref startIndex, ref endIndex))
+            if (RomanNumeral.TryParse(span, startIndex, endIndex, out RomanNumeral rn, out nextIndex))
             {
-                nextIndex = startIndex;
-                result = default;
-                return false;
+                result = rn;
+                return true;
             }
-            switch (span[startIndex])
-            {
-                case ROMAN_NUM_1000_UC:
-                case ROMAN_NUM_1000_LC:
-                    nextIndex = MoveFromM(span, startIndex, endIndex);
-                    break;
-                case ROMAN_NUM_500_UC:
-                case ROMAN_NUM_500_LC:
-                    nextIndex = MoveFromD(span, startIndex, endIndex);
-                    break;
-                case ROMAN_NUM_100_UC:
-                case ROMAN_NUM_100_LC:
-                    nextIndex = MoveFromC(span, startIndex, endIndex);
-                    break;
-                case ROMAN_NUM_50_UC:
-                case ROMAN_NUM_50_LC:
-                    nextIndex = MoveFromL(span, startIndex, endIndex);
-                    break;
-                case ROMAN_NUM_10_UC:
-                case ROMAN_NUM_10_LC:
-                    nextIndex = MoveFromX(span, startIndex, endIndex);
-                    break;
-                case ROMAN_NUM_5_UC:
-                case ROMAN_NUM_5_LC:
-                    nextIndex = MoveFromV(span, startIndex, endIndex);
-                    break;
-                case ROMAN_NUM_1_UC:
-                case ROMAN_NUM_1_LC:
-                    nextIndex = MoveFromI(span, startIndex, endIndex);
-                    break;
-                default:
-                    nextIndex = startIndex;
-                    result = default;
-                    return false;
-            }
-            result = new(new string(span[startIndex..nextIndex]));
-            return true;
+            result = null;
+            return false;
         }
     }
 }

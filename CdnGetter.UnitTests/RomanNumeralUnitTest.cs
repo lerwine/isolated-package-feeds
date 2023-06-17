@@ -104,16 +104,27 @@ namespace CdnGetter.UnitTests
         [Fact]
         public void ToRomanNumeralTest()
         {
+            try
+            {
+                string? actual = Parsing.RomanNumeral.ToRomanNumeral(0);
+                Assert.Null(actual);
+            }
+            catch
+            {
+                _output.WriteLine($"Failing {nameof(Parsing.RomanNumeral.ToRomanNumeral)}(value: 0); // expected: null");
+                throw;
+            }
             foreach ((ushort value, string expected) in GetRomanNumeralTestValues())
             {
                 try
                 {
-                    string actual = Parsing.RomanNumeral.ToRomanNumeral(value);
+                    string? actual = Parsing.RomanNumeral.ToRomanNumeral(value);
+                    Assert.NotNull(actual);
                     Assert.Equal(expected, actual);
                 }
                 catch
                 {
-                    _output.WriteLine($"Failing {nameof(Parsing.RomanNumeral.ToRomanNumeral)}:(value: {value}); // expected: \"{expected.ToCsLikeCode()}\"");
+                    _output.WriteLine($"Failing {nameof(Parsing.RomanNumeral.ToRomanNumeral)}(value: {value}); // expected: \"{expected.ToCsLikeCode()}\"");
                     throw;
                 }
             }
@@ -909,7 +920,7 @@ namespace CdnGetter.UnitTests
                         throw;
                     }
                     if (diff > 1)
-                    try
+                        try
                         {
                             ushort actualResult = Parsing.RomanNumeral.ParseFromM(span, startIndex, endIndex + 1, out int actualNextIndex);
                             Assert.Equal(expectedResult, actualResult);
@@ -950,7 +961,13 @@ namespace CdnGetter.UnitTests
                 try
                 {
                     Parsing.RomanNumeral returnValue = Parsing.RomanNumeral.Parse(text);
-                    Assert.Equal(text, returnValue.Value);
+                    if (string.IsNullOrEmpty(text))
+                        Assert.Null(returnValue.Value);
+                    else
+                    {
+                        Assert.NotNull(returnValue.Value);
+                        Assert.Equal(text, returnValue.Value);
+                    }
                     int actual = returnValue.GetValue();
                     Assert.Equal(expected, actual);
                 }
@@ -962,14 +979,13 @@ namespace CdnGetter.UnitTests
                 try
                 {
                     Parsing.RomanNumeral returnValue = Parsing.RomanNumeral.Parse(text.AsSpan());
-                    if (text.Length > 0)
+                    if (string.IsNullOrEmpty(text))
+                        Assert.Null(returnValue.Value);
+                    else
                     {
                         Assert.NotNull(returnValue.Value);
                         Assert.Equal(text, returnValue.Value);
                     }
-                    else
-                        Assert.Null(returnValue.Value);
-                    Assert.Equal(text, returnValue.Value);
                     int actual = returnValue.GetValue();
                     Assert.Equal(expected, actual);
                 }
@@ -994,7 +1010,6 @@ namespace CdnGetter.UnitTests
                     bool returnValue = Parsing.RomanNumeral.TryParse(text, out Parsing.RomanNumeral result);
                     Assert.False(returnValue);
                     Assert.Null(result.Value);
-                    Assert.Equal(string.Empty, result.Value);
                     ushort actual = result.GetValue();
                     Assert.Equal<ushort>(0, actual);
                 }
@@ -1023,8 +1038,13 @@ namespace CdnGetter.UnitTests
                 {
                     bool returnValue = Parsing.RomanNumeral.TryParse(text, out Parsing.RomanNumeral result);
                     Assert.True(returnValue);
-                    Assert.NotNull(result.Value);
-                    Assert.Equal(text, result.Value);
+                    if (string.IsNullOrEmpty(text))
+                        Assert.Null(result.Value);
+                    else
+                    {
+                        Assert.NotNull(result.Value);
+                        Assert.Equal(text, result.Value);
+                    }
                     int actual = result.GetValue();
                     Assert.Equal(expected, actual);
                 }
@@ -1037,8 +1057,13 @@ namespace CdnGetter.UnitTests
                 {
                     bool returnValue = Parsing.RomanNumeral.TryParse(text.AsSpan(), out Parsing.RomanNumeral result);
                     Assert.True(returnValue);
-                    Assert.NotNull(result.Value);
-                    Assert.Equal(text, result.Value);
+                    if (string.IsNullOrEmpty(text))
+                        Assert.Null(result.Value);
+                    else
+                    {
+                        Assert.NotNull(result.Value);
+                        Assert.Equal(text, result.Value);
+                    }
                     int actual = result.GetValue();
                     Assert.Equal(expected, actual);
                 }
@@ -1051,7 +1076,7 @@ namespace CdnGetter.UnitTests
         }
 
         /// <summary>
-        /// Unit test for <see cref="Parsing.RomanNumeral.Matcher.TryParse(ReadOnlySpan{char}, int, int, out Parsing.RomanNumeral, out int)" />.
+        /// Unit test for <see cref="Parsing.RomanNumeral.TryParse(ReadOnlySpan{char}, int, int, out Parsing.RomanNumeral, out int)" />.
         /// </summary>
         [Fact]
         public void MatcherTryParseTest()
@@ -1076,7 +1101,7 @@ namespace CdnGetter.UnitTests
             {
                 try
                 {
-                    bool actualReturnValue = Parsing.RomanNumeral.Matcher.Instance.TryParse(text.AsSpan(), startIndex, endIndex, out Parsing.RomanNumeral actualResult, out int actualNextIndex);
+                    bool actualReturnValue = Parsing.RomanNumeral.TryParse(text.AsSpan(), startIndex, endIndex, out Parsing.RomanNumeral actualResult, out int actualNextIndex);
                     Assert.Equal(expectedReturnValue, actualReturnValue);
                     if (expectedResult.Length > 0)
                     {
@@ -1096,7 +1121,7 @@ namespace CdnGetter.UnitTests
                 {
                     try
                     {
-                        bool actualReturnValue = Parsing.RomanNumeral.Matcher.Instance.TryParse(text.AsSpan(), startIndex, altEndIndex1, out Parsing.RomanNumeral actualResult, out int actualNextIndex);
+                        bool actualReturnValue = Parsing.RomanNumeral.TryParse(text.AsSpan(), startIndex, altEndIndex1, out Parsing.RomanNumeral actualResult, out int actualNextIndex);
                         Assert.Equal(expectedReturnValue, actualReturnValue);
                         if (expectedResult.Length > 0)
                         {
@@ -1116,7 +1141,7 @@ namespace CdnGetter.UnitTests
                     {
                         try
                         {
-                            bool actualReturnValue = Parsing.RomanNumeral.Matcher.Instance.TryParse(text.AsSpan(), startIndex, altEndIndex2, out Parsing.RomanNumeral actualResult, out int actualNextIndex);
+                            bool actualReturnValue = Parsing.RomanNumeral.TryParse(text.AsSpan(), startIndex, altEndIndex2, out Parsing.RomanNumeral actualResult, out int actualNextIndex);
                             Assert.Equal(expectedReturnValue, actualReturnValue);
                             if (expectedResult.Length > 0)
                             {
