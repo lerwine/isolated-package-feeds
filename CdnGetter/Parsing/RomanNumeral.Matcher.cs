@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using static CdnGetter.Parsing.ParsingExtensionMethods;
 
 namespace CdnGetter.Parsing;
 
@@ -829,7 +828,7 @@ public readonly partial struct RomanNumeral
 
     public static string? ToRomanNumeral(ushort value)
     {
-        if (value > ROMAN_NUMERAL_MAX_VALUE)
+        if (value > ParsingExtensionMethods.ROMAN_NUMERAL_MAX_VALUE)
             throw new ArgumentOutOfRangeException(nameof(value));
         switch (value)
         {

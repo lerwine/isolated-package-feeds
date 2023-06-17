@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
-using static CdnGetter.Parsing.ParsingExtensionMethods;
 
 namespace CdnGetter.Parsing;
 
@@ -19,7 +18,7 @@ public class DigitsMatcher : IMatcher<char>
         }
         nextIndex = startIndex;
         char c = span[nextIndex];
-        if (c == DELIMITER_DASH)
+        if (c == ParsingExtensionMethods.DELIMITER_DASH)
         {
             if (++nextIndex == endIndex)
             {
@@ -52,7 +51,7 @@ public class DigitsMatcher : IMatcher<char>
         }
         nextIndex = startIndex;
         char c = span[nextIndex];
-        bool hasNegativeSign = c == DELIMITER_DASH;
+        bool hasNegativeSign = c == ParsingExtensionMethods.DELIMITER_DASH;
         if (hasNegativeSign)
         {
             if (++nextIndex == endIndex)
@@ -70,7 +69,7 @@ public class DigitsMatcher : IMatcher<char>
             return false;
         }
         int zeroPadLength = 0;
-        if (c == ZERO)
+        if (c == ParsingExtensionMethods.ZERO)
         {
             do
             {
@@ -82,7 +81,7 @@ public class DigitsMatcher : IMatcher<char>
                 }
                 c = span[nextIndex];
             }
-            while (c == ZERO);
+            while (c == ParsingExtensionMethods.ZERO);
             if (!char.IsDigit(c))
             {
                 result = new Digits8Bit(0, hasNegativeSign, zeroPadLength - 1);

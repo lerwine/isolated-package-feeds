@@ -1,5 +1,4 @@
 using System.Numerics;
-using static CdnGetter.Parsing.ParsingExtensionMethods;
 
 namespace CdnGetter.Parsing;
 
@@ -52,7 +51,7 @@ namespace CdnGetter.Parsing;
                 return HasNegativeSign ? numericalToken.CompareAbs(Value) : 1;
             return HasNegativeSign ? -1 : 0 - numericalToken.CompareAbs(Value);
         }
-        return NoCaseComparer.Compare(GetValue(), other.GetValue());
+        return ParsingExtensionMethods.NoCaseComparer.Compare(GetValue(), other.GetValue());
     }
 
     public bool Equals(IToken? other)
@@ -61,7 +60,7 @@ namespace CdnGetter.Parsing;
             return false;
         if (other is INumericalToken numericalToken)
             return Value.Equals(0) ? numericalToken.IsZero : !numericalToken.IsZero && HasNegativeSign == numericalToken.HasNegativeSign && numericalToken.EqualsAbs(Value);
-        return NoCaseComparer.Equals(GetValue(), other.GetValue());
+        return ParsingExtensionMethods.NoCaseComparer.Equals(GetValue(), other.GetValue());
     }
 
     public override bool Equals(object? obj) => obj is IToken other && Equals(other);

@@ -1,5 +1,4 @@
 using System.Collections;
-using static CdnGetter.Parsing.ParsingExtensionMethods;
 
 namespace CdnGetter.Parsing;
 
@@ -29,9 +28,9 @@ public readonly struct StringToken : ITokenCharacters
     public StringToken(ReadOnlySpan<char> value, int startIndex, int endIndex) => Value = (endIndex <= startIndex || startIndex >= value.Length) ? string.Empty : new((startIndex < 1) ?
         ((endIndex >= value.Length) ? value : value[..endIndex]) : (endIndex >= value.Length) ? value[startIndex..] : value[startIndex..endIndex]);
 
-    public int CompareTo(IToken? other) => (other is null) ? 1 : NoCaseComparer.Compare(Value, other.GetValue());
+    public int CompareTo(IToken? other) => (other is null) ? 1 : ParsingExtensionMethods.NoCaseComparer.Compare(Value, other.GetValue());
 
-    public bool Equals(IToken? other) => other is not null && NoCaseComparer.Equals(Value, other.GetValue());
+    public bool Equals(IToken? other) => other is not null && ParsingExtensionMethods.NoCaseComparer.Equals(Value, other.GetValue());
 
     public override bool Equals(object? obj) => obj is IToken other && Equals(other);
 
@@ -43,7 +42,7 @@ public readonly struct StringToken : ITokenCharacters
 
     string IToken.GetValue() => Value;
 
-    public override int GetHashCode() => NoCaseComparer.GetHashCode(Value);
+    public override int GetHashCode() => ParsingExtensionMethods.NoCaseComparer.GetHashCode(Value);
 
     public override string ToString() => Value;
 }
