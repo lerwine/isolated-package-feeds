@@ -16,14 +16,19 @@ public class LocalVersion : ModificationTrackingModelBase
     /// </summary>
     public Guid Id { get; set; }
     
-#warning Need to use type from CdnGetter.parsing
     public const int MAXLENGTH_Version = 1024;
+    
+    private Parsing.ISoftwareVersion _version = Parsing.NameVersion.Empty;
+
     /// <summary>
     /// Gets or sets the library version.
     /// </summary>
-#warning Need to use type from CdnGetter.parsing
-    public SwVersion Version { get; set; }
-    
+    public Parsing.ISoftwareVersion Version
+    {
+        get => _version;
+        set => _version = value ?? Parsing.NameVersion.Empty;
+    }
+
     public const ushort DEFAULTVALUE_Order = ushort.MaxValue;
     /// <summary>
     /// Gets or sets the release order for the library version.
@@ -88,8 +93,7 @@ public class LocalVersion : ModificationTrackingModelBase
         _ = builder.Property(nameof(LibraryId)).UseCollation(COLLATION_NOCASE);
         _ = builder.HasIndex(nameof(Version));
         _ = builder.HasIndex(nameof(Version), nameof(LibraryId)).IsUnique();
-#warning Need to use type from CdnGetter.Parsing
-        _ = builder.Property(nameof(Version)).HasConversion(SwVersion.Converter).HasMaxLength(MAXLENGTH_Version).IsRequired().UseCollation(COLLATION_NOCASE);
+        _ = builder.Property(nameof(Version)).HasConversion(ValueConverters.VersionConverter).HasMaxLength(MAXLENGTH_Version).IsRequired().UseCollation(COLLATION_NOCASE);
         _ = builder.Property(nameof(Order)).IsRequired().HasDefaultValue(DEFAULTVALUE_Order);
         _ = builder.HasIndex(nameof(Order));
         _ = builder.HasIndex(nameof(Order), nameof(LibraryId)).IsUnique();

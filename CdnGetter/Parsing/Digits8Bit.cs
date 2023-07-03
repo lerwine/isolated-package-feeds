@@ -6,6 +6,8 @@ namespace CdnGetter.Parsing;
     public readonly struct Digits8Bit : INumericalToken
 #pragma warning restore CA2231
 {
+    public static readonly Digits8Bit Zero = new(0);
+    
     public static readonly Digits8Bit MaxValue = new(byte.MaxValue);
     
     public static readonly int MAX_ABS_LENGTH;
