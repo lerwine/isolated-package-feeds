@@ -10,6 +10,7 @@ public readonly partial struct SwVersion
     /// <summary>
     /// Represents a segment of the <see cref="Build" /> component.
     /// </summary>
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public readonly struct BuildSegment : IDelimitedTokenList<IToken>
     {
         /// <summary>
@@ -23,7 +24,6 @@ public readonly partial struct SwVersion
         /// <summary>
         /// Gets the text of the current <see cref="Build" /> component segment, not including the character indicated by the <see cref="Separator" /> property.
         /// </summary>
-        [Obsolete("Use Tokens property")]
         public string Value { get; }
 
         ISeparatorToken? IDelimitedTokenList<IToken>.Delimiter => throw new NotImplementedException();

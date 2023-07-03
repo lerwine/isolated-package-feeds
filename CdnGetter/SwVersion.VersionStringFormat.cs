@@ -5,6 +5,7 @@ public readonly partial struct SwVersion
     /// <summary>
     /// Indicates the format of a version string.
     /// </summary>
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public enum VersionStringFormat
     {
         /// <summary>
