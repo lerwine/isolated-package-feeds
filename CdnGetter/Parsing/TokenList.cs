@@ -3,7 +3,7 @@ using System.Text;
 
 namespace CdnGetter.Parsing;
 
-public class TokenList : IToken, IReadOnlyList<IToken>
+public class TokenList : ITokenList
 {
     private readonly IToken[] _items;
 
@@ -106,4 +106,9 @@ public class TokenList : IToken, IReadOnlyList<IToken>
     }
 
     IEnumerator IEnumerable.GetEnumerator() => _items.GetEnumerator();
+
+    public override string ToString()
+    {
+        throw new NotImplementedException();
+    }
 }

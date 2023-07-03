@@ -16,6 +16,12 @@ public static class ValueConverters
         s => s.ConvertToJsonNode()
     );
 
+    public static readonly ValueConverter<Parsing.ISoftwareVersion, string> VersionConverter = new(
+        v => v.ToString(),
+        s => Parsing.NameVersion.Create(s)
+    );
+
+    
     private static readonly Regex PathEncodeRegex = new(@"([^!\$&'\(\)\*\+,;=@\[\]/%\\]+|\\|%(?![a-fA-F\d]{2}))+", RegexOptions.Compiled);
     private static string EncodeUrlPath(string uriString)
     {
