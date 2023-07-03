@@ -5,6 +5,7 @@ public readonly partial struct SwVersion
     /// <summary>
     /// Indicates the leading character for a <see cref="BuildSegment" />.
     /// </summary>
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public enum BuildSeparator
     {
         /// <summary>

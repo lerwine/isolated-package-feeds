@@ -25,6 +25,7 @@ public readonly partial struct SwVersion
         return end - index;
     }
 
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public static IList<IToken> Tokenize(string? versionString)
     {
         if (string.IsNullOrEmpty(versionString))
@@ -277,6 +278,7 @@ public readonly partial struct SwVersion
         return new ByteToken((byte)value, ZeroCount(source, start));
     }
 
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     class UInt64Token : IUInt64Token
     {
         public ulong Value { get; }
@@ -312,6 +314,7 @@ public readonly partial struct SwVersion
         public override int GetHashCode() { unchecked { return (21 + Value.GetHashCode()) * 7 + ZeroPadLength; } }
     }
 
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     class Int64Token : IInt64Token
     {
         public long Value { get; }
@@ -367,6 +370,7 @@ public readonly partial struct SwVersion
         public override int GetHashCode() { unchecked { return (21 + Value.GetHashCode()) * 7 + ZeroPadLength; } }
     }
 
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     class Int32Token : IInt32Token
     {
         public int Value { get; }
@@ -422,6 +426,7 @@ public readonly partial struct SwVersion
         public override int GetHashCode() { unchecked { return (21 + Value) * 7 + ZeroPadLength; } }
     }
 
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     class Int16Token : IInt16Token
     {
         public short Value { get; }
@@ -477,6 +482,7 @@ public readonly partial struct SwVersion
         public override int GetHashCode() { unchecked { return (21 + Value) * 7 + ZeroPadLength; } }
     }
 
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     class ByteToken : IByteToken
     {
         public byte Value { get; }
@@ -512,6 +518,7 @@ public readonly partial struct SwVersion
         public override int GetHashCode() { unchecked { return (21 + Value) * 7 + ZeroPadLength; } }
     }
 
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     class AlphaToken : IStringToken
     {
         public string Value { get; }
@@ -542,6 +549,7 @@ public readonly partial struct SwVersion
         public override int GetHashCode() => Value.GetHashCode();
     }
 
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     class SeparatorToken : ISeparatorToken
     {
         public char Value { get; }
@@ -583,6 +591,7 @@ public readonly partial struct SwVersion
         internal static readonly SeparatorToken Plus = new(SEPARATOR_PLUS, 1);
     }
 
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     class OtherToken : IStringToken
     {
         public string Value { get; }
@@ -750,6 +759,7 @@ public readonly partial struct SwVersion
         return false;
     }
     
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public enum TokenType
     {
         Separator,
@@ -759,6 +769,7 @@ public readonly partial struct SwVersion
         Other
     }
 
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public interface IToken : IComparable<IToken>, IEquatable<IToken>
     {
         TokenType Type { get; }
@@ -770,6 +781,7 @@ public readonly partial struct SwVersion
         IEnumerable<char> AsEnumerable();
     }
 
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public interface IDelimitedToken<T> : IEquatable<IDelimitedToken<T>>, IComparable<IDelimitedToken<T>>
         where T : IToken
     {
@@ -782,6 +794,7 @@ public readonly partial struct SwVersion
         int CompareTo(IDelimitedToken<T>? other, ISeparatorToken defaultDelimiter);
     }
 
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public class DelimitedToken<T> : IDelimitedToken<T> where T : IToken
     {
         public T Value { get; }
@@ -812,6 +825,7 @@ public readonly partial struct SwVersion
         public override int GetHashCode() { unchecked { return (21 + Value.GetHashCode()) * 7 + Delimiter.GetHashCode(); } }
     }
 
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public class DefaultDelimitedToken<T> : IDelimitedToken<T> where T : IToken
     {
         public T Value { get; }
@@ -845,6 +859,7 @@ public readonly partial struct SwVersion
         public override int GetHashCode() => Value.GetHashCode();
     }
 
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public interface IDelimitedTokenList<T> : IReadOnlyCollection<T>, IEquatable<IDelimitedTokenList<T>>, IComparable<IDelimitedTokenList<T>>
         where T : IToken
     {
@@ -855,6 +870,7 @@ public readonly partial struct SwVersion
         int CompareTo(IDelimitedTokenList<T>? other, ISeparatorToken defaultDelimiter);
     }
 
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public class DelimitedTokenList<T> : ReadOnlyCollection<T>, IDelimitedTokenList<T>
         where T : IToken
     {
@@ -897,6 +913,7 @@ public readonly partial struct SwVersion
         }
     }
 
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public class DefaultDelimitedTokenList<T> : ReadOnlyCollection<T>, IDelimitedTokenList<T>
         where T : IToken
     {
@@ -938,41 +955,49 @@ public readonly partial struct SwVersion
         }
     }
 
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public interface INumericToken : IToken
     {
         int ZeroPadLength { get; }
     }
 
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public interface IByteToken : INumericToken
     {
         byte Value { get; }
     }
     
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public interface IInt16Token : INumericToken
     {
         short Value { get; }
     }
     
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public interface IInt32Token : INumericToken
     {
         int Value { get; }
     }
     
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public interface IInt64Token : INumericToken
     {
         long Value { get; }
     }
         
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public interface IUInt64Token : INumericToken
     {
         ulong Value { get; }
     }
     
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public interface IStringToken : IToken
     {
         string Value { get; }
     }
 
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public interface ISeparatorToken : IToken
     {
         int Length { get; }

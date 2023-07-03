@@ -9,151 +9,82 @@ namespace CdnGetter;
 /// <summary>
 /// Represents a comparable software version.
 /// </summary>
+[Obsolete("Use types in CdnGetter.Versioning namespace")]
 public readonly partial struct SwVersion : IEquatable<SwVersion>, IComparable<SwVersion>
 {
-    [Obsolete("Use SemanticLikeRegex")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     private const string GRP_p = "p";
 
-    [Obsolete("Use SemanticLikeRegex")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     private const string GRP_n = "n";
 
-    [Obsolete("Use SemanticLikeRegex")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     private const string GRP_r = "r";
 
-    [Obsolete("Use SemanticLikeRegex")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     private const string GRP_b = "b";
 
-    [Obsolete("Use Tokens")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public const string REGEX_GROUP_pfx = "pfx";
 
-    [Obsolete("Use Tokens")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public const string REGEX_GROUP_major = "major";
 
-    [Obsolete("Use Tokens")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public const string REGEX_GROUP_minor = "minor";
 
-    [Obsolete("Use Tokens")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public const string REGEX_GROUP_rel = "rel";
 
-    [Obsolete("Use Tokens")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public const string REGEX_GROUP_patch = "patch";
 
-    [Obsolete("Use Tokens")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public const string REGEX_GROUP_rev = "rev";
 
-    [Obsolete("Use Tokens")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public const string REGEX_GROUP_xnum = "xnum";
 
-    [Obsolete("Use Tokens")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public const string REGEX_GROUP_endday = "endday";
 
-    [Obsolete("Use Tokens")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public const string REGEX_GROUP_endyr = "endyr";
 
-    [Obsolete("Use Tokens")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public const string REGEX_GROUP_modname = "modname";
 
-    [Obsolete("Use Tokens")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public const string REGEX_GROUP_modnum = "modnum";
 
-    [Obsolete("Use Tokens")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public const string REGEX_GROUP_DELIM = "delim";
 
-    [Obsolete("Use Tokens")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public const string REGEX_GROUP_PRE = "pre";
 
-    [Obsolete("Use Tokens")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public const string REGEX_GROUP_BUILD = "build";
 
-    [Obsolete("Use Tokens")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public const string REGEX_GROUP_epoch = "epoch";
 
-    /// <summary>
-    /// Matches a version string similar to the PEP 440 format.
-    /// </summary>
-    /// <see href="https://peps.python.org/pep-0440/" />
-    [Obsolete("Use Tokens")]
-    public static readonly Regex Pep440Regex = new(@$"^
-(?<{REGEX_GROUP_pfx}>\D+)?
-((?<{REGEX_GROUP_epoch}>\d+)!)?
-(?<{REGEX_GROUP_major}>\d+)(\.(?<{REGEX_GROUP_minor}>\d+)(\.(?<{REGEX_GROUP_patch}>\d+)(\.(?<{REGEX_GROUP_rev}>\d+)(\.(?<{REGEX_GROUP_xnum}>\d+(\.\d+)*))?)?)?)?
-(
-    (?<{REGEX_GROUP_DELIM}>[-_\.])?
-    (?<{REGEX_GROUP_PRE}>
-        (?<{REGEX_GROUP_modname}>[a-z]+)
-        [-_\.]?(?<{REGEX_GROUP_modnum}>\d+)?
-    )
-    |
-    (?<{REGEX_GROUP_DELIM}>-)(?<{REGEX_GROUP_PRE}>\d+) # post
-)?
-(
-    [+.-](?<{REGEX_GROUP_BUILD}>.*)
-    |
-    (?<{REGEX_GROUP_BUILD}>[^\d+_.-].*)
-)?
-$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
-    
-    /// <summary>
-    /// Matches a date-based version string
-    /// </summary>
-    [Obsolete("Use Tokens")]
-    public static readonly Regex DatedVersionRegex = new(@$"^
-(?<{REGEX_GROUP_pfx}>\D+)?
-(
-    (?<{REGEX_GROUP_minor}>1[012]|0?\d)-(?<{REGEX_GROUP_rel}>3[01]|[012]?\d)-(?<{REGEX_GROUP_major}>\d{{4}})
-    |
-    (?<{REGEX_GROUP_major}>\d{{2}}|\d{{4}})-(?<{REGEX_GROUP_minor}>1[012]|0?\d)-(?<{REGEX_GROUP_rel}>3[01]|[012]?\d)
-)
-(
-    (?<{REGEX_GROUP_DELIM}>(\.|_+)([^\d._]\D*)?|[^\d._]\D*)
-    (
-        (?<{REGEX_GROUP_patch}>\d+)
-        [_+-]*
-    )?
-    (
-        (?<{REGEX_GROUP_xnum}>(1[012]|0?\d)-(3[01]|[012]?\d))-(?<{REGEX_GROUP_rev}>\d{{4}})
-        |
-        (?<{REGEX_GROUP_rev}>\d{{2}}|\d{{4}})-(?<{REGEX_GROUP_xnum}>(1[012]|0?\d)-(3[01]|[012]?\d))
-    )
-    (
-        [_-]+
-        (
-            (?<{REGEX_GROUP_endday}>(1[012]|0?\d)-(3[01]|[012]?\d))-(?<{REGEX_GROUP_endyr}>\d{{4}})
-            |
-            (?<{REGEX_GROUP_endyr}>\d{{2}}|\d{{4}})-(?<{REGEX_GROUP_endday}>(1[012]|0?\d)-(3[01]|[012]?\d))
-        )
-    )
-)?
-(
-    [_+-](?<{REGEX_GROUP_BUILD}>.*)
-    |
-    (?<{REGEX_GROUP_BUILD}>\D.*)
-)?
-$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
-    
-    /// <summary>
-    /// Matches a version string similar to the SemVer format.
-    /// </summary>
-    /// <see href="https://semver.org/" />
-    [Obsolete("Use Tokens")]
-    public static readonly Regex SemanticLikeRegex = new(@$"^(?<{REGEX_GROUP_pfx}>[+-]*[^\d+-]+([+-]+[^\d+-]+)*-*)?(?<{REGEX_GROUP_major}>-?\d+)(\.(?<{REGEX_GROUP_minor}>-?\d+)(\.(?<{REGEX_GROUP_patch}>-?\d+)(\.(?<{REGEX_GROUP_rev}>-?\d+)(\.(?<{REGEX_GROUP_xnum}>-?\d+(\.-?\d+)*))?)?)?)?((?<{REGEX_GROUP_DELIM}>\.)(?<{REGEX_GROUP_PRE}>([^\d+][^+]*)?)|(?<{REGEX_GROUP_DELIM}>-)(?<{REGEX_GROUP_PRE}>[^+]*)|(?<{REGEX_GROUP_PRE}>[^\d.+-][^+]*))?(\+(?<{REGEX_GROUP_BUILD}>.*))?$", RegexOptions.Compiled);
-
-    [Obsolete("Use Tokens")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     private static readonly Regex _versionRegex = new(@$"^(?<{GRP_p}>(-?[^\d.+-]+)+)?(?<{GRP_n}>-?\d+(\.\d+)*)(?<{GRP_r}>-[^+]*|[^+]+)?(?<{GRP_b}>\+.*)?$", RegexOptions.Compiled);
 
-    [Obsolete("Use SEPARATOR_DASH")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public const char DELIMITER_PRERELEASE = '-';
 
-    [Obsolete("Use SEPARATOR_PLUS")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public const char DELIMITER_BUILD = '+';
 
-    [Obsolete("Use Tokens")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     private static readonly char[] FIRST_VERSION_TOKEN_CHARS = new char[] { SEPARATOR_DOT, '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
-    [Obsolete("Use Tokens")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     private static readonly char[] SEPARATOR_PreRelease = new char[] { DELIMITER_PRERELEASE, SEPARATOR_DOT };
 
-    [Obsolete("Use Tokens")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     private static readonly char[] SEPARATOR_Build = new char[] { DELIMITER_BUILD, SEPARATOR_DOT, DELIMITER_PRERELEASE };
 
     public static readonly StringComparer TextComparer = StringComparer.OrdinalIgnoreCase;
@@ -165,7 +96,7 @@ $", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePattern
     /// A <see langword="null" /> value indicates there is no prefixed version component.
     /// </summary>
     /// <remarks>This will never be a zero-length string.</remarks>
-    [Obsolete("Use Prefix property")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public string? Prefix_obs { get; }
 
     public ReadOnlyCollection<IToken>? Prefix { get; }
@@ -174,7 +105,7 @@ $", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePattern
     /// Gets the value of first numerical version component indicating the major version number.
     /// </summary>
     /// <remarks>This will always be <c>0</c> when <see cref="Format" /> is <see cref="VersionStringFormat.NonNumerical" /> since non-standard version strings do not have parsable numerical components..</remarks>
-    [Obsolete("Use Major property")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public int Major_obs { get; }
 
     public INumericToken Major { get; }
@@ -185,7 +116,7 @@ $", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePattern
     /// </summary>
     /// <remarks>This will always be <see langword="null" /> when <see cref="Format" /> is <see cref="VersionStringFormat.NonNumerical" />.
     /// This will never have a negative value.</remarks>
-    [Obsolete("Use Minor property")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public int? Minor_obs { get; }
 
     public DelimitedToken<INumericToken>? Minor { get; }
@@ -196,7 +127,7 @@ $", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePattern
     /// </summary>
     /// <remarks>This will always be <see langword="null" /> when <see cref="Format" /> is <see cref="VersionStringFormat.NonNumerical" />.
     /// This will never have a negative value.</remarks>
-    [Obsolete("Use Micro property")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public int? Patch { get; }
     
     public DelimitedToken<INumericToken>? Micro { get; }
@@ -207,7 +138,7 @@ $", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePattern
     /// </summary>
     /// <remarks>This will always be <see langword="null" /> when <see cref="Format" /> is <see cref="VersionStringFormat.NonNumerical" />.
     /// This will never have a negative value.</remarks>
-    [Obsolete("This will roll up into the AdditionalNumerical property")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public int? Revision { get; }
 
     /// <summary>
@@ -215,7 +146,7 @@ $", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePattern
     /// A <see langword="null" /> value indicates there are no additinal numerical component.
     /// </summary>
     /// <remarks>This will never contain an empty collection; It will always have at least 1 element if it is not <see cref="null" />.</remarks>
-    [Obsolete("Use AdditionalNumerical property")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public ReadOnlyCollection<int>? AdditionalNumerical_obs { get; }
 
     public ReadOnlyCollection<DelimitedToken<INumericToken>>? AdditionalNumerical { get; }
@@ -225,7 +156,7 @@ $", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePattern
     /// A <see langword="null" /> value indicates there is no pre-release component.
     /// </summary>
     /// <remarks>This will never contain an empty collection; It will always have at least 1 element if it is not <see cref="null" />.</remarks>
-    [Obsolete("Use Modifiers property")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public ReadOnlyCollection<PreReleaseSegment>? PreRelease { get; }
 
     public ReadOnlyCollection<IDelimitedTokenList<IToken>>? Modifiers { get; }
@@ -235,7 +166,7 @@ $", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePattern
     /// A <see langword="null" /> value indicates there is no build component.
     /// </summary>
     /// <remarks>This will never contain an empty collection; It will always have at least 1 element if it is not <see cref="null" />.</remarks>
-    [Obsolete("This will roll up into the Modifiers property")]
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public ReadOnlyCollection<BuildSegment>? Build { get; }
     
     /// <summary>
@@ -243,6 +174,7 @@ $", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePattern
     /// </summary>
     public VersionStringFormat Format { get; }
 
+    [Obsolete("Use types in CdnGetter.Versioning namespace")]
     public static readonly ValueConverter<SwVersion, string> Converter = new(
         v => v.ToString(),
         s => new(s)

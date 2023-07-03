@@ -22,7 +22,7 @@ public readonly partial struct SwVersion
         /// <summary>
         /// Gets the text of the current <see cref="PreRelease" /> component segment, not including the character indicated by the <see cref="AltSeparator" /> property.
         /// </summary>
-        [Obsolete("Use Tokens property")]
+        [Obsolete("Use types in CdnGetter.Versioning namespace")]
         public string Value { get; }
 
         public ISeparatorToken? Delimiter => throw new NotImplementedException();
