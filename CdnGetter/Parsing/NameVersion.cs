@@ -66,4 +66,9 @@ public readonly struct NameVersion : ISoftwareVersion
     {
         throw new NotImplementedException();
     }
+
+    public IEnumerable<char> GetSourceValues()
+    {
+        throw new NotImplementedException();
+    }
 }

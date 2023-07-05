@@ -4,32 +4,34 @@ using System.Text;
 namespace CdnGetter.Parsing;
 
 /// <summary>
-/// A compound token comprised of a sequence of tokens.
+/// A compound token comprised of a sequence of numerical tokens.
 /// </summary>
-public class TokenList : ITokenList
+public class NumericalTokenList : INumericalTokenList
 {
-    private readonly IToken[] _items;
+    private readonly INumericalToken[] _items;
 
     /// <summary>
-    /// Intializes a new <c>TokenList</c>.
+    /// Intializes a new <c>NumericalTokenList</c>.
     /// </summary>
-    /// <param name="items">The tokens that will make up this compound token.</param>
-    public TokenList(params IToken[] items) => _items = items ?? Array.Empty<IToken>();
+    /// <param name="items">The numerical tokens that will make up this compound token.</param>
+    public NumericalTokenList(params INumericalToken[] items) => _items = items ?? Array.Empty<INumericalToken>();
     
     /// <summary>
-    /// Intializes a new <c>TokenList</c>.
+    /// Intializes a new <c>NumericalTokenList</c>.
     /// </summary>
-    /// <param name="items">The tokens that will make up this compound token.</param>
-    public TokenList(IEnumerable<IToken> items) => _items = items?.ToArray() ?? Array.Empty<IToken>();
+    /// <param name="items">The numerical tokens that will make up this compound token.</param>
+    public NumericalTokenList(IEnumerable<INumericalToken> items) => _items = items?.ToArray() ?? Array.Empty<INumericalToken>();
     
     /// <summary>
-    /// Gets the token at the specified index.
+    /// Gets the numerical token at the specified index.
     /// </summary>
-    /// <param name="index">The zero-based index of the token to get.</param>
-    public IToken this[int index] => _items[index];
+    /// <param name="index">The zero-based index of the numerical token to get.</param>
+    public INumericalToken this[int index] => _items[index];
+
+    IToken IReadOnlyList<IToken>.this[int index] => _items[index];
 
     /// <summary>
-    /// Gets the number of tokens in the current token list.
+    /// Gets the number of numerical tokens in the current token list.
     /// </summary>
     public int Count => _items.Length;
 
@@ -106,7 +108,9 @@ public class TokenList : ITokenList
         return ParsingExtensionMethods.NoCaseComparer.Equals(sb.ToString(), v);
     }
 
-    public IEnumerator<IToken> GetEnumerator() => _items.AsEnumerable().GetEnumerator();
+    public IEnumerator<INumericalToken> GetEnumerator() => _items.AsEnumerable().GetEnumerator();
+
+    IEnumerator<IToken> IEnumerable<IToken>.GetEnumerator() => _items.Cast<IToken>().GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => _items.GetEnumerator();
 

@@ -74,4 +74,9 @@ public readonly struct SemanticVersion : INumericalSoftwareVersion
     {
         throw new NotImplementedException();
     }
+
+    public IEnumerable<char> GetSourceValues()
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -2,6 +2,9 @@ using System.Numerics;
 
 namespace CdnGetter.Parsing;
 
+/// <summary>
+/// Represents a numerical token derrived from roman numerals.
+/// </summary>
 #pragma warning disable CA2231
 public readonly partial struct RomanNumeral : INumericalToken
 #pragma warning restore CA2231
@@ -10,18 +13,41 @@ public readonly partial struct RomanNumeral : INumericalToken
     
     public static readonly RomanNumeral Empty = new();
     
+    /// <summary>
+    /// Gets the roman numeral characters that make up this token.
+    /// </summary>
     public string? Value { get; }
 
     bool INumericalToken.HasNegativeSign => false;
 
     int INumericalToken.ZeroPadLength => 0;
 
+    /// <summary>
+    /// Gets a value that indicates whether this token represents a zero value.
+    /// </summary>
     public bool IsZero => Value is null;
 
+    /// <summary>
+    /// Creates a new <c>RomanNumeral</c> token.
+    /// </summary>
+    public RomanNumeral() => Value = null;
+    
+    /// <summary>
+    /// Creates a new <c>RomanNumeral</c> token.
+    /// </summary>
+    /// <param name="value">The value of the token.</param>
     public RomanNumeral(ushort value) => Value = ToRomanNumeral(value);
     
+    /// <summary>
+    /// Creates a new <c>RomanNumeral</c> token.
+    /// </summary>
+    /// <param name="value">The string value of the token.</param>
     private RomanNumeral(string? value) => Value = value;
     
+    /// <summary>
+    /// Gets the absolute value of the current token as a <see cref="BigInteger" />.
+    /// </summary>
+    /// <returns>The absolute value of the current token as a <see cref="BigInteger" />.</returns>
     public BigInteger AsBigInteger() => new(GetValue());
 
     public int CompareTo(IToken? other)
@@ -51,10 +77,18 @@ public readonly partial struct RomanNumeral : INumericalToken
 
     public override int GetHashCode() => HashCode.Combine(false, (ulong)GetValue());
 
+    /// <summary>
+    /// Gets the length of the current token.
+    /// </summary>
+    /// <returns>The token length.</returns>
     public int GetLength() => Value?.Length ?? 0;
 
     int IToken.GetLength(bool allChars) => GetLength();
 
+    /// <summary>
+    /// Gets the numerical value of the current token.
+    /// </summary>
+    /// <returns>The numerical value of the current token.</returns>
     public ushort GetValue() => string.IsNullOrEmpty(Value) ? (ushort)0 : Value[0] switch
     {
         ROMAN_NUM_1000_UC or ROMAN_NUM_1000_LC => ParseFromM(Value.AsSpan(), 0, Value.Length, out _),
@@ -70,6 +104,11 @@ public readonly partial struct RomanNumeral : INumericalToken
 
     public override string ToString() => Value ?? "";
 
+    /// <summary>
+    /// Attempts to return the absolute value of the current token as a <see cref="byte" /> value.
+    /// </summary>
+    /// <param name="value">The byte value of the absolute value of the current token or <c>0</c> if the absolute value is greater than <see cref="byte.MaxValue /></param>
+    /// <returns><see langword="true" /> if  the absolute numerical value of the current token is less than or equal to <see cref="byte.MaxValue />; otherwise, <see langword="false" />.</returns>
     public bool TryGet8Bit(out byte value)
     {
         if (Value is null)
@@ -177,4 +216,5 @@ public readonly partial struct RomanNumeral : INumericalToken
 
     bool INumericalToken.EqualsAbs(byte other) => GetValue().Equals(other);
 
+    public IEnumerable<char> GetSourceValues() => Value ?? "";
 }

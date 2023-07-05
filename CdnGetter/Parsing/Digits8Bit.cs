@@ -2,26 +2,44 @@ using System.Numerics;
 
 namespace CdnGetter.Parsing;
 
+/// <summary>
+/// Represents a numerical token that has an 8-bit absolute value.
+/// </summary>
 #pragma warning disable CA2231
-    public readonly struct Digits8Bit : INumericalToken
+public readonly struct Digits8Bit : INumericalToken
 #pragma warning restore CA2231
 {
     public static readonly Digits8Bit Zero = new(0);
     
     public static readonly Digits8Bit MaxValue = new(byte.MaxValue);
     
+    /// <summary>
+    /// Gets the maximum length of the absolute-value string representation.
+    /// </summary>
     public static readonly int MAX_ABS_LENGTH;
 
+    /// <summary>
+    /// Gets the absolute value of this token.
+    /// </summary>
     public byte Value { get; }
 
+    /// <summary>
+    /// Gets a value that indicates whether the numerical value of the token is prefixed by a negative sign.
+    /// </summary>
     public bool HasNegativeSign { get; }
 
+    /// <summary>
+    /// Gets the number of leading zeros for the numerical value.
+    /// </summary>
     public int ZeroPadLength { get; }
 
     bool INumericalToken.IsZero => Value == 0;
 
     static Digits8Bit()  => MAX_ABS_LENGTH = byte.MaxValue.ToString().Length;
 
+    /// <summary>
+    /// Creates a new <c>Digits8Bit</c> token.
+    /// </summary>
     public Digits8Bit()
     {
         ZeroPadLength = 0;
@@ -29,6 +47,11 @@ namespace CdnGetter.Parsing;
         Value = 0;
     }
     
+    /// <summary>
+    /// Creates a new <c>Digits8Bit</c> token.
+    /// </summary>
+    /// <param name="value">The value of the token.</param>
+    /// <param name="leadingZeroCount">The number of leading <c>'0'</c> characters.</param>
     public Digits8Bit(sbyte value, int leadingZeroCount = 0)
     {
         HasNegativeSign = value < 0;
@@ -36,6 +59,12 @@ namespace CdnGetter.Parsing;
         ZeroPadLength = (leadingZeroCount < 0) ? 0 : leadingZeroCount;
     }
 
+    /// <summary>
+    /// Creates a new <c>Digits8Bit</c> token.
+    /// </summary>
+    /// <param name="value">The absolute value of the token.</param>
+    /// <param name="hasNegativeSign">Indicates whether the numeric value is preceded by a negative sign.</param>
+    /// <param name="leadingZeroCount">The number of leading <c>'0'</c> characters.</param>
     public Digits8Bit(byte value, bool hasNegativeSign = false, int leadingZeroCount = 0)
     {
         HasNegativeSign = hasNegativeSign;
@@ -43,6 +72,11 @@ namespace CdnGetter.Parsing;
         ZeroPadLength = (leadingZeroCount < 0) ? 0 : leadingZeroCount;
     }
 
+    /// <summary>
+    /// Creates a new <c>Digits8Bit</c> token.
+    /// </summary>
+    /// <param name="value">The value of the token.</param>
+    /// <param name="leadingZeroCount">The number of leading <c>'0'</c> characters.</param>
     public Digits8Bit(byte value, int leadingZeroCount)
     {
         HasNegativeSign = false;
@@ -50,6 +84,10 @@ namespace CdnGetter.Parsing;
         ZeroPadLength = (leadingZeroCount < 0) ? 0 : leadingZeroCount;
     }
 
+    /// <summary>
+    /// Gets the absolute value of the current token as a <see cref="BigInteger" />.
+    /// </summary>
+    /// <returns>The absolute value of the current token as a <see cref="BigInteger" />.</returns>
     public BigInteger AsBigInteger() => new(Value);
 
     public int CompareTo(IToken? other)
@@ -82,10 +120,22 @@ namespace CdnGetter.Parsing;
 
     public override int GetHashCode() => HashCode.Combine(HasNegativeSign && Value != 0, (ulong)Value);
 
-    public int GetLength(bool allChars = false) => allChars ? (HasNegativeSign ? Value.ToString().Length + ZeroPadLength + 1 : Value.ToString().Length + ZeroPadLength) : GetValue().Length;
+    /// <summary>
+    /// Gets the length of the current token.
+    /// </summary>
+    /// <param name="includeZeroPad">If <see langword="true" />, then the length, including any padded zero characters, is returned;
+    /// otherwise this will return the length of the current token without padded zero characters.</param>
+    /// <returns>The token length.</returns>
+    public int GetLength(bool includeZeroPad = false) => includeZeroPad ? (HasNegativeSign ? Value.ToString().Length + ZeroPadLength + 1 : Value.ToString().Length + ZeroPadLength) : GetValue().Length;
 
+    /// <summary>
+    /// Gets the string value of the current token, excluding padded zero values.
+    /// </summary>
     public string GetValue() => (HasNegativeSign && Value != 0) ? $"-{Value}" : Value.ToString();
 
+    /// <summary>
+    /// Gets the string value of the current token, including padded zero values.
+    /// </summary>
     public override string ToString() => HasNegativeSign ? ((ZeroPadLength > 0) ? $"-{new string('0', ZeroPadLength)}{Value}" : $"-{Value}") :
         (ZeroPadLength > 0) ? $"{new string('0', ZeroPadLength)}{Value}" : Value.ToString();
     
@@ -132,4 +182,14 @@ namespace CdnGetter.Parsing;
     bool INumericalToken.EqualsAbs(ushort other) => other <= byte.MaxValue && Value.Equals((byte)other);
 
     bool INumericalToken.EqualsAbs(byte other) => Value.Equals(other);
+
+    public IEnumerable<char> GetSourceValues()
+    {
+        if (HasNegativeSign)
+            yield return '-';
+        for (int i = 0; i < ZeroPadLength; i++)
+            yield return '0';
+        foreach (char c in Value.ToString())
+            yield return c;
+    }
 }
