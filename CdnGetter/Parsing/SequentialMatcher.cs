@@ -46,30 +46,28 @@ public class SequentialMatcher : IMatcher
     /// <summary>
     /// Tests whether all matchers can sequentially produce tokens, with the first one starting from the specified index.
     /// </summary>
-    /// <param name="span">The source sequence of values.</param>
+    /// <param name="source">The source character values.</param>
     /// <param name="startIndex">The index of the first value to be tested.</param>
-    /// <param name="endIndex">The exclusive index of the end of the range of values to be tested.</param>
+    /// <param name="count">The number of characters  to be tested.</param>
     /// <param name="nextIndex">Returns the index following the last matched value or the value of <paramref name="startIndex" /> if there is no match.</param>
     /// <returns><see langword="true" /> if the all <see cref="ElementMatchers" /> can sequentially parse <see cref="IToken" />s from values starting from the specified <paramref name="startIndex" />; otherwise, <see langword="false" />.</returns>
-    public bool Match(ReadOnlySpan<char> span, int startIndex, int endIndex, out int nextIndex)
+    public bool Match(ParsingSource source, int startIndex, int count, out int nextIndex)
     {
-        if (span.ValidateExtentsIsEmpty(ref startIndex, ref endIndex))
+        if (source.ValidateSourceIsEmpty(ref startIndex, ref count))
         {
             nextIndex = startIndex;
             return false;
         }
         nextIndex = startIndex;
+        int endIndex = startIndex + count;
         foreach (IMatcher matcher in ElementMatchers)
         {
-            if (!matcher.Match(span, nextIndex, endIndex, out nextIndex))
+            count = endIndex - nextIndex;
+            if (count < 1 || !matcher.Match(source, nextIndex, count, out nextIndex))
             {
                 nextIndex = startIndex;
                 return false;
             }
-            if (nextIndex < startIndex)
-                nextIndex = startIndex;
-            else if (nextIndex > endIndex)
-                nextIndex = endIndex;
         }
         return true;
     }
@@ -77,43 +75,41 @@ public class SequentialMatcher : IMatcher
     /// <summary>
     /// Attempts to sequentially parse tokens, starting from the specified index.
     /// </summary>
-    /// <param name="span">The source sequence of values.</param>
-    /// <param name="startIndex">The index of the first value to be parsed.</param>
-    /// <param name="endIndex">The exclusive index of the end of the range of values to be parsed.</param>
+    /// <param name="source">The source character values.</param>
+    /// <param name="startIndex">The index of the first value to be tested.</param>
+    /// <param name="count">The number of characters  to be tested.</param>
     /// <param name="result">Returns the parsed <see cref="ITokenList" /> or <see langword="null" /> if any of the <see cref="ElementMatchers" /> could not produced a token.</param>
     /// <param name="nextIndex">Returns the index following the last matched value or the value of <paramref name="startIndex" /> if there is no match.</param>
     /// <returns><see langword="true" /> if all <see cref="ElementMatchers" /> sequentially parsed <see cref="IToken" />s beginning from the specified <paramref name="startIndex" />; otherwise, <see langword="false" />.</returns>
-    public bool TryParse(ReadOnlySpan<char> span, int startIndex, int endIndex, [NotNullWhen(true)] out ITokenList? result, out int nextIndex)
+    public bool TryParse(ParsingSource source, int startIndex, int count, [NotNullWhen(true)] out ITokenList? result, out int nextIndex)
     {
-        if (span.ValidateExtentsIsEmpty(ref startIndex, ref endIndex))
+        if (source.ValidateSourceIsEmpty(ref startIndex, ref count))
         {
             nextIndex = startIndex;
-            result = null;
+            result = default;
             return false;
         }
+        int endIndex = startIndex + count;
         Collection<IToken> items = new();
         nextIndex = startIndex;
         foreach (IMatcher matcher in ElementMatchers)
         {
-            if (!matcher.TryParse(span, nextIndex, endIndex, out IToken? item, out nextIndex))
+            count = endIndex - nextIndex;
+            if (count < 1 || !matcher.TryParse(source, nextIndex, count, out IToken? item, out nextIndex))
             {
                 nextIndex = startIndex;
                 result = null;
                 return false;
             }
             items.Add(item);
-            if (nextIndex < startIndex)
-                nextIndex = startIndex;
-            else if (nextIndex > endIndex)
-                nextIndex = endIndex;
         }
         result = Aggregator(items);
         return true;
     }
 
-    bool IMatcher.TryParse(ReadOnlySpan<char> span, int startIndex, int endIndex, [NotNullWhen(true)] out IToken? result, out int nextIndex)
+    bool IMatcher.TryParse(ParsingSource source, int startIndex, int count, [NotNullWhen(true)] out IToken? result, out int nextIndex)
     {
-        if (TryParse(span, startIndex, endIndex, out ITokenList? list, out nextIndex))
+        if (TryParse(source, startIndex, count, out ITokenList? list, out nextIndex))
         {
             result = list;
             return true;
@@ -158,30 +154,25 @@ public class SequentialMatcher<TAggregate> : IMatcher where TAggregate : IToken
     /// <summary>
     /// Tests whether all matchers can sequentially produce tokens, with the first one starting from the specified index.
     /// </summary>
-    /// <param name="span">The source sequence of values.</param>
+    /// <param name="source">The source character values.</param>
     /// <param name="startIndex">The index of the first value to be tested.</param>
-    /// <param name="endIndex">The exclusive index of the end of the range of values to be tested.</param>
+    /// <param name="count">The number of characters  to be tested.</param>
     /// <param name="nextIndex">Returns the index following the last matched value or the value of <paramref name="startIndex" /> if there is no match.</param>
     /// <returns><see langword="true" /> if the all <see cref="ElementMatchers" /> can sequentially parse <see cref="IToken" />s from values starting from the specified <paramref name="startIndex" />; otherwise, <see langword="false" />.</returns>
-    public bool Match(ReadOnlySpan<char> span, int startIndex, int endIndex, out int nextIndex)
+    public bool Match(ParsingSource source, int startIndex, int count, out int nextIndex)
     {
-        if (span.ValidateExtentsIsEmpty(ref startIndex, ref endIndex))
-        {
-            nextIndex = startIndex;
-            return false;
-        }
+        int endIndex = startIndex + count;
+        if (endIndex > source.Count)
+            endIndex = source.Count;
         nextIndex = startIndex;
         foreach (IMatcher matcher in ElementMatchers)
         {
-            if (!matcher.Match(span, nextIndex, endIndex, out nextIndex))
+            count = endIndex - nextIndex;
+            if (count < 1 || !matcher.Match(source, nextIndex, endIndex, out nextIndex))
             {
                 nextIndex = startIndex;
                 return false;
             }
-            if (nextIndex < startIndex)
-                nextIndex = startIndex;
-            else if (nextIndex > endIndex)
-                nextIndex = endIndex;
         }
         return true;
     }
@@ -189,43 +180,37 @@ public class SequentialMatcher<TAggregate> : IMatcher where TAggregate : IToken
     /// <summary>
     /// Attempts to sequentially parse tokens, starting from the specified index.
     /// </summary>
-    /// <param name="span">The source sequence of values.</param>
-    /// <param name="startIndex">The index of the first value to be parsed.</param>
-    /// <param name="endIndex">The exclusive index of the end of the range of values to be parsed.</param>
+    /// <param name="source">The source character values.</param>
+    /// <param name="startIndex">The index of the first value to be tested.</param>
+    /// <param name="count">The number of characters  to be tested.</param>
     /// <param name="result">Returns the combined <see cref="TAggregate" /> or <see langword="default" /> if any of the <see cref="ElementMatchers" /> could not produced a token.</param>
     /// <param name="nextIndex">Returns the index following the last matched value or the value of <paramref name="startIndex" /> if there is no match.</param>
     /// <returns><see langword="true" /> if all <see cref="ElementMatchers" /> sequentially parsed <see cref="IToken" />s beginning from the specified <paramref name="startIndex" />; otherwise, <see langword="false" />.</returns>
-    public bool TryParse(ReadOnlySpan<char> span, int startIndex, int endIndex, [MaybeNullWhen(false)] out TAggregate result, out int nextIndex)
+    public bool TryParse(ParsingSource source, int startIndex, int count, [MaybeNullWhen(false)] out TAggregate result, out int nextIndex)
     {
-        if (span.ValidateExtentsIsEmpty(ref startIndex, ref endIndex))
-        {
-            nextIndex = startIndex;
-            result = default;
-            return false;
-        }
+        int endIndex = startIndex + count;
+        if (endIndex > source.Count)
+            endIndex = source.Count;
         Collection<IToken> items = new();
         nextIndex = startIndex;
         foreach (IMatcher matcher in ElementMatchers)
         {
-            if (!matcher.TryParse(span, nextIndex, endIndex, out IToken? item, out nextIndex))
+            count = endIndex - nextIndex;
+            if (count < 1 || !matcher.TryParse(source, nextIndex, count, out IToken? item, out nextIndex))
             {
                 nextIndex = startIndex;
                 result = default;
                 return false;
             }
             items.Add(item);
-            if (nextIndex < startIndex)
-                nextIndex = startIndex;
-            else if (nextIndex > endIndex)
-                nextIndex = endIndex;
         }
         result = Aggregator(items);
         return true;
     }
 
-    bool IMatcher.TryParse(ReadOnlySpan<char> span, int startIndex, int endIndex, [NotNullWhen(true)] out IToken? result, out int nextIndex)
+    bool IMatcher.TryParse(ParsingSource source, int startIndex, int count, [NotNullWhen(true)] out IToken? result, out int nextIndex)
     {
-        if (TryParse(span, startIndex, endIndex, out TAggregate? aggregate, out nextIndex))
+        if (TryParse(source, startIndex, count, out TAggregate? aggregate, out nextIndex))
         {
             result = aggregate;
             return true;

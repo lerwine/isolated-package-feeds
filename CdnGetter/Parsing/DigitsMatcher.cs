@@ -15,19 +15,21 @@ public class DigitsMatcher : IMatcher
     /// <summary>
     /// Tests whether a numerical token can be parsed from one or more characters starting from the specified index.
     /// </summary>
-    /// <param name="span">The source sequence of characters.</param>
-    /// <param name="startIndex">The index of the first character to be tested.</param>
-    /// <param name="endIndex">The exclusive index of the end of the range of characters to be tested.</param>
+    /// <param name="source">The source character values.</param>
+    /// <param name="startIndex">The index of the first value to be tested.</param>
+    /// <param name="count">The number of characters  to be tested.</param>
     /// <param name="nextIndex">Returns the index following the last matched character or the value of <paramref name="startIndex" /> if there is no match.</param>
     /// <returns><see langword="true" /> if the current <see cref="IMatcher" /> can parse an <see cref="IToken" /> from one or more characters starting from the specified <paramref name="startIndex" />; otherwise, <see langword="false" />.</returns>
-    public bool Match(ReadOnlySpan<char> span, int startIndex, int endIndex, out int nextIndex)
+    public bool Match(ParsingSource source, int startIndex, int count, out int nextIndex)
     {
-        if (span.ValidateExtentsIsEmpty(ref startIndex, ref endIndex))
+        if (source.ValidateSourceIsEmpty(ref startIndex, ref count))
         {
             nextIndex = startIndex;
             return false;
         }
         nextIndex = startIndex;
+        ReadOnlySpan<char> span = source.AsSpan(startIndex, count);
+        int endIndex = startIndex + count;
         char c = span[nextIndex];
         if (c == ParsingExtensionMethods.DELIMITER_DASH)
         {
@@ -55,21 +57,23 @@ public class DigitsMatcher : IMatcher
     /// <summary>
     /// Attempts to parse a token from one or more values starting from the specified index.
     /// </summary>
-    /// <param name="span">The source sequence of values.</param>
-    /// <param name="startIndex">The index of the first value to be parsed.</param>
-    /// <param name="endIndex">The exclusive index of the end of the range of values to be parsed.</param>
+    /// <param name="source">The source character values.</param>
+    /// <param name="startIndex">The index of the first value to be tested.</param>
+    /// <param name="count">The number of characters  to be tested.</param>
     /// <param name="result">Returns the parsed <see cref="IToken" /> or <see langword="null" /> if no token could be parsed.</param>
     /// <param name="nextIndex">Returns the index following the last matched value or the value of <paramref name="startIndex" /> if there is no match.</param>
     /// <returns><see langword="true" /> if the current <see cref="IMatcher" /> parsed an <see cref="IToken" /> from one or more values starting from the specified <paramref name="startIndex" />; otherwise, <see langword="false" />.</returns>
-    public static bool TryParse(ReadOnlySpan<char> span, int startIndex, int endIndex, [NotNullWhen(true)] out INumericalToken? result, out int nextIndex)
+    public static bool TryParse(ParsingSource source, int startIndex, int count, [NotNullWhen(true)] out INumericalToken? result, out int nextIndex)
     {
-        if (span.ValidateExtentsIsEmpty(ref startIndex, ref endIndex))
+        if (source.ValidateSourceIsEmpty(ref startIndex, ref count))
         {
             nextIndex = startIndex;
             result = null;
             return false;
         }
         nextIndex = startIndex;
+        ReadOnlySpan<char> span = source.AsSpan(startIndex, count);
+        int endIndex = startIndex + count;
         char c = span[nextIndex];
         bool hasNegativeSign = c == ParsingExtensionMethods.DELIMITER_DASH;
         if (hasNegativeSign)
@@ -134,9 +138,9 @@ public class DigitsMatcher : IMatcher
         return true;
     }
 
-    bool IMatcher.TryParse(ReadOnlySpan<char> span, int startIndex, int endIndex, [NotNullWhen(true)] out IToken? result, out int nextIndex)
+    bool IMatcher.TryParse(ParsingSource source, int startIndex, int count, [NotNullWhen(true)] out IToken? result, out int nextIndex)
     {
-        if (TryParse(span, startIndex, endIndex, out INumericalToken? token, out nextIndex))
+        if (TryParse(source, startIndex, count, out INumericalToken? token, out nextIndex))
         {
             result = token;
             return true;

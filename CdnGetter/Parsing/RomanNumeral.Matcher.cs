@@ -948,50 +948,53 @@ public readonly partial struct RomanNumeral
         return sb.ToString();
     }
     
-    public static bool TryParse(ReadOnlySpan<char> span, int startIndex, int endIndex, out RomanNumeral result, out int nextIndex)
+    public static bool TryParse(ParsingSource source, int startIndex, int count, out RomanNumeral result, out int nextIndex)
     {
-        if (span.ValidateExtentsIsEmpty(ref startIndex, ref endIndex))
+        if (source.ValidateSourceIsEmpty(ref startIndex, ref count))
         {
             nextIndex = startIndex;
             result = default;
             return false;
         }
+        int endIndex = startIndex + count;
+        ReadOnlySpan<char> span = source.AsSpan(startIndex, endIndex);
+        ushort value;
         switch (span[startIndex])
         {
             case ROMAN_NUM_1000_UC:
             case ROMAN_NUM_1000_LC:
-                nextIndex = MoveFromM(span, startIndex, endIndex);
+                value = ParseFromM(span, startIndex, endIndex, out nextIndex);
                 break;
             case ROMAN_NUM_500_UC:
             case ROMAN_NUM_500_LC:
-                nextIndex = MoveFromD(span, startIndex, endIndex);
+                value = ParseFromD(span, startIndex, endIndex, out nextIndex);
                 break;
             case ROMAN_NUM_100_UC:
             case ROMAN_NUM_100_LC:
-                nextIndex = MoveFromC(span, startIndex, endIndex);
+                value = ParseFromC(span, startIndex, endIndex, out nextIndex);
                 break;
             case ROMAN_NUM_50_UC:
             case ROMAN_NUM_50_LC:
-                nextIndex = MoveFromL(span, startIndex, endIndex);
+                value = ParseFromL(span, startIndex, endIndex, out nextIndex);
                 break;
             case ROMAN_NUM_10_UC:
             case ROMAN_NUM_10_LC:
-                nextIndex = MoveFromX(span, startIndex, endIndex);
+                value = ParseFromX(span, startIndex, endIndex, out nextIndex);
                 break;
             case ROMAN_NUM_5_UC:
             case ROMAN_NUM_5_LC:
-                nextIndex = MoveFromV(span, startIndex, endIndex);
+                value = ParseFromV(span, startIndex, endIndex, out nextIndex);
                 break;
             case ROMAN_NUM_1_UC:
             case ROMAN_NUM_1_LC:
-                nextIndex = MoveFromI(span, startIndex, endIndex);
+                value = ParseFromI(span, startIndex, endIndex, out nextIndex);
                 break;
             default:
                 nextIndex = startIndex;
                 result = default;
                 return false;
         }
-        result = new(new string(span[startIndex..nextIndex]));
+        result = new(source, startIndex, nextIndex - startIndex, value);
         return true;
     }
     
@@ -1004,18 +1007,20 @@ public readonly partial struct RomanNumeral
         /// <summary>
         /// Tests whether a roman numeral token can be parsed from one or more characters starting from the specified index.
         /// </summary>
-        /// <param name="span">The source sequence of characters.</param>
+        /// <param name="source">The source character values.</param>
         /// <param name="startIndex">The index of the first character to be tested.</param>
-        /// <param name="endIndex">The exclusive index of the end of the range of characters to be tested.</param>
+        /// <param name="count">The number of characters  to be tested.</param>
         /// <param name="nextIndex">Returns the index following the last matched character or the value of <paramref name="startIndex" /> if there is no match.</param>
         /// <returns><see langword="true" /> if the current <see cref="IMatcher" /> can parse a <see cref="RomanNumeral" /> token from one or more characters starting from the specified <paramref name="startIndex" />; otherwise, <see langword="false" />.</returns>
-        public bool Match(ReadOnlySpan<char> span, int startIndex, int endIndex, out int nextIndex)
+        public bool Match(ParsingSource source, int startIndex, int count, out int nextIndex)
         {
-            if (span.ValidateExtentsIsEmpty(ref startIndex, ref endIndex))
+            if (source.ValidateSourceIsEmpty(ref startIndex, ref count))
             {
                 nextIndex = startIndex;
                 return false;
             }
+            int endIndex = startIndex + count;
+            ReadOnlySpan<char> span = source.AsSpan(startIndex, endIndex);
             switch (span[startIndex])
             {
                 case ROMAN_NUM_1000_UC:
@@ -1053,9 +1058,9 @@ public readonly partial struct RomanNumeral
             return true;
         }
 
-        public bool TryParse(ReadOnlySpan<char> span, int startIndex, int endIndex, [NotNullWhen(true)] out IToken? result, out int nextIndex)
+        public bool TryParse(ParsingSource source, int startIndex, int count, [NotNullWhen(true)] out IToken? result, out int nextIndex)
         {
-            if (RomanNumeral.TryParse(span, startIndex, endIndex, out RomanNumeral rn, out nextIndex))
+            if (RomanNumeral.TryParse(source, startIndex, count, out RomanNumeral rn, out nextIndex))
             {
                 result = rn;
                 return true;
