@@ -4,17 +4,54 @@ using System.Diagnostics.CodeAnalysis;
 namespace CdnGetter.Parsing;
 
 /// <summary>
-/// Matches a sequence of matchers.
+/// A compound matcher that parses/matches tokens from the a sequence matchers that can each produce a token.
 /// </summary>
-/// <typeparam name="TInput">The input element type.</typeparam>
+/// <typeparam name="TInput">The item value type.</typeparam>
+/// <seealso cref="AlternateMatcher{TInput}" />
+/// <seealso cref="SequentialMatcher{TInput, TAggregate}" />
 public class SequentialMatcher<TInput> : IMatcher<TInput>
 {
+    /// <summary>
+    /// The ordered matchers that make up this compound matcher.
+    /// </summary>
     public ReadOnlyCollection<IMatcher<TInput>> ElementMatchers { get; }
     
-    public SequentialMatcher(params IMatcher<TInput>[] elementMatchers) => ElementMatchers = new(elementMatchers?.Where(p => p is not null).ToArray() ?? Array.Empty<IMatcher<TInput>>());
+    /// <summary>
+    /// The delegate that creates a <see cref="ITokenList" /> from the matched tokens.
+    /// </summary>
+    public Func<IList<IToken>, ITokenList> Aggregator { get; }
+
+    /// <summary>
+    /// Intializes a new <c>SequentialMatcher</c> that parses matches as a <see cref="TokenList" />.
+    /// </summary>
+    /// <param name="elementMatchers">The ordered matchers that will make up the new compound matcher.</param>
+    public SequentialMatcher(params IMatcher<TInput>[] elementMatchers) =>
+        (ElementMatchers, Aggregator) = (new(elementMatchers?.Where(p => p is not null).ToArray() ?? Array.Empty<IMatcher<TInput>>()), new Func<IList<IToken>, ITokenList>(t => new TokenList(t)));
     
-    public SequentialMatcher(IEnumerable<IMatcher<TInput>> elementMatchers) => ElementMatchers = new(elementMatchers?.Where(p => p is not null).ToArray() ?? Array.Empty<IMatcher<TInput>>());
+    /// <summary>
+    /// Intializes a new <c>SequentialMatcher</c>.
+    /// </summary>
+    /// <param name="elementMatchers">The ordered matchers that will make up the new compound matcher.</param>
+    /// <param name="aggregator">The delegate that creates a <see cref="ITokenList" /> from the matched tokens or <see langword="null" /> to parse as a <see cref="TokenList" />.</param>
+    public SequentialMatcher(IEnumerable<IMatcher<TInput>> elementMatchers, Func<IList<IToken>, ITokenList>? aggregator = null) =>
+        (ElementMatchers, Aggregator) = (new(elementMatchers?.Where(p => p is not null).ToArray() ?? Array.Empty<IMatcher<TInput>>()), aggregator ?? new Func<IList<IToken>, ITokenList>(t => new TokenList(t)));
     
+    /// <summary>
+    /// Intializes a new <c>SequentialMatcher</c>.
+    /// </summary>
+    /// <param name="aggregator">The delegate that creates a <see cref="ITokenList" /> from the matched tokens.</param>
+    /// <param name="elementMatchers">The ordered matchers that will make up the new compound matcher.</param>
+    public SequentialMatcher(Func<IList<IToken>, ITokenList> aggregator, params IMatcher<TInput>[] elementMatchers) =>
+        (ElementMatchers, Aggregator) = (new(elementMatchers?.Where(p => p is not null).ToArray() ?? Array.Empty<IMatcher<TInput>>()), aggregator ?? throw new ArgumentNullException(nameof(aggregator)));
+    
+    /// <summary>
+    /// Tests whether all matchers can sequentially produce tokens, with the first one starting from the specified index.
+    /// </summary>
+    /// <param name="span">The source sequence of values.</param>
+    /// <param name="startIndex">The index of the first value to be tested.</param>
+    /// <param name="endIndex">The exclusive index of the end of the range of values to be tested.</param>
+    /// <param name="nextIndex">Returns the index following the last matched value or the value of <paramref name="startIndex" /> if there is no match.</param>
+    /// <returns><see langword="true" /> if the all <see cref="ElementMatchers" /> can sequentially parse <see cref="IToken" />s from values starting from the specified <paramref name="startIndex" />; otherwise, <see langword="false" />.</returns>
     public bool Match(ReadOnlySpan<TInput> span, int startIndex, int endIndex, out int nextIndex)
     {
         if (span.ValidateExtentsIsEmpty(ref startIndex, ref endIndex))
@@ -38,7 +75,16 @@ public class SequentialMatcher<TInput> : IMatcher<TInput>
         return true;
     }
 
-    public bool TryParse(ReadOnlySpan<TInput> span, int startIndex, int endIndex, [NotNullWhen(true)] out TokenList? result, out int nextIndex)
+    /// <summary>
+    /// Attempts to sequentially parse tokens, starting from the specified index.
+    /// </summary>
+    /// <param name="span">The source sequence of values.</param>
+    /// <param name="startIndex">The index of the first value to be parsed.</param>
+    /// <param name="endIndex">The exclusive index of the end of the range of values to be parsed.</param>
+    /// <param name="result">Returns the parsed <see cref="ITokenList" /> or <see langword="null" /> if any of the <see cref="ElementMatchers" /> could not produced a token.</param>
+    /// <param name="nextIndex">Returns the index following the last matched value or the value of <paramref name="startIndex" /> if there is no match.</param>
+    /// <returns><see langword="true" /> if all <see cref="ElementMatchers" /> sequentially parsed <see cref="IToken" />s beginning from the specified <paramref name="startIndex" />; otherwise, <see langword="false" />.</returns>
+    public bool TryParse(ReadOnlySpan<TInput> span, int startIndex, int endIndex, [NotNullWhen(true)] out ITokenList? result, out int nextIndex)
     {
         if (span.ValidateExtentsIsEmpty(ref startIndex, ref endIndex))
         {
@@ -62,13 +108,13 @@ public class SequentialMatcher<TInput> : IMatcher<TInput>
             else if (nextIndex > endIndex)
                 nextIndex = endIndex;
         }
-        result = new TokenList(items);
+        result = Aggregator(items);
         return true;
     }
 
     bool IMatcher<TInput>.TryParse(ReadOnlySpan<TInput> span, int startIndex, int endIndex, [NotNullWhen(true)] out IToken? result, out int nextIndex)
     {
-        if (TryParse(span, startIndex, endIndex, out TokenList? list, out nextIndex))
+        if (TryParse(span, startIndex, endIndex, out ITokenList? list, out nextIndex))
         {
             result = list;
             return true;
@@ -78,16 +124,47 @@ public class SequentialMatcher<TInput> : IMatcher<TInput>
     }
 }
 
+/// <summary>
+/// A compound matcher that parses/matches tokens from the a sequence matchers that can each produce a token.
+/// </summary>
+/// <typeparam name="TInput">The item value type.</typeparam>
+/// <typeparam name="TAggregate">The aggregate token type.</typeparam>
+/// <seealso cref="AlternateMatcher{TInput}" />
+/// <seealso cref="SequentialMatcher{TInput}" />
 public class SequentialMatcher<TInput, TAggregate> : IMatcher<TInput> where TAggregate : IToken
 {
+    /// <summary>
+    /// The ordered matchers that make up this compound matcher.
+    /// </summary>
     public ReadOnlyCollection<IMatcher<TInput>> ElementMatchers { get; }
 
+    /// <summary>
+    /// The delegate that creates a <typeparamref name="TAggregate" /> from the matched tokens.
+    /// </summary>
     public Func<IList<IToken>, TAggregate> Aggregator { get; }
     
+    /// <summary>
+    /// Initializes a new <c>SequentialMatcher</c>.
+    /// </summary>
+    /// <param name="aggregator">The delegate that creates a <typeparamref name="TAggregate" /> from the matched tokens.</param>
+    /// <param name="elementMatchers">The ordered matchers will make up the new compound matcher.</param>
     public SequentialMatcher(Func<IList<IToken>, TAggregate> aggregator, params IMatcher<TInput>[] elementMatchers) => (Aggregator, ElementMatchers) = (aggregator, new(elementMatchers?.Where(p => p is not null).ToArray() ?? Array.Empty<IMatcher<TInput>>()));
     
+    /// <summary>
+    /// Initializes a new <c>SequentialMatcher</c>.
+    /// </summary>
+    /// <param name="elementMatchers">The ordered matchers will make up the new compound matcher.</param>
+    /// <param name="aggregator">The delegate that creates a <typeparamref name="TAggregate" /> from the matched tokens.</param>
     public SequentialMatcher(IEnumerable<IMatcher<TInput>> elementMatchers, Func<IList<IToken>, TAggregate> aggregator) => (ElementMatchers, Aggregator) = (new(elementMatchers?.Where(p => p is not null).ToArray() ?? Array.Empty<IMatcher<TInput>>()), aggregator);
-    
+
+    /// <summary>
+    /// Tests whether all matchers can sequentially produce tokens, with the first one starting from the specified index.
+    /// </summary>
+    /// <param name="span">The source sequence of values.</param>
+    /// <param name="startIndex">The index of the first value to be tested.</param>
+    /// <param name="endIndex">The exclusive index of the end of the range of values to be tested.</param>
+    /// <param name="nextIndex">Returns the index following the last matched value or the value of <paramref name="startIndex" /> if there is no match.</param>
+    /// <returns><see langword="true" /> if the all <see cref="ElementMatchers" /> can sequentially parse <see cref="IToken" />s from values starting from the specified <paramref name="startIndex" />; otherwise, <see langword="false" />.</returns>
     public bool Match(ReadOnlySpan<TInput> span, int startIndex, int endIndex, out int nextIndex)
     {
         if (span.ValidateExtentsIsEmpty(ref startIndex, ref endIndex))
@@ -111,6 +188,15 @@ public class SequentialMatcher<TInput, TAggregate> : IMatcher<TInput> where TAgg
         return true;
     }
 
+    /// <summary>
+    /// Attempts to sequentially parse tokens, starting from the specified index.
+    /// </summary>
+    /// <param name="span">The source sequence of values.</param>
+    /// <param name="startIndex">The index of the first value to be parsed.</param>
+    /// <param name="endIndex">The exclusive index of the end of the range of values to be parsed.</param>
+    /// <param name="result">Returns the combined <see cref="TAggregate" /> or <see langword="default" /> if any of the <see cref="ElementMatchers" /> could not produced a token.</param>
+    /// <param name="nextIndex">Returns the index following the last matched value or the value of <paramref name="startIndex" /> if there is no match.</param>
+    /// <returns><see langword="true" /> if all <see cref="ElementMatchers" /> sequentially parsed <see cref="IToken" />s beginning from the specified <paramref name="startIndex" />; otherwise, <see langword="false" />.</returns>
     public bool TryParse(ReadOnlySpan<TInput> span, int startIndex, int endIndex, [MaybeNullWhen(false)] out TAggregate result, out int nextIndex)
     {
         if (span.ValidateExtentsIsEmpty(ref startIndex, ref endIndex))

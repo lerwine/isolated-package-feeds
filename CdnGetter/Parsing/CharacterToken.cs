@@ -6,7 +6,7 @@ namespace CdnGetter.Parsing;
 /// Represents a parsed token containing a single character.
 /// </summary>
 #pragma warning disable CA2231
-public readonly struct CharacterToken : ITokenCharacters
+public readonly struct CharacterToken : IStringToken
 #pragma warning restore CA2231
 {
     public readonly char Value { get; }
@@ -42,4 +42,6 @@ public readonly struct CharacterToken : ITokenCharacters
     int IToken.GetLength(bool allChars) => 1;
 
     string IToken.GetValue() => ToString();
+
+    IEnumerable<char> IToken.GetSourceValues() { yield return Value; }
 }

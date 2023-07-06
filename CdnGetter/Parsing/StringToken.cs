@@ -6,7 +6,7 @@ namespace CdnGetter.Parsing;
 /// Represents a parsed token containing a string of characters.
 /// </summary>
 #pragma warning disable CA2231
-public readonly struct StringToken : ITokenCharacters
+public readonly struct StringToken : IStringToken
 #pragma warning restore CA2231
 {
     public static readonly StringToken Empty = new();
@@ -45,4 +45,6 @@ public readonly struct StringToken : ITokenCharacters
     public override int GetHashCode() => ParsingExtensionMethods.NoCaseComparer.GetHashCode(Value);
 
     public override string ToString() => Value;
+
+    IEnumerable<char> IToken.GetSourceValues() => Value;
 }
