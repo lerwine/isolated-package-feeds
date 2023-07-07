@@ -936,7 +936,7 @@ namespace CdnGetter.UnitTests
         }
 
         /// <summary>
-        /// Unit test for <see cref="Parsing.RomanNumeral.Parse(ReadOnlySpan{char})" /> and <see cref="Parsing.RomanNumeral.Parse(ReadOnlySpan{char})" />.
+        /// Unit test for <see cref="Parsing.RomanNumeral.Parse(string)" /> and <see cref="Parsing.RomanNumeral.Parse(ReadOnlySpan{char})" />.
         /// </summary>
         [Fact]
         public void ParseTest()
@@ -961,15 +961,8 @@ namespace CdnGetter.UnitTests
                 try
                 {
                     Parsing.RomanNumeral returnValue = Parsing.RomanNumeral.Parse(text);
-                    if (string.IsNullOrEmpty(text))
-                        Assert.Null(returnValue.Value);
-                    else
-                    {
-                        Assert.NotNull(returnValue.Value);
-                        Assert.Equal(text, returnValue.Value);
-                    }
-                    int actual = returnValue.GetValue();
-                    Assert.Equal(expected, actual);
+                    Assert.Equal(text, returnValue.ToString());
+                    Assert.Equal(expected, returnValue.Value);
                 }
                 catch
                 {
@@ -979,15 +972,8 @@ namespace CdnGetter.UnitTests
                 try
                 {
                     Parsing.RomanNumeral returnValue = Parsing.RomanNumeral.Parse(text.AsSpan());
-                    if (string.IsNullOrEmpty(text))
-                        Assert.Null(returnValue.Value);
-                    else
-                    {
-                        Assert.NotNull(returnValue.Value);
-                        Assert.Equal(text, returnValue.Value);
-                    }
-                    int actual = returnValue.GetValue();
-                    Assert.Equal(expected, actual);
+                    Assert.Equal(text, returnValue.ToString());
+                    Assert.Equal(expected, returnValue.Value);
                 }
                 catch
                 {
@@ -998,7 +984,7 @@ namespace CdnGetter.UnitTests
         }
 
         /// <summary>
-        /// Unit test for <see cref="Parsing.RomanNumeral.TryParse(ReadOnlySpan{char}, out Parsing.RomanNumeral))" /> and <see cref="Parsing.RomanNumeral.TryParse(string, out Parsing.RomanNumeral)" />.
+        /// Unit test for <see cref="Parsing.RomanNumeral.TryParse(string, out Parsing.RomanNumeral)" /> and <see cref="Parsing.RomanNumeral.TryParse(string, out Parsing.RomanNumeral)" />.
         /// </summary>
         [Fact]
         public void TryParseTest()
@@ -1009,9 +995,8 @@ namespace CdnGetter.UnitTests
                 {
                     bool returnValue = Parsing.RomanNumeral.TryParse(text, out Parsing.RomanNumeral result);
                     Assert.False(returnValue);
-                    Assert.Null(result.Value);
-                    ushort actual = result.GetValue();
-                    Assert.Equal<ushort>(0, actual);
+                    Assert.Equal(string.Empty, result.ToString());
+                    Assert.Equal<ushort>(0, result.Value);
                 }
                 catch
                 {
@@ -1022,9 +1007,8 @@ namespace CdnGetter.UnitTests
                 {
                     bool returnValue = Parsing.RomanNumeral.TryParse(text.AsSpan(), out Parsing.RomanNumeral result);
                     Assert.False(returnValue);
-                    Assert.Null(result.Value);
-                    ushort actual = result.GetValue();
-                    Assert.Equal<ushort>(0, actual);
+                    Assert.Equal(string.Empty, result.ToString());
+                    Assert.Equal<ushort>(0, result.Value);
                 }
                 catch
                 {
@@ -1038,15 +1022,8 @@ namespace CdnGetter.UnitTests
                 {
                     bool returnValue = Parsing.RomanNumeral.TryParse(text, out Parsing.RomanNumeral result);
                     Assert.True(returnValue);
-                    if (string.IsNullOrEmpty(text))
-                        Assert.Null(result.Value);
-                    else
-                    {
-                        Assert.NotNull(result.Value);
-                        Assert.Equal(text, result.Value);
-                    }
-                    int actual = result.GetValue();
-                    Assert.Equal(expected, actual);
+                    Assert.Equal(text, result.ToString());
+                    Assert.Equal(expected, result.Value);
                 }
                 catch
                 {
@@ -1057,15 +1034,8 @@ namespace CdnGetter.UnitTests
                 {
                     bool returnValue = Parsing.RomanNumeral.TryParse(text.AsSpan(), out Parsing.RomanNumeral result);
                     Assert.True(returnValue);
-                    if (string.IsNullOrEmpty(text))
-                        Assert.Null(result.Value);
-                    else
-                    {
-                        Assert.NotNull(result.Value);
-                        Assert.Equal(text, result.Value);
-                    }
-                    int actual = result.GetValue();
-                    Assert.Equal(expected, actual);
+                    Assert.Equal(text, result.ToString());
+                    Assert.Equal(expected, result.Value);
                 }
                 catch
                 {
@@ -1076,7 +1046,7 @@ namespace CdnGetter.UnitTests
         }
 
         /// <summary>
-        /// Unit test for <see cref="Parsing.RomanNumeral.TryParse(ReadOnlySpan{char}, int, int, out Parsing.RomanNumeral, out int)" />.
+        /// Unit test for <see cref="Parsing.RomanNumeral.TryParse(Parsing.ParsingSource, int, int, out Parsing.RomanNumeral, out int)" />.
         /// </summary>
         [Fact]
         public void MatcherTryParseTest()
@@ -1084,77 +1054,69 @@ namespace CdnGetter.UnitTests
             RotatingEnumerable<string> leadingTextValues = new(string.Empty, "M", " .", "x", "ab", "5", " -");
             RotatingEnumerable<string> trailingTextValues = new(string.Empty, "z", " ", "1", "-+", "\r\n", "II", "V");
             using IEnumerator<(string LeadingText, string TrailingText)> enumerator = leadingTextValues.SelectMany(l => trailingTextValues.Select(t => (l, t))).GetEnumerator();
-            foreach ((string text, int startIndex, int endIndex, int altEndIndex1, int altEndIndex2, string expectedResult, int expectedNextIndex, bool expectedReturnValue) in leadingTextValues.GetValues()
+            foreach ((string text, int startIndex, int count, int altCount1, int altCount2, string expectedResult, ushort expectedValue, int expectedNextIndex, bool expectedReturnValue) in leadingTextValues.GetValues()
                 .SelectMany(lt => trailingTextValues.GetValues().Select(tt => (lt + tt, lt.Length,
-                    (tt.Length > 0) ? tt switch { "II" or "V" => lt.Length, _ =>  lt.Length + 1 } : lt.Length,
-                    (tt.Length > 0) ? tt switch { "II" or "V" => lt.Length, _ =>  lt.Length + tt.Length } : lt.Length)))
-                .Select(a => (a.Item1, a.Length, a.Length, a.Item3, a.Item4, string.Empty, a.Length, false)).Concat(GetRomanNumeralTestValues().Select((a, i) =>
+                    (tt.Length > 0) ? tt switch { "II" or "V" => lt.Length, _ =>  1 } : 0,
+                    (tt.Length > 0) ? tt switch { "II" or "V" => lt.Length, _ =>  tt.Length } : 0)))
+                .Select(a => (a.Item1, a.Length, 0, a.Item3, a.Item4, string.Empty, (ushort)0, a.Length, false)).Concat(GetRomanNumeralTestValues().Select((a, i) =>
             {
                 enumerator.MoveNext();
                 string r = (i % 1 == 0) ? a.Text : a.Text.ToLower();
                 (string leadingText, string trailingText) = enumerator.Current;
-                return (leadingText + r + trailingText, leadingText.Length, leadingText.Length + r.Length,
-                    leadingText.Length + ((trailingText.Length > 0) ? trailingText switch { "II" or "V" => r.Length, _ =>  r.Length  + 1 } : r.Length),
-                    leadingText.Length + ((trailingText.Length > 0) ? trailingText switch { "II" or "V" => r.Length, _ =>  r.Length + trailingText.Length } : r.Length),
-                    Result: r, leadingText.Length + r.Length, true);
+                return (leadingText + r + trailingText, leadingText.Length, r.Length,
+                    (trailingText.Length > 0) ? trailingText switch { "II" or "V" => r.Length, _ =>  r.Length  + 1 } : r.Length,
+                    (trailingText.Length > 0) ? trailingText switch { "II" or "V" => r.Length, _ =>  r.Length + trailingText.Length } : r.Length,
+                    Result: r, a.Value, leadingText.Length + r.Length, true);
             })))
             {
+                Parsing.ParsingSource source = new(text);
                 try
                 {
-                    bool actualReturnValue = Parsing.RomanNumeral.TryParse(text.AsSpan(), startIndex, endIndex, out Parsing.RomanNumeral actualResult, out int actualNextIndex);
+                    bool actualReturnValue = Parsing.RomanNumeral.TryParse(source, startIndex, count, out Parsing.RomanNumeral actualResult, out int actualNextIndex);
                     Assert.Equal(expectedReturnValue, actualReturnValue);
-                    if (expectedResult.Length > 0)
-                    {
-                        Assert.NotNull(actualResult.Value);
-                        Assert.Equal(expectedResult, actualResult.Value);
-                    }
-                    else
-                        Assert.Null(actualResult.Value);
+                    string s = actualResult.ToString();
+                    Assert.NotNull(s);
+                    Assert.Equal(expectedResult, s);
+                    Assert.Equal(expectedValue, actualResult.Value);
                     Assert.Equal(expectedNextIndex, actualNextIndex);
                 }
                 catch
                 {
-                    _output.WriteLine($"Failing {nameof(Parsing.RomanNumeral.Matcher.TryParse)}(target: \"{text.ToCsLikeCode()}\".AsSpan(), startIndex: {startIndex}, endIndex: {endIndex}, out Parsing.RomanNumeral actualResult, out int actualEndIndex); // expectedReturnValue: {expectedReturnValue}, expectedResult: {{{expectedResult}}}, expectedNextIndex: {expectedNextIndex}");
+                    _output.WriteLine($"Failing {nameof(Parsing.RomanNumeral.Matcher.TryParse)}(target: \"{text.ToCsLikeCode()}\".AsSpan(), startIndex: {startIndex}, endIndex: {count}, out Parsing.RomanNumeral actualResult, out int actualEndIndex); // expectedReturnValue: {expectedReturnValue}, expectedResult: {{{expectedResult}}}, expectedNextIndex: {expectedNextIndex}");
                     throw;
                 }
-                if (altEndIndex1 > endIndex)
+                if (altCount1 > count)
                 {
                     try
                     {
-                        bool actualReturnValue = Parsing.RomanNumeral.TryParse(text.AsSpan(), startIndex, altEndIndex1, out Parsing.RomanNumeral actualResult, out int actualNextIndex);
+                        bool actualReturnValue = Parsing.RomanNumeral.TryParse(source, startIndex, altCount1, out Parsing.RomanNumeral actualResult, out int actualNextIndex);
                         Assert.Equal(expectedReturnValue, actualReturnValue);
-                        if (expectedResult.Length > 0)
-                        {
-                            Assert.NotNull(actualResult.Value);
-                            Assert.Equal(expectedResult, actualResult.Value);
-                        }
-                        else
-                            Assert.Null(actualResult.Value);
+                        string s = actualResult.ToString();
+                        Assert.NotNull(s);
+                        Assert.Equal(expectedResult, s);
+                        Assert.Equal(expectedValue, actualResult.Value);
                         Assert.Equal(expectedNextIndex, actualNextIndex);
                     }
                     catch
                     {
-                        _output.WriteLine($"Failing {nameof(Parsing.RomanNumeral.Matcher.TryParse)}(target: \"{text.ToCsLikeCode()}\".AsSpan(), startIndex: {startIndex}, endIndex: {altEndIndex1}, out Parsing.RomanNumeral actualResult, out int actualEndIndex); // expectedReturnValue: {expectedReturnValue}, expectedResult: {{{expectedResult}}}, expectedNextIndex: {expectedNextIndex}");
+                        _output.WriteLine($"Failing {nameof(Parsing.RomanNumeral.Matcher.TryParse)}(target: \"{text.ToCsLikeCode()}\".AsSpan(), startIndex: {startIndex}, endIndex: {altCount1}, out Parsing.RomanNumeral actualResult, out int actualEndIndex); // expectedReturnValue: {expectedReturnValue}, expectedResult: {{{expectedResult}}}, expectedNextIndex: {expectedNextIndex}");
                         throw;
                     }
-                    if (altEndIndex2 > altEndIndex1)
+                    if (altCount2 > altCount1)
                     {
                         try
                         {
-                            bool actualReturnValue = Parsing.RomanNumeral.TryParse(text.AsSpan(), startIndex, altEndIndex2, out Parsing.RomanNumeral actualResult, out int actualNextIndex);
+                            bool actualReturnValue = Parsing.RomanNumeral.TryParse(source, startIndex, altCount2, out Parsing.RomanNumeral actualResult, out int actualNextIndex);
                             Assert.Equal(expectedReturnValue, actualReturnValue);
-                            if (expectedResult.Length > 0)
-                            {
-                                Assert.NotNull(actualResult.Value);
-                                Assert.Equal(expectedResult, actualResult.Value);
-                            }
-                            else
-                                Assert.Null(actualResult.Value);
+                            string s = actualResult.ToString();
+                            Assert.NotNull(s);
+                            Assert.Equal(expectedResult, s);
+                            Assert.Equal(expectedValue, actualResult.Value);
                             Assert.Equal(expectedNextIndex, actualNextIndex);
                         }
                         catch
                         {
-                            _output.WriteLine($"Failing {nameof(Parsing.RomanNumeral.Matcher.TryParse)}(target: \"{text.ToCsLikeCode()}\".AsSpan(), startIndex: {startIndex}, endIndex: {altEndIndex2}, out Parsing.RomanNumeral actualResult, out int actualEndIndex); // expectedReturnValue: {expectedReturnValue}, expectedResult: {{{expectedResult}}}, expectedNextIndex: {expectedNextIndex}");
+                            _output.WriteLine($"Failing {nameof(Parsing.RomanNumeral.Matcher.TryParse)}(target: \"{text.ToCsLikeCode()}\".AsSpan(), startIndex: {startIndex}, endIndex: {altCount2}, out Parsing.RomanNumeral actualResult, out int actualEndIndex); // expectedReturnValue: {expectedReturnValue}, expectedResult: {{{expectedResult}}}, expectedNextIndex: {expectedNextIndex}");
                             throw;
                         }
                     }
@@ -1163,7 +1125,7 @@ namespace CdnGetter.UnitTests
         }
         
         /// <summary>
-        /// Unit test for <see cref="Parsing.RomanNumeral.Matcher.Match(ReadOnlySpan{char}, int, int, out int)" />.
+        /// Unit test for <see cref="Parsing.RomanNumeral.Matcher.Match(Parsing.ParsingSource, int, int, out int)" />.
         /// </summary>
         [Fact]
         public void MatcherMatchTest()
@@ -1171,56 +1133,57 @@ namespace CdnGetter.UnitTests
             RotatingEnumerable<string> leadingTextValues = new(string.Empty, "M", " .", "x", "ab", "5", " -");
             RotatingEnumerable<string> trailingTextValues = new(string.Empty, "z", " ", "1", "-+", "\r\n", "II", "V");
             using IEnumerator<(string LeadingText, string TrailingText)> enumerator = leadingTextValues.SelectMany(l => trailingTextValues.Select(t => (l, t))).GetEnumerator();
-            foreach ((string text, int startIndex, int endIndex, int altEndIndex1, int altEndIndex2, int expectedNextIndex, bool expectedReturnValue) in leadingTextValues.GetValues()
+            foreach ((string text, int startIndex, int count, int altCount1, int altCount2, int expectedNextIndex, bool expectedReturnValue) in leadingTextValues.GetValues()
                 .SelectMany(lt => trailingTextValues.GetValues().Select(tt => (lt + tt, lt.Length,
-                    (tt.Length > 0) ? tt switch { "II" or "V" => lt.Length, _ =>  lt.Length + 1 } : lt.Length,
-                    (tt.Length > 0) ? tt switch { "II" or "V" => lt.Length, _ =>  lt.Length + tt.Length } : lt.Length)))
+                    (tt.Length > 0) ? tt switch { "II" or "V" => lt.Length, _ =>  1 } : 0,
+                    (tt.Length > 0) ? tt switch { "II" or "V" => lt.Length, _ =>  tt.Length } : 0)))
                 .Select(a => (a.Item1, a.Length, a.Length, a.Item3, a.Item4, a.Length, false)).Concat(GetRomanNumeralTestValues().Select((a, i) =>
             {
                 enumerator.MoveNext();
                 string r = (i % 1 == 0) ? a.Text : a.Text.ToLower();
                 (string leadingText, string trailingText) = enumerator.Current;
-                return (leadingText + r + trailingText, leadingText.Length, leadingText.Length + r.Length,
-                    leadingText.Length + ((trailingText.Length > 0) ? trailingText switch { "II" or "V" => r.Length, _ =>  r.Length  + 1 } : r.Length),
-                    leadingText.Length + ((trailingText.Length > 0) ? trailingText switch { "II" or "V" => r.Length, _ =>  r.Length + trailingText.Length } : r.Length),
+                return (leadingText + r + trailingText, leadingText.Length, r.Length,
+                    (trailingText.Length > 0) ? trailingText switch { "II" or "V" => r.Length, _ =>  r.Length  + 1 } : r.Length,
+                    (trailingText.Length > 0) ? trailingText switch { "II" or "V" => r.Length, _ =>  r.Length + trailingText.Length } : r.Length,
                     leadingText.Length + r.Length, true);
             })))
             {
+                Parsing.ParsingSource source = new(text);
                 try
                 {
-                    bool actualReturnValue = Parsing.RomanNumeral.Matcher.Instance.Match(text.AsSpan(), startIndex, endIndex, out int actualNextIndex);
+                    bool actualReturnValue = Parsing.RomanNumeral.Matcher.Instance.Match(source, startIndex, count, out int actualNextIndex);
                     Assert.Equal(expectedReturnValue, actualReturnValue);
                     Assert.Equal(expectedNextIndex, actualNextIndex);
                 }
                 catch
                 {
-                    _output.WriteLine($"Failing {nameof(Parsing.RomanNumeral.Matcher.Match)}(target: \"{text.ToCsLikeCode()}\".AsSpan(), startIndex: {startIndex}, endIndex: {endIndex}, out int actualEndIndex); // expectedReturnValue: {expectedReturnValue}, expectedNextIndex: {expectedNextIndex}");
+                    _output.WriteLine($"Failing {nameof(Parsing.RomanNumeral.Matcher.Match)}(target: \"{text.ToCsLikeCode()}\".AsSpan(), startIndex: {startIndex}, endIndex: {count}, out int actualEndIndex); // expectedReturnValue: {expectedReturnValue}, expectedNextIndex: {expectedNextIndex}");
                     throw;
                 }
-                if (altEndIndex1 > endIndex)
+                if (altCount1 > count)
                 {
                     try
                     {
-                        bool actualReturnValue = Parsing.RomanNumeral.Matcher.Instance.Match(text.AsSpan(), startIndex, altEndIndex1, out int actualNextIndex);
+                        bool actualReturnValue = Parsing.RomanNumeral.Matcher.Instance.Match(source, startIndex, altCount1, out int actualNextIndex);
                         Assert.Equal(expectedReturnValue, actualReturnValue);
                         Assert.Equal(expectedNextIndex, actualNextIndex);
                     }
                     catch
                     {
-                        _output.WriteLine($"Failing {nameof(Parsing.RomanNumeral.Matcher.Match)}(target: \"{text.ToCsLikeCode()}\".AsSpan(), startIndex: {startIndex}, endIndex: {altEndIndex1}, out int actualEndIndex); // expectedReturnValue: {expectedReturnValue}, expectedNextIndex: {expectedNextIndex}");
+                        _output.WriteLine($"Failing {nameof(Parsing.RomanNumeral.Matcher.Match)}(target: \"{text.ToCsLikeCode()}\".AsSpan(), startIndex: {startIndex}, endIndex: {altCount1}, out int actualEndIndex); // expectedReturnValue: {expectedReturnValue}, expectedNextIndex: {expectedNextIndex}");
                         throw;
                     }
-                    if (altEndIndex2 > altEndIndex1)
+                    if (altCount2 > altCount1)
                     {
                         try
                         {
-                            bool actualReturnValue = Parsing.RomanNumeral.Matcher.Instance.Match(text.AsSpan(), startIndex, altEndIndex2, out int actualNextIndex);
+                            bool actualReturnValue = Parsing.RomanNumeral.Matcher.Instance.Match(source, startIndex, altCount2, out int actualNextIndex);
                             Assert.Equal(expectedReturnValue, actualReturnValue);
                             Assert.Equal(expectedNextIndex, actualNextIndex);
                         }
                         catch
                         {
-                            _output.WriteLine($"Failing {nameof(Parsing.RomanNumeral.Matcher.Match)}(target: \"{text.ToCsLikeCode()}\".AsSpan(), startIndex: {startIndex}, endIndex: {altEndIndex2}, out int actualEndIndex); // expectedReturnValue: {expectedReturnValue}, expectedNextIndex: {expectedNextIndex}");
+                            _output.WriteLine($"Failing {nameof(Parsing.RomanNumeral.Matcher.Match)}(target: \"{text.ToCsLikeCode()}\".AsSpan(), startIndex: {startIndex}, endIndex: {altCount2}, out int actualEndIndex); // expectedReturnValue: {expectedReturnValue}, expectedNextIndex: {expectedNextIndex}");
                             throw;
                         }
                     }

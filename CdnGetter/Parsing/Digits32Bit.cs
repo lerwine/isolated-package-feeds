@@ -1,10 +1,12 @@
 using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace CdnGetter.Parsing;
 
 /// <summary>
 /// Represents a numerical token that has a 32-bit absolute value.
 /// </summary>
+[StructLayout(LayoutKind.Sequential)]
 #pragma warning disable CA2231
 public readonly struct Digits32Bit : INumericalToken
 #pragma warning restore CA2231

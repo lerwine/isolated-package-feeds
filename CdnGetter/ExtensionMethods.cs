@@ -9,6 +9,30 @@ public static class ExtensionMethods
 
     public static readonly Regex LineBreakRegex = new(@"\r?\n|\n", RegexOptions.Compiled);
     
+    public static bool ValidateSourceIsEmpty(this Parsing.ParsingSource source, ref int startIndex, ref int count)
+    {
+        if (source.Count == 0)
+            startIndex = 0;
+        else if (startIndex >= source.Count)
+            startIndex = source.Count;
+        else
+        {
+            if (startIndex < 0)
+            {
+                count += startIndex;
+                startIndex = 0;
+            }
+            if (count > 0)
+            {
+                if (count + startIndex > source.Count)
+                    count = source.Count - startIndex;
+                return false;
+            }
+        }
+        count = 0;
+        return true;
+    }
+
     public static bool ValidateExtentsIsEmpty<T>(this ReadOnlySpan<T> span, ref int startIndex, ref int endIndex)
     {
         if (span.IsEmpty)
@@ -30,6 +54,30 @@ public static class ExtensionMethods
             return false;
         }
         return true;
+    }
+
+    public static bool ValidateSourceNotEmpty(this Parsing.ParsingSource source, ref int startIndex, ref int count)
+    {
+        if (source.Count == 0)
+            startIndex = 0;
+        else if (startIndex >= source.Count)
+            startIndex = source.Count;
+        else
+        {
+            if (startIndex < 0)
+            {
+                count += startIndex;
+                startIndex = 0;
+            }
+            if (count > 0)
+            {
+                if (count + startIndex > source.Count)
+                    count = source.Count - startIndex;
+                return true;
+            }
+        }
+        count = 0;
+        return false;
     }
 
     public static bool ValidateExtentsNotEmpty<T>(this ReadOnlySpan<T> span, ref int startIndex, ref int endIndex)
