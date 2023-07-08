@@ -31,7 +31,7 @@ public class DigitsMatcher : IMatcher
         ReadOnlySpan<char> span = source.AsSpan(startIndex, count);
         int endIndex = startIndex + count;
         char c = span[nextIndex];
-        if (c == ParsingExtensionMethods.DELIMITER_DASH)
+        if (c == Parsing.DELIMITER_DASH)
         {
             if (++nextIndex == endIndex)
             {
@@ -75,7 +75,7 @@ public class DigitsMatcher : IMatcher
         ReadOnlySpan<char> span = source.AsSpan(startIndex, count);
         int endIndex = startIndex + count;
         char c = span[nextIndex];
-        bool hasNegativeSign = c == ParsingExtensionMethods.DELIMITER_DASH;
+        bool hasNegativeSign = c == Parsing.DELIMITER_DASH;
         if (hasNegativeSign)
         {
             if (++nextIndex == endIndex)
@@ -93,7 +93,7 @@ public class DigitsMatcher : IMatcher
             return false;
         }
         int zeroPadLength = 0;
-        if (c == ParsingExtensionMethods.ZERO)
+        if (c == Parsing.ZERO)
         {
             do
             {
@@ -105,7 +105,7 @@ public class DigitsMatcher : IMatcher
                 }
                 c = span[nextIndex];
             }
-            while (c == ParsingExtensionMethods.ZERO);
+            while (c == Parsing.ZERO);
             if (!char.IsDigit(c))
             {
                 result = new Digits8Bit(0, hasNegativeSign, zeroPadLength - 1);

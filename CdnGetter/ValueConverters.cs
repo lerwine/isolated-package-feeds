@@ -16,9 +16,9 @@ public static class ValueConverters
         s => s.ConvertToJsonNode()
     );
 
-    public static readonly ValueConverter<Parsing.ISoftwareVersion, string> VersionConverter = new(
-        v => v.ToString(),
-        s => Parsing.NameVersion.Create(s)
+    public static readonly ValueConverter<Parsing.Version.ISoftwareVersion?, string> VersionConverter = new(
+        v => (v == null) ? string.Empty : v.ToString(),
+        s => Parsing.Version.Version.ParseSoftwareVersion(s)
     );
 
     

@@ -18,15 +18,15 @@ public class LocalVersion : ModificationTrackingModelBase
     
     public const int MAXLENGTH_Version = 1024;
     
-    private Parsing.ISoftwareVersion _version = Parsing.NameVersion.Empty;
+    private Parsing.Version.ISoftwareVersion _version = Parsing.Version.NameVersion.Empty;
 
     /// <summary>
     /// Gets or sets the library version.
     /// </summary>
-    public Parsing.ISoftwareVersion Version
+    public Parsing.Version.ISoftwareVersion Version
     {
         get => _version;
-        set => _version = value ?? Parsing.NameVersion.Empty;
+        set => _version = value ?? Parsing.Version.NameVersion.Empty;
     }
 
     public const ushort DEFAULTVALUE_Order = ushort.MaxValue;

@@ -25,9 +25,9 @@ public readonly struct CharacterToken : IStringToken
 
     public CharacterToken(char value) => Value = value;
     
-    public int CompareTo(IToken? other) => (other is null) ? 1 : ParsingExtensionMethods.NoCaseComparer.Compare(ToString(), other.GetValue());
+    public int CompareTo(IToken? other) => (other is null) ? 1 : Parsing.NoCaseComparer.Compare(ToString(), other.GetValue());
 
-    public bool Equals(IToken? other) => other is not null && ParsingExtensionMethods.NoCaseComparer.Equals(ToString(), other.GetValue());
+    public bool Equals(IToken? other) => other is not null && Parsing.NoCaseComparer.Equals(ToString(), other.GetValue());
 
     public override bool Equals(object? obj) => obj is IToken other && Equals(other);
 
@@ -35,7 +35,7 @@ public readonly struct CharacterToken : IStringToken
 
     IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)Enumerable.Repeat(Value, 1)).GetEnumerator();
 
-    public override int GetHashCode() => ParsingExtensionMethods.NoCaseComparer.GetHashCode(ToString());
+    public override int GetHashCode() => Parsing.NoCaseComparer.GetHashCode(ToString());
 
     public override string ToString() => new(Value, 1);
 

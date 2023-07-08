@@ -71,10 +71,10 @@ public class TokenList : ITokenList
             return 1;
         string s = values.Current;
         if (s.Length > v.Length || !values.MoveNext())
-            return ParsingExtensionMethods.NoCaseComparer.Compare(s, v);
+            return Parsing.NoCaseComparer.Compare(s, v);
         StringBuilder sb = new(s);
         do { sb.Append(values.Current); } while (sb.Length <= v.Length && values.MoveNext());
-        return ParsingExtensionMethods.NoCaseComparer.Compare(sb.ToString(), v);
+        return Parsing.NoCaseComparer.Compare(sb.ToString(), v);
     }
 
     public bool Equals(IToken? other)
@@ -100,10 +100,10 @@ public class TokenList : ITokenList
             return false;
         string s = values.Current;
         if (s.Length > v.Length || !values.MoveNext())
-            return ParsingExtensionMethods.NoCaseComparer.Equals(s, v);
+            return Parsing.NoCaseComparer.Equals(s, v);
         StringBuilder sb = new(s);
         do { sb.Append(values.Current); } while (sb.Length <= v.Length && values.MoveNext());
-        return ParsingExtensionMethods.NoCaseComparer.Equals(sb.ToString(), v);
+        return Parsing.NoCaseComparer.Equals(sb.ToString(), v);
     }
 
     public IEnumerator<IToken> GetEnumerator() => _items.AsEnumerable().GetEnumerator();

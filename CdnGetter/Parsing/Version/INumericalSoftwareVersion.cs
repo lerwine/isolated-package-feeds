@@ -1,14 +1,14 @@
-namespace CdnGetter.Parsing;
+namespace CdnGetter.Parsing.Version;
 
 public interface INumericalSoftwareVersion : ISoftwareVersion
 {
     new INumericalToken Major { get; }
 
-    new INumericalToken? Minor { get; }
+    new DelimitedNumericalToken? Minor { get; }
 
-    new INumericalToken? Patch { get; }
+    new DelimitedNumericalToken? Patch { get; }
 
-    new INumericalTokenList Micro { get; }
+    new NumericalTokenList Micro { get; }
 }
     
     // public static readonly ValueConverter<SwVersion, string> Converter = new(

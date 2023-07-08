@@ -9,9 +9,9 @@ namespace CdnGetter.Parsing;
 public readonly partial struct RomanNumeral : INumericalToken
 #pragma warning restore CA2231
 {
-    public static readonly RomanNumeral MaxValue = new(ParsingExtensionMethods.ROMAN_NUMERAL_MAX_VALUE);
+    public static readonly RomanNumeral MinValue = new(1);
     
-    public static readonly RomanNumeral Empty = new();
+    public static readonly RomanNumeral MaxValue = new(Parsing.ROMAN_NUMERAL_MAX_VALUE);
     
     private readonly ParsingSource _source;
 
@@ -28,12 +28,12 @@ public readonly partial struct RomanNumeral : INumericalToken
 
     int INumericalToken.ZeroPadLength => 0;
 
-    bool INumericalToken.IsZero => Value  == 0;
+    bool INumericalToken.IsZero => false;
 
     /// <summary>
     /// Creates a new <c>RomanNumeral</c> token.
     /// </summary>
-    public RomanNumeral() => (_source, _startIndex, Length, Value) = (ParsingSource.Empty, 0, 0, 0);
+    public RomanNumeral() => (_source, _startIndex, Length, Value) = (MinValue._source, MinValue._startIndex, MinValue.Length, MinValue.Value);
     
     /// <summary>
     /// Creates a new <c>RomanNumeral</c> token.
@@ -60,12 +60,8 @@ public readonly partial struct RomanNumeral : INumericalToken
         if (other is null)
             return 1;
         if (other is INumericalToken numericalToken)
-        {
-            if (Value == 0)
-                return numericalToken.IsZero ? 0 : numericalToken.HasNegativeSign ? 1 : -1;
-            return (numericalToken.IsZero || numericalToken.HasNegativeSign) ? 1 : (numericalToken.TryGet16Bit(out ushort s) && s <= ParsingExtensionMethods.ROMAN_NUMERAL_MAX_VALUE) ? Value.CompareTo(s) : -1;
-        }
-        return ParsingExtensionMethods.NoCaseComparer.Compare(Value, other.GetValue());
+            return (numericalToken.IsZero || numericalToken.HasNegativeSign) ? 1 : (numericalToken.TryGet16Bit(out ushort s) && s <= Parsing.ROMAN_NUMERAL_MAX_VALUE) ? Value.CompareTo(s) : -1;
+        return Parsing.NoCaseComparer.Compare(Value, other.GetValue());
     }
 
     public bool Equals(IToken? other)
@@ -73,9 +69,9 @@ public readonly partial struct RomanNumeral : INumericalToken
         if (other is null)
             return false;
         if (other is INumericalToken numericalToken)
-            return (Value == 0) ? numericalToken.IsZero : !numericalToken.IsZero && !numericalToken.HasNegativeSign && numericalToken.TryGet16Bit(out ushort value) &&
-                value <= ParsingExtensionMethods.ROMAN_NUMERAL_MAX_VALUE && Value == value;
-        return ParsingExtensionMethods.NoCaseComparer.Equals(Value, other.GetValue());
+            return !numericalToken.IsZero && !numericalToken.HasNegativeSign && numericalToken.TryGet16Bit(out ushort value) &&
+                value <= Parsing.ROMAN_NUMERAL_MAX_VALUE && Value == value;
+        return Parsing.NoCaseComparer.Equals(Value, other.GetValue());
     }
 
     public override bool Equals(object? obj) => obj is IToken other && Equals(other);
@@ -124,10 +120,7 @@ public readonly partial struct RomanNumeral : INumericalToken
 
     public static RomanNumeral Parse(string text)
     {
-        if (string.IsNullOrEmpty(text))
-            return Empty;
-            
-        if (TryParse(new ParsingSource(text), 0, text.Length, out RomanNumeral result, out int nextIndex))
+        if (!string.IsNullOrEmpty(text) && TryParse(new ParsingSource(text), 0, text.Length, out RomanNumeral result, out int nextIndex))
         {
             if (nextIndex == text.Length)
                 return result;
@@ -139,9 +132,7 @@ public readonly partial struct RomanNumeral : INumericalToken
     
     public static RomanNumeral Parse(ReadOnlySpan<char> text)
     {
-        if (text.IsEmpty)
-            return Empty;
-        if (TryParse(new ParsingSource(new string(text)), 0, text.Length, out RomanNumeral result, out int nextIndex))
+        if (!text.IsEmpty && TryParse(new ParsingSource(new string(text)), 0, text.Length, out RomanNumeral result, out int nextIndex))
         {
             if (nextIndex == text.Length)
                 return result;
@@ -153,11 +144,9 @@ public readonly partial struct RomanNumeral : INumericalToken
     
     public static bool TryParse(string text, out RomanNumeral result)
     {
-        if (string.IsNullOrEmpty(text))
-            result = Empty;
-        else if (!TryParse(new ParsingSource(text), 0, text.Length, out result, out int nextIndex) || nextIndex < text.Length)
+        if (string.IsNullOrEmpty(text) || !TryParse(new ParsingSource(text), 0, text.Length, out result, out int nextIndex) || nextIndex < text.Length)
         {
-            result = Empty;
+            result = MinValue;
             return false;
         }
         return true;
@@ -165,33 +154,31 @@ public readonly partial struct RomanNumeral : INumericalToken
     
     public static bool TryParse(ReadOnlySpan<char> text, out RomanNumeral result)
     {
-        if (text.IsEmpty)
-            result = Empty;
-        else if (!TryParse(new ParsingSource(new string(text)), 0, text.Length, out result, out int nextIndex) || nextIndex < text.Length)
+        if (text.IsEmpty || !TryParse(new ParsingSource(new string(text)), 0, text.Length, out result, out int nextIndex) || nextIndex < text.Length)
         {
-            result = Empty;
+            result = MinValue;
             return false;
         }
         return true;
     }
     
-    int INumericalToken.CompareAbs(BigInteger other) => (other.CompareTo(ParsingExtensionMethods.ROMAN_NUMERAL_MAX_VALUE) > 0) ? 1: Value.CompareTo((ushort)other);
+    int INumericalToken.CompareAbs(BigInteger other) => (other.CompareTo(Parsing.ROMAN_NUMERAL_MAX_VALUE) > 0) ? 1: Value.CompareTo((ushort)other);
 
-    int INumericalToken.CompareAbs(ulong other) => (other > ParsingExtensionMethods.ROMAN_NUMERAL_MAX_VALUE) ? 1 : Value.CompareTo((ushort)other);
+    int INumericalToken.CompareAbs(ulong other) => (other > Parsing.ROMAN_NUMERAL_MAX_VALUE) ? 1 : Value.CompareTo((ushort)other);
 
-    int INumericalToken.CompareAbs(uint other) => (other > ParsingExtensionMethods.ROMAN_NUMERAL_MAX_VALUE) ? 1 : Value.CompareTo((ushort)other);
+    int INumericalToken.CompareAbs(uint other) => (other > Parsing.ROMAN_NUMERAL_MAX_VALUE) ? 1 : Value.CompareTo((ushort)other);
 
-    int INumericalToken.CompareAbs(ushort other) => (other > ParsingExtensionMethods.ROMAN_NUMERAL_MAX_VALUE) ? 1 : Value.CompareTo((ushort)other);
+    int INumericalToken.CompareAbs(ushort other) => (other > Parsing.ROMAN_NUMERAL_MAX_VALUE) ? 1 : Value.CompareTo((ushort)other);
 
     int INumericalToken.CompareAbs(byte other) => Value.CompareTo(other);
 
-    bool INumericalToken.EqualsAbs(BigInteger other) => other.CompareTo(ParsingExtensionMethods.ROMAN_NUMERAL_MAX_VALUE) <= 0 && Value.Equals((ushort)other);
+    bool INumericalToken.EqualsAbs(BigInteger other) => other.CompareTo(Parsing.ROMAN_NUMERAL_MAX_VALUE) <= 0 && Value.Equals((ushort)other);
 
-    bool INumericalToken.EqualsAbs(ulong other) => other <= ParsingExtensionMethods.ROMAN_NUMERAL_MAX_VALUE && Value.Equals((ushort)other);
+    bool INumericalToken.EqualsAbs(ulong other) => other <= Parsing.ROMAN_NUMERAL_MAX_VALUE && Value.Equals((ushort)other);
 
-    bool INumericalToken.EqualsAbs(uint other) => other <= ParsingExtensionMethods.ROMAN_NUMERAL_MAX_VALUE && Value.Equals((ushort)other);
+    bool INumericalToken.EqualsAbs(uint other) => other <= Parsing.ROMAN_NUMERAL_MAX_VALUE && Value.Equals((ushort)other);
 
-    bool INumericalToken.EqualsAbs(ushort other) => other <= ParsingExtensionMethods.ROMAN_NUMERAL_MAX_VALUE && Value.Equals((ushort)other);
+    bool INumericalToken.EqualsAbs(ushort other) => other <= Parsing.ROMAN_NUMERAL_MAX_VALUE && Value.Equals((ushort)other);
 
     bool INumericalToken.EqualsAbs(byte other) => Value.Equals(other);
 

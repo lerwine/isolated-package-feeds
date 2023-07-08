@@ -828,7 +828,7 @@ public readonly partial struct RomanNumeral
 
     public static string? ToRomanNumeral(ushort value)
     {
-        if (value > ParsingExtensionMethods.ROMAN_NUMERAL_MAX_VALUE)
+        if (value > Parsing.ROMAN_NUMERAL_MAX_VALUE)
             throw new ArgumentOutOfRangeException(nameof(value));
         switch (value)
         {
@@ -997,6 +997,13 @@ public readonly partial struct RomanNumeral
         result = new(source, startIndex, nextIndex - startIndex, value);
         return true;
     }
+    
+    public static bool IsRomanNumeralChar(char value) => value switch
+    {
+        ROMAN_NUM_1000_UC or ROMAN_NUM_1000_LC or ROMAN_NUM_500_UC or ROMAN_NUM_500_LC or ROMAN_NUM_100_UC or ROMAN_NUM_100_LC or ROMAN_NUM_50_UC or ROMAN_NUM_50_LC or ROMAN_NUM_10_UC or ROMAN_NUM_10_LC or ROMAN_NUM_5_UC
+            or ROMAN_NUM_5_LC or ROMAN_NUM_1_UC or ROMAN_NUM_1_LC => true,
+        _ => false,
+    };
     
     public sealed class Matcher : IMatcher
     {

@@ -1,7 +1,8 @@
 using System.Collections;
 using System.Numerics;
+using static CdnGetter.Parsing.Version.Version;
 
-namespace CdnGetter.Parsing;
+namespace CdnGetter.Parsing.Version;
 
 public readonly struct NamedNumericalToken : INumericalToken, ITokenList
 {
@@ -24,10 +25,27 @@ public readonly struct NamedNumericalToken : INumericalToken, ITokenList
         _ => throw new IndexOutOfRangeException()
     };
 
-    public NamedNumericalToken() => (ValueToken, NameToken) = (Digits8Bit.Zero, StringToken.Empty);
+    public NamedNumericalToken() => (ValueToken, NameToken) = (Digits8Bit.Zero, WildcardToken);
     
-    public NamedNumericalToken(INumericalToken valueToken, IStringToken name) =>
-        (ValueToken, NameToken) = (valueToken ?? throw new ArgumentNullException(nameof(valueToken)), name ?? throw new ArgumentNullException(nameof(name)));
+    public NamedNumericalToken(Digits8Bit valueToken, StringToken name) => (ValueToken, NameToken) = (valueToken, name);
+
+    public NamedNumericalToken(Digits8Bit valueToken, CharacterToken name) => (ValueToken, NameToken) = (valueToken, name);
+
+    public NamedNumericalToken(Digits16Bit valueToken, StringToken name) => (ValueToken, NameToken) = (valueToken, name);
+
+    public NamedNumericalToken(Digits16Bit valueToken, CharacterToken name) => (ValueToken, NameToken) = (valueToken, name);
+
+    public NamedNumericalToken(Digits32Bit valueToken, StringToken name) => (ValueToken, NameToken) = (valueToken, name);
+
+    public NamedNumericalToken(Digits32Bit valueToken, CharacterToken name) => (ValueToken, NameToken) = (valueToken, name);
+
+    public NamedNumericalToken(Digits64Bit valueToken, StringToken name) => (ValueToken, NameToken) = (valueToken, name);
+
+    public NamedNumericalToken(Digits64Bit valueToken, CharacterToken name) => (ValueToken, NameToken) = (valueToken, name);
+
+    public NamedNumericalToken(DigitsNBit valueToken, StringToken name) => (ValueToken, NameToken) = (valueToken, name);
+
+    public NamedNumericalToken(DigitsNBit valueToken, CharacterToken name) => (ValueToken, NameToken) = (valueToken, name);
 
     int INumericalToken.CompareAbs(BigInteger other) => ValueToken.CompareAbs(other);
 

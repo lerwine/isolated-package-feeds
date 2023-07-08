@@ -1,4 +1,5 @@
 using System.Numerics;
+using static CdnGetter.Parsing.Parsing;
 
 namespace CdnGetter.Parsing;
 
@@ -9,6 +10,8 @@ namespace CdnGetter.Parsing;
 public readonly struct DigitsNBit : INumericalToken
 #pragma warning restore CA2231
 {
+    public static readonly DigitsNBit Zero = new(0);
+
     /// <summary>
     /// Gets the absolute value of this token.
     /// </summary>
@@ -61,6 +64,110 @@ public readonly struct DigitsNBit : INumericalToken
         Value = HasNegativeSign ? BigInteger.Negate(value) : value;
     }
 
+    public static bool TryParse(ParsingSource source, int startIndex, int count, out DigitsNBit result, out int nextIndex)
+    {
+        if (source.ValidateSourceIsEmpty(ref startIndex, ref count))
+        {
+            nextIndex = startIndex;
+            result = Zero;
+            return false;
+        }
+        nextIndex = startIndex;
+        char c = source[nextIndex++];
+        bool isNegative = c == DELIMITER_DASH;
+        int firstNz;
+        if (isNegative)
+        {
+            if (count == 1)
+            {
+                nextIndex = startIndex;
+                result = Zero;
+                return false;
+            }
+            firstNz = startIndex + 1;
+            c = source[nextIndex++];
+        }
+        else
+            firstNz = startIndex;
+        int endIndex = startIndex + count;
+        if (c == '0')
+        {
+            do
+            {
+                firstNz++;
+                if (nextIndex == endIndex)
+                    break;
+                c = source[nextIndex++];
+            }
+            while (c == '0');
+            if (!char.IsNumber(c) || nextIndex == endIndex)
+            {
+                result = new(0, isNegative, nextIndex - (startIndex + (isNegative ? 2 : 1)));
+                return true;
+            }
+        }
+        else if (!char.IsNumber(c))
+        {
+            nextIndex = startIndex;
+            result = Zero;
+            return false;
+        }
+        count = 0;
+        do
+        {
+            count++;
+            if (!char.IsNumber(source[nextIndex++]))
+                break;
+        }
+        while (nextIndex < endIndex);
+        result = new(BigInteger.Parse(source.ToString(firstNz, count)), isNegative, firstNz - (isNegative ? startIndex + 1 : startIndex));
+        return true;
+    }
+
+    public static DigitsNBit Parse(string text)
+    {
+        if (!string.IsNullOrEmpty(text) && TryParse(new ParsingSource(text), 0, text.Length, out DigitsNBit result, out int nextIndex))
+        {
+            if (nextIndex == text.Length)
+                return result;
+        }
+        else
+            nextIndex = 0;
+        throw new ArgumentException($"Invalid big integer sequence at index {nextIndex}.", nameof(text));
+    }
+
+    public static DigitsNBit Parse(ReadOnlySpan<char> text)
+    {
+        if (!text.IsEmpty && TryParse(new ParsingSource(new string(text)), 0, text.Length, out DigitsNBit result, out int nextIndex))
+        {
+            if (nextIndex == text.Length)
+                return result;
+        }
+        else
+            nextIndex = 0;
+        throw new ArgumentException($"Invalid big integer sequence at index {nextIndex}.", nameof(text));
+    }
+
+    public static bool TryParse(string text, out DigitsNBit result)
+    {
+        if (string.IsNullOrEmpty(text) || !TryParse(new ParsingSource(text), 0, text.Length, out result, out int nextIndex) || nextIndex < text.Length)
+        {
+            result = Zero;
+            return false;
+        }
+        return true;
+    }
+
+    public static bool TryParse(ReadOnlySpan<char> text, out DigitsNBit result)
+    {
+        if (text.IsEmpty || !TryParse(new ParsingSource(new string(text)), 0, text.Length, out result, out int nextIndex) || nextIndex < text.Length)
+        {
+            result = Zero;
+            return false;
+        }
+        return true;
+    }
+
     BigInteger INumericalToken.AsBigInteger() => Value;
 
     public int CompareTo(IToken? other)
@@ -77,7 +184,7 @@ public readonly struct DigitsNBit : INumericalToken
                 return HasNegativeSign ? numericalToken.CompareAbs(Value) : 1;
             return HasNegativeSign ? -1 : 0 - numericalToken.CompareAbs(Value);
         }
-        return ParsingExtensionMethods.NoCaseComparer.Compare(GetValue(), other.GetValue());
+        return NoCaseComparer.Compare(GetValue(), other.GetValue());
     }
 
     public bool Equals(IToken? other)
@@ -86,7 +193,7 @@ public readonly struct DigitsNBit : INumericalToken
             return false;
         if (other is INumericalToken numericalToken)
             return Value.Equals(0) ? numericalToken.IsZero : !numericalToken.IsZero && HasNegativeSign == numericalToken.HasNegativeSign && numericalToken.EqualsAbs(Value);
-        return ParsingExtensionMethods.NoCaseComparer.Equals(GetValue(), other.GetValue());
+        return NoCaseComparer.Equals(GetValue(), other.GetValue());
     }
 
     public override bool Equals(object? obj) => obj is IToken other && Equals(other);

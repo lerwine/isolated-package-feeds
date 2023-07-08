@@ -1,5 +1,6 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
+using static CdnGetter.Parsing.Parsing;
 
 namespace CdnGetter.Parsing;
 
@@ -11,12 +12,14 @@ namespace CdnGetter.Parsing;
 public readonly struct Digits16Bit : INumericalToken
 #pragma warning restore CA2231
 {
+    public static readonly Digits16Bit Zero = new(0);
+
     public static readonly Digits16Bit MaxValue = new(ushort.MaxValue);
     
     /// <summary>
     /// Gets the maximum length of the absolute-value string representation.
     /// </summary>
-    public static readonly int MAX_ABS_LENGTH;
+    public static readonly int MAX_ABS_LENGTH = ushort.MaxValue.ToString().Length;
     
     /// <summary>
     /// Gets the absolute value of this token.
@@ -34,8 +37,6 @@ public readonly struct Digits16Bit : INumericalToken
     public int ZeroPadLength { get; }
 
     bool INumericalToken.IsZero => Value == 0;
-
-    static Digits16Bit()  => MAX_ABS_LENGTH = ushort.MaxValue.ToString().Length;
 
     /// <summary>
     /// Creates a new <c>Digits16Bit</c> token.
@@ -84,6 +85,121 @@ public readonly struct Digits16Bit : INumericalToken
         ZeroPadLength = (leadingZeroCount < 0) ? 0 : leadingZeroCount;
     }
 
+    public static bool TryParse(ParsingSource source, int startIndex, int count, out Digits16Bit result, out int nextIndex)
+    {
+        if (source.ValidateSourceIsEmpty(ref startIndex, ref count))
+        {
+            nextIndex = startIndex;
+            result = Zero;
+            return false;
+        }
+        nextIndex = startIndex;
+        char c = source[nextIndex++];
+        bool isNegative = c == DELIMITER_DASH;
+        int firstNz;
+        if (isNegative)
+        {
+            if (count == 1)
+            {
+                nextIndex = startIndex;
+                result = Zero;
+                return false;
+            }
+            firstNz = startIndex + 1;
+            c = source[nextIndex++];
+        }
+        else
+            firstNz = startIndex;
+        int endIndex = startIndex + count;
+        if (c == '0')
+        {
+            do
+            {
+                firstNz++;
+                if (nextIndex == endIndex)
+                    break;
+                c = source[nextIndex++];
+            }
+            while (c == '0');
+            if (!char.IsNumber(c) || nextIndex == endIndex)
+            {
+                result = new(0, isNegative, nextIndex - (startIndex + (isNegative ? 2 : 1)));
+                return true;
+            }
+        }
+        else if (!char.IsNumber(c))
+        {
+            nextIndex = startIndex;
+            result = Zero;
+            return false;
+        }
+        
+        count = 1;
+        while (char.IsNumber(source[nextIndex++]))
+        {
+            count++;
+            if (count == MAX_ABS_LENGTH)
+            {
+                if ((nextIndex < endIndex && char.IsNumber(source[nextIndex])) || !ushort.TryParse(source.ToString(nextIndex - 3, 3), out ushort value))
+                {
+                    nextIndex = startIndex;
+                    result = Zero;
+                    return false;
+                }
+                result = new(value, isNegative, firstNz - (isNegative ? startIndex + 1 : startIndex));
+                return true;
+            }
+            if (nextIndex == endIndex)
+                break;
+        }
+        result = new(ushort.Parse(source.ToString(firstNz, count)), isNegative, firstNz - (isNegative ? startIndex + 1 : startIndex));
+        return true;
+    }
+
+    public static Digits16Bit Parse(string text)
+    {
+        if (!string.IsNullOrEmpty(text) && TryParse(new ParsingSource(text), 0, text.Length, out Digits16Bit result, out int nextIndex))
+        {
+            if (nextIndex == text.Length)
+                return result;
+        }
+        else
+            nextIndex = 0;
+        throw new ArgumentException($"Invalid short integer sequence at index {nextIndex}.", nameof(text));
+    }
+
+    public static Digits16Bit Parse(ReadOnlySpan<char> text)
+    {
+        if (!text.IsEmpty && TryParse(new ParsingSource(new string(text)), 0, text.Length, out Digits16Bit result, out int nextIndex))
+        {
+            if (nextIndex == text.Length)
+                return result;
+        }
+        else
+            nextIndex = 0;
+        throw new ArgumentException($"Invalid short integer sequence at index {nextIndex}.", nameof(text));
+    }
+
+    public static bool TryParse(string text, out Digits16Bit result)
+    {
+        if (string.IsNullOrEmpty(text) || !TryParse(new ParsingSource(text), 0, text.Length, out result, out int nextIndex) || nextIndex < text.Length)
+        {
+            result = Zero;
+            return false;
+        }
+        return true;
+    }
+
+    public static bool TryParse(ReadOnlySpan<char> text, out Digits16Bit result)
+    {
+        if (text.IsEmpty || !TryParse(new ParsingSource(new string(text)), 0, text.Length, out result, out int nextIndex) || nextIndex < text.Length)
+        {
+            result = Zero;
+            return false;
+        }
+        return true;
+    }
+
     /// <summary>
     /// Gets the absolute value of the current token as a <see cref="BigInteger" />.
     /// </summary>
@@ -104,7 +220,7 @@ public readonly struct Digits16Bit : INumericalToken
                 return HasNegativeSign ? numericalToken.CompareAbs(Value) : 1;
             return HasNegativeSign ? -1 : 0 - numericalToken.CompareAbs(Value);
         }
-        return ParsingExtensionMethods.NoCaseComparer.Compare(GetValue(), other.GetValue());
+        return NoCaseComparer.Compare(GetValue(), other.GetValue());
     }
 
     public bool Equals(IToken? other)
@@ -113,7 +229,7 @@ public readonly struct Digits16Bit : INumericalToken
             return false;
         if (other is INumericalToken numericalToken)
             return (Value == 0) ? numericalToken.IsZero : !numericalToken.IsZero && HasNegativeSign == numericalToken.HasNegativeSign && numericalToken.EqualsAbs(Value);
-        return ParsingExtensionMethods.NoCaseComparer.Equals(GetValue(), other.GetValue());
+        return NoCaseComparer.Equals(GetValue(), other.GetValue());
     }
 
     public override bool Equals(object? obj) => obj is IToken other && Equals(other);
