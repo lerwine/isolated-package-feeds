@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,7 +14,9 @@ namespace CdnGetter.Parsing.Version;
 /// <summary>
 /// Version string to be treated as an alphabetical name.
 /// </summary>
+#pragma warning disable CA2231
 public readonly struct NameVersion : ISoftwareVersion
+#pragma warning restore CA2231
 {
     public static readonly NameVersion Empty = new();
 
@@ -185,9 +188,24 @@ public readonly struct NameVersion : ISoftwareVersion
         throw new NotImplementedException();
     }
 
+    public override bool Equals([NotNullWhen(true)] object? obj)
+    {
+        return base.Equals(obj);
+    }
+
     public IEnumerator<IToken> GetEnumerator()
     {
         throw new NotImplementedException();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override int GetHashCode()
+    {
+        return base.GetHashCode();
     }
 
     public int GetLength(bool allParsedValues = false)
@@ -205,7 +223,7 @@ public readonly struct NameVersion : ISoftwareVersion
         throw new NotImplementedException();
     }
 
-    IEnumerator IEnumerable.GetEnumerator()
+    public override string ToString()
     {
         throw new NotImplementedException();
     }

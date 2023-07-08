@@ -4,7 +4,9 @@ using static CdnGetter.Parsing.Version.Version;
 
 namespace CdnGetter.Parsing.Version;
 
+#pragma warning disable CA2231
 public readonly struct NamedNumericalToken : INumericalToken, ITokenList
+#pragma warning restore CA2231
 {
     public INumericalToken ValueToken { get; }
     

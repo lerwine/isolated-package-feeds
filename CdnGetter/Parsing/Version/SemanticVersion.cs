@@ -14,7 +14,9 @@ namespace CdnGetter.Parsing.Version;
 /// Represents a SemVer format version string
 /// </summary>
 /// <see href="https://semver.org/" />
+#pragma warning disable CA2231
 public readonly struct SemanticVersion : INumericalSoftwareVersion
+#pragma warning restore CA2231
 {
     public static readonly SemanticVersion Empty = new();
 

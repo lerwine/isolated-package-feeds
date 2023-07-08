@@ -7,7 +7,9 @@ namespace CdnGetter.Parsing.Version;
 /// <summary>
 /// Represents a numerical token that is preceded by a delimiter.
 /// </summary>
+#pragma warning disable CA2231
 public readonly struct DelimitedNumericalToken : INumericalToken, IDelimitedToken
+#pragma warning restore CA2231
 {
     /// <summary>
     /// Gets the delimiter that precedes the numerical token.

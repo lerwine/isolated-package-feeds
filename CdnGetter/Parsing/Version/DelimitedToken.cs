@@ -3,7 +3,9 @@ using static CdnGetter.Parsing.Version.Version;
 
 namespace CdnGetter.Parsing.Version;
 
+#pragma warning disable CA2231
 public readonly struct DelimitedToken : IDelimitedToken, IStringToken
+#pragma warning restore CA2231
 {
     public IStringToken DelimiterToken { get; }
 
