@@ -200,6 +200,8 @@ public static class ExtensionMethods
         return source.Select(ToTrimmedOrNullIfEmpty).Where(t => t is not null)!;
     }
     
+    public static IEnumerable<string> FromCsv(this string? source) => string.IsNullOrWhiteSpace(source) ? Enumerable.Empty<string>() : source.Split(',').TrimmedNotEmptyValues();
+    
     public static string[] SplitLines(this string? value)
     {
         if (value is null)
