@@ -1,31 +1,45 @@
-﻿// See https://aka.ms/new-console-template for more information
-using CdnGetter.Config;
+﻿using CdnGetter.Config;
 using CdnGetter.Services;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
-IHost host = Host.CreateDefaultBuilder(args)
-    .ConfigureServices((hbContext, services) => {
-        services.AddHostedService<MainService>();
-        services.Configure<CommandSettings>(hbContext.Configuration);
-        IConfigurationSection section = hbContext.Configuration.GetSection(nameof(CdnGetter));
-        services.Configure<AppSettings>(section);
-        
-        string databaseFilePath = AppSettings.GetDbFileName(section.Get<AppSettings>());
-        databaseFilePath = Path.GetFullPath(Path.IsPathRooted(databaseFilePath) ? databaseFilePath : Path.Combine(hbContext.HostingEnvironment.ContentRootPath, databaseFilePath));
-        services.AddDbContext<ContentDb>(opt =>
-            opt.UseSqlite(new SqliteConnectionStringBuilder
+internal class Program
+{
+    internal static IHost Host { get; private set; } = null!;
+
+    private static void Main(string[] args)
+    {
+        HostApplicationBuilder builder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder();
+        builder.Environment.ContentRootPath = Directory.GetCurrentDirectory();
+        if (builder.Environment.IsDevelopment())
+            builder.Configuration.AddUserSecrets(System.Reflection.Assembly.GetExecutingAssembly(), true);
+        builder.Logging.AddConsole();
+        builder.Services.Configure<AppSettings>(builder.Configuration.GetSection(nameof(CdnGetter)));
+        AppSettings.Configure(args, builder.Configuration);
+        builder.Services.AddDbContextPool<ContentDb>(options =>
             {
-                DataSource = databaseFilePath,
-                ForeignKeys = true,
-                Mode = File.Exists(databaseFilePath) ? SqliteOpenMode.ReadWrite : SqliteOpenMode.ReadWriteCreate
-            }.ConnectionString)
-        );
+                var dbFile = builder.Configuration.GetSection(nameof(CdnGetter)).Get<AppSettings>()?.DbFile;
+                try
+                {
+                    dbFile = Path.GetFullPath(string.IsNullOrEmpty(dbFile) ? Path.Combine(builder.Environment.ContentRootPath, CdnGetter.Constants.DEFAULT_DbFile) :
+                        Path.IsPathFullyQualified(dbFile) || Path.IsPathRooted(dbFile) ? dbFile : Path.Combine(builder.Environment.ContentRootPath, dbFile));
+                }
+                catch { }
+                options.UseSqlite(new SqliteConnectionStringBuilder
+                {
+                    DataSource = dbFile,
+                    ForeignKeys = true,
+                    Mode = SqliteOpenMode.ReadWrite
+                }.ConnectionString);
+            })
+            .AddHostedService<MainService>();
         foreach (Type type in ContentGetterAttribute.UpstreamCdnServices.Values.Select(t => t.Type))
-            services.AddSingleton(type);
-    })
-    .Build();
-host.Run();
+            builder.Services.AddSingleton(type);
+        Host = builder.Build();
+        Host.Run();
+    }
+}

@@ -234,42 +234,54 @@ internal static class LoggerMessages
     public static void LogCdnLibraryAlreadyExistsWarning(this ILogger logger, string libraryName, string upstreamCdnName) => _cdnLibraryAlreadyExistsWarning(logger, libraryName, upstreamCdnName, null);
     
     #endregion
-    #region MutuallyExclusiveSwitch Warning (0x000f)
+    #region UnsupportedSwitch Warning (0x000f)
 
-    public const int EVENT_ID_MutuallyExclusiveSwitchWarning = 0x000f;
-    public static readonly EventId MutuallyExclusiveSwitchWarning = new(EVENT_ID_MutuallyExclusiveSwitchWarning, nameof(MutuallyExclusiveSwitchWarning));
-    private static readonly Action<ILogger, string, string, Exception?> _mutuallyExclusiveSwitchWarning = LoggerMessage.Define<string, string>(LogLevel.Warning, MutuallyExclusiveSwitchWarning,
-        "The --{SwitchName} switch cannot be used with the --{MutuallyExclusive} switch.");
+    public const int EVENT_ID_UnsupportedSwitchWarning = 0x000f;
+    public static readonly EventId UnsupportedSwitchWarning = new(EVENT_ID_UnsupportedSwitchWarning, nameof(UnsupportedSwitchWarning));
+    private static readonly Action<ILogger, string, string, Exception?> _mutuallyExclusiveSwitchWarning1 = LoggerMessage.Define<string, string>(LogLevel.Warning, UnsupportedSwitchWarning,
+        "The {SwitchName} switch cannot be used with the {MutuallyExclusive} switch.");
+    private static readonly Action<ILogger, string, string, string, Exception?> _mutuallyExclusiveSwitchWarning2 = LoggerMessage.Define<string, string, string>(LogLevel.Warning, UnsupportedSwitchWarning,
+        "The {SwitchName} switch cannot be used with the {MutuallyExclusive} switch is set to {Value}.");
     /// <summary>
-    /// Logs an MutuallyExclusiveSwitch event with event code 0x000f.
+    /// Logs an UnsupportedSwitch event with event code 0x000f.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="switchName">The name of the target command line switch.</param>
     /// <param name="mutuallyExclusiveSwitch">The name of the command line switch that can't be used with the target switch.</param>
-    public static void LogMutuallyExclusiveSwitchWarning(this ILogger logger, string switchName, string mutuallyExclusiveSwitch) => _mutuallyExclusiveSwitchWarning(logger, switchName, mutuallyExclusiveSwitch, null);
+    public static void LogMutuallyExclusiveSwitchWarning(this ILogger logger, string switchName, string mutuallyExclusiveSwitch) => _mutuallyExclusiveSwitchWarning1(logger, switchName, mutuallyExclusiveSwitch, null);
+
+    public static void LogMutuallyExclusiveSwitchWarning(this ILogger logger, string switchName, string mutuallyExclusiveSwitch, string switchValue) => _mutuallyExclusiveSwitchWarning2(logger, switchName, mutuallyExclusiveSwitch, switchValue, null);
 
     #endregion
     #region RequiredDependentParameter Warning (0x0010)
 
     public const int EVENT_ID_RequiredDependentParameterWarning = 0x0010;
     public static readonly EventId RequiredDependentParameterWarning = new(EVENT_ID_RequiredDependentParameterWarning, nameof(RequiredDependentParameterWarning));
-    private static readonly Action<ILogger, string, string, Exception?> _requiredDependentParameterWarning = LoggerMessage.Define<string, string>(LogLevel.Warning, RequiredDependentParameterWarning,
-        "The --{DependentSwitch} switch is required when the --{SwitchName} switch is present.");
+    private static readonly Action<ILogger, string, string, Exception?> _requiredDependentParameterWarning1 = LoggerMessage.Define<string, string>(LogLevel.Warning, RequiredDependentParameterWarning,
+        "The {DependentSwitch} switch is required when the {SwitchName} switch is present.");
+    private static readonly Action<ILogger, string, string, string, Exception?> _requiredDependentParameterWarning2 = LoggerMessage.Define<string, string, string>(LogLevel.Warning, RequiredDependentParameterWarning,
+        "The {DependentSwitch} switch is required when the {SwitchName} switch is set to {Value}.");
     /// <summary>
     /// Logs an RequiredDependentParameter event with event code 0x0010.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="dependentSwitch">The dependent switch name.</param>
     /// <param name="switchName">The target switch name.</param>
-    public static void LogRequiredDependentParameterWarning(this ILogger logger, string dependentSwitch, string switchName) => _requiredDependentParameterWarning(logger, dependentSwitch, switchName, null);
+    public static void LogRequiredDependentParameterWarning(this ILogger logger, string dependentSwitch, string switchName) => _requiredDependentParameterWarning1(logger, dependentSwitch, switchName, null);
+
+    public static void LogRequiredDependentParameterWarning(this ILogger logger, string dependentSwitch, string switchName, string switchValue) => _requiredDependentParameterWarning2(logger, dependentSwitch, switchName, switchValue, null);
 
     #endregion
     #region RequiredAltDependentParameter Warning (0x0011)
 
     public const int EVENT_ID_RequiredAltDependentParameterWarning = 0x0011;
     public static readonly EventId RequiredAltDependentParameterWarning = new(EVENT_ID_RequiredAltDependentParameterWarning, nameof(RequiredAltDependentParameterWarning));
-    private static readonly Action<ILogger, string, string, string, Exception?> _requiredAltDependentParameterWarning = LoggerMessage.Define<string, string, string>(LogLevel.Warning, RequiredAltDependentParameterWarning,
-        "The --{DependentSwitch1} or --{DependentSwitch2} switch is required when the --{SwitchName} switch is present.");
+    private static readonly Action<ILogger, string, string, string, Exception?> _requiredAltDependentParameterWarning1 = LoggerMessage.Define<string, string, string>(LogLevel.Warning, RequiredAltDependentParameterWarning,
+        "The {DependentSwitch1} or {DependentSwitch2} switch is required when the {SwitchName} switch is present.");
+    private static readonly Action<ILogger, string, string, string, string, Exception?> _requiredAltDependentParameterWarning2 = LoggerMessage.Define<string, string, string, string>(LogLevel.Warning, RequiredAltDependentParameterWarning,
+        "The {DependentSwitch} is required with the value {Value1} or {Value2} switch is required when the {SwitchName} switch is present.");
+    private static readonly Action<ILogger, string, string, string, string, Exception?> _requiredAltDependentParameterWarning3 = LoggerMessage.Define<string, string, string, string>(LogLevel.Warning, RequiredAltDependentParameterWarning,
+        "The {SwitchValues} switch or the {LastDependendSwitch} with the value {DependendValue} required when the {SwitchName} switch is present.");
     /// <summary>
     /// Logs an RequiredAltDependentParameter event with event code 0x0011.
     /// </summary>
@@ -277,7 +289,13 @@ internal static class LoggerMessages
     /// <param name="dependentSwitch1">The first depenent switch name.</param>
     /// <param name="dependentSwitch2">The second dependent switch name.</param>
     /// <param name="switchName">The target switch name.</param>
-    public static void LogRequiredAltDependentParameterWarning(this ILogger logger, string dependentSwitch1, string dependentSwitch2, string switchName) => _requiredAltDependentParameterWarning(logger, dependentSwitch1, dependentSwitch2, switchName, null);
+    public static void LogRequiredAltDependentParameterWarning(this ILogger logger, string dependentSwitch1, string dependentSwitch2, string switchName) => _requiredAltDependentParameterWarning1(logger, dependentSwitch1, dependentSwitch2, switchName, null);
+
+        // Upstream, RemoveLibrary, ReloadExistingVersions, GetNewVersions, AddLibrary, Show, SHOW_Files
+    public static void LogRequiredAltDependentParameterWarning(this ILogger logger, string dependentSwitch, string dependendValue1, string dependendValue2, string switchName) => _requiredAltDependentParameterWarning2(logger, dependentSwitch, dependendValue1, dependendValue2, switchName, null);
+
+    public static void LogRequiredAltDependentParameterWarning(this ILogger logger, string lastDependentSwitch, string dependendValue, string switchName, params string[] otherDependendSwitches) =>
+        _requiredAltDependentParameterWarning3(logger, $"{string.Join(", ", otherDependendSwitches.SkipLast(1))} or {otherDependendSwitches[^1]}", lastDependentSwitch, dependendValue, switchName, null);
 
     #endregion
     #region InvalidParameterValue Warning (0x0012)
@@ -285,7 +303,7 @@ internal static class LoggerMessages
     public const int EVENT_ID_InvalidParameterValueWarning = 0x0012;
     public static readonly EventId InvalidParameterValueWarning = new(EVENT_ID_InvalidParameterValueWarning, nameof(InvalidParameterValueWarning));
     private static readonly Action<ILogger, string, string, Exception?> _invalidParameterValueWarning = LoggerMessage.Define<string, string>(LogLevel.Warning, InvalidParameterValueWarning,
-        "Invalid value for the --{SwitchName} switch ({ParameterValue}).");
+        "Invalid value for the {SwitchName} switch ({ParameterValue}).");
     /// <summary>
     /// Logs an InvalidParameterValue event with event code 0x0012.
     /// </summary>
@@ -437,7 +455,7 @@ internal static class LoggerMessages
     /// <param name="logger">The current logger.</param>
     /// <param name="showSwitchValue">The name of the show value.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogNoLibraryNameSpecifiedWarning(this ILogger logger, string showSwitchValue) => _noLibraryNameSpecifiedWarning(logger, nameof(Config.CommandSettings.Library), nameof(Config.CommandSettings.Show), showSwitchValue, null);
+    public static void LogNoLibraryNameSpecifiedWarning(this ILogger logger, string showSwitchValue) => _noLibraryNameSpecifiedWarning(logger, nameof(Config.AppSettings.Library), nameof(Config.AppSettings.Show), showSwitchValue, null);
     
     #endregion
     #region ExecuteMethod Scope

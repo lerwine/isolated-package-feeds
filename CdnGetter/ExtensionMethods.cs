@@ -8,7 +8,7 @@ public static class ExtensionMethods
     public static readonly Regex NonNormalizedWhiteSpaceRegex = new(@"( |(?! ))[\r\n\s]+", RegexOptions.Compiled);
 
     public static readonly Regex LineBreakRegex = new(@"\r?\n|\n", RegexOptions.Compiled);
-    
+
     public static bool ValidateSourceIsEmpty(this Parsing.ParsingSource source, ref int startIndex, ref int count)
     {
         if (source.Count == 0)
@@ -143,7 +143,7 @@ public static class ExtensionMethods
 
     public static IEnumerable<T> AppendValue<T>(this IEnumerable<T>? source, T element) where T : struct => (source is null) ? Enumerate(element) : source.Append(element);
 
-    public static IEnumerable<T> PrependIfNotNull<T>(this IEnumerable<T>? source,  T? element)
+    public static IEnumerable<T> PrependIfNotNull<T>(this IEnumerable<T>? source, T? element)
         where T : class
     {
         if (source is null)
@@ -151,7 +151,7 @@ public static class ExtensionMethods
         return (element is null) ? source : source.Prepend(element);
     }
 
-    public static IEnumerable<T> AppendIfNotNull<T>(this IEnumerable<T>? source,  T? element)
+    public static IEnumerable<T> AppendIfNotNull<T>(this IEnumerable<T>? source, T? element)
         where T : class
     {
         if (source is null)
@@ -192,16 +192,16 @@ public static class ExtensionMethods
             return Enumerable.Empty<T>();
         return source.Where(t => t is not null)!;
     }
-    
+
     public static IEnumerable<string> TrimmedNotEmptyValues(this IEnumerable<string?>? source)
     {
         if (source is null)
             return Enumerable.Empty<string>();
         return source.Select(ToTrimmedOrNullIfEmpty).Where(t => t is not null)!;
     }
-    
+
     public static IEnumerable<string> FromCsv(this string? source) => string.IsNullOrWhiteSpace(source) ? Enumerable.Empty<string>() : source.Split(',').TrimmedNotEmptyValues();
-    
+
     public static string[] SplitLines(this string? value)
     {
         if (value is null)
@@ -360,7 +360,7 @@ public static class ExtensionMethods
                 (foreignKey1, foreignKey2, foreignKey3, foreignKey4) = keyAcessor(target = newValue);
         }
         finally { Monitor.Exit(syncRoot); }
-    
+
     }
 
     public static string ToStatusMessage(this int statusCode) => statusCode switch

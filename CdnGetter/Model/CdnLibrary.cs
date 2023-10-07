@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
@@ -53,7 +54,7 @@ public class CdnLibrary : ModificationTrackingModelBase
         get => _cdn;
         set => value.SetNavigation(_syncRoot, p => p.Id, ref _cdnId, ref _cdn);
     }
-    
+
     /// <summary>
     /// Gets or sets the preferential order override for the upstream CDN or <see langword="null" /> to use <see cref="UpstreamCdn.Priority" />.
     /// </summary>
@@ -75,12 +76,12 @@ public class CdnLibrary : ModificationTrackingModelBase
     /// Library versions for this content library.
     /// </summary>
     public Collection<CdnVersion> Versions { get; set; } = new();
-    
+
     /// <summary>
     /// CDN acess logs for this content library.
     /// </summary>
     public Collection<LibraryLog> Logs { get; set; } = new();
-    
+
     /// <summary>
     /// Performs configuration of the <see cref="CdnLibrary" /> entity type in the model for the <see cref="Services.ContentDb" />.
     /// </summary>
@@ -144,7 +145,15 @@ public class CdnLibrary : ModificationTrackingModelBase
         }
     }
 
-    internal static async Task ShowAsync(IEnumerable<string> cdnNames, Services.ContentDb dbContext, ILogger logger, CancellationToken cancellationToken)
+    /// <summary>
+    /// SHows librarys in the database.
+    /// </summary>
+    /// <param name="cdnNames">Names of explicit CDNs or empty to show all libraries regardless of CDN.</param>
+    /// <param name="dbContext">The database context.</param>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="cancellationToken">The toke to observe.</param>
+    /// <returns>The asynchronous operation.</returns>
+    internal static async Task ShowAsync(ImmutableArray<string> cdnNames, Services.ContentDb dbContext, ILogger logger, CancellationToken cancellationToken)
     {
         if (cdnNames.Any())
         {
@@ -167,42 +176,73 @@ public class CdnLibrary : ModificationTrackingModelBase
     }
 
 #pragma warning disable CS1998
-    internal static async Task AddAsync(IEnumerable<string> cdnNames, IEnumerable<string> versionStrings, Services.ContentDb dbContext, ILogger<Services.MainService> logger, CancellationToken cancellationToken)
+    /// <summary>
+    /// Adds libraries to the database from an upstream CDN.
+    /// </summary>
+    /// <param name="libraryNames">The names of the libraries to add. This should never be empty.</param>
+    /// <param name="cdnNames">The names of the upstream CDNs to add versions from. This should never be empty.</param>
+    /// <param name="versionStrings">Explicit versions of libraries to add or empty to add all versions.</param>
+    /// <param name="dbContext">The database context.</param>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="cancellationToken">The toke to observe.</param>
+    /// <returns>The asynchronous operation.</returns>
+    internal static async Task AddAsync(ImmutableArray<string> libraryNames, ImmutableArray<string> cdnNames, ImmutableArray<string> versionStrings, Services.ContentDb dbContext, ILogger logger, CancellationToken cancellationToken)
 #pragma warning restore CS1998
     {
-            if (cdnNames.Any())
-            {
-                throw new NotImplementedException("Add libraries functionality not implemented.");
-            }
-            else
-                logger.LogRequiredDependentParameterWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Upstream)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.AddLibrary)}");
+        throw new NotImplementedException("Add libraries functionality not implemented.");
     }
 
 #pragma warning disable CS1998
-    internal static async Task RemoveAsync(IEnumerable<string> cdnNames, IEnumerable<string> versionStrings, Services.ContentDb dbContext, ILogger<Services.MainService> logger, CancellationToken cancellationToken)
+    /// <summary>
+    /// Removes libraries from the database from an upstream CDN.
+    /// </summary>
+    /// <param name="libraryNames">The names of the libraries to remove. This should never be empty.</param>
+    /// <param name="cdnNames">The explict names of the upstream CDNs to to remove libraries from or empty to remove libraries regardless of the upstream CDN.</param>
+    /// <param name="versionStrings">Explicit versions of libraries to remove or empty to remove libraries regardless of the version.</param>
+    /// <param name="dbContext">The database context.</param>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="cancellationToken">The toke to observe.</param>
+    /// <returns>The asynchronous operation.</returns>
+    internal static async Task RemoveAsync(ImmutableArray<string> libraryNames, ImmutableArray<string> cdnNames, ImmutableArray<string> versionStrings, Services.ContentDb dbContext, ILogger logger, CancellationToken cancellationToken)
 #pragma warning restore CS1998
     {
+        throw new NotImplementedException("Remove libraries functionality not implemented.");
     }
 
 #pragma warning disable CS1998
-    internal static async Task ReloadAsync(IEnumerable<string> cdnNames, IEnumerable<string> versionStrings, Services.ContentDb dbContext, ILogger<Services.MainService> logger, CancellationToken cancellationToken)
+    /// <summary>
+    /// Reloads libraries, getting new versions as well.
+    /// </summary>
+    /// <param name="libraryNames">The names of the libraries to reload. This should never be empty.</param>
+    /// <param name="cdnNames">The explicit names of upstream CDNs to reload from or empty to reload libraries regardless of upstream CDN.</param>
+    /// <param name="dbContext">The database context.</param>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="cancellationToken">The toke to observe.</param>
+    /// <returns>The asynchronous operation.</returns>
+    internal static async Task ReloadAsync(ImmutableArray<string> libraryNames, ImmutableArray<string> cdnNames, Services.ContentDb dbContext, ILogger logger, CancellationToken cancellationToken)
 #pragma warning restore CS1998
     {
         if (cdnNames.Any())
         {
             throw new NotImplementedException("Reload libraries for specific CDNs functionality not implemented.");
         }
-        else if (versionStrings.Any())
-        {
-            throw new NotImplementedException("Reload libraries for specific versions functionality not implemented.");
-        }
         else
-            logger.LogRequiredAltDependentParameterWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Upstream)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Version)}",
-                $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.ReloadLibrary)}");
+            logger.LogRequiredAltDependentParameterWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Upstream)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Version)}",
+                $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.ReloadLibrary)}");
     }
 
 #pragma warning disable CS1998
-    internal static async Task ReloadExistingAsync(IEnumerable<string> cdnNames, IEnumerable<string> versionStrings, Services.ContentDb dbContext, ILogger<Services.MainService> logger, CancellationToken cancellationToken)
+    /// <summary>
+    /// Reloads existing libraries.
+    /// </summary>
+    /// <param name="libraryNames">The names of the libraries to reload. This should never be empty.</param>
+    /// <param name="cdnNames">The explicit names of upstream CDNs to reload from or empty to reload libraries regardless of upstream CDN. This should never be empty if <paramref name="versionStrings"/> is empty.</param>
+    /// <param name="versionStrings">The explicity library versions to reload or empty to reload libraries of all versions. This should never be empty if <paramref name="cdnNames"/> is empty.</param>
+    /// <param name="dbContext">The database context.</param>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="cancellationToken">The toke to observe.</param>
+    /// <returns>The asynchronous operation.</returns>
+    internal static async Task ReloadExistingAsync(ImmutableArray<string> libraryNames, ImmutableArray<string> cdnNames, ImmutableArray<string> versionStrings, Services.ContentDb dbContext, ILogger logger, CancellationToken cancellationToken)
 #pragma warning restore CS1998
     {
         if (cdnNames.Any())
@@ -214,7 +254,7 @@ public class CdnLibrary : ModificationTrackingModelBase
             throw new NotImplementedException("Reload libraries for specific existing versions functionality not implemented.");
         }
         else
-            logger.LogRequiredAltDependentParameterWarning($"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Upstream)}", $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.Version)}",
-                $"{nameof(CdnGetter)}:{nameof(Config.CommandSettings.ReloadExistingVersions)}");
+            logger.LogRequiredAltDependentParameterWarning($"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Upstream)}", $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.Version)}",
+                $"{nameof(CdnGetter)}:{nameof(Config.AppSettings.ReloadExistingVersions)}");
     }
 }
