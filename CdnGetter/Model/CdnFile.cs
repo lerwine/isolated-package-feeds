@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Nodes;
@@ -189,7 +190,17 @@ public class CdnFile : ModificationTrackingModelBase
     }
 
 #pragma warning disable CS1998
-    internal static async Task ShowAsync(IEnumerable<string> libraryNames, IEnumerable<string> versionStrings, IEnumerable<string> upstreamNames, Services.ContentDb dbContext, ILogger<Services.MainService> logger, CancellationToken cancellationToken)
+    /// <summary>
+    /// Gets files in in database.
+    /// </summary>
+    /// <param name="libraryNames">The names of libraries to show files for. This should never be empty.</param>
+    /// <param name="versionStrings">The explicit version to show files for or empty to show files from all versions.</param>
+    /// <param name="cdnNames">The explicit names of CDNs to show files for or empt to show files from all CDNs.</param>
+    /// <param name="dbContext">The database context.</param>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="cancellationToken">The toke to observe.</param>
+    /// <returns>The asynchronous operation.</returns>
+    internal static async Task ShowAsync(ImmutableArray<string> libraryNames, ImmutableArray<string> versionStrings, ImmutableArray<string> cdnNames, Services.ContentDb dbContext, ILogger logger, CancellationToken cancellationToken)
 #pragma warning restore CS1998
     {
         throw new NotImplementedException("Show files functionality not implemented");

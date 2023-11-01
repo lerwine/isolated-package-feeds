@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
@@ -134,15 +135,21 @@ public class LocalLibrary : ModificationTrackingModelBase
         await dbContext.SaveChangesAsync(true, cancellationToken);
     }
 
-#pragma warning disable CS1998
-    internal static async Task GetNewVersionsPreferredAsync(Services.ContentDb dbContext, ILogger logger, CancellationToken stoppingToken)
+    /// <summary>
+    /// Gets new versions for the specified libraries.
+    /// </summary>
+    /// <param name="libraryNames">The explicit library names to get new versions for. This should not be empty.</param>
+    /// <param name="dbContext">The database context.</param>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="cancellationToken">The token to observe.</param>
+    /// <returns>The asyncrhonous task.</returns>
+    internal static async Task GetNewVersionsPreferredAsync(ImmutableArray<string> cdnNames, Services.ContentDb dbContext, ILogger logger, CancellationToken cancellationToken)
     {
-        LocalLibrary[] libraries = await dbContext.LocalLibraries.ToArrayAsync(stoppingToken);
+        LocalLibrary[] libraries = await dbContext.LocalLibraries.ToArrayAsync(cancellationToken);
         if (libraries.Length == 0)
             logger.LogNothingToDoWarning();
         else
             throw new NotImplementedException("Get New Versions for Preferred not implemented.");
             // foreach (LocalLibrary l in libraries)
     }
-#pragma warning restore CS1998
 }
