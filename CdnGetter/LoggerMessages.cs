@@ -1,7 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
+using NuGet.Versioning;
 
 namespace CdnGetter;
 
@@ -29,6 +31,7 @@ internal static class LoggerMessages
     public static void LogUnexpectedServiceError<T>(this ILogger logger, Exception error) => LogUnexpectedServiceError(logger, typeof(T), error);
 
     #endregion
+
     #region InvalidContentRoot Error (0x0002)
 
     public const int EVENT_ID_InvalidContentRootError = 0x0002;
@@ -44,6 +47,7 @@ internal static class LoggerMessages
     public static void LogInvalidContentRootError(this ILogger logger, string path, Exception error) => _invalidContentRootError(logger, path, error);
     
     #endregion
+
     #region EVENT_ID_CannotCreateCdnContentRoot Error (0x0003)
 
     public const int EVENT_ID_CannotCreateCdnContentRootError = 0x0003;
@@ -59,6 +63,7 @@ internal static class LoggerMessages
     public static void LogCannotCreateCdnContentRootError(this ILogger logger, string path, Exception? error = null) => _cannotCreateCdnContentRootError(logger, path, error);
     
     #endregion
+
     #region UpstreamCdnNotFound Error (0x0004)
 
     public const int EVENT_ID_UpstreamCdnNotFoundError = 0x0004;
@@ -74,6 +79,7 @@ internal static class LoggerMessages
     public static void LogUpstreamCdnNotFoundError(this ILogger logger, string upstreamCdnName, Exception? error = null) => _upstreamCdnNotFoundError(logger, upstreamCdnName, error);
     
     #endregion
+
     #region UpstreamCdnNotSupported Error (0x0005)
 
     public const int EVENT_ID_UpstreamCdnNotSupportedError = 0x0005;
@@ -89,6 +95,7 @@ internal static class LoggerMessages
     public static void LogUpstreamCdnNotSupportedError(this ILogger logger, string upstreamCdnName, Exception? error = null) => _upstreamCdnNotSupportedError(logger, upstreamCdnName, error);
     
     #endregion
+
     #region ServiceTypeNotFound Error (0x0006)
 
     public const int EVENT_ID_ServiceTypeNotFoundError = 0x0006;
@@ -104,6 +111,7 @@ internal static class LoggerMessages
     public static void LogServiceTypeNotFoundError(this ILogger logger, Type type, Exception? error = null) => _serviceTypeNotFoundError(logger, type.FullName ?? type.Name, error);
     
     #endregion
+
     #region NoUpstreamCdnsFound Warning (0x0007)
 
     public const int EVENT_ID_NoUpstreamCdnsFoundWarning = 0x0007;
@@ -117,6 +125,7 @@ internal static class LoggerMessages
     public static void LogNoUpstreamCdnsFoundWarning(this ILogger logger) => _noUpstreamCdnsFoundWarning(logger, null);
     
     #endregion
+
     #region UpstreamCdnNoActions Warning (0x0008)
 
     public const int EVENT_ID_UpstreamCdnNoActionsWarning = 0x0008;
@@ -131,6 +140,7 @@ internal static class LoggerMessages
     public static void LogUpstreamCdnNoActionsWarning(this ILogger logger, string upstreamCdnName) => _upstreamCdnNoActionsWarning(logger, upstreamCdnName, null);
     
     #endregion
+
     #region NothingToDo Warning (0x0009)
 
     public const int EVENT_ID_NothingToDoWarning = 0x0009;
@@ -144,6 +154,7 @@ internal static class LoggerMessages
     public static void LogNothingToDoWarning(this ILogger logger) => _nothingToDoWarning(logger, null);
     
     #endregion
+
     #region InvalidBaseUrl Error (0x000a)
 
     public const int EVENT_ID_InvalidBaseUrlError = 0x000a;
@@ -176,6 +187,7 @@ internal static class LoggerMessages
     public static void LogInvalidBaseUrlError(this ILogger logger, Type upstreamCdnType, string upstreamCdnName, Exception? error = null) => throw new NotImplementedException();
 
     #endregion
+
     #region LocalLibraryNotFound Warning (0x000b)
 
     public const int EVENT_ID_LocalLibraryNotFoundWarning = 0x000b;
@@ -190,6 +202,7 @@ internal static class LoggerMessages
     public static void LogLocalLibraryNotFoundWarning(this ILogger logger, string libraryName) => _localLibraryNotFoundWarning(logger, libraryName, null);  
     
     #endregion
+
     #region CdnLibraryNotFound Warning (0x000c)
 
     public const int EVENT_ID_CdnLibraryNotFoundWarning = 0x000c;
@@ -205,6 +218,7 @@ internal static class LoggerMessages
     public static void LogCdnLibraryNotFoundWarning(this ILogger logger, string libraryName, string upstreamCdnName) => _cdnLibraryNotFoundWarning(logger, libraryName, upstreamCdnName, null);
     
     #endregion
+
     #region LocalLibraryAlreadyExists Warning (0x000d)
 
     public const int EVENT_ID_LocalLibraryAlreadyExistsWarning = 0x000d;
@@ -219,6 +233,7 @@ internal static class LoggerMessages
     public static void LogLocalLibraryAlreadyExistsWarning(this ILogger logger, string libraryName) => _localLibraryAlreadyExistsWarning(logger, libraryName, null);
     
     #endregion
+
     #region CdnLibraryAlreadyExists Warning (0x000e)
 
     public const int EVENT_ID_CdnLibraryAlreadyExistsWarning = 0x000e;
@@ -234,6 +249,7 @@ internal static class LoggerMessages
     public static void LogCdnLibraryAlreadyExistsWarning(this ILogger logger, string libraryName, string upstreamCdnName) => _cdnLibraryAlreadyExistsWarning(logger, libraryName, upstreamCdnName, null);
     
     #endregion
+
     #region UnsupportedSwitch Warning (0x000f)
 
     public const int EVENT_ID_UnsupportedSwitchWarning = 0x000f;
@@ -253,6 +269,7 @@ internal static class LoggerMessages
     public static void LogMutuallyExclusiveSwitchWarning(this ILogger logger, string switchName, string mutuallyExclusiveSwitch, string switchValue) => _mutuallyExclusiveSwitchWarning2(logger, switchName, mutuallyExclusiveSwitch, switchValue, null);
 
     #endregion
+
     #region RequiredDependentParameter Warning (0x0010)
 
     public const int EVENT_ID_RequiredDependentParameterWarning = 0x0010;
@@ -272,6 +289,7 @@ internal static class LoggerMessages
     public static void LogRequiredDependentParameterWarning(this ILogger logger, string dependentSwitch, string switchName, string switchValue) => _requiredDependentParameterWarning2(logger, dependentSwitch, switchName, switchValue, null);
 
     #endregion
+
     #region RequiredAltDependentParameter Warning (0x0011)
 
     public const int EVENT_ID_RequiredAltDependentParameterWarning = 0x0011;
@@ -298,6 +316,7 @@ internal static class LoggerMessages
         _requiredAltDependentParameterWarning3(logger, $"{string.Join(", ", otherDependendSwitches.SkipLast(1))} or {otherDependendSwitches[^1]}", lastDependentSwitch, dependendValue, switchName, null);
 
     #endregion
+
     #region InvalidParameterValue Warning (0x0012)
 
     public const int EVENT_ID_InvalidParameterValueWarning = 0x0012;
@@ -313,6 +332,7 @@ internal static class LoggerMessages
     public static void LogInvalidParameterValueWarning(this ILogger logger, string switchName, string parameterValue) => _invalidParameterValueWarning(logger, switchName, parameterValue, null);    
 
     #endregion
+
     #region ValidatingEntity Trace (0x0013)
 
     public const int EVENT_ID_ValidatingEntityTrace = 0x0013;
@@ -330,6 +350,7 @@ internal static class LoggerMessages
         metadata.DisplayName().ToTrimmedOrDefaultIfEmpty(() => metadata.Name.ToTrimmedOrDefaultIfEmpty(() => entity.GetType().FullName!)), entity, null);
 
     #endregion
+
     #region EntityValidation Error (0x0014)
 
     public const int EVENT_ID_EntityValidationFailure = 0x0014;
@@ -359,6 +380,7 @@ internal static class LoggerMessages
     }
 
     #endregion
+
     #region ValidationSucceeded Trace (0x0015)
 
     public const int EVENT_ID_ValidationSucceededTrace = 0x0015;
@@ -376,6 +398,7 @@ internal static class LoggerMessages
         metadata.DisplayName().ToTrimmedOrDefaultIfEmpty(() => metadata.Name.ToTrimmedOrDefaultIfEmpty(() => entity.GetType().FullName!)), entity, null);
 
     #endregion
+
     #region DbSaveChangeCompleted Trace (0x0016)
 
     public const int EVENT_ID_DbSaveChangeCompletedTrace = 0x0016;
@@ -394,6 +417,7 @@ internal static class LoggerMessages
         acceptAllChangesOnSuccess.HasValue ? $"SaveChanges({acceptAllChangesOnSuccess.Value})" : "SaveChanges()", returnValue, null);
     
     #endregion
+
     #region UsingConnectionString Trace (0x0017)
 
     public const int EVENT_ID_UsingConnectionStringTrace = 0x0017;
@@ -408,6 +432,7 @@ internal static class LoggerMessages
     public static void LogUsingConnectionStringTrace(this ILogger logger, string connectionString) => _usingConnectionStringTrace(logger, connectionString, null);
 
     #endregion
+
     #region InitializingNewDatabase Information (0x0018)
 
     public const int EVENT_ID_InitializingNewDatabase = 0x0018;
@@ -422,6 +447,7 @@ internal static class LoggerMessages
     public static void LogInitializingNewDatabase(this ILogger logger, string dataSource) => _initializingNewDatabase(logger, dataSource, null);
 
     #endregion
+
     #region CriticalQueryExecution Error (0x0019)
 
     public const int EVENT_ID_CriticalQueryExecutionError = 0x0019;
@@ -443,6 +469,7 @@ internal static class LoggerMessages
         }), error);
     
     #endregion
+
     #region NoLibraryNameSpecified Warning (0x001a)
     
     public const int EVENT_ID_NoLibraryNameSpecifiedWarning = 0x001a;
@@ -458,7 +485,381 @@ internal static class LoggerMessages
     public static void LogNoLibraryNameSpecifiedWarning(this ILogger logger, string showSwitchValue) => _noLibraryNameSpecifiedWarning(logger, nameof(Config.AppSettings.Library), nameof(Config.AppSettings.Show), showSwitchValue, null);
     
     #endregion
-    #region ExecuteMethod Scope
+
+    #region Nuget Debug (0x001b)
+    
+    public const int EVENT_ID_NugetDebug = 0x001b;
+    public static readonly EventId NugetDebug = new(EVENT_ID_NugetDebug, nameof(NugetDebug));
+    
+    private static readonly Action<ILogger, string, Exception?> _nugetDebugMessage1 = LoggerMessage.Define<string>(LogLevel.Debug, NugetDebug, "NuGet Message: {Message}");
+
+    private static readonly Action<ILogger, string, string, int, Exception?> _nugetDebugMessage2 = LoggerMessage.Define<string, string, int>(LogLevel.Debug, NugetDebug, "NuGet {NugetID} ({Code}) Message: {Message}");
+
+    private static readonly Action<ILogger, string, Exception?> _nugetVerboseMessage1 = LoggerMessage.Define<string>(LogLevel.Trace, NugetDebug, "NuGet Message: {Message}");
+
+    private static readonly Action<ILogger, string, string, int, Exception?> _nugetVerboseMessage2 = LoggerMessage.Define<string, string, int>(LogLevel.Trace, NugetDebug, "NuGet {NugetID} ({Code}) Message: {Message}");
+
+    /// <summary>
+    /// Logs a <see cref="NuGet.Common.LogLevel.Debug"/> NugetDebug event with event code 0x001b.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="message">The NuGet log message.</param>
+    /// <param name="code">The optional NuGet log code.</param>
+    public static void LogNugetDebugMessage(this ILogger logger, string message, NuGet.Common.NuGetLogCode? code = null)
+    {
+        if (code.HasValue)
+            _nugetDebugMessage2(logger, message, code.Value.ToString("F"), (int)code.Value, null);
+        else
+            _nugetDebugMessage1(logger, message, null);
+    }
+
+    /// <summary>
+    /// Logs a <see cref="NuGet.Common.LogLevel.Verbose"/> NugetDebug event with event code 0x001b.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="message">The NuGet log message.</param>
+    /// <param name="code">The optional NuGet log code.</param>
+    public static void LogNugetVerboseMessage(this ILogger logger, string message, NuGet.Common.NuGetLogCode? code = null)
+    {
+        if (code.HasValue)
+            _nugetVerboseMessage2(logger, message, code.Value.ToString("F"), (int)code.Value, null);
+        else
+            _nugetVerboseMessage1(logger, message, null);
+    }
+
+    #endregion
+
+    #region Nuget Message (0x001c)
+
+    public const int EVENT_ID_NugetMessage = 0x001c;
+    public static readonly EventId NugetMessage = new(EVENT_ID_NugetMessage, nameof(NugetMessage));
+    
+    private static readonly Action<ILogger, string, Exception?> _nugetInformationMessage1 = LoggerMessage.Define<string>(LogLevel.Information, NugetMessage, "NuGet Message: {Message}");
+
+    private static readonly Action<ILogger, string, string, int, Exception?> _nugetInformationMessage2 = LoggerMessage.Define<string, string, int>(LogLevel.Information, NugetMessage, "NuGet {NugetID} ({Code}) Message: {Message}");
+
+    private static readonly Action<ILogger, string, Exception?> _nugetMinimalMessage1 = LoggerMessage.Define<string>(LogLevel.Information, NugetMessage, "NuGet Message: {Message}");
+
+    private static readonly Action<ILogger, string, string, int, Exception?> _nugetMinimalMessage2 = LoggerMessage.Define<string, string, int>(LogLevel.Information, NugetMessage, "NuGet {NugetID} ({Code}) Message: {Message}");
+
+    /// <summary>
+    /// Logs an <see cref="NuGet.Common.LogLevel.Information"/> NugetMessage event with event code 0x001b.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="message">The NuGet log message.</param>
+    /// <param name="code">The optional NuGet log code.</param>
+    public static void LogNugetInformationMessage(this ILogger logger, string message, NuGet.Common.NuGetLogCode? code = null)
+    {
+        if (code.HasValue)
+            _nugetInformationMessage2(logger, message, code.Value.ToString("F"), (int)code.Value, null);
+        else
+            _nugetInformationMessage1(logger, message, null);
+    }
+
+    /// <summary>
+    /// Logs an <see cref="NuGet.Common.LogLevel.Minimal"/> NugetMessage event with event code 0x001b.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="message">The NuGet log message.</param>
+    /// <param name="code">The optional NuGet log code.</param>
+    public static void LogNugetMinimalMessage(this ILogger logger, string message, NuGet.Common.NuGetLogCode? code = null)
+    {
+        if (code.HasValue)
+            _nugetMinimalMessage2(logger, message, code.Value.ToString("F"), (int)code.Value, null);
+        else
+            _nugetMinimalMessage1(logger, message, null);
+    }
+
+    #endregion
+
+    #region Nuget Warning Message (0x001d)
+
+    public const int EVENT_ID_NugetWarning = 0x001d;
+
+    public static readonly EventId NugetWarning = new(EVENT_ID_NugetWarning, nameof(NugetWarning));
+
+    private static readonly Action<ILogger, string, Exception?> _nugetWarning1 = LoggerMessage.Define<string>(LogLevel.Warning, NugetWarning, "NuGet Message: {Message}");
+
+    private static readonly Action<ILogger, string, string, int, Exception?> _nugetWarning2 = LoggerMessage.Define<string, string, int>(LogLevel.Warning, NugetWarning, "NuGet {NugetID} ({Code}) Message: {Message}");
+
+    /// <summary>
+    /// Logs an NugetWarning event with event code 0x001d.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="message">The NuGet warning message.</param>
+    /// <param name="code">The optional NuGet log code.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    public static void LogNugetWarning(this ILogger logger, string message, NuGet.Common.NuGetLogCode? code = null, Exception? exception = null)
+    {
+        if (code.HasValue)
+            _nugetWarning2(logger, message, code.Value.ToString("F"), (int)code.Value, exception);
+        else
+            _nugetWarning1(logger, message, exception);
+    }
+
+    #endregion
+
+    #region NuGet Error Message (0x001e)
+
+    public const int EVENT_ID_NuGetError = 0x001e;
+
+    public static readonly EventId NuGetError = new(EVENT_ID_NuGetError, nameof(NuGetError));
+
+    private static readonly Action<ILogger, string, Exception?> _nuGetError1 = LoggerMessage.Define<string>(LogLevel.Error, NuGetError, "NuGet Message: {Message}");
+    
+    private static readonly Action<ILogger, string, string, int, Exception?> _nuGetError2 = LoggerMessage.Define<string, string, int>(LogLevel.Error, NuGetError, "NuGet {NugetID} ({Code}) Message: {Message}");
+
+    /// <summary>
+    /// Logs a NuGetError event with event code 0x001e.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="message">The NuGet error message.</param>
+    /// <param name="code">The optional NuGet log code.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    public static void LogNuGetError(this ILogger logger, string message, NuGet.Common.NuGetLogCode? code = null, Exception? error = null)
+    {
+        if (code.HasValue)
+            _nuGetError2(logger, message, code.Value.ToString("F"), (int)code.Value, error);
+        else
+            _nuGetError1(logger, message, error);
+    }
+
+    #endregion
+
+    #region Critical Nuget Error (0x001f)
+    
+    public const int EVENT_ID_CriticalNugetError = 0x001f;
+    public static readonly EventId CriticalNugetError = new(EVENT_ID_CriticalNugetError, nameof(CriticalNugetError));
+
+    private static readonly Action<ILogger, string, Exception?> _criticalNugetError1 = LoggerMessage.Define<string>(LogLevel.Critical, CriticalNugetError, "NuGet Message: {Message}");
+    
+    private static readonly Action<ILogger, string, string, int, Exception?> _criticalNugetError2 = LoggerMessage.Define<string, string, int>(LogLevel.Critical, CriticalNugetError, "NuGet {NugetID} ({Code}) Message: {Message}");
+    
+    /// <summary>
+    /// Logs a CriticalNugetError event with event code 0x001f.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="message">The NuGet error message.</param>
+    /// <param name="code">The optional NuGet log code.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    public static void LogCriticalNugetError(this ILogger logger, string message, NuGet.Common.NuGetLogCode? code = null, Exception? error = null)
+    {
+        if (code.HasValue)
+            _criticalNugetError2(logger, message, code.Value.ToString("F"), (int)code.Value, error);
+        else
+            _criticalNugetError1(logger, message, error);
+    }
+
+    #endregion
+
+    #region Critical LocalNugetRepositorySecurity Error (0x0020)
+    
+    public const int EVENT_ID_LocalNugetRepositorySecurityError = 0x0020;
+
+    public static readonly EventId LocalNugetRepositorySecurityError = new(EVENT_ID_LocalNugetRepositorySecurityError, nameof(LocalNugetRepositorySecurityError));
+
+    private static readonly Action<ILogger, string, Exception?> _localNugetRepositorySecurityError = LoggerMessage.Define<string>(LogLevel.Critical, LocalNugetRepositorySecurityError,
+        "Access denied while accessing local NuGet repository path {Path}");
+
+    /// <summary>
+    /// Logs an LocalNugetRepositorySecurityError event with event code 0x0020.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="path">The path of the local NuGet repository.</param>
+    /// <param name="error">The exception that caused the event or <see langword="null" /> for no exception.</param>
+    public static void LogLocalNugetRepositorySecurityError(this ILogger logger, string path, Exception? error) => _localNugetRepositorySecurityError(logger, path, error);
+    
+    #endregion
+
+    #region Critical InvalidLocalNugetRepositoryPath Error (0x0021)
+    
+    public const int EVENT_ID_InvalidLocalNugetRepositoryPath = 0x0021;
+
+    public static readonly EventId InvalidLocalNugetRepositoryPath = new(EVENT_ID_InvalidLocalNugetRepositoryPath, nameof(InvalidLocalNugetRepositoryPath));
+
+    private static readonly Action<ILogger, string, Exception?> _invalidLocalNugetRepositoryPath = LoggerMessage.Define<string>(LogLevel.Critical, InvalidLocalNugetRepositoryPath,
+        "Local NuGet repository path {Path} is invalid.");
+
+    private static readonly Action<ILogger, string, Exception?> _localNugetRepositoryPathTooLong = LoggerMessage.Define<string>(LogLevel.Critical, InvalidLocalNugetRepositoryPath,
+        "Local NuGet repository path {Path} is too long.");
+
+    private static readonly Action<ILogger, string, Exception?> _localNugetRepositoryPathNotSubdirectory = LoggerMessage.Define<string>(LogLevel.Critical, InvalidLocalNugetRepositoryPath,
+        "Local NuGet repository path {Path} does not refer to a subdirectory.");
+
+    /// <summary>
+    /// Logs an InvalidLocalNugetRepositoryPath event with event code 0x0021.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="path">The path of the local NuGet repository.</param>
+    /// <param name="error">The exception that caused the event.</param>
+    public static void LogInvalidLocalNugetRepositoryPath(this ILogger logger, string path, Exception error) => _invalidLocalNugetRepositoryPath(logger, path, error);
+    
+    /// <summary>
+    /// Logs an InvalidLocalNugetRepositoryPath event with event code 0x0021.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="path">The path of the local NuGet repository.</param>
+    /// <param name="error">The exception that caused the event.</param>
+    public static void LogLocalNugetRepositoryPathTooLong(this ILogger logger, string path, PathTooLongException error) => _localNugetRepositoryPathTooLong(logger, path, error);
+    
+    /// <summary>
+    /// Logs an InvalidLocalNugetRepositoryPath event with event code 0x0021.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="path">The path of the local NuGet repository.</param>
+    public static void LogLocalNugetRepositoryPathNotSubdirectory(this ILogger logger, string path) => _localNugetRepositoryPathNotSubdirectory(logger, path, null);
+    
+    #endregion
+
+    #region Critical LocalNugetRepositoryCreation Error (0x0022)
+    
+    public const int EVENT_ID_LocalNugetRepositoryCreationError = 0x0022;
+
+    public static readonly EventId LocalNugetRepositoryCreationError = new(EVENT_ID_LocalNugetRepositoryCreationError, nameof(LocalNugetRepositoryCreationError));
+
+    private static readonly Action<ILogger, string, Exception?> _localNugetRepositoryCreationError = LoggerMessage.Define<string>(LogLevel.Critical, LocalNugetRepositoryCreationError,
+        "Unable to create local NuGet repository subdirectory {Path}");
+
+    /// <summary>
+    /// Logs an LocalNugetRepositoryCreationError event with event code 0x0022.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="path">The path of the local NuGet repository.</param>
+    /// <param name="error">The exception that caused the event or <see langword="null" /> for no exception.</param>
+    public static void LogLocalNugetRepositoryCreationError(this ILogger logger, string path, Exception? error) => _localNugetRepositoryCreationError(logger, path, error);
+    
+    #endregion
+
+    #region Critical InvalidRemoteRepositoryUrl Error (0x0023)
+    
+    public const int EVENT_ID_InvalidRemoteRepositoryUrl = 0x0023;
+
+    public static readonly EventId InvalidRemoteRepositoryUrl = new(EVENT_ID_InvalidRemoteRepositoryUrl, nameof(InvalidRemoteRepositoryUrl));
+
+    private static readonly Action<ILogger, string, Exception?> _invalidRemoteRepositoryUrl = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRemoteRepositoryUrl,
+        "Remote NuGet repository URL {UriString} is invalid.");
+
+    private static readonly Action<ILogger, string, Exception?> _remoteRepositoryIsLocal = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRemoteRepositoryUrl,
+        "Remote NuGet repository URL {URL} must not refer to a local path.");
+
+    /// <summary>
+    /// Logs an InvalidRemoteRepositoryUrl event with event code 0x0023.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="uriString">The URI string for the remote NuGet repository.</param>
+    /// <param name="error">The exception that caused the event.</param>
+    public static void LogInvalidRemoteRepositoryUrl(this ILogger logger, string uriString, Exception error) => _invalidRemoteRepositoryUrl(logger, uriString, error);
+    
+    /// <summary>
+    /// Logs an InvalidRemoteRepositoryUrl event with event code 0x0023.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="uri">The URI for the remote NuGet repository.</param>
+    public static void LogRemoteRepositoryUrlIsLocal(this ILogger logger, string uri) => _remoteRepositoryIsLocal(logger, uri, null);
+    
+    #endregion
+    
+    #region GetNugetResourceFailure Error (0x0024)
+    
+    public const int EVENT_ID_GetNugetResourceFailure = 0x0024;
+    public static readonly EventId GetNugetResourceFailure = new(EVENT_ID_GetNugetResourceFailure, nameof(GetNugetResourceFailure));
+    private static readonly Action<ILogger, Type, Exception?> _getNugetResourceFailure = LoggerMessage.Define<Type>(LogLevel.Error, GetNugetResourceFailure,
+        "Failed to get NuGet resource type {Type}");
+    /// <summary>
+    /// Logs an GetNugetResourceFailure event with event code 0x0024.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="type">The type of resource that was not found.</param>
+    public static void LogGetNugetResourceFailure(this ILogger logger, Type type) => _getNugetResourceFailure(logger, type, null);
+    
+    #endregion
+    
+    #region GetNuGetMetaDataFailure Error (0x0025)
+    
+    public const int EVENT_ID_GetNuGetMetaDataFailure = 0x0025;
+
+    public static readonly EventId GetNuGetMetaDataFailure = new(EVENT_ID_GetNuGetMetaDataFailure, nameof(GetNuGetMetaDataFailure));
+
+    private static readonly Action<ILogger, string, Uri, bool, bool, Exception?> _getNuGetMetaDataFailure = LoggerMessage.Define<string, Uri, bool, bool>(LogLevel.Error, GetNuGetMetaDataFailure,
+        "Failed to get NuGet MetaData for package with ID {PackageID} from {URL}: IncludePreRelease={IncludePreRelease}; IncludeUnlisted={IncludeUnlisted}");
+
+    /// <summary>
+    /// Logs an GetNuGetMetaDataFailure event with event code 0x0025.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="packageID">The package identifier.</param>
+    /// <param name="url">The source repository URL.</param>
+    /// <param name="includePreRelease">Whether pre-release version were to be includd.</param>
+    /// <param name="includeUnlisted">Whether unlisted version were to be included.</param>
+    /// <param name="error">The exception that caused the event.</param>
+    public static void LogGetNuGetMetaDataFailure(this ILogger logger, string packageID, Uri url, bool includePreRelease, bool includeUnlisted, Exception error) => _getNuGetMetaDataFailure(logger, packageID, url, includePreRelease, includeUnlisted, error);
+    
+    #endregion
+
+    #region GetAllNuGetVersionsFailure Error (0x0026)
+    
+    public const int EVENT_ID_GetAllNuGetVersionsFailure = 0x0026;
+
+    public static readonly EventId GetAllNuGetVersionsFailure = new(EVENT_ID_GetAllNuGetVersionsFailure, nameof(GetAllNuGetVersionsFailure));
+
+    private static readonly Action<ILogger, string, Uri, Exception?> _getAllNuGetVersionsFailure = LoggerMessage.Define<string, Uri>(LogLevel.Error, GetAllNuGetVersionsFailure, "Failed to get all NuGet version for package with ID {PackageID} from {URL}");
+        
+    /// <summary>
+    /// Logs an GetAllNuGetVersionsFailure event with event code 0x0026.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="packageID">The package identifier.</param>
+    /// <param name="url">The source repository URL.</param>
+    /// <param name="error">The exception that caused the event.</param>
+    public static void LogGetAllNuGetVersionsFailure(this ILogger logger, string packageID, Uri url, Exception error) => _getAllNuGetVersionsFailure(logger, packageID, url, error);
+    
+    #endregion
+
+    #region GetNuGetDependencyInfoFailure Error (0x0027)
+    
+    public const int EVENT_ID_GetNuGetDependencyInfoFailure = 0x0027;
+
+    public static readonly EventId GetNuGetDependencyInfoFailure = new(EVENT_ID_GetNuGetDependencyInfoFailure, nameof(GetNuGetDependencyInfoFailure));
+
+    private static readonly Action<ILogger, string, NuGetVersion, Uri, Exception?> _getNuGetDependencyInfoFailure = LoggerMessage.Define<string, NuGetVersion, Uri>(LogLevel.Error, GetNuGetDependencyInfoFailure,
+        "Failed to get NuGet dependency information for package with ID {PackageID} and version {Version} from {URL}");
+
+    /// <summary>
+    /// Logs an GetNuGetDependencyInfoFailure event with event code 0x0027.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="packageID">The package identifier.</param>
+    /// <param name="version">The package version.</param>
+    /// <param name="url">The source repository URL.</param>
+    /// <param name="error">The exception that caused the event.</param>
+    public static void LogGetNuGetDependencyInfoFailure(this ILogger logger, string packageID, NuGetVersion version, Uri url, Exception error) => _getNuGetDependencyInfoFailure(logger, packageID, version, url, error);
+    
+    #endregion
+
+    #region DoesNuGetPackageExistFailure Error (0x0027)
+    
+    public const int EVENT_ID_DoesNuGetPackageExistFailure = 0x0027;
+
+    public static readonly EventId DoesNuGetPackageExistFailure = new(EVENT_ID_DoesNuGetPackageExistFailure, nameof(DoesNuGetPackageExistFailure));
+
+    private static readonly Action<ILogger, string, NuGetVersion, Uri, Exception?> _doesNuGetPackageExistFailure = LoggerMessage.Define<string, NuGetVersion, Uri>(LogLevel.Error, DoesNuGetPackageExistFailure,
+        "Failed to get test whether NuGet package with ID {PackageID} and version {Version} exists from {URL}");
+
+    /// <summary>
+    /// Logs an DoesNuGetPackageExistFailure event with event code 0x0027.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="packageID">The package identifier.</param>
+    /// <param name="version">The package version.</param>
+    /// <param name="url">The source repository URL.</param>
+    /// <param name="error">The exception that caused the event.</param>
+    public static void LogDoesNuGetPackageExistFailure(this ILogger logger, string packageID, NuGetVersion version, Uri url, Exception error) => _doesNuGetPackageExistFailure(logger, packageID, version, url, error);
+    
+    #endregion
+
+    #region Scopes
+    
+    #region ExecuteMethod
     
     private static readonly Func<ILogger, string, IDisposable?> _executeMethodScope = LoggerMessage.DefineScope<string>("Execute method {MethodName}()");
     /// <summary>
@@ -471,7 +872,7 @@ internal static class LoggerMessages
     
     private static readonly Func<ILogger, string, string, object?, IDisposable?> _executeMethodScope1 = LoggerMessage.DefineScope<string, string, object?>("Execute method {MethodName}({ParamName}: {ParamValue})");
     /// <summary>
-    /// Formats the ExecuteMethod1 message and creates a scope.
+    /// Formats the ExecuteMethod message and creates a scope.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="methodName">The name of the method.</param>
@@ -479,6 +880,69 @@ internal static class LoggerMessages
     /// <param name="paramValue">The value of the method parameter.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
     public static IDisposable? BeginExecuteMethodScope(this ILogger logger, string methodName, string paramName, object? paramValue) => _executeMethodScope1(logger, methodName, paramName, paramValue);
+    
+    #endregion
+    
+    #region RepositoryUrl
+    
+    private static readonly Func<ILogger, string, bool, IDisposable?> _repositoryUrlScope = LoggerMessage.DefineScope<string, bool>("Nuget Repossitory URL: {URL}; Is Local {IsLocal}");
+
+    /// <summary>
+    /// Formats the RepositoryUrl message and creates a scope.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="url">The name of the method.</param>
+    /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
+    public static IDisposable? BeginRepositoryUrlScope(this ILogger logger, string url, bool isLocal = false) => _repositoryUrlScope(logger, url, isLocal);
+    
+    #endregion
+    
+    #region GetNugetMetaData
+    
+    private static readonly Func<ILogger, Uri, string, bool, bool, IDisposable?> _getNugetMetaDataScope = LoggerMessage.DefineScope<Uri, string, bool, bool>("Get NuGet MetaData from {URL}: ID={PackageID}; IncludePrerelease={IncludePrerelease}; IncludeUnlisted={IncludeUnlisted}");
+
+    /// <summary>
+    /// Formats the GetNugetMetaData message and creates a scope.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="packageId">The package ID.</param>
+    /// <param name="includePrerelease">Whether include pre-release packages.</param>
+    /// <param name="packageId">Whether to include unlisted packages.</param>
+    /// <param name="url">The source URL.</param>
+    /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
+    public static IDisposable? BeginGetNugetMetaDataScope(this ILogger logger, Uri url, string packageId, bool includePrerelease, bool includeUnlisted) => _getNugetMetaDataScope(logger, url, packageId, includePrerelease, includeUnlisted);
+    
+    #endregion
+    
+    #region GetNuGetPackageVersions
+    
+    private static readonly Func<ILogger, Uri, string, IDisposable?> _getNuGetPackageVersionsScope = LoggerMessage.DefineScope<Uri, string>("Get NuGet Package versions from {URL}: ID={PackageID}");
+
+    /// <summary>
+    /// Formats the GetNuGetPackageVersions message and creates a scope.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="packageId">The package ID.</param>
+    /// <param name="url">The source URL.</param>
+    /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
+    public static IDisposable? BeginGetNuGetPackageVersionsScope(this ILogger logger, Uri url, string packageId) => _getNuGetPackageVersionsScope(logger, url, packageId);
+    
+    #endregion
+    
+    #region FindNuGetPackageById
+    
+    private static readonly Func<ILogger, Uri, string, IDisposable?> _findNuGetPackageByIdScope = LoggerMessage.DefineScope<Uri, string>("Find NuGet Package by ID from {URL}: ID={PackageID}");
+
+    /// <summary>
+    /// Formats the FindNuGetPackageById message and creates a scope.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="packageId">The package ID.</param>
+    /// <param name="url">The source URL.</param>
+    /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
+    public static IDisposable? BeginFindNuGetPackageByIdScope(this ILogger logger, Uri url, string packageId) => _findNuGetPackageByIdScope(logger, url, packageId);
+    
+    #endregion
     
     #endregion
 }

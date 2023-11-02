@@ -227,6 +227,10 @@ public static class ExtensionMethods
 
     public static string ToTrimmedOrDefaultIfEmpty(this string? value, Func<string> getDefault) => (value is not null && (value = value.Trim()).Length > 0) ? value : getDefault();
 
+    public static string DefaultIfWhiteSpace(this string? value, string defaultValue) => string.IsNullOrWhiteSpace(value) ? defaultValue : value;
+
+    public static string DefaultIfWhiteSpace(this string? value, Func<string> getDefault) => string.IsNullOrWhiteSpace(value) ? getDefault() : value;
+
     public static string ToTrimmedOrDefaultIfEmpty(this string? value, string defaultValue) => (value is not null && (value = value.Trim()).Length > 0) ? value : defaultValue;
 
     public static void SetNavigation<T>(this Guid newValue, object syncRoot, Func<T, Guid> keyAcessor, ref Guid foreignKey, ref T? target)
