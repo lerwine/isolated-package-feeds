@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
+using NuGet.Packaging.Core;
+using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 
 namespace CdnGetter;
@@ -780,7 +782,7 @@ internal static class LoggerMessages
 
     public static readonly EventId GetNuGetMetaDataFailure = new(EVENT_ID_GetNuGetMetaDataFailure, nameof(GetNuGetMetaDataFailure));
 
-    private static readonly Action<ILogger, string, Uri, bool, bool, Exception?> _getNuGetMetaDataFailure = LoggerMessage.Define<string, Uri, bool, bool>(LogLevel.Error, GetNuGetMetaDataFailure,
+    private static readonly Action<ILogger, string, string, bool, bool, Exception?> _getNuGetMetaDataFailure = LoggerMessage.Define<string, string, bool, bool>(LogLevel.Error, GetNuGetMetaDataFailure,
         "Failed to get NuGet MetaData for package with ID {PackageID} from {URL}: IncludePreRelease={IncludePreRelease}; IncludeUnlisted={IncludeUnlisted}");
 
     /// <summary>
@@ -792,7 +794,7 @@ internal static class LoggerMessages
     /// <param name="includePreRelease">Whether pre-release version were to be includd.</param>
     /// <param name="includeUnlisted">Whether unlisted version were to be included.</param>
     /// <param name="error">The exception that caused the event.</param>
-    public static void LogGetNuGetMetaDataFailure(this ILogger logger, string packageID, Uri url, bool includePreRelease, bool includeUnlisted, Exception error) => _getNuGetMetaDataFailure(logger, packageID, url, includePreRelease, includeUnlisted, error);
+    public static void LogGetNuGetMetaDataFailure(this ILogger logger, string packageID, string url, bool includePreRelease, bool includeUnlisted, Exception error) => _getNuGetMetaDataFailure(logger, packageID, url, includePreRelease, includeUnlisted, error);
     
     #endregion
 
@@ -802,7 +804,7 @@ internal static class LoggerMessages
 
     public static readonly EventId GetAllNuGetVersionsFailure = new(EVENT_ID_GetAllNuGetVersionsFailure, nameof(GetAllNuGetVersionsFailure));
 
-    private static readonly Action<ILogger, string, Uri, Exception?> _getAllNuGetVersionsFailure = LoggerMessage.Define<string, Uri>(LogLevel.Error, GetAllNuGetVersionsFailure, "Failed to get all NuGet version for package with ID {PackageID} from {URL}");
+    private static readonly Action<ILogger, string, string, Exception?> _getAllNuGetVersionsFailure = LoggerMessage.Define<string, string>(LogLevel.Error, GetAllNuGetVersionsFailure, "Failed to get all NuGet version for package with ID {PackageID} from {URL}");
         
     /// <summary>
     /// Logs an GetAllNuGetVersionsFailure event with event code 0x0026.
@@ -811,7 +813,7 @@ internal static class LoggerMessages
     /// <param name="packageID">The package identifier.</param>
     /// <param name="url">The source repository URL.</param>
     /// <param name="error">The exception that caused the event.</param>
-    public static void LogGetAllNuGetVersionsFailure(this ILogger logger, string packageID, Uri url, Exception error) => _getAllNuGetVersionsFailure(logger, packageID, url, error);
+    public static void LogGetAllNuGetVersionsFailure(this ILogger logger, string packageID, string url, Exception error) => _getAllNuGetVersionsFailure(logger, packageID, url, error);
     
     #endregion
 
@@ -821,7 +823,7 @@ internal static class LoggerMessages
 
     public static readonly EventId GetNuGetDependencyInfoFailure = new(EVENT_ID_GetNuGetDependencyInfoFailure, nameof(GetNuGetDependencyInfoFailure));
 
-    private static readonly Action<ILogger, string, NuGetVersion, Uri, Exception?> _getNuGetDependencyInfoFailure = LoggerMessage.Define<string, NuGetVersion, Uri>(LogLevel.Error, GetNuGetDependencyInfoFailure,
+    private static readonly Action<ILogger, string, NuGetVersion, string, Exception?> _getNuGetDependencyInfoFailure = LoggerMessage.Define<string, NuGetVersion, string>(LogLevel.Error, GetNuGetDependencyInfoFailure,
         "Failed to get NuGet dependency information for package with ID {PackageID} and version {Version} from {URL}");
 
     /// <summary>
@@ -832,7 +834,7 @@ internal static class LoggerMessages
     /// <param name="version">The package version.</param>
     /// <param name="url">The source repository URL.</param>
     /// <param name="error">The exception that caused the event.</param>
-    public static void LogGetNuGetDependencyInfoFailure(this ILogger logger, string packageID, NuGetVersion version, Uri url, Exception error) => _getNuGetDependencyInfoFailure(logger, packageID, version, url, error);
+    public static void LogGetNuGetDependencyInfoFailure(this ILogger logger, string packageID, NuGetVersion version, string url, Exception error) => _getNuGetDependencyInfoFailure(logger, packageID, version, url, error);
     
     #endregion
 
@@ -842,7 +844,7 @@ internal static class LoggerMessages
 
     public static readonly EventId DoesNuGetPackageExistFailure = new(EVENT_ID_DoesNuGetPackageExistFailure, nameof(DoesNuGetPackageExistFailure));
 
-    private static readonly Action<ILogger, string, NuGetVersion, Uri, Exception?> _doesNuGetPackageExistFailure = LoggerMessage.Define<string, NuGetVersion, Uri>(LogLevel.Error, DoesNuGetPackageExistFailure,
+    private static readonly Action<ILogger, string, NuGetVersion, string, Exception?> _doesNuGetPackageExistFailure = LoggerMessage.Define<string, NuGetVersion, string>(LogLevel.Error, DoesNuGetPackageExistFailure,
         "Failed to get test whether NuGet package with ID {PackageID} and version {Version} exists from {URL}");
 
     /// <summary>
@@ -853,7 +855,75 @@ internal static class LoggerMessages
     /// <param name="version">The package version.</param>
     /// <param name="url">The source repository URL.</param>
     /// <param name="error">The exception that caused the event.</param>
-    public static void LogDoesNuGetPackageExistFailure(this ILogger logger, string packageID, NuGetVersion version, Uri url, Exception error) => _doesNuGetPackageExistFailure(logger, packageID, version, url, error);
+    public static void LogDoesNuGetPackageExistFailure(this ILogger logger, string packageID, NuGetVersion version, string url, Exception error) => _doesNuGetPackageExistFailure(logger, packageID, version, url, error);
+    
+    #endregion
+
+    #region NuGetPackageSearchFailure event logger message (0x0028)
+    
+    public const int EVENT_ID_NuGetPackageSearchFailure = 0x0028;
+    
+    public static readonly EventId NuGetPackageSearchFailure = new(EVENT_ID_NuGetPackageSearchFailure, nameof(NuGetPackageSearchFailure));
+    
+    private static readonly Action<ILogger, string, string, SearchFilter, int, int, Exception?> _nuGetPackageSearchFailure = LoggerMessage.Define<string, string, SearchFilter, int, int>(LogLevel.Error, NuGetPackageSearchFailure,
+        "Message {SearchTerm} {URL} {Filters} {SkipCount} {TakeCount}");
+    
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Error"/> message for a NuGetPackageSearchFailure event with event code 0x0028.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="searchTerm">The first event parameter.</param>
+    /// <param name="url">The second event parameter.</param>
+    /// <param name="filters">The third event parameter.</param>
+    /// <param name="skipCount">The fourth event parameter.</param>
+    /// <param name="takeCount">The fifth event parameter.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    public static void LogNuGetPackageSearchFailure(this ILogger logger, string searchTerm, string url, SearchFilter filters, int skipCount, int takeCount, Exception? exception = null) => _nuGetPackageSearchFailure(logger, searchTerm, url, filters, skipCount, takeCount, exception);
+    
+    #endregion
+
+    #region GetNuGetDownloadResourceResultsFailure event logger message (0x0029)
+    
+    public const int EVENT_ID_GetNuGetDownloadResourceResultsFailure = 0x0029;
+    
+    public static readonly EventId GetNuGetDownloadResourceResultsFailure = new(EVENT_ID_GetNuGetDownloadResourceResultsFailure, nameof(GetNuGetDownloadResourceResultsFailure));
+    
+    private static readonly Action<ILogger, PackageIdentity, string, PackageDownloadContext, string, Exception?> _getNuGetDownloadResourceResultsFailure = LoggerMessage.Define<PackageIdentity, string, PackageDownloadContext, string>(LogLevel.Error, GetNuGetDownloadResourceResultsFailure,
+        "Message {Identity} {URL} {DownloadContext} {GlobalPackagesFolder}");
+    
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Error"/> message for a GetNuGetDownloadResourceResultsFailure event with event code 0x0029.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="identity">The first event parameter.</param>
+    /// <param name="url">The second event parameter.</param>
+    /// <param name="downloadContext">The third event parameter.</param>
+    /// <param name="globalPackagesFolder">The fourth event parameter.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    public static void LogGetNuGetDownloadResourceResultsFailure(this ILogger logger, PackageIdentity identity, string url, PackageDownloadContext downloadContext, string globalPackagesFolder, Exception? exception = null) => _getNuGetDownloadResourceResultsFailure(logger, identity, url, downloadContext, globalPackagesFolder, exception);
+    
+    #endregion
+    
+    #region ListNuGetPackagesFailure event logger message (0x002a)
+    
+    public const int EVENT_ID_ListNuGetPackagesFailure = 0x002a;
+    
+    public static readonly EventId ListNuGetPackagesFailure = new(EVENT_ID_ListNuGetPackagesFailure, nameof(ListNuGetPackagesFailure));
+    
+    private static readonly Action<ILogger, string, string, bool, bool, bool, Exception?> _listNuGetPackagesFailure = LoggerMessage.Define<string, string, bool, bool, bool>(LogLevel.Error, ListNuGetPackagesFailure,
+        "Failed to list NuGet packages ({SearchTerm}; {URL}; {PreRelease}; {AllVersions}; {IncludeDelisted}).");
+    
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Error"/> message for a ListNuGetPackagesFailure event with event code 0x002a.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="searchTerm">The first event parameter.</param>
+    /// <param name="url">The second event parameter.</param>
+    /// <param name="preRelease">The third event parameter.</param>
+    /// <param name="allVersions">The fourth event parameter.</param>
+    /// <param name="includeDelisted">The fifth event parameter.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    public static void LogListNuGetPackagesFailure(this ILogger logger, string searchTerm, string url, bool preRelease, bool allVersions, bool includeDelisted, Exception? exception = null) => _listNuGetPackagesFailure(logger, searchTerm, url, preRelease, allVersions, includeDelisted, exception);
     
     #endregion
 
@@ -899,7 +969,7 @@ internal static class LoggerMessages
     
     #region GetNugetMetaData
     
-    private static readonly Func<ILogger, Uri, string, bool, bool, IDisposable?> _getNugetMetaDataScope = LoggerMessage.DefineScope<Uri, string, bool, bool>("Get NuGet MetaData from {URL}: ID={PackageID}; IncludePrerelease={IncludePrerelease}; IncludeUnlisted={IncludeUnlisted}");
+    private static readonly Func<ILogger, string, string, bool, bool, IDisposable?> _getNugetMetaDataScope = LoggerMessage.DefineScope<string, string, bool, bool>("Get NuGet MetaData from {URL}: ID={PackageID}; IncludePrerelease={IncludePrerelease}; IncludeUnlisted={IncludeUnlisted}");
 
     /// <summary>
     /// Formats the GetNugetMetaData message and creates a scope.
@@ -910,13 +980,13 @@ internal static class LoggerMessages
     /// <param name="packageId">Whether to include unlisted packages.</param>
     /// <param name="url">The source URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetNugetMetaDataScope(this ILogger logger, Uri url, string packageId, bool includePrerelease, bool includeUnlisted) => _getNugetMetaDataScope(logger, url, packageId, includePrerelease, includeUnlisted);
+    public static IDisposable? BeginGetNugetMetaDataScope(this ILogger logger, string url, string packageId, bool includePrerelease, bool includeUnlisted) => _getNugetMetaDataScope(logger, url, packageId, includePrerelease, includeUnlisted);
     
     #endregion
     
     #region GetNuGetPackageVersions
     
-    private static readonly Func<ILogger, Uri, string, IDisposable?> _getNuGetPackageVersionsScope = LoggerMessage.DefineScope<Uri, string>("Get NuGet Package versions from {URL}: ID={PackageID}");
+    private static readonly Func<ILogger, string, string, IDisposable?> _getNuGetPackageVersionsScope = LoggerMessage.DefineScope<string, string>("Get NuGet Package versions from {URL}: ID={PackageID}");
 
     /// <summary>
     /// Formats the GetNuGetPackageVersions message and creates a scope.
@@ -925,13 +995,13 @@ internal static class LoggerMessages
     /// <param name="packageId">The package ID.</param>
     /// <param name="url">The source URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetNuGetPackageVersionsScope(this ILogger logger, Uri url, string packageId) => _getNuGetPackageVersionsScope(logger, url, packageId);
+    public static IDisposable? BeginGetNuGetPackageVersionsScope(this ILogger logger, string url, string packageId) => _getNuGetPackageVersionsScope(logger, url, packageId);
     
     #endregion
     
     #region FindNuGetPackageById
     
-    private static readonly Func<ILogger, Uri, string, IDisposable?> _findNuGetPackageByIdScope = LoggerMessage.DefineScope<Uri, string>("Find NuGet Package by ID from {URL}: ID={PackageID}");
+    private static readonly Func<ILogger, string, string, IDisposable?> _findNuGetPackageByIdScope = LoggerMessage.DefineScope<string, string>("Find NuGet Package by ID from {URL}: ID={PackageID}");
 
     /// <summary>
     /// Formats the FindNuGetPackageById message and creates a scope.
@@ -940,9 +1010,61 @@ internal static class LoggerMessages
     /// <param name="packageId">The package ID.</param>
     /// <param name="url">The source URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginFindNuGetPackageByIdScope(this ILogger logger, Uri url, string packageId) => _findNuGetPackageByIdScope(logger, url, packageId);
+    public static IDisposable? BeginFindNuGetPackageByIdScope(this ILogger logger, string url, string packageId) => _findNuGetPackageByIdScope(logger, url, packageId);
     
     #endregion
     
+    #region ListNuGetPackages Scope
+    
+    private static readonly Func<ILogger, string, string, bool, bool, bool, IDisposable?> _listNuGetPackagesScope = LoggerMessage.DefineScope<string, string, bool, bool, bool>("List Packages {SearchTerm} {URL} {PreRelease} {AllVersions} {IncludeDelisted}");
+    /// <summary>
+    /// Formats the ListNuGetPackages message and creates a scope.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="searchTerm">description</param>
+    /// <param name="url">description</param>
+    /// <param name="preRelease">description</param>
+    /// <param name="allVersions">description</param>
+    /// <param name="includeDelisted">description</param>
+    /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
+    public static IDisposable? BeginListNuGetPackagesScope(this ILogger logger, string searchTerm, string url, bool preRelease, bool allVersions, bool includeDelisted) => _listNuGetPackagesScope(logger, searchTerm, url, preRelease, allVersions, includeDelisted);
+    
     #endregion
+
+    #region GetNuGetDownloadResourceResult Scope
+    
+    private static readonly Func<ILogger, PackageIdentity, string, PackageDownloadContext, string, IDisposable?> _getDownloadResourceResultScope = LoggerMessage.DefineScope<PackageIdentity, string, PackageDownloadContext, string>("Message {Identity} {URL} {DownloadContext} {GlobalPackageFolder}");
+    
+    /// <summary>
+    /// Formats the GetNuGetDownloadResourceResult message and creates a scope.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="identity">The first scope context parameter.</param>
+    /// <param name="url">The second scope context parameter.</param>
+    /// <param name="downloadContext">The third scope context parameter.</param>
+    /// <param name="globalPackageFolder">The fourth scope context parameter.</param>
+    /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
+    public static IDisposable? BeginGetNuGetDownloadResourceResultScope(this ILogger logger, PackageIdentity identity, string url, PackageDownloadContext downloadContext, string globalPackageFolder) => _getDownloadResourceResultScope(logger, identity, url, downloadContext, globalPackageFolder);
+    
+    #endregion
+
+    #region SearchNuGetPackage Scope
+    
+    private static readonly Func<ILogger, string, string, SearchFilter, int, int, IDisposable?> _searchNuGetPackageScope = LoggerMessage.DefineScope<string, string, SearchFilter, int, int>("Message {SearchTerm} {URL} {Filters} {Skip} {Take}");
+    
+    /// <summary>
+    /// Formats the SearchNuGetPackage message and creates a scope.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="searchTerm">The first scope context parameter.</param>
+    /// <param name="url">The second scope context parameter.</param>
+    /// <param name="filters">The third scope context parameter.</param>
+    /// <param name="skip">The fourth scope context parameter.</param>
+    /// <param name="take">The fifth scope context parameter.</param>
+    /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
+    public static IDisposable? BeginSearchNuGetPackageScope(this ILogger logger, string searchTerm, string url, SearchFilter filters, int skip, int take) => _searchNuGetPackageScope(logger, searchTerm, url, filters, skip, take);
+    
+    #endregion
+
+    #endregion // GetNuGetPackageSearch(string searchTerm, url, SearchFilter filters, int skip, int take
 }

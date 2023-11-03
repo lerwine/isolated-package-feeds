@@ -7,29 +7,29 @@ namespace CdnGetter.Services;
 
 public sealed class RemoteNugetClientService : NugetClientService
 {
-    private readonly Task<SourceRepository> _getRepositoryAsync;
+    private readonly LazyTransform<string, SourceRepository> _sourceRepo;
 
-    protected override Task<SourceRepository> GetRepositoryAsync() => _getRepositoryAsync;
-    
-    public RemoteNugetClientService(IOptions<Config.NuGetSettings> options, ILogger<RemoteNugetClientService> logger) : base(options, logger)
+    protected override LazyTransform<string, SourceRepository> SourceRepo => _sourceRepo;
+
+    public RemoteNugetClientService(IOptions<Config.NuGetSettings> options, ILogger<RemoteNugetClientService> logger) : base(logger)
     {
-        string endpointUri = options.Value.V3ApiUrl.DefaultIfWhiteSpace(() => Config.NuGetSettings.DEFAULT_V3_API_URI);
-        _getRepositoryAsync = Task.Run(() =>
+        _sourceRepo = new(options.Value.V3ApiUrl.DefaultIfWhiteSpace(() => Config.NuGetSettings.DEFAULT_V3_API_URI), (uriString, setUri) =>
         {
-            using var scope = Logger.BeginRepositoryUrlScope(endpointUri);
+            using var scope = Logger.BeginRepositoryUrlScope(uriString);
             Uri uri;
-            try { uri = new(endpointUri, UriKind.Absolute); }
+            try { uriString = (uri = new(uriString, UriKind.Absolute)).AbsoluteUri; }
             catch (UriFormatException error)
             {
-                throw InvalidRemoteNugetRepositoryUrlException.LogAndCreate(logger, endpointUri, error);
+                throw InvalidRemoteNugetRepositoryUrlException.LogAndCreate(logger, uriString, error);
             }
             catch (ArgumentException error)
             {
-                throw InvalidRemoteNugetRepositoryUrlException.LogAndCreate(logger, endpointUri, error);
+                throw InvalidRemoteNugetRepositoryUrlException.LogAndCreate(logger, uriString, error);
             }
+            setUri(uriString);
             if (uri.IsFile)
-                throw InvalidRemoteNugetRepositoryUrlException.LogAndCreate(logger, endpointUri);
-            return Repository.Factory.GetCoreV3(endpointUri);
+                throw InvalidRemoteNugetRepositoryUrlException.LogAndCreate(logger, uriString);
+            return Repository.Factory.GetCoreV3(uriString);
         });
     }
 }
