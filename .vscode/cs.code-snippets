@@ -162,7 +162,7 @@
 			"public static readonly EventId ${1} = new(EVENT_ID_${1}, nameof(${1}));",
             "",
 			"private static readonly Action<ILogger, ${3:ParamType1}, ${4:ParamType2}, ${5:ParamType3}, ${6:ParamType4}, ${7:ParamType5}, ${8:ParamType6}, Exception?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/} = LoggerMessage.Define<${3}, ${4}, ${5}, ${6}, ${7}, ${8}>(LogLevel.${9:Critical|Error|Warning|Information|Trace|Debug}, ${1},",
-			"    \"${10:Message} (${11:ParamName1}={${11}}; ${12:ParamName2}={${12}}; ${13:ParamName3}={${13}}; ${14:ParamName4}={${14}}; {${15:Param5}; ${16:ParamName6}={${16}}).\");",
+			"    \"${10:Message} (${11:ParamName1}={${11}}; ${12:ParamName2}={${12}}; ${13:ParamName3}={${13}}; ${14:ParamName4}={${14}}; ${15:Param5}={${15}}; ${16:ParamName6}={${16}}).\");",
             "",
             "/// <summary>",
             "/// Logs a <see cref=\"LogLevel.${9}\"/> message for a ${1} event with event code 0x${2}.",
