@@ -1,0 +1,184 @@
+{
+    "@id": "https://api.nuget.org/v3/catalog0/data/2022.11.07.17.56.57/microsoft.extensions.dependencyinjection.7.0.0.json",
+    "authors": "Microsoft",
+    "dependencyGroups": [
+      {
+        "TargetFramework": {
+          "Framework": ".NETFramework",
+          "Version": "4.6.2.0",
+          "Platform": "",
+          "PlatformVersion": "0.0.0.0",
+          "HasPlatform": false,
+          "HasProfile": false,
+          "Profile": "",
+          "DotNetFrameworkName": ".NETFramework,Version=v4.6.2",
+          "DotNetPlatformName": "",
+          "IsPCL": false,
+          "IsPackageBased": false,
+          "AllFrameworkVersions": false,
+          "IsUnsupported": false,
+          "IsAgnostic": false,
+          "IsAny": false,
+          "IsSpecificFramework": true
+        },
+        "Packages": [
+          {
+            "Id": "Microsoft.Bcl.AsyncInterfaces",
+            "Include": [],
+            "Exclude": [],
+            "VersionRange": "[7.0.0, )"
+          },
+          {
+            "Id": "Microsoft.Extensions.DependencyInjection.Abstractions",
+            "Include": [],
+            "Exclude": [],
+            "VersionRange": "[7.0.0, )"
+          },
+          {
+            "Id": "System.Threading.Tasks.Extensions",
+            "Include": [],
+            "Exclude": [],
+            "VersionRange": "[4.5.4, )"
+          }
+        ]
+      },
+      {
+        "TargetFramework": {
+          "Framework": ".NETCoreApp",
+          "Version": "6.0.0.0",
+          "Platform": "",
+          "PlatformVersion": "0.0.0.0",
+          "HasPlatform": false,
+          "HasProfile": false,
+          "Profile": "",
+          "DotNetFrameworkName": ".NETCoreApp,Version=v6.0",
+          "DotNetPlatformName": "",
+          "IsPCL": false,
+          "IsPackageBased": true,
+          "AllFrameworkVersions": false,
+          "IsUnsupported": false,
+          "IsAgnostic": false,
+          "IsAny": false,
+          "IsSpecificFramework": true
+        },
+        "Packages": [
+          {
+            "Id": "Microsoft.Extensions.DependencyInjection.Abstractions",
+            "Include": [],
+            "Exclude": [],
+            "VersionRange": "[7.0.0, )"
+          }
+        ]
+      },
+      {
+        "TargetFramework": {
+          "Framework": ".NETCoreApp",
+          "Version": "7.0.0.0",
+          "Platform": "",
+          "PlatformVersion": "0.0.0.0",
+          "HasPlatform": false,
+          "HasProfile": false,
+          "Profile": "",
+          "DotNetFrameworkName": ".NETCoreApp,Version=v7.0",
+          "DotNetPlatformName": "",
+          "IsPCL": false,
+          "IsPackageBased": true,
+          "AllFrameworkVersions": false,
+          "IsUnsupported": false,
+          "IsAgnostic": false,
+          "IsAny": false,
+          "IsSpecificFramework": true
+        },
+        "Packages": [
+          {
+            "Id": "Microsoft.Extensions.DependencyInjection.Abstractions",
+            "Include": [],
+            "Exclude": [],
+            "VersionRange": "[7.0.0, )"
+          }
+        ]
+      },
+      {
+        "TargetFramework": {
+          "Framework": ".NETStandard",
+          "Version": "2.0.0.0",
+          "Platform": "",
+          "PlatformVersion": "0.0.0.0",
+          "HasPlatform": false,
+          "HasProfile": false,
+          "Profile": "",
+          "DotNetFrameworkName": ".NETStandard,Version=v2.0",
+          "DotNetPlatformName": "",
+          "IsPCL": false,
+          "IsPackageBased": true,
+          "AllFrameworkVersions": false,
+          "IsUnsupported": false,
+          "IsAgnostic": false,
+          "IsAny": false,
+          "IsSpecificFramework": true
+        },
+        "Packages": [
+          {
+            "Id": "Microsoft.Bcl.AsyncInterfaces",
+            "Include": [],
+            "Exclude": [],
+            "VersionRange": "[7.0.0, )"
+          },
+          {
+            "Id": "Microsoft.Extensions.DependencyInjection.Abstractions",
+            "Include": [],
+            "Exclude": [],
+            "VersionRange": "[7.0.0, )"
+          },
+          {
+            "Id": "System.Threading.Tasks.Extensions",
+            "Include": [],
+            "Exclude": [],
+            "VersionRange": "[4.5.4, )"
+          }
+        ]
+      },
+      {
+        "TargetFramework": {
+          "Framework": ".NETStandard",
+          "Version": "2.1.0.0",
+          "Platform": "",
+          "PlatformVersion": "0.0.0.0",
+          "HasPlatform": false,
+          "HasProfile": false,
+          "Profile": "",
+          "DotNetFrameworkName": ".NETStandard,Version=v2.1",
+          "DotNetPlatformName": "",
+          "IsPCL": false,
+          "IsPackageBased": true,
+          "AllFrameworkVersions": false,
+          "IsUnsupported": false,
+          "IsAgnostic": false,
+          "IsAny": false,
+          "IsSpecificFramework": true
+        },
+        "Packages": [
+          {
+            "Id": "Microsoft.Extensions.DependencyInjection.Abstractions",
+            "Include": [],
+            "Exclude": [],
+            "VersionRange": "[7.0.0, )"
+          }
+        ]
+      }
+    ],
+    "description": "Default implementation of dependency injection for Microsoft.Extensions.DependencyInjection.",
+    "iconUrl": "https://api.nuget.org/v3-flatcontainer/microsoft.extensions.dependencyinjection/7.0.0/icon",
+    "licenseUrl": "https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection/7.0.0/license",
+    "id": "Microsoft.Extensions.DependencyInjection",
+    "projectUrl": "https://dot.net/",
+    "published": "2022-11-07T17:54:12.26+00:00",
+    "requireLicenseAcceptance": false,
+    "summary": "Default implementation of dependency injection for Microsoft.Extensions.DependencyInjection.",
+    "tags": "",
+    "title": "Microsoft.Extensions.DependencyInjection",
+    "version": "7.0.0",
+    "verified": false,
+    "licenseExpression": "MIT",
+    "listed": true
+  }

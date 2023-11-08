@@ -1,13 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using NuGet.Frameworks;
 using NuGet.Versioning;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace CdnGetter.UnitTests;
@@ -35,52 +29,54 @@ public class RemoteNugetClientServiceTest : IDisposable
     }
 
     [Fact]
-    public void GetMetadataTest1()
+    public async void GetMetadataTest1()
     {
         var service = _host.Services.GetRequiredService<Services.RemoteNugetClientService>();
         string packageId = "Microsoft.Extensions.DependencyInjection";
         bool includePrerelease = false;
         bool includeUnlisted = false;
-        var result = service.GetMetadataAsync(packageId, includePrerelease, includeUnlisted, CancellationToken.None).Result;
+        var result = await service.GetMetadataAsync(packageId, includePrerelease, includeUnlisted, CancellationToken.None);
+        Assert.NotNull(result);
+        Assert.NotEmpty(result);
+    }
+
+    [Fact]
+    public async void GetMetadataTest2()
+    {
+        var service = _host.Services.GetRequiredService<Services.RemoteNugetClientService>();
+        string packageId = "Microsoft.Extensions.DependencyInjection";
+        var version = NuGetVersion.Parse("7.0.0");
+        var result = await service.GetMetadataAsync(packageId, version, CancellationToken.None);
         Assert.NotNull(result);
     }
 
     [Fact]
-    public void GetMetadataTest2()
+    public async void GetAllVersionsTest()
     {
         var service = _host.Services.GetRequiredService<Services.RemoteNugetClientService>();
         string packageId = "Microsoft.Extensions.DependencyInjection";
-        var version = NuGetVersion.Parse("7.0.13");
-        var result = service.GetMetadataAsync(packageId, version, CancellationToken.None).Result;
+        var result = await service.GetAllVersionsAsync(packageId, CancellationToken.None);
+        Assert.NotNull(result);
+        Assert.NotEmpty(result);
+    }
+
+    [Fact]
+    public async void GetDependencyInfoTest()
+    {
+        var service = _host.Services.GetRequiredService<Services.RemoteNugetClientService>();
+        string packageId = "Microsoft.Extensions.DependencyInjection";
+        var version = NuGetVersion.Parse("7.0.0");
+        var result = await service.GetDependencyInfoAsync(packageId, version, CancellationToken.None);
         Assert.NotNull(result);
     }
 
     [Fact]
-    public void GetAllVersionsTest()
+    public async void DoesPackageExistTest()
     {
         var service = _host.Services.GetRequiredService<Services.RemoteNugetClientService>();
         string packageId = "Microsoft.Extensions.DependencyInjection";
-        var result = service.GetAllVersionsAsync(packageId, CancellationToken.None).Result;
-        Assert.NotNull(result);
-    }
-
-    [Fact]
-    public void GetDependencyInfoTest()
-    {
-        var service = _host.Services.GetRequiredService<Services.RemoteNugetClientService>();
-        string packageId = "Microsoft.Extensions.DependencyInjection";
-        var version = NuGetVersion.Parse("7.0.13");
-        var result = service.GetDependencyInfoAsync(packageId, version, CancellationToken.None).Result;
-        Assert.NotNull(result);
-    }
-
-    [Fact]
-    public void DoesPackageExistTest()
-    {
-        var service = _host.Services.GetRequiredService<Services.RemoteNugetClientService>();
-        string packageId = "Microsoft.Extensions.DependencyInjection";
-        var version = NuGetVersion.Parse("7.0.13");
-        var result = service.DoesPackageExistAsync(packageId, version, CancellationToken.None).Result;
+        var version = NuGetVersion.Parse("7.0.0");
+        var result = await service.DoesPackageExistAsync(packageId, version, CancellationToken.None);
         Assert.True(result);
     }
 }

@@ -1,0 +1,201 @@
+{
+    "PackageIdentity": {
+      "Id": "Microsoft.Extensions.DependencyInjection",
+      "Version": "7.0.0",
+      "HasVersion": true
+    },
+    "DependencyGroups": [
+      {
+        "TargetFramework": {
+          "Framework": ".NETFramework",
+          "Version": "4.6.2.0",
+          "Platform": "",
+          "PlatformVersion": "0.0.0.0",
+          "HasPlatform": false,
+          "HasProfile": false,
+          "Profile": "",
+          "DotNetFrameworkName": ".NETFramework,Version=v4.6.2",
+          "DotNetPlatformName": "",
+          "IsPCL": false,
+          "IsPackageBased": false,
+          "AllFrameworkVersions": false,
+          "IsUnsupported": false,
+          "IsAgnostic": false,
+          "IsAny": false,
+          "IsSpecificFramework": true
+        },
+        "Packages": [
+          {
+            "Id": "Microsoft.Bcl.AsyncInterfaces",
+            "Include": [],
+            "Exclude": [
+              "Analyzers",
+              "Build"
+            ],
+            "VersionRange": "[7.0.0, )"
+          },
+          {
+            "Id": "Microsoft.Extensions.DependencyInjection.Abstractions",
+            "Include": [],
+            "Exclude": [
+              "Analyzers",
+              "Build"
+            ],
+            "VersionRange": "[7.0.0, )"
+          },
+          {
+            "Id": "System.Threading.Tasks.Extensions",
+            "Include": [],
+            "Exclude": [
+              "Analyzers",
+              "Build"
+            ],
+            "VersionRange": "[4.5.4, )"
+          }
+        ]
+      },
+      {
+        "TargetFramework": {
+          "Framework": ".NETCoreApp",
+          "Version": "6.0.0.0",
+          "Platform": "",
+          "PlatformVersion": "0.0.0.0",
+          "HasPlatform": false,
+          "HasProfile": false,
+          "Profile": "",
+          "DotNetFrameworkName": ".NETCoreApp,Version=v6.0",
+          "DotNetPlatformName": "",
+          "IsPCL": false,
+          "IsPackageBased": true,
+          "AllFrameworkVersions": false,
+          "IsUnsupported": false,
+          "IsAgnostic": false,
+          "IsAny": false,
+          "IsSpecificFramework": true
+        },
+        "Packages": [
+          {
+            "Id": "Microsoft.Extensions.DependencyInjection.Abstractions",
+            "Include": [],
+            "Exclude": [
+              "Analyzers",
+              "Build"
+            ],
+            "VersionRange": "[7.0.0, )"
+          }
+        ]
+      },
+      {
+        "TargetFramework": {
+          "Framework": ".NETCoreApp",
+          "Version": "7.0.0.0",
+          "Platform": "",
+          "PlatformVersion": "0.0.0.0",
+          "HasPlatform": false,
+          "HasProfile": false,
+          "Profile": "",
+          "DotNetFrameworkName": ".NETCoreApp,Version=v7.0",
+          "DotNetPlatformName": "",
+          "IsPCL": false,
+          "IsPackageBased": true,
+          "AllFrameworkVersions": false,
+          "IsUnsupported": false,
+          "IsAgnostic": false,
+          "IsAny": false,
+          "IsSpecificFramework": true
+        },
+        "Packages": [
+          {
+            "Id": "Microsoft.Extensions.DependencyInjection.Abstractions",
+            "Include": [],
+            "Exclude": [
+              "Analyzers",
+              "Build"
+            ],
+            "VersionRange": "[7.0.0, )"
+          }
+        ]
+      },
+      {
+        "TargetFramework": {
+          "Framework": ".NETStandard",
+          "Version": "2.0.0.0",
+          "Platform": "",
+          "PlatformVersion": "0.0.0.0",
+          "HasPlatform": false,
+          "HasProfile": false,
+          "Profile": "",
+          "DotNetFrameworkName": ".NETStandard,Version=v2.0",
+          "DotNetPlatformName": "",
+          "IsPCL": false,
+          "IsPackageBased": true,
+          "AllFrameworkVersions": false,
+          "IsUnsupported": false,
+          "IsAgnostic": false,
+          "IsAny": false,
+          "IsSpecificFramework": true
+        },
+        "Packages": [
+          {
+            "Id": "Microsoft.Bcl.AsyncInterfaces",
+            "Include": [],
+            "Exclude": [
+              "Analyzers",
+              "Build"
+            ],
+            "VersionRange": "[7.0.0, )"
+          },
+          {
+            "Id": "Microsoft.Extensions.DependencyInjection.Abstractions",
+            "Include": [],
+            "Exclude": [
+              "Analyzers",
+              "Build"
+            ],
+            "VersionRange": "[7.0.0, )"
+          },
+          {
+            "Id": "System.Threading.Tasks.Extensions",
+            "Include": [],
+            "Exclude": [
+              "Analyzers",
+              "Build"
+            ],
+            "VersionRange": "[4.5.4, )"
+          }
+        ]
+      },
+      {
+        "TargetFramework": {
+          "Framework": ".NETStandard",
+          "Version": "2.1.0.0",
+          "Platform": "",
+          "PlatformVersion": "0.0.0.0",
+          "HasPlatform": false,
+          "HasProfile": false,
+          "Profile": "",
+          "DotNetFrameworkName": ".NETStandard,Version=v2.1",
+          "DotNetPlatformName": "",
+          "IsPCL": false,
+          "IsPackageBased": true,
+          "AllFrameworkVersions": false,
+          "IsUnsupported": false,
+          "IsAgnostic": false,
+          "IsAny": false,
+          "IsSpecificFramework": true
+        },
+        "Packages": [
+          {
+            "Id": "Microsoft.Extensions.DependencyInjection.Abstractions",
+            "Include": [],
+            "Exclude": [
+              "Analyzers",
+              "Build"
+            ],
+            "VersionRange": "[7.0.0, )"
+          }
+        ]
+      }
+    ],
+    "FrameworkReferenceGroups": []
+  }
