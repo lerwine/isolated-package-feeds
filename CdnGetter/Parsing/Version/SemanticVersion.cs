@@ -130,6 +130,39 @@ public readonly partial struct SemanticVersion : INumericalSoftwareVersion
 
     IDelimitedTokenList ISoftwareVersion.Build => Build;
 
+    public SemanticVersion(int major)
+    {
+        Prefix = null;
+        Major = ToNumericalToken(major);
+        Minor = null;
+        Patch = null;
+        Micro = new();
+        PreRelease = new();
+        Build = new();
+    }
+    
+    public SemanticVersion(int major, int minor)
+    {
+        Prefix = null;
+        Major = ToNumericalToken(major);
+        Minor = ToDelimitedNumericalToken(minor);
+        Patch = null;
+        Micro = new();
+        PreRelease = new();
+        Build = new();
+    }
+    
+    public SemanticVersion(int major, int minor, int patch, params int[] micro)
+    {
+        Prefix = null;
+        Major = ToNumericalToken(major);
+        Minor = ToDelimitedNumericalToken(minor);
+        Patch = ToDelimitedNumericalToken(patch);
+        Micro = new();
+        PreRelease = new();
+        Build = new();
+    }
+    
     public SemanticVersion(INumericalToken major)
     {
         if (!major.IsNamedOrSimpleNumericToken())

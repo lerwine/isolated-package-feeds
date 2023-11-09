@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CdnGetter.Services;
 [ContentGetter(JsDelivrSettings.PROVIDER_ID, JsDelivrSettings.PROVIDER_NAME, Description = "data.jsdelivr.com")]
+[Obsolete("Storage and retrieval should exist as separate services")]
 public class JsDelivrGetterService : ContentGetterService
 {
     private readonly ILogger<JsDelivrGetterService> _logger;

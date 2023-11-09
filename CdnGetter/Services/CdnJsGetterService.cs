@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace CdnGetter.Services;
 
 [ContentGetter(CdnJsSettings.PROVIDER_ID, CdnJsSettings.PROVIDER_NAME, Description = "api.cdnjs.com")]
+[Obsolete("Storage and retrieval should exist as separate services")]
 public class CdnJsGetterService : ContentGetterService
 {
     private readonly ILogger<CdnJsGetterService> _logger;

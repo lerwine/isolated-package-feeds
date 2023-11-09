@@ -11,6 +11,7 @@ namespace CdnGetter.Services;
 /// <summary>
 /// Base class for services that retrieve content from remote CDNs.
 /// </summary>
+[Obsolete("Storage and retrieval should exist as separate services")]
 public abstract class ContentGetterService
 {
     private readonly AppSettings _settings;

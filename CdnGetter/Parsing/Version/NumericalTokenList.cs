@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Text;
+using static CdnGetter.Parsing.Parsing;
 
 namespace CdnGetter.Parsing.Version;
 
@@ -9,6 +10,16 @@ namespace CdnGetter.Parsing.Version;
 public class NumericalTokenList : IDelimitedTokenList, IReadOnlyList<DelimitedNumericalToken>
 {
     private readonly DelimitedNumericalToken[] _items;
+
+    public static NumericalTokenList Create(params int[] values) => new((values is null) ? Enumerable.Empty<DelimitedNumericalToken>() : values.Select(v => ToDelimitedNumericalToken(v)));
+
+    public static NumericalTokenList Create(IEnumerable<int> values, CharacterToken? delimiter = null)
+    {
+        if (values is null)
+            return new NumericalTokenList();
+        delimiter ??= DotToken;
+        return new NumericalTokenList(values.Select(v => ToDelimitedNumericalToken(v, delimiter)));
+    }
 
     /// <summary>
     /// Intializes a new <c>NumericalTokenList</c>.
