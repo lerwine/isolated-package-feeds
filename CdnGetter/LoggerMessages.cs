@@ -1042,6 +1042,7 @@ internal static class LoggerMessages
     #region ListNuGetPackages Scope
 
     private static readonly Func<ILogger, string, string, bool, bool, bool, IDisposable?> _listNuGetPackagesScope = LoggerMessage.DefineScope<string, string, bool, bool, bool>("List Packages {SearchTerm} {URL} {PreRelease} {AllVersions} {IncludeDelisted}");
+
     /// <summary>
     /// Formats the ListNuGetPackages message and creates a scope.
     /// </summary>
@@ -1091,5 +1092,5 @@ internal static class LoggerMessages
 
     #endregion
 
-    #endregion // GetNuGetPackageSearch(string searchTerm, url, SearchFilter filters, int skip, int take
+    #endregion
 }
