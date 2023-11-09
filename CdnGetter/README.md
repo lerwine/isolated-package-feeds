@@ -107,13 +107,7 @@ Optional Switch
   - [Exploring the NuGet v3 Libraries, Part 2](https://www.daveaglick.com/posts/exploring-the-nuget-v3-libraries-part-2)
   - [Exploring the NuGet v3 Libraries, Part 3: Installing packages](http://daveaglick.com/posts/exploring-the-nuget-v3-libraries-part-3)
   - [Revisiting the NuGet v3 Libraries](https://martinbjorkstrom.com/posts/2018-09-19-revisiting-nuget-client-libraries)
-
-#### Example Projects
-
-- [NugetDownloader](https://github.com/paraspatidar/NugetDownloader)
-- [NetCoreNugetServer](https://github.com/emresenturk/NetCoreNugetServer)
-- [MinimalNugetServer](https://github.com/TanukiSharp/MinimalNugetServer)
-- [NuGet](https://github.com/NuGet)
+- [Sources](https://github.com/NuGet)
   - [NuGet.Protocol](https://www.nuget.org/packages/NuGet.Protocol)
     - [Repository](https://github.com/NuGet/NuGet.Client/tree/dev/src/NuGet.Core/NuGet.Protocol)
   - [NuGet.Packaging](https://www.nuget.org/packages/NuGet.Packaging/)
@@ -121,3 +115,9 @@ Optional Switch
   - [NuGetGallery](https://github.com/NuGet/NuGetGallery)
   - [NuGet.Server](https://github.com/NuGet/NuGet.Server)
   - [NuGet.Client](https://github.com/NuGet/NuGet.Client)
+
+#### Example Projects
+
+- [NugetDownloader](https://github.com/paraspatidar/NugetDownloader)
+- [NetCoreNugetServer](https://github.com/emresenturk/NetCoreNugetServer)
+- [MinimalNugetServer](https://github.com/TanukiSharp/MinimalNugetServer)

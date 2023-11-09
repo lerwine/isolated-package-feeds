@@ -13,7 +13,7 @@ public sealed class RemoteNugetClientService : NugetClientService
 
     public RemoteNugetClientService(IOptions<Config.NuGetSettings> options, ILogger<RemoteNugetClientService> logger) : base(logger)
     {
-        _sourceRepo = new(options.Value.V3ApiUrl.DefaultIfWhiteSpace(() => Config.NuGetSettings.DEFAULT_V3_API_URI), (uriString, setUri) =>
+        _sourceRepo = new(options.Value.ServiceIndexUrl.DefaultIfWhiteSpace(() => Config.NuGetSettings.DEFAULT_SERVICE_INDEX_URL), (uriString, setUri) =>
         {
             using var scope = Logger.BeginRepositoryUrlScope(uriString);
             Uri uri;
