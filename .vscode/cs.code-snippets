@@ -564,7 +564,7 @@
 		"body": [
             "#region ${1:ScopeName} Scope",
             "",
-			"private static readonly Func<ILogger, ${2:ParamType1}, ${3:ParamType2}, ${4:ParamType3}, ${5:ParamType4}, ${6:ParamType5}, ${7:ParamType6}, IDisposable?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Scope = LoggerMessage.DefineScope<$2, $3, $4, $5, $7>(",
+			"private static readonly Func<ILogger, ${2:ParamType1}, ${3:ParamType2}, ${4:ParamType3}, ${5:ParamType4}, ${6:ParamType5}, ${7:ParamType6}, IDisposable?> _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Scope = LoggerMessage.DefineScope<$2, $3, $4, $5, $6, $7>(",
             "   \"${8:Message} (${9:ParamName1}={${9}}; ${10:ParamName2}={${10}}; ${11:ParamName3}={${11}}; ${12:ParamName4}={${12}}; ${13:ParamName5}={${13}}; ${14:ParamName6}={${14}}).\");",
             "",
             "/// <summary>",
@@ -578,7 +578,7 @@
             "/// <param name=\"${13/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${19:The fifth scope context parameter.}</param>",
             "/// <param name=\"${14/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}\">${20:The sixth scope context parameter}</param>",
             "/// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>",
-			"public static IDisposable? Begin${1}Scope(this ILogger logger, ${2} ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${3} ${10/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${11/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${5} ${12/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${7} ${13/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${8} ${14/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Scope(logger, ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${10/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${11/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${12/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${13/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${14/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/});",
+			"public static IDisposable? Begin${1}Scope(this ILogger logger, ${2} ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${3} ${10/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${4} ${11/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${5} ${12/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${6} ${13/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${7} ${14/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}) => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}Scope(logger, ${9/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${10/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${11/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${12/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${13/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${14/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/});",
             "",
             "#endregion"
 		],
