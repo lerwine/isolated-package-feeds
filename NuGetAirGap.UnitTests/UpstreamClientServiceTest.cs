@@ -2,78 +2,73 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NuGet.Versioning;
-using Xunit.Abstractions;
 
-namespace CdnGetter.UnitTests;
+namespace NuGetAirGap.UnitTests;
 
-public class RemoteNugetClientServiceTest : IDisposable
+[TestFixture]
+public class UpstreamClientServiceTest
 {
-    private readonly ITestOutputHelper _output;
-    private readonly IHost _host;
+    private IHost _host;
 
-    public RemoteNugetClientServiceTest(ITestOutputHelper output)
+    [SetUp]
+    public void Setup()
     {
-        _output = output;
         HostApplicationBuilder builder = Host.CreateApplicationBuilder();
         builder.Environment.ContentRootPath = Directory.GetCurrentDirectory();
-        builder.Logging.AddConsole();
-        builder.Services.Configure<Config.AppSettings>(builder.Configuration.GetSection(nameof(CdnGetter)));
-        builder.Services.AddSingleton<Services.RemoteNugetClientService>();
+        builder.Logging.AddDebug();
+        builder.Services.Configure<AppSettings>(builder.Configuration.GetSection(nameof(NuGetAirGap)));
+        builder.Services.AddSingleton<UpstreamClientService>();
         _host = builder.Build();
         _host.Start();
     }
 
-    public void Dispose()
-    {
-        _host.Dispose();
-    }
+    [TearDown]
+    public void TearDown() => _host.Dispose();
 
-    [Fact]
-    public async void GetMetadataTest1()
+    [Test]
+    public async Task GetMetadataTest1()
     {
-        var service = _host.Services.GetRequiredService<Services.RemoteNugetClientService>();
+        var service = _host.Services.GetRequiredService<UpstreamClientService>();
         string packageId = "Microsoft.Extensions.DependencyInjection";
         bool includePrerelease = false;
         bool includeUnlisted = false;
         var result = await service.GetMetadataAsync(packageId, includePrerelease, includeUnlisted, CancellationToken.None);
-        Assert.NotNull(result);
-        Assert.NotEmpty(result);
+        Assert.That(result, Is.Not.Null.And.Not.Empty);
     }
-
-    [Fact]
-    public async void GetMetadataTest2()
+    
+    [Test]
+    public async Task GetMetadataTest2()
     {
-        var service = _host.Services.GetRequiredService<Services.RemoteNugetClientService>();
+        var service = _host.Services.GetRequiredService<UpstreamClientService>();
         string packageId = "Microsoft.Extensions.DependencyInjection";
         var version = NuGetVersion.Parse("7.0.0");
         var result = await service.GetMetadataAsync(packageId, version, CancellationToken.None);
-        Assert.NotNull(result);
+        Assert.That(result, Is.Not.Null);
     }
-
-    [Fact]
-    public async void GetAllVersionsTest()
+    
+    [Test]
+    public async Task GetAllVersionsTest()
     {
-        var service = _host.Services.GetRequiredService<Services.RemoteNugetClientService>();
+        var service = _host.Services.GetRequiredService<UpstreamClientService>();
         string packageId = "Microsoft.Extensions.DependencyInjection";
         var result = await service.GetAllVersionsAsync(packageId, CancellationToken.None);
-        Assert.NotNull(result);
-        Assert.NotEmpty(result);
+        Assert.That(result, Is.Not.Null.And.Not.Empty);
     }
-
-    [Fact]
-    public async void GetDependencyInfoTest()
+    
+    [Test]
+    public async Task GetDependencyInfoTest()
     {
-        var service = _host.Services.GetRequiredService<Services.RemoteNugetClientService>();
+        var service = _host.Services.GetRequiredService<UpstreamClientService>();
         string packageId = "Microsoft.Extensions.DependencyInjection";
         var version = NuGetVersion.Parse("7.0.0");
         var result = await service.GetDependencyInfoAsync(packageId, version, CancellationToken.None);
-        Assert.NotNull(result);
+        Assert.That(result, Is.Not.Null);
     }
 
-    [Fact]
-    public async void DoesPackageExistTest()
+    [Test]
+    public async Task DoesPackageExistTest()
     {
-        var service = _host.Services.GetRequiredService<Services.RemoteNugetClientService>();
+        var service = _host.Services.GetRequiredService<UpstreamClientService>();
         string packageId = "Microsoft.Extensions.DependencyInjection";
         var version = NuGetVersion.Parse("7.0.0");
         var result = await service.DoesPackageExistAsync(packageId, version, CancellationToken.None);

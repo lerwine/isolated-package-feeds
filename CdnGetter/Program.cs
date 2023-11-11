@@ -37,8 +37,6 @@ internal class Program
                 }.ConnectionString);
             })
             .AddHostedService<MainService>();
-        builder.Services.AddSingleton<LocalNugetClientService>();
-        builder.Services.AddSingleton<RemoteNugetClientService>();
         foreach (Type type in ContentGetterAttribute.UpstreamCdnServices.Values.Select(t => t.Type))
             builder.Services.AddSingleton(type);
         Host = builder.Build();
