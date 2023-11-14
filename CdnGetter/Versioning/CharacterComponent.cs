@@ -1,12 +1,13 @@
+
 namespace CdnGetter.Versioning
 {
     public readonly struct CharacterComponent : ITextComponent
     {
-        public CharacterComponent(char suffix)
-        {
-        }
+        public CharacterComponent(char value) => Value = value;
 
-        public int Length => throw new NotImplementedException();
+        public char Value { get; }
+
+        int ITextComponent.Length => 1;
 
         public int CompareTo(ITextComponent? other)
         {
@@ -41,6 +42,11 @@ namespace CdnGetter.Versioning
         public bool Equals(char other)
         {
             throw new NotImplementedException();
+        }
+
+        IEnumerable<char> ITextComponent.GetChars()
+        {
+            yield return Value;
         }
     }
 }

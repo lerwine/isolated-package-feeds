@@ -2,11 +2,16 @@ namespace CdnGetter.Versioning
 {
     public readonly struct StringComponent : ITextComponent
     {
-        public StringComponent(string suffix)
+        public StringComponent(string text)
         {
+            if (text is null || text.Length < 2)
+                throw new ArgumentException($"'{nameof(text)}' cannot be null or less than 1 character.", nameof(text));
+            Text = text;
         }
 
-        public int Length => throw new NotImplementedException();
+        public string Text { get; }
+
+        int ITextComponent.Length => Text.Length;
 
         public int CompareTo(ITextComponent? other)
         {
@@ -42,5 +47,7 @@ namespace CdnGetter.Versioning
         {
             throw new NotImplementedException();
         }
+
+        IEnumerable<char> ITextComponent.GetChars() => Text;
     }
 }
