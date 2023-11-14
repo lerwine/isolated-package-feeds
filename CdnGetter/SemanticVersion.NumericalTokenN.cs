@@ -1,29 +1,52 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
+using CdnGetter.Parsing.Version;
 
 namespace CdnGetter;
 
 public partial class SemanticVersion
 {
-    public readonly struct NumericalTokenN : INumericalToken
+    public readonly struct NumericalTokenN : INumericalToken<BigInteger>, IComparable<NumericalTokenN>, IEquatable<NumericalTokenN>
     {
-        public string Suffix { get; }
-
+        public NumericalTokenN(BigInteger value, int zeroPadLength = 0, ICharacterSpanToken? suffix = null)
+        {
+            if (zeroPadLength < 0)
+                throw new ArgumentOutOfRangeException(nameof(zeroPadLength));
+            if (value.Sign < 0)
+            {
+                IsNegative = true;
+                Value = BigInteger.Negate(value);
+            }
+            else
+            {
+                IsNegative = false;
+                Value = value;
+            }
+            ZeroPadLength = zeroPadLength;
+            Suffix = (suffix is not null && suffix.Length > 0) ? suffix : null;
+        }
+        
+        public NumericalTokenN(BigInteger value, int zeroPadLength, string? suffix) : this(value, zeroPadLength, string.IsNullOrEmpty(suffix) ? null : (suffix.Length == 1) ? new CharacterToken(suffix[0]) : new StringToken(suffix)) { }
+        
+        public NumericalTokenN(BigInteger value, int zeroPadLength, char suffix) : this(value, zeroPadLength, new CharacterToken(suffix)) { }
+        
+        public NumericalTokenN(BigInteger value, ICharacterSpanToken? suffix) : this(value, 0, suffix) { }
+        
+        public NumericalTokenN(BigInteger value, string? suffix) : this(value, 0, suffix) { }
+        
+        public NumericalTokenN(BigInteger value, char suffix) : this(value, 0, suffix) { }
+        
         public bool IsNegative { get; }
+
+        public int ZeroPadLength { get; }
+
+        public ICharacterSpanToken? Suffix { get; }
 
         public BigInteger Value { get; }
 
-        public NumericalTokenN(BigInteger value, string? suffix = null) : this()
+        public int CompareTo(NumericalTokenN other)
         {
-            if (string.IsNullOrEmpty(suffix))
-                Suffix = string.Empty;
-            else
-            {
-                if (char.IsNumber(suffix[0]))
-                    throw new ArgumentException($"{nameof(suffix)} cannot start with a number.", nameof(suffix));
-                Suffix = suffix;
-            }
-            IsNegative = value.Sign < 0;
-            Value = IsNegative ? BigInteger.Abs(value) : value;
+            throw new NotImplementedException();
         }
 
         public int CompareTo(INumericalToken? other)
@@ -31,111 +54,161 @@ public partial class SemanticVersion
             throw new NotImplementedException();
         }
 
-        public int CompareTo(sbyte other)
+        public int CompareTo(IToken<BigInteger>? other)
         {
             throw new NotImplementedException();
         }
 
-        public int CompareTo(byte other)
+        public int CompareTo(IToken? other)
         {
-            throw new NotImplementedException();
+            if (other is null)
+                return 1;
+            if (other is NumericalTokenN nt)
+                return CompareTo(nt);
+            int result;
+            if (other is INumericalToken n)
+                result = IsNegative ? (n.IsNegative ? n.CompareTo(Value) : -1) : n.IsNegative ? 1 : 0 - n.CompareTo(Value);
+            else if (other is IToken<BigInteger> tb)
+            {
+                if (IsNegative)
+                    return -1;
+                result = Value.CompareTo(tb.Value);
+            }
+            else
+                return TextComparer.Compare(ToString(), other.ToString());
+            if (result != 0)
+                return result;
+            return CompareCharacterSpanTokens(Suffix, (other is IDelimitedToken d) ? d.Delimiter : null);
         }
 
-        public int CompareTo(short other)
+        public int CompareTo(sbyte other) => IsNegative ? BigInteger.Negate(Value).CompareTo(other) : Value.IsZero ? 0 - other : Value.CompareTo(other);
+
+        public int CompareTo(byte other) => IsNegative ? -1 : Value.IsZero ? ((other == 0) ? 0 : -1) : Value.CompareTo(other);
+
+        public int CompareTo(short other) => IsNegative ? BigInteger.Negate(Value).CompareTo(other) : Value.IsZero ? 0 - other : Value.CompareTo(other);
+
+        public int CompareTo(ushort other) => IsNegative ? -1 : Value.IsZero ? ((other == 0) ? 0 : -1) : Value.CompareTo(other);
+
+        public int CompareTo(int other) => IsNegative ? BigInteger.Negate(Value).CompareTo(other) : Value.IsZero ? 0 - other : Value.CompareTo(other);
+
+        public int CompareTo(uint other) => IsNegative ? -1 : Value.IsZero ? ((other == 0u) ? 0 : -1) : Value.CompareTo(other);
+
+        public int CompareTo(long other) => (IsNegative ? BigInteger.Negate(Value) : Value).CompareTo(other);
+
+        public int CompareTo(ulong other) => IsNegative ? -1 : Value.IsZero ? ((other == 0L) ? 0 : -1) : Value.CompareTo(other);
+
+        public int CompareTo(BigInteger other) => other.IsZero ? (Value.IsZero ? 0 : IsNegative ? -1 : 1) : Value.IsZero ? other.Sign : IsNegative ? ((other.Sign > 0) ? -1 : BigInteger.Negate(Value).CompareTo(other)) :
+            (other.Sign < 0) ? 1 : Value.CompareTo(other);
+
+        public bool Equals(NumericalTokenN other) => IsNegative == other.IsNegative && Value == other.Value && CharacterSpanTokensEqual(Suffix, other.Suffix);
+
+        public bool Equals([NotNullWhen(true)] INumericalToken? other)
         {
-            throw new NotImplementedException();
+            if (other is null)
+                return false;
+            if (other is NumericalTokenN ntn)
+                return Equals(ntn);
+            return IsNegative == other.IsNegative && other.Equals(Value) && CharacterSpanTokensEqual(Suffix, other.Suffix);
         }
 
-        public int CompareTo(ushort other)
+        public bool Equals([NotNullWhen(true)] IToken<BigInteger>? other)
         {
-            throw new NotImplementedException();
+            if (other is null)
+                return false;
+            if (other is NumericalTokenN ntn)
+                return Equals(ntn);
+            if (other is INumericalToken n)
+                return IsNegative == n.IsNegative && n.Equals(Value) && CharacterSpanTokensEqual(Suffix, n.Suffix);
+            return other.Value.Equals(IsNegative ? BigInteger.Negate(Value) : Value) && CharacterSpanTokensEqual(Suffix, other is IDelimitedToken d ? d.Delimiter : null);
         }
 
-        public int CompareTo(int other)
+        public bool Equals([NotNullWhen(true)] IToken? other)
         {
-            throw new NotImplementedException();
+            if (other is null)
+                return false;
+            if (other is NumericalTokenN ntn)
+                return Equals(ntn);
+            if (other is INumericalToken n)
+                return IsNegative == n.IsNegative && n.Equals(Value) && CharacterSpanTokensEqual(Suffix, n.Suffix);
+            if (other is IToken<BigInteger> tb)
+                return tb.Value.Equals(IsNegative ? BigInteger.Negate(Value) : Value) && CharacterSpanTokensEqual(Suffix, tb is IDelimitedToken d ? d.Delimiter : null);
+            return TextComparer.Equals(ToString(), other.ToString());
         }
 
-        public int CompareTo(uint other)
+        public bool Equals(sbyte other) => (IsNegative ? BigInteger.Negate(Value) : Value) == other;
+
+        public bool Equals(byte other) => (IsNegative ? BigInteger.Negate(Value) : Value) == other;
+
+        public bool Equals(short other) => (IsNegative ? BigInteger.Negate(Value) : Value) == other;
+
+        public bool Equals(ushort other) => (IsNegative ? BigInteger.Negate(Value) : Value) == other;
+
+        public bool Equals(int other) => (IsNegative ? BigInteger.Negate(Value) : Value) == other;
+
+        public bool Equals(uint other) => (IsNegative ? BigInteger.Negate(Value) : Value) == other;
+
+        public bool Equals(long other) => (IsNegative ? BigInteger.Negate(Value) : Value) == other;
+
+        public bool Equals(ulong other) => (IsNegative ? BigInteger.Negate(Value) : Value) == other;
+
+        public bool Equals(BigInteger other) => (IsNegative ? BigInteger.Negate(Value) : Value) == other;
+
+        public override bool Equals([NotNullWhen(true)] object? obj)
         {
-            throw new NotImplementedException();
+            if (obj is null)
+                return false;
+            if (obj is NumericalTokenN ntn)
+                return Equals(ntn);
+            if (obj is INumericalToken n)
+                return IsNegative == n.IsNegative && n.Equals(Value) && CharacterSpanTokensEqual(Suffix, n.Suffix);
+            if (obj is IToken<BigInteger> tb)
+                return tb.Value.Equals(IsNegative ? BigInteger.Negate(Value) : Value) && CharacterSpanTokensEqual(Suffix, tb is IDelimitedToken d ? d.Delimiter : null);
+            if (obj is IToken t)
+                return TextComparer.Equals(ToString(), t.ToString());
+            if (obj is BigInteger bi)
+                return Equals(bi);
+            if (obj is ulong ul)
+                return Equals(ul);
+            if (obj is long l)
+                return Equals(l);
+            if (obj is uint u)
+                return Equals(u);
+            if (obj is int i)
+                return Equals(i);
+            if (obj is ushort us)
+                return Equals(us);
+            if (obj is short v)
+                return Equals(v);
+            if (obj is byte b)
+                return Equals(b);
+            return obj is sbyte s && Equals(s);
         }
 
-        public int CompareTo(long other)
+        public IEnumerable<char> GetCharacters(bool normalized = false)
         {
-            throw new NotImplementedException();
+            if (IsNegative)
+                return Enumerable.Repeat('-', 1).Concat((normalized || ZeroPadLength == 0) ? ((Suffix is null) ? Value.ToString() : Value.ToString().Concat(Suffix.GetCharacters(true))) :
+                    Enumerable.Repeat('0', ZeroPadLength).Concat((Suffix is null) ? Value.ToString() : Value.ToString().Concat(Suffix.GetCharacters(true))));
+            return (normalized || ZeroPadLength == 0) ? ((Suffix is null) ? Value.ToString() : Value.ToString().Concat(Suffix.GetCharacters(true))) :
+                Enumerable.Repeat('0', ZeroPadLength).Concat((Suffix is null) ? Value.ToString() : Value.ToString().Concat(Suffix.GetCharacters(true)));
         }
-
-        public int CompareTo(ulong other)
-        {
-            throw new NotImplementedException();
-        }
-
-        public int CompareTo(BigInteger other)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Equals(INumericalToken? other)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Equals(sbyte other)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Equals(byte other)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Equals(short other)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Equals(ushort other)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Equals(int other)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Equals(uint other)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Equals(long other)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Equals(ulong other)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Equals(BigInteger other) => Suffix.Length == 0 && (IsNegative ? other.Equals(BigInteger.Negate(Value)) : other.Equals(Value));
-
-        public override bool Equals(object? obj) => obj is not null && ((obj is NumericalTokenN n) ? IsNegative == n.IsNegative && Value == n.Value && AlphaComparer.Equals(Suffix, n.Suffix) :
-            (obj is INumericalToken other) ? Equals(other) : (Suffix.Length == 0 && (obj is sbyte s) ? Value.Equals(s) : (obj is byte b) ? Value.Equals(b) : (obj is short t) ? Value.Equals(t) :
-            (obj is ushort v) ? Value.Equals(v) : (obj is int i) ? Value.Equals(i) : (obj is uint u) ? Value.Equals(u) : (obj is long l) ? Value.Equals(l) : (obj is ulong o) ? Value.Equals(o) :
-            obj is BigInteger x && Value.Equals(x)));
 
         public override int GetHashCode()
         {
             unchecked
             {
-                return ((IsNegative ? 616 : 605) + Value.GetHashCode()) * 11 + AlphaComparer.GetHashCode(Suffix).GetHashCode();
+                int hash = (IsNegative ? 616 : 605) + Value.GetHashCode() * 11;
+                return (Suffix is null) ? hash : hash + Suffix.GetHashCode();
             }
         }
 
-        public override string ToString() => IsNegative ? ((Suffix.Length > 0) ? $"-{Value}{Suffix}" : $"-{Value}") : (Suffix.Length > 0) ? $"{Value}{Suffix}" : Value.ToString();
+        public override string ToString()
+        {
+            if (IsNegative)
+                return (ZeroPadLength == 0) ? ((Suffix is null) ? $"-{Value}" : $"-{Value}{Suffix}") :
+                    (Suffix is null) ? $"-{new string('0', ZeroPadLength)}{Value}" : $"-{new string('0', ZeroPadLength)}{Value}{Suffix}";
+            return (ZeroPadLength == 0) ? ((Suffix is null) ? Value.ToString() : $"{Value}{Suffix}") :
+                (Suffix is null) ? $"{new string('0', ZeroPadLength)}{Value}" : $"{new string('0', ZeroPadLength)}{Value}{Suffix}";
+        }
     }
 }

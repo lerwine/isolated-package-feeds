@@ -4,6 +4,8 @@ namespace CdnGetter;
 
 public partial class SemanticVersion : IComparable<SemanticVersion>, IEquatable<SemanticVersion>
 {
+    public static readonly StringComparer TextComparer = StringComparer.CurrentCultureIgnoreCase;
+
     string Prefix { get; }
 
     INumericalToken Major { get; }
@@ -14,9 +16,14 @@ public partial class SemanticVersion : IComparable<SemanticVersion>, IEquatable<
 
     IList<IDelimitedNumericalToken> Micro { get; }
 
-    public interface IDelimitedNumericalToken : INumericalToken
+    public static int CompareCharacterSpanTokens(ICharacterSpanToken? x, ICharacterSpanToken? y)
     {
+        throw new NotImplementedException();
+    }
 
+    public static bool CharacterSpanTokensEqual(ICharacterSpanToken? x, ICharacterSpanToken? y)
+    {
+        throw new NotImplementedException();
     }
 
     public int CompareTo(SemanticVersion? other)
@@ -80,41 +87,31 @@ public partial class SemanticVersion : IComparable<SemanticVersion>, IEquatable<
     
     public static INumericalToken ToNumericalToken(BigInteger value)
     {
-        throw new NotImplementedException();
+        if (value.IsZero)
+            return NumericalToken8.Zero;
+        if (value.IsOne)
+            return NumericalToken8.One;
+        if (value < NumericalToken64.RANGE_MIN_VALUE || value > NumericalToken64.RANGE_MAX_VALUE)
+            return new NumericalTokenN(value);
+        bool isNegative = value.Sign < 0;
+        if (isNegative && (value = BigInteger.Negate(value)).IsOne)
+            return NumericalToken8.NegativeOne;
+        if (value > NumericalToken32.RANGE_MAX_VALUE)
+            return new NumericalToken64((ulong)value, isNegative);
+        if (value > NumericalToken16.RANGE_MAX_VALUE)
+            return new NumericalToken32((uint)value, isNegative);
+        return (value > NumericalToken8.RANGE_MAX_VALUE) ? new NumericalToken16((ushort)value, isNegative) : new NumericalToken8((byte)value, isNegative);
     }
     
-    public static bool operator ==(SemanticVersion left, SemanticVersion right)
-    {
-        if (left is null)
-        {
-            return right is null;
-        }
+    public static bool operator ==(SemanticVersion left, SemanticVersion right) => (left is null) ? right is null : left.Equals(right);
 
-        return left.Equals(right);
-    }
+    public static bool operator !=(SemanticVersion left, SemanticVersion right) => (left is null) ? right is not null : !left.Equals(right);
 
-    public static bool operator !=(SemanticVersion left, SemanticVersion right)
-    {
-        return !(left == right);
-    }
+    public static bool operator <(SemanticVersion left, SemanticVersion right) => left is null ? right is not null : left.CompareTo(right) < 0;
 
-    public static bool operator <(SemanticVersion left, SemanticVersion right)
-    {
-        return left is null ? right is not null : left.CompareTo(right) < 0;
-    }
+    public static bool operator <=(SemanticVersion left, SemanticVersion right) => left is null || left.CompareTo(right) <= 0;
 
-    public static bool operator <=(SemanticVersion left, SemanticVersion right)
-    {
-        return left is null || left.CompareTo(right) <= 0;
-    }
+    public static bool operator >(SemanticVersion left, SemanticVersion right) => left is not null && left.CompareTo(right) > 0;
 
-    public static bool operator >(SemanticVersion left, SemanticVersion right)
-    {
-        return left is not null && left.CompareTo(right) > 0;
-    }
-
-    public static bool operator >=(SemanticVersion left, SemanticVersion right)
-    {
-        return left is null ? right is null : left.CompareTo(right) >= 0;
-    }
+    public static bool operator >=(SemanticVersion left, SemanticVersion right) => left is null ? right is null : left.CompareTo(right) >= 0;
 }
