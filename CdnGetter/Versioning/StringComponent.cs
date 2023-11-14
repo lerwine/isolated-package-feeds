@@ -20,31 +20,53 @@ namespace CdnGetter.Versioning
 
         int IReadOnlyCollection<char>.Count => Text.Length;
 
-        public int CompareTo(ITextComponent? other) => NoCaseComparer.Compare(Text, other);
+        public int CompareTo(string? other) => VersionComponentComparer.CompareTo(Text, other);
 
-        public int CompareTo(string? other) => NoCaseComparer.Compare(Text, other);
+        public int CompareTo(char other) => VersionComponentComparer.CompareTo(Text, other);
 
-        public int CompareTo(char other) => NoCaseComparer.Compare(Text, other);
+        public int CompareTo(ITextComponent? other)
+        {
+            throw new NotImplementedException();
+        }
 
-        public int CompareTo(object? obj) => (obj is null) ? 1 : (obj is ITextComponent textComponent) ? NoCaseComparer.Compare(Text, textComponent) :
-            (obj is char c) ? NoCaseComparer.Compare(Text, c) : (obj is string other) ? NoCaseComparer.Compare(Text, other) : -1;
+        public int CompareTo(IVersionComponent? other)
+        {
+            throw new NotImplementedException();
+        }
 
-        public bool Equals(ITextComponent? other) => NoCaseComparer.Equals(Text, other);
+        public int CompareTo(object? obj)
+        {
+            throw new NotImplementedException();
+        }
 
-        public bool Equals(string? other) => NoCaseComparer.Equals(Text, other);
+        public bool Equals(string? other) => VersionComponentComparer.AreEqual(Text, other);
 
-        public bool Equals(char other) => NoCaseComparer.Equals(Text, other);
+        public bool Equals(char other) => VersionComponentComparer.AreEqual(Text, other);
 
-        public override bool Equals([NotNullWhen(true)] object? obj) => obj is not null && ((obj is ITextComponent textComponent) ? NoCaseComparer.Equals(Text, textComponent) :
-            (obj is char c) ? NoCaseComparer.Equals(Text, c) : obj is string other && NoCaseComparer.Equals(Text, other));
+        public bool Equals(ITextComponent? other)
+        {
+            throw new NotImplementedException();
+        }
 
-        IEnumerable<char> ITextComponent.GetChars() => Text;
+        public bool Equals(IVersionComponent? other)
+        {
+            throw new NotImplementedException();
+        }
 
-        IEnumerator<char> IEnumerable<char>.GetEnumerator() => Text.GetEnumerator();
+        public override bool Equals([NotNullWhen(true)] object? obj)
+        {
+            throw new NotImplementedException();
+        }
+
+        char ITextComponent.First() => Text[0];
+
+        public IEnumerator<char> GetEnumerator() => Text.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)Text).GetEnumerator();
 
-        public override int GetHashCode() => NoCaseComparer.GetHashCode(Text);
+        char ITextComponent.Last() => Text[^1];
+
+        public override int GetHashCode() => VersionComponentComparer.GetHashCodeOf(Text);
 
         public override string ToString() => Text;
     }

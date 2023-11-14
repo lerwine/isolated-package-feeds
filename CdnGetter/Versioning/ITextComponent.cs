@@ -1,9 +1,9 @@
 namespace CdnGetter.Versioning
 {
-    public interface ITextComponent : IEquatable<ITextComponent>, IEquatable<string>, IEquatable<char>, IComparable<ITextComponent>, IComparable<string>, IComparable<char>, IComparable, IReadOnlyList<char>
+    public interface ITextComponent : IEquatable<ITextComponent>, IEquatable<string>, IEquatable<char>, IComparable<ITextComponent>, IComparable<string>, IComparable<char>, IComparable, IReadOnlyList<char>, IVersionComponent
     {
         int Length { get; }
-
-        IEnumerable<char> GetChars();
+        char First();
+        char Last();
     }
 }

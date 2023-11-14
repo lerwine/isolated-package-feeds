@@ -220,7 +220,7 @@ public readonly struct Digits64Bit : INumericalToken
                 return HasNegativeSign ? numericalToken.CompareAbs(Value) : 1;
             return HasNegativeSign ? -1 : 0 - numericalToken.CompareAbs(Value);
         }
-        return NoCaseComparer.Compare(GetValue(), other.GetValue());
+        return VersionComponentComparer.CompareTo(GetValue(), other.GetValue());
     }
 
     public bool Equals(IToken? other)
@@ -229,7 +229,7 @@ public readonly struct Digits64Bit : INumericalToken
             return false;
         if (other is INumericalToken numericalToken)
             return (Value == 0) ? numericalToken.IsZero : !numericalToken.IsZero && HasNegativeSign == numericalToken.HasNegativeSign && numericalToken.EqualsAbs(Value);
-        return NoCaseComparer.Equals(GetValue(), other.GetValue());
+        return VersionComponentComparer.AreEqual(GetValue(), other.GetValue());
     }
 
     public override bool Equals(object? obj) => obj is IToken other && Equals(other);

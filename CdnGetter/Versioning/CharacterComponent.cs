@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace CdnGetter.Versioning
 {
-
     public readonly struct CharacterComponent : ITextComponent
     {
         public CharacterComponent(char value) => Value = value;
@@ -24,35 +23,60 @@ namespace CdnGetter.Versioning
             }
         }
 
-        public int CompareTo(ITextComponent? other) => NoCaseComparer.Compare(Value, other);
+        public int CompareTo(string? other) => VersionComponentComparer.CompareTo(Value, other);
 
-        public int CompareTo(string? other) => NoCaseComparer.Compare(Value, other);
+        public int CompareTo(char other) => VersionComponentComparer.CompareTo(Value, other);
 
-        public int CompareTo(char other) => NoCaseComparer.Compare(Value, other);
+        public int CompareTo(ITextComponent? other)
+        {
+            throw new NotImplementedException();
+        }
 
-        public int CompareTo(object? obj) => (obj is null) ? 1 : (obj is ITextComponent textComponent) ? NoCaseComparer.Compare(Value, textComponent) :
-            (obj is char c) ? NoCaseComparer.Compare(Value, c) : (obj is string other) ? NoCaseComparer.Compare(Value, other) : -1;
+        public int CompareTo(IVersionComponent? other)
+        {
+            throw new NotImplementedException();
+        }
 
-        public bool Equals(ITextComponent? other) => NoCaseComparer.Equals(Value, other);
+        public int CompareTo(object? obj)
+        {
+            throw new NotImplementedException();
+        }
 
-        public bool Equals(string? other) => NoCaseComparer.Equals(Value, other);
+        public bool Equals(string? other) => VersionComponentComparer.AreEqual(Value, other);
 
-        public bool Equals(char other) => NoCaseComparer.Equals(Value, other);
+        public bool Equals(char other) => VersionComponentComparer.AreEqual(Value, other);
 
-        public override bool Equals([NotNullWhen(true)] object? obj) => obj is not null && ((obj is ITextComponent textComponent) ? NoCaseComparer.Equals(Value, textComponent) :
-            (obj is char c) ? NoCaseComparer.Equals(Value, c) : obj is string other && NoCaseComparer.Equals(Value, other));
+        public bool Equals(ITextComponent? other)
+        {
+            throw new NotImplementedException();
+        }
 
-        public IEnumerable<char> GetChars()
+        public bool Equals(IVersionComponent? other)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override bool Equals([NotNullWhen(true)] object? obj)
+        {
+            throw new NotImplementedException();
+        }
+
+        char ITextComponent.First() => Value;
+
+        public IEnumerator<char> GetEnumerator()
         {
             yield return Value;
         }
 
-        public override int GetHashCode() => NoCaseComparer.GetHashCode(Value);
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            yield return Value;
+        }
+
+        char ITextComponent.Last() => Value;
+
+        public override int GetHashCode() => VersionComponentComparer.GetHashCodeOf(Value);
 
         public override string ToString() => Value.ToString();
-
-        IEnumerator<char> IEnumerable<char>.GetEnumerator() => GetChars().GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)GetChars()).GetEnumerator();
     }
 }

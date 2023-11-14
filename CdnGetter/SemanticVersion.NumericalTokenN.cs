@@ -75,7 +75,7 @@ public partial class SemanticVersion
                 result = Value.CompareTo(tb.Value);
             }
             else
-                return NoCaseComparer.Compare(ToString(), other.ToString());
+                return VersionComponentComparer.CompareTo(ToString(), other.ToString());
             if (result != 0)
                 return result;
             return CompareCharacterSpanTokens(Suffix, (other is IDelimitedToken d) ? d.Delimiter : null);
@@ -132,7 +132,7 @@ public partial class SemanticVersion
                 return IsNegative == n.IsNegative && n.Equals(Value) && CharacterSpanTokensEqual(Suffix, n.Suffix);
             if (other is IToken<BigInteger> tb)
                 return tb.Value.Equals(IsNegative ? BigInteger.Negate(Value) : Value) && CharacterSpanTokensEqual(Suffix, tb is IDelimitedToken d ? d.Delimiter : null);
-            return NoCaseComparer.Equals(ToString(), other.ToString());
+            return VersionComponentComparer.AreEqual(ToString(), other.ToString());
         }
 
         public bool Equals(sbyte other) => (IsNegative ? BigInteger.Negate(Value) : Value) == other;
@@ -164,7 +164,7 @@ public partial class SemanticVersion
             if (obj is IToken<BigInteger> tb)
                 return tb.Value.Equals(IsNegative ? BigInteger.Negate(Value) : Value) && CharacterSpanTokensEqual(Suffix, tb is IDelimitedToken d ? d.Delimiter : null);
             if (obj is IToken t)
-                return NoCaseComparer.Equals(ToString(), t.ToString());
+                return VersionComponentComparer.AreEqual(ToString(), t.ToString());
             if (obj is BigInteger bi)
                 return Equals(bi);
             if (obj is ulong ul)
