@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -14,7 +15,8 @@ public class UpstreamClientServiceTest
     public void Setup()
     {
         HostApplicationBuilder builder = Host.CreateApplicationBuilder();
-        builder.Environment.ContentRootPath = Directory.GetCurrentDirectory();
+        var testContext = TestContext.CurrentContext;
+        builder.Environment.ContentRootPath = testContext.WorkDirectory;
         builder.Logging.AddDebug();
         builder.Services.Configure<AppSettings>(builder.Configuration.GetSection(nameof(NuGetAirGap)));
         builder.Services.AddSingleton<UpstreamClientService>();
