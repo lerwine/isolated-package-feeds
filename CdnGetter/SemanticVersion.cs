@@ -4,8 +4,6 @@ namespace CdnGetter;
 
 public partial class SemanticVersion : IComparable<SemanticVersion>, IEquatable<SemanticVersion>
 {
-    public static readonly StringComparer TextComparer = StringComparer.CurrentCultureIgnoreCase;
-
     string Prefix { get; }
 
     INumericalToken Major { get; }
@@ -55,8 +53,6 @@ public partial class SemanticVersion : IComparable<SemanticVersion>, IEquatable<
     {
         throw new NotImplementedException();
     }
-
-    public static readonly StringComparer AlphaComparer = StringComparer.CurrentCultureIgnoreCase;
 
     public static INumericalToken ToNumericalToken(short value) => (value > byte.MaxValue || value < sbyte.MinValue) ? new NumericalToken16(value) : (value < 0) ? new NumericalToken8((sbyte)value) : new NumericalToken8((byte)value);
     

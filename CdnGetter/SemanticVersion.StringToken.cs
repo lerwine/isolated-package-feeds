@@ -48,17 +48,17 @@ public partial class SemanticVersion
             throw new NotImplementedException();
         }
 
-        public bool Equals(StringToken other) => TextComparer.Equals(Value, other.Value);
+        public bool Equals(StringToken other) => NoCaseComparer.Equals(Value, other.Value);
 
         public bool Equals([NotNullWhen(true)] ICharacterSpanToken? other)
         {
             if (other is null)
                 return false;
             if (other is StringToken st)
-                return TextComparer.Equals(Value, st.Value);
+                return NoCaseComparer.Equals(Value, st.Value);
             if (other is IToken<string> ts)
-                return TextComparer.Equals(Value, ts.ToString());
-            return TextComparer.Equals(Value, other.ToString());
+                return NoCaseComparer.Equals(Value, ts.ToString());
+            return NoCaseComparer.Equals(Value, other.ToString());
         }
 
         public bool Equals([NotNullWhen(true)] IToken<string>? other)
@@ -66,10 +66,10 @@ public partial class SemanticVersion
             if (other is null)
                 return false;
             if (other is StringToken st)
-                return TextComparer.Equals(Value, st.Value);
+                return NoCaseComparer.Equals(Value, st.Value);
             if (other is ICharacterSpanToken cst)
-                return TextComparer.Equals(Value, cst.ToString());
-            return TextComparer.Equals(Value, other.ToString());
+                return NoCaseComparer.Equals(Value, cst.ToString());
+            return NoCaseComparer.Equals(Value, other.ToString());
         }
 
         public bool Equals([NotNullWhen(true)] IToken? other)
@@ -77,38 +77,38 @@ public partial class SemanticVersion
             if (other is null)
                 return false;
             if (other is StringToken st)
-                return TextComparer.Equals(Value, st.Value);
+                return NoCaseComparer.Equals(Value, st.Value);
             if (other is ICharacterSpanToken cst)
-                return TextComparer.Equals(Value, cst.ToString());
+                return NoCaseComparer.Equals(Value, cst.ToString());
             if (other is IToken<string> ts)
-                return TextComparer.Equals(Value, ts.ToString());
-            return TextComparer.Equals(Value, other.ToString());
+                return NoCaseComparer.Equals(Value, ts.ToString());
+            return NoCaseComparer.Equals(Value, other.ToString());
         }
 
-        public bool Equals([NotNullWhen(true)] string? other) => !string.IsNullOrEmpty(other) && TextComparer.Equals(Value, other);
+        public bool Equals([NotNullWhen(true)] string? other) => !string.IsNullOrEmpty(other) && NoCaseComparer.Equals(Value, other);
 
-        public bool Equals(char other) => Value.Length == 1 && TextComparer.Equals(Value, other.ToString());
+        public bool Equals(char other) => Value.Length == 1 && NoCaseComparer.Equals(Value, other.ToString());
 
         public override bool Equals([NotNullWhen(true)] object? obj)
         {
             if (obj is null)
                 return false;
             if (obj is StringToken st)
-                return TextComparer.Equals(Value, st.Value);
+                return NoCaseComparer.Equals(Value, st.Value);
             if (obj is ICharacterSpanToken cst)
-                return TextComparer.Equals(Value, cst.ToString());
+                return NoCaseComparer.Equals(Value, cst.ToString());
             if (obj is IToken<string> ts)
-                return TextComparer.Equals(Value, ts.ToString());
+                return NoCaseComparer.Equals(Value, ts.ToString());
             if (obj is IToken t)
-                return TextComparer.Equals(Value, t.ToString());
+                return NoCaseComparer.Equals(Value, t.ToString());
             if (obj is string s)
-                return s.Length > 0 && TextComparer.Equals(Value, s);
-            return obj is char c && Value.Length == 1 && TextComparer.Equals(Value, c.ToString());
+                return s.Length > 0 && NoCaseComparer.Equals(Value, s);
+            return obj is char c && Value.Length == 1 && NoCaseComparer.Equals(Value, c.ToString());
         }
 
         IEnumerable<char> IToken.GetCharacters(bool normalized) => Value;
 
-        public override int GetHashCode() => TextComparer.GetHashCode(Value);
+        public override int GetHashCode() => NoCaseComparer.GetHashCode(Value);
 
         public override string ToString() => Value;
     }
