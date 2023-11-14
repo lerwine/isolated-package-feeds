@@ -29,7 +29,7 @@ public class UpstreamClientServiceTest
     public async Task GetMetadataTest1()
     {
         var service = _host.Services.GetRequiredService<UpstreamClientService>();
-        string packageId = "Microsoft.Extensions.DependencyInjection";
+        string packageId = "Microsoft.Extensions.Logging.Abstractions";
         bool includePrerelease = false;
         bool includeUnlisted = false;
         var result = await service.GetMetadataAsync(packageId, includePrerelease, includeUnlisted, CancellationToken.None);
@@ -40,7 +40,7 @@ public class UpstreamClientServiceTest
     public async Task GetMetadataTest2()
     {
         var service = _host.Services.GetRequiredService<UpstreamClientService>();
-        string packageId = "Microsoft.Extensions.DependencyInjection";
+        string packageId = "Microsoft.Extensions.Logging.Abstractions";
         var version = NuGetVersion.Parse("7.0.0");
         var result = await service.GetMetadataAsync(packageId, version, CancellationToken.None);
         Assert.That(result, Is.Not.Null);
@@ -50,7 +50,7 @@ public class UpstreamClientServiceTest
     public async Task GetAllVersionsTest()
     {
         var service = _host.Services.GetRequiredService<UpstreamClientService>();
-        string packageId = "Microsoft.Extensions.DependencyInjection";
+        string packageId = "Microsoft.Extensions.Logging.Abstractions";
         var result = await service.GetAllVersionsAsync(packageId, CancellationToken.None);
         Assert.That(result, Is.Not.Null.And.Not.Empty);
     }
@@ -59,7 +59,7 @@ public class UpstreamClientServiceTest
     public async Task GetDependencyInfoTest()
     {
         var service = _host.Services.GetRequiredService<UpstreamClientService>();
-        string packageId = "Microsoft.Extensions.DependencyInjection";
+        string packageId = "Microsoft.Extensions.Logging.Abstractions";
         var version = NuGetVersion.Parse("7.0.0");
         var result = await service.GetDependencyInfoAsync(packageId, version, CancellationToken.None);
         Assert.That(result, Is.Not.Null);
@@ -69,7 +69,7 @@ public class UpstreamClientServiceTest
     public async Task DoesPackageExistTest()
     {
         var service = _host.Services.GetRequiredService<UpstreamClientService>();
-        string packageId = "Microsoft.Extensions.DependencyInjection";
+        string packageId = "Microsoft.Extensions.Logging.Abstractions";
         var version = NuGetVersion.Parse("7.0.0");
         var result = await service.DoesPackageExistAsync(packageId, version, CancellationToken.None);
         Assert.True(result);

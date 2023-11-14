@@ -4,6 +4,9 @@ using Microsoft.Extensions.Configuration;
 
 namespace NuGetAirGap;
 
+/// <summary>
+/// Binds to application settings and command line options.
+/// </summary>
 public class AppSettings
 {
     #region ServiceIndexUrl
@@ -41,6 +44,30 @@ public class AppSettings
 
     #endregion
 
+    #region Add
+
+    public const char COMMAND_LINE_SWITCH_a = 'a';
+
+    /// <summary>
+    /// Comma-separated list of package IDs for packages to be added to the local repository.
+    /// </summary>
+    /// <remarks>If a package is referenced in this option as well as the <see cref="Delete" />, it will be deleted and then re-added.</remarks>
+    public string? Add { get; set; }
+
+    #endregion
+    
+    #region Delete
+
+    public const char COMMAND_LINE_SWITCH_d = 'd';
+
+    /// <summary>
+    /// Comma-separated list of package IDs for packages to be deleted from the local reository.
+    /// </summary>
+    /// <remarks>If a package is referenced in this option as well as the <see cref="Add" />, it will be deleted and then re-added.</remarks>
+    public string? Delete { get; set; }
+
+    #endregion
+    
     #region Help
 
     /// <summary>
@@ -71,7 +98,8 @@ public class AppSettings
     private static readonly ReadOnlyDictionary<string, string> _valueSwitchMappings = new(new Dictionary<string, string>()
     {
         { $"-{COMMAND_LINE_SWITCH_s}", $"{nameof(NuGetAirGap)}:{nameof(LocalRepository)}" },
-        { $"-{COMMAND_LINE_SWITCH_l}", $"{nameof(NuGetAirGap)}:{nameof(ServiceIndexUrl)}" }
+        { $"-{COMMAND_LINE_SWITCH_l}", $"{nameof(NuGetAirGap)}:{nameof(ServiceIndexUrl)}" },
+        { $"-{COMMAND_LINE_SWITCH_a}", $"{nameof(NuGetAirGap)}:{nameof(Add)}" }
     });
 
     internal static void Configure(string[] args, IConfigurationBuilder builder)

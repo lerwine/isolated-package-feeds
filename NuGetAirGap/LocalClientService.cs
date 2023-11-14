@@ -66,4 +66,15 @@ public sealed class LocalClientService : ClientService
             return Repository.Factory.GetCoreV3(uriString);
         throw logger.LogRepositoryPathNotFound(uriString, false, message => new RepositoryPathNotFoundException(uriString, false, message));
     })) { }
+
+    public async Task DeleteAsync(IEnumerable<string> packageIds, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+    
+    public async Task AddAsync(IEnumerable<string> packageIds, UpstreamClientService upstreamClientService, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
 }
+

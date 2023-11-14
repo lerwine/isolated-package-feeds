@@ -9,6 +9,9 @@ using Microsoft.Extensions.Options;
 
 namespace NuGetAirGap
 {
+    /// <summary>
+    /// Main application service that performs actions according to command line arguments.
+    /// </summary>
     public class MainService : BackgroundService
     {
         private readonly ILogger<MainService> _logger;
@@ -24,7 +27,14 @@ namespace NuGetAirGap
             try
             {
                 using var scope = _serviceProvider.CreateScope();
-
+                var localClientService = scope.ServiceProvider.GetRequiredService<LocalClientService>();
+                var upstreamClientService = scope.ServiceProvider.GetRequiredService<UpstreamClientService>();
+                var appSettings = _settingsOptions.Value;
+                var packageIds = appSettings.Add?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(StringComparer.CurrentCultureIgnoreCase);
+                if (packageIds is not null && packageIds.Any())
+                    await localClientService.DeleteAsync(packageIds, stoppingToken);
+                if ((packageIds = appSettings.Add?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(StringComparer.CurrentCultureIgnoreCase)) is not null && packageIds.Any())
+                    await localClientService.AddAsync(packageIds, upstreamClientService, stoppingToken);
             }
             catch (OperationCanceledException) { throw; }
             finally
