@@ -39,7 +39,7 @@ public class AppSettings
     /// <summary>
     /// Specifies the relative or absolute path of the local repository.
     /// </summary>
-    /// <remarks>If this path is not absolute, it will be resolved relative to the <see cref="Microsoft.Extensions.Hosting.IHostEnvironment.ContentRootPath" />. The default value of this setting is defined in the <see cref="DEFAULT_LOCAL_REPOSITORY" /> constant.</remarks>
+    /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory. The default value of this setting is defined in the <see cref="DEFAULT_LOCAL_REPOSITORY" /> constant.</remarks>
     public string? LocalRepository { get; set; }
 
     #endregion

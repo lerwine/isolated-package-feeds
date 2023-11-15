@@ -8,9 +8,9 @@ namespace NuGetAirGap;
 
 public static class AppLoggerExtensions
 {
-    #region InvalidRepositoryUrl event logger message (0x0002)
+    #region InvalidRepositoryUrl event logger message (0x0001)
     
-    public const int EVENT_ID_InvalidRepositoryUrl = 0x0002;
+    public const int EVENT_ID_InvalidRepositoryUrl = 0x0001;
     
     public static readonly EventId InvalidRepositoryUrl = new(EVENT_ID_InvalidRepositoryUrl, nameof(InvalidRepositoryUrl));
     
@@ -47,7 +47,7 @@ public static class AppLoggerExtensions
     /// <summary>
     /// </summary>
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidRepositoryUrl"/> event with event code 0x0002.
+    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidRepositoryUrl"/> event with event code 0x0001.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="url">The invalid NuGet repository URL.</param>
@@ -106,9 +106,9 @@ public static class AppLoggerExtensions
 
     #endregion
 
-    #region RepositorySecurityException event logger message (0x0003)
+    #region RepositorySecurityException event logger message (0x0002)
     
-    public const int EVENT_ID_RepositorySecurityException = 0x0003;
+    public const int EVENT_ID_RepositorySecurityException = 0x0002;
     
     public static readonly EventId RepositorySecurityException = new(EVENT_ID_RepositorySecurityException, nameof(RepositorySecurityException));
     
@@ -123,7 +123,7 @@ public static class AppLoggerExtensions
         $"{MESSAGE_LocalRepositorySecurityException} ({{Path}}).");
     
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="RepositorySecurityException"/> event with code 0x0003.
+    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="RepositorySecurityException"/> event with code 0x0002.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
@@ -145,6 +145,33 @@ public static class AppLoggerExtensions
     
     #endregion
 
+    #region LocalRepositoryIOException event logger message (0x0003)
+    
+    public const int EVENT_ID_LocalRepositoryIOException = 0x0003;
+    
+    public static readonly EventId LocalRepositoryIOException = new(EVENT_ID_LocalRepositoryIOException, nameof(LocalRepositoryIOException));
+    
+    private const string MESSAGE_LocalRepositoryIOException = "I/O error while creating local repository folder";
+    
+    private static readonly Action<ILogger, string, Exception?> _localRepositoryIOException = LoggerMessage.Define<string>(LogLevel.Critical, LocalRepositoryIOException,
+        $"{MESSAGE_LocalRepositoryIOException} {{Path}}.");
+    
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="LocalRepositoryIOException"/> event with code 0x0003.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="path">The local repository path.</param>
+    /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    /// <typeparam name="T">The type of exception to be created.</typeparam>
+    /// <returns>The exception that was created by the <paramref name="factory"/> function.</returns>
+    public static T LogLocalRepositoryIOException<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : Exception
+    {
+        _localRepositoryIOException(logger, path, exception);
+        return factory(MESSAGE_LocalRepositoryIOException);
+    }
+    
+    #endregion
     #region RepositoryPathNotFound event logger message (0x0004)
     
     public const int EVENT_ID_RepositoryPathNotFound = 0x0004;

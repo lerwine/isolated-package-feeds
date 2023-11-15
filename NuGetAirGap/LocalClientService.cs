@@ -18,13 +18,13 @@ public sealed class LocalClientService : ClientService
 
     public LocalClientService(IOptions<AppSettings> appSettings, IHostEnvironment hostingEnvironment, ILogger<UpstreamClientService> logger) : base(logger, Task.Run(() =>
     {
-        var path = appSettings.Value.ServiceIndexUrl.DefaultIfWhiteSpace(() => AppSettings.DEFAULT_LOCAL_REPOSITORY);
+        var path = appSettings.Value.ServiceIndexUrl.DefaultIfWhiteSpace(() => Path.Combine(hostingEnvironment.ContentRootPath, AppSettings.DEFAULT_LOCAL_REPOSITORY));
         using var scope = logger.BeginValidateLocalPathScope(path);
         Uri? uri;
         try
         {
             if (!Uri.TryCreate(path, UriKind.Absolute, out uri))
-                uri = new Uri(path, UriKind.Absolute);
+                uri = new Uri(path, UriKind.Relative);
         }
         catch (UriFormatException error)
         {
@@ -35,42 +35,45 @@ public sealed class LocalClientService : ClientService
             throw logger.LogInvalidRepositoryUrl(path, false, message => new InvalidRepositoryUrlException(path, false, error), error);
         }
         DirectoryInfo directoryInfo;
-        if (uri.IsAbsoluteUri)
+        if (uri.IsAbsoluteUri && !uri.IsFile)
         {
             if (!uri.IsFile)
                 throw logger.LogInvalidRepositoryUrl(uri, false, message => new InvalidRepositoryUrlException(uri.AbsoluteUri, false, message));
             path = uri.LocalPath;
-            try { path = (directoryInfo = new(path)).FullName; }
-            catch (System.Security.SecurityException error)
-            {
-                throw logger.LogRepositorySecurityException(path, false, message => new RepositorySecurityException(path, false, message, error), error);
-            }
-            catch (PathTooLongException error)
-            {
-                throw logger.LogInvalidRepositoryUrl(path, false, message => new InvalidRepositoryUrlException(path, false, error), error);
-            }
-            catch (ArgumentException error)
-            {
-                throw logger.LogInvalidRepositoryUrl(path, false, message => new InvalidRepositoryUrlException(path, false, error), error);
-            }
         }
-        else
-            try { path = (directoryInfo = new(Path.IsPathFullyQualified(path) ? path : Path.Combine(hostingEnvironment.ContentRootPath, path))).FullName; }
-            catch (System.Security.SecurityException error)
-            {
-                throw logger.LogRepositorySecurityException(path, false, message => new RepositorySecurityException(path, false, message, error), error);
-            }
-            catch (PathTooLongException error)
-            {
-                throw logger.LogInvalidRepositoryUrl(path, false, message => new InvalidRepositoryUrlException(path, false, error), error);
-            }
-            catch (ArgumentException error)
-            {
-                throw logger.LogInvalidRepositoryUrl(path, false, message => new InvalidRepositoryUrlException(path, false, error), error);
-            }
-        if (directoryInfo.Exists)
-            return Repository.Factory.GetCoreV3(path);
-        throw logger.LogRepositoryPathNotFound(path, false, message => new RepositoryPathNotFoundException(path, false, message));
+        try { path = (directoryInfo = new(path)).FullName; }
+        catch (System.Security.SecurityException error)
+        {
+            throw logger.LogRepositorySecurityException(path, false, message => new RepositorySecurityException(path, false, message, error), error);
+        }
+        catch (PathTooLongException error)
+        {
+            throw logger.LogInvalidRepositoryUrl(path, false, message => new InvalidRepositoryUrlException(path, false, error), error);
+        }
+        catch (ArgumentException error)
+        {
+            throw logger.LogInvalidRepositoryUrl(path, false, message => new InvalidRepositoryUrlException(path, false, error), error);
+        }
+        if (!directoryInfo.Exists)
+        {
+            if (directoryInfo.Parent is not null && directoryInfo.Parent.Exists && !File.Exists(directoryInfo.FullName))
+                try { directoryInfo.Create(); }
+                catch (DirectoryNotFoundException exception)
+                {
+                    throw logger.LogRepositoryPathNotFound(path, false, message => new RepositoryPathNotFoundException(path, false, message, exception), exception);
+                }
+                catch (IOException exception)
+                {
+                    throw logger.LogLocalRepositoryIOException(path, message => new LocalRepositoryIOExceptionException(path, message, exception), exception);
+                }
+                catch (System.Security.SecurityException exception)
+                {
+                    throw logger.LogRepositorySecurityException(path, false, message => new RepositorySecurityException(path, false, message, exception), exception);
+                }
+            else
+                throw logger.LogRepositoryPathNotFound(path, false, message => new RepositoryPathNotFoundException(path, false, message));
+        }
+        return Repository.Factory.GetCoreV3(path);
     })) { }
 
     #region Methods using the Search Query API
