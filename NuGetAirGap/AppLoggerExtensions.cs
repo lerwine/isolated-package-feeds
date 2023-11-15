@@ -411,26 +411,26 @@ public static class AppLoggerExtensions
     #endregion
 
     /// string packageId, bool includePrerelease, bool includeUnlisted, string repositoryUrl
-    #region GetMetadataAsync Scope
+    #region GetMetadata Scope
     
-    private static readonly Func<ILogger, string, bool, bool, string, IDisposable?> _getUpstreamMetadataAsyncScope1 = LoggerMessage.DefineScope<string, bool, bool, string>(
+    private static readonly Func<ILogger, string, bool, bool, string, IDisposable?> _getUpstreamMetadataScope1 = LoggerMessage.DefineScope<string, bool, bool, string>(
        "Get NuGet package metadata from upstream (PackageId={PackageId}; IncludePreRelease={IncludePreRelease}; IncludeUnlisted={IncludeUnlisted}; RepositoryUrl={RepositoryUrl})."
     );
 
-    private static readonly Func<ILogger, string, bool, bool, string, IDisposable?> _getLocalMetadataAsyncScope1 = LoggerMessage.DefineScope<string, bool, bool, string>(
+    private static readonly Func<ILogger, string, bool, bool, string, IDisposable?> _getLocalMetadataScope1 = LoggerMessage.DefineScope<string, bool, bool, string>(
        "Get NuGet package metadata from local (PackageId={PackageId}; IncludePreRelease={IncludePreRelease}; IncludeUnlisted={IncludeUnlisted}; RepositoryUrl={RepositoryUrl})."
     );
     
-    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _getUpstreamMetadataAsyncScope2 = LoggerMessage.DefineScope<string, NuGetVersion, string>(
+    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _getUpstreamMetadataScope2 = LoggerMessage.DefineScope<string, NuGetVersion, string>(
        "Get NuGet package metadata from upstream (PackageId={PackageId}; Version={Version}; RepositoryUrl={RepositoryUrl})."
     );
 
-    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _getLocalMetadataAsyncScope2 = LoggerMessage.DefineScope<string, NuGetVersion, string>(
+    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _getLocalMetadataScope2 = LoggerMessage.DefineScope<string, NuGetVersion, string>(
        "Get NuGet package metadata from local (PackageId={PackageId}; Version={Version}; RepositoryUrl={RepositoryUrl})."
     );
 
     /// <summary>
-    /// Formats the GetMetadataAsync message and creates a scope.
+    /// Formats the GetMetadata message and creates a scope.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The package ID.</param>
@@ -439,18 +439,18 @@ public static class AppLoggerExtensions
     /// <param name="repositoryUrl">The NuGet repository URL.</param>
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetMetadataAsyncScope(this ILogger logger, string packageId, bool includePreRelease, bool includeUnlisted, string repositoryUrl, bool isUpstream)
+    public static IDisposable? BeginGetMetadataScope(this ILogger logger, string packageId, bool includePreRelease, bool includeUnlisted, string repositoryUrl, bool isUpstream)
     {
         if (isUpstream)
-            return _getUpstreamMetadataAsyncScope1(logger, packageId, includePreRelease, includeUnlisted, repositoryUrl);
-        return _getLocalMetadataAsyncScope1(logger, packageId, includePreRelease, includeUnlisted, repositoryUrl);
+            return _getUpstreamMetadataScope1(logger, packageId, includePreRelease, includeUnlisted, repositoryUrl);
+        return _getLocalMetadataScope1(logger, packageId, includePreRelease, includeUnlisted, repositoryUrl);
     }
 
-    public static IDisposable? BeginGetMetadataAsyncScope(this ILogger logger, string packageId, NuGetVersion version, string repositoryUrl, bool isUpstream)
+    public static IDisposable? BeginGetMetadataScope(this ILogger logger, string packageId, NuGetVersion version, string repositoryUrl, bool isUpstream)
     {
         if (isUpstream)
-            return _getUpstreamMetadataAsyncScope2(logger, packageId, version, repositoryUrl);
-        return _getLocalMetadataAsyncScope2(logger, packageId, version, repositoryUrl);
+            return _getUpstreamMetadataScope2(logger, packageId, version, repositoryUrl);
+        return _getLocalMetadataScope2(logger, packageId, version, repositoryUrl);
     }
 
     #endregion
@@ -666,8 +666,8 @@ public static class AppLoggerExtensions
 
     #region DeleteLocalPackage Scope
     
-    private static readonly Func<ILogger, string, IDisposable?> _deleteLocalPackageScope = LoggerMessage.DefineScope<string>(
-        "Delete local package {PackageId}."
+    private static readonly Func<ILogger, string, string, IDisposable?> _deleteLocalPackageScope = LoggerMessage.DefineScope<string, string>(
+        "Delete local package {PackageId} from {URL}."
     );
     
     /// <summary>
@@ -675,15 +675,16 @@ public static class AppLoggerExtensions
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The ID of the local package to delete.</param>
+    /// <param name="url">The local repository URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginDeleteLocalPackageScope(this ILogger logger, string packageId) => _deleteLocalPackageScope(logger, packageId);
+    public static IDisposable? BeginDeleteLocalPackageScope(this ILogger logger, string packageId, string url) => _deleteLocalPackageScope(logger, packageId, url);
     
     #endregion
 
     #region DeleteLocalPackageVersion Scope
     
-    private static readonly Func<ILogger, string, NuGetVersion, IDisposable?> _deleteLocalPackageVersionScope = LoggerMessage.DefineScope<string, NuGetVersion>(
-        "Delete local package (PackageId={PackageId}; Version={Version})."
+    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _deleteLocalPackageVersionScope = LoggerMessage.DefineScope<string, NuGetVersion, string>(
+        "Delete local package {PackageId}, version {Version} from {URL}."
     );
     
     /// <summary>
@@ -692,15 +693,16 @@ public static class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The ID of the local package to delete.</param>
     /// <param name="version">The package version.</param>
+    /// <param name="url">The local repository URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginDeleteLocalPackageVersionScope(this ILogger logger, string packageId, NuGetVersion version) => _deleteLocalPackageVersionScope(logger, packageId, version);
+    public static IDisposable? BeginDeleteLocalPackageVersionScope(this ILogger logger, string packageId, NuGetVersion version, string url) => _deleteLocalPackageVersionScope(logger, packageId, version, url);
     
     #endregion
 
     #region AddLocalPackage Scope
     
-    private static readonly Func<ILogger, string, IDisposable?> _addLocalPackageScope = LoggerMessage.DefineScope<string>(
-        "Add local package {PackageId}."
+    private static readonly Func<ILogger, string, string, IDisposable?> _addLocalPackageScope = LoggerMessage.DefineScope<string, string>(
+        "Add local package {PackageId} to {URL}."
     );
     
     /// <summary>
@@ -708,8 +710,25 @@ public static class AppLoggerExtensions
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The ID of the upstream package to add locally.</param>
+    /// <param name="url">The local repository URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginAddLocalPackageScope(this ILogger logger, string packageId) => _addLocalPackageScope(logger, packageId);
+    public static IDisposable? BeginAddLocalPackageScope(this ILogger logger, string packageId, string url) => _addLocalPackageScope(logger, packageId, url);
+    
+    #endregion
+
+    #region GetAllLocalPackages Scope
+    
+    private static readonly Func<ILogger, string, IDisposable?> _getAllLocalPackagesScope = LoggerMessage.DefineScope<string>(
+        "Getting all packages from {URL}."
+    );
+    
+    /// <summary>
+    /// Formats the GetAllLocalPackages message and creates a scope.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="url">The local repository URL.</param>
+    /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
+    public static IDisposable? BeginGetAllLocalPackagesScope(this ILogger logger, string url) => _getAllLocalPackagesScope(logger, url);
     
     #endregion
 }

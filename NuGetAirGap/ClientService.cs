@@ -107,7 +107,7 @@ public abstract class ClientService : IDisposable
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.7.x/src/NuGet.Core/NuGet.Protocol/LocalRepositories/LocalPackageMetadataResource.cs#L29"/>
     /// <seealso href="https://learn.microsoft.com/en-us/nuget/api/registration-base-url-resource#registration-page"/>
     public Task<IEnumerable<IPackageSearchMetadata>> GetMetadataAsync(string packageId, bool includePrerelease, bool includeUnlisted, CancellationToken cancellationToken) =>
-        WithPackageMetadataResourceScopeAsync(uri => Logger.BeginGetMetadataAsyncScope(packageId, includePrerelease, includeUnlisted, uri, IsUpstream), (resource, token) =>
+        WithPackageMetadataResourceScopeAsync(uri => Logger.BeginGetMetadataScope(packageId, includePrerelease, includeUnlisted, uri, IsUpstream), (resource, token) =>
             resource.GetMetadataAsync(packageId.ToLower(), includePrerelease, includeUnlisted, CacheContext, NuGetLogger, token), cancellationToken);
 
     /// <summary>
@@ -121,7 +121,7 @@ public abstract class ClientService : IDisposable
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.7.x/src/NuGet.Core/NuGet.Protocol/LocalRepositories/LocalPackageMetadataResource.cs#L51"/>
     /// <seealso href="https://learn.microsoft.com/en-us/nuget/api/registration-base-url-resource#registration-page"/>
     public Task<IPackageSearchMetadata?> GetMetadataAsync(string packageId, NuGetVersion version, CancellationToken cancellationToken) =>
-        WithPackageMetadataResourceScopeAsync(uri => Logger.BeginGetMetadataAsyncScope(packageId, version, uri, IsUpstream), (resource, token) =>
+        WithPackageMetadataResourceScopeAsync(uri => Logger.BeginGetMetadataScope(packageId, version, uri, IsUpstream), (resource, token) =>
             resource.GetMetadataAsync(new PackageIdentity(packageId.ToLower(), version), CacheContext, NuGetLogger, token), cancellationToken);
 
     #endregion
