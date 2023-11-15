@@ -1,22 +1,15 @@
 # CdnGetter Project
 
-## Content Retrieval Service Classes
-
-For a class to function as middleware for a specifice remote CDN, it must inerit from [CdnGetter.Services.ContentGetterService](./Services/ContentGetterService.cs) and it must also have the
-[CdnGetter.Services.ContentGetterAttribute](./Services/ContentGetterAttribute.cs) attribute, which specifies a unique GUID that identifies the corresponding [UpstreamCdn](./Model/UpstreamCdn.cs)
-database entity and a name that describes the upstream CDN. The static `UpstreamCdnServices` property of that attribute contains all the upstream CDN service types that were found.
-Each `ContentGetterService` implementation should have its own settings section under the main [Application Settings](./Config/AppSettings.cs)
-where the upstream CDN URL and other CDN-specific configuration can be specified.
-
 ## Command Line Arguments
 
-### Adding Packages
-
+- `--update-all` - Update all existing packages in the local NuGet repository.
+- `-u [package-id]`*[,package-id,...]* - Update specified packages in the local NuGet repository.
 - `-a [package-id]`*[,package-id,...]* - Add packages from remote repository to local repository.
-
-### Deleting Packages
-
 - `-d [package-id]`*[,package-id,...]* - Delete packages from local repository.
+- `-l` - Lists packages stored in the local NuGet repository.
+- `--export-package-listing=[path.json]` - Export package metadata for packages stored in local repository.
+- `--local-repository=[subdirectory]` - Override path of local NuGet repository subdirectory.
+- `--upstream-service-index=[URL_or_subdirectory]` - Override URL of upstream NuGet server. This can also be the path to a subdirectory to use a local folder as the upstream repository.
 
 ## Development
 

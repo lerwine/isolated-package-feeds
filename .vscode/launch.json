@@ -7,7 +7,7 @@
             "request": "launch",
             "preLaunchTask": "Build NuGetAirGap",
             "program": "${workspaceFolder}/NuGetAirGap/bin/Debug/net6.0/NuGetAirGap.dll",
-            "args": [],
+            "args": [ "--list-local" ],
             "cwd": "${workspaceFolder}/CdnServer",
             "stopAtEntry": false,
             "console": "internalConsole"

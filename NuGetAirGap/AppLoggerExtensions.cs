@@ -9,36 +9,36 @@ namespace NuGetAirGap;
 public static class AppLoggerExtensions
 {
     #region InvalidRepositoryUrl event logger message (0x0001)
-    
+
     public const int EVENT_ID_InvalidRepositoryUrl = 0x0001;
-    
+
     public static readonly EventId InvalidRepositoryUrl = new(EVENT_ID_InvalidRepositoryUrl, nameof(InvalidRepositoryUrl));
-    
+
     private const string MESSAGE_LocalRepositoryUrlIsNotLocal = "Local NuGet repository URL does not reference a local path";
 
     private static readonly Action<ILogger, string, Exception?> _localRepositoryUrlIsNotLocal = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
         $"{MESSAGE_LocalRepositoryUrlIsNotLocal} ({{URL}}).");
-    
+
     private const string MESSAGE_UpstreamRepositoryUrlIsNotAbsolute = "Upstream NuGet repository URL cannot be relative";
 
     private static readonly Action<ILogger, string, Exception?> _upstreamRepositoryUrlIsNotAbsolute = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
         $"{MESSAGE_UpstreamRepositoryUrlIsNotAbsolute} ({{URL}}).");
-        
+
     private const string MESSAGE_UpstreamRepositoryPathTooLong = "Upstream NuGet repository path is too long";
 
     private static readonly Action<ILogger, string, Exception?> _upstreamRepositoryPathTooLong = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
         $"{MESSAGE_UpstreamRepositoryPathTooLong} ({{Path}}).");
-        
+
     private const string MESSAGE_LocalRepositoryPathTooLong = "Local NuGet repository path is too long";
 
     private static readonly Action<ILogger, string, Exception?> _localRepositoryPathTooLong = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
         $"{MESSAGE_LocalRepositoryPathTooLong} ({{Path}}).");
-        
+
     private const string MESSAGE_InvalidLocalRepositoryUrl = "Local NuGet repository URL is invalid";
 
     private static readonly Action<ILogger, string, Exception?> _invalidLocalRepositoryUrl = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
         $"{MESSAGE_InvalidLocalRepositoryUrl} ({{URL}}).");
-    
+
     private const string MESSAGE_InvalidUpstreamRepositoryUrl = "Upstream NuGet repository URL is invalid";
 
     private static readonly Action<ILogger, string, Exception?> _invalidUpstreamRepositoryUrl = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
@@ -99,7 +99,7 @@ public static class AppLoggerExtensions
             _upstreamRepositoryUrlIsNotAbsolute(logger, url.OriginalString, exception);
             return createException($"{MESSAGE_UpstreamRepositoryUrlIsNotAbsolute}.");
         }
-            
+
         _invalidLocalRepositoryUrl(logger, url.OriginalString, exception);
         return createException($"{MESSAGE_InvalidLocalRepositoryUrl}.");
     }
@@ -107,21 +107,21 @@ public static class AppLoggerExtensions
     #endregion
 
     #region RepositorySecurityException event logger message (0x0002)
-    
+
     public const int EVENT_ID_RepositorySecurityException = 0x0002;
-    
+
     public static readonly EventId RepositorySecurityException = new(EVENT_ID_RepositorySecurityException, nameof(RepositorySecurityException));
-    
+
     private const string MESSAGE_UpstreamRepositorySecurityException = "Access denied while accessing upstream NuGet repository path";
-    
+
     private const string MESSAGE_LocalRepositorySecurityException = "Access denied while accessing local NuGet repository path";
-    
+
     private static readonly Action<ILogger, string, Exception?> _upstreamRepositorySecurityException = LoggerMessage.Define<string>(LogLevel.Critical, RepositorySecurityException,
         $"{MESSAGE_UpstreamRepositorySecurityException} ({{Path}}).");
-    
+
     private static readonly Action<ILogger, string, Exception?> _localRepositorySecurityException = LoggerMessage.Define<string>(LogLevel.Critical, RepositorySecurityException,
         $"{MESSAGE_LocalRepositorySecurityException} ({{Path}}).");
-    
+
     /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="RepositorySecurityException"/> event with code 0x0002.
     /// </summary>
@@ -142,20 +142,20 @@ public static class AppLoggerExtensions
         _localRepositorySecurityException(logger, path, exception);
         return factory(MESSAGE_LocalRepositorySecurityException);
     }
-    
+
     #endregion
 
     #region LocalRepositoryIOException event logger message (0x0003)
-    
+
     public const int EVENT_ID_LocalRepositoryIOException = 0x0003;
-    
+
     public static readonly EventId LocalRepositoryIOException = new(EVENT_ID_LocalRepositoryIOException, nameof(LocalRepositoryIOException));
-    
+
     private const string MESSAGE_LocalRepositoryIOException = "I/O error while creating local repository folder";
-    
+
     private static readonly Action<ILogger, string, Exception?> _localRepositoryIOException = LoggerMessage.Define<string>(LogLevel.Critical, LocalRepositoryIOException,
         $"{MESSAGE_LocalRepositoryIOException} {{Path}}.");
-    
+
     /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="LocalRepositoryIOException"/> event with code 0x0003.
     /// </summary>
@@ -170,24 +170,25 @@ public static class AppLoggerExtensions
         _localRepositoryIOException(logger, path, exception);
         return factory(MESSAGE_LocalRepositoryIOException);
     }
-    
+
     #endregion
+
     #region RepositoryPathNotFound event logger message (0x0004)
-    
+
     public const int EVENT_ID_RepositoryPathNotFound = 0x0004;
-    
+
     public static readonly EventId RepositoryPathNotFound = new(EVENT_ID_RepositoryPathNotFound, nameof(RepositoryPathNotFound));
-    
+
     private const string MESSAGE_UpstreamRepositoryPathNotFound = "Upstream repository path not found";
-    
+
     private static readonly Action<ILogger, string, Exception?> _upstreamRepositoryPathNotFound = LoggerMessage.Define<string>(LogLevel.Critical, RepositoryPathNotFound,
         $"{MESSAGE_UpstreamRepositoryPathNotFound} ({{Path}}).");
-    
+
     private const string MESSAGE_LocalRepositoryPathNotFound = "Local repository path not found";
-    
+
     private static readonly Action<ILogger, string, Exception?> _localRepositoryPathNotFound = LoggerMessage.Define<string>(LogLevel.Critical, RepositoryPathNotFound,
         $"{MESSAGE_UpstreamRepositoryPathNotFound} ({{Path}}).");
-    
+
     /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="RepositoryPathNotFound"/> event with code 0x0004.
     /// </summary>
@@ -208,7 +209,7 @@ public static class AppLoggerExtensions
         _localRepositoryPathNotFound(logger, path, exception);
         return factory(MESSAGE_LocalRepositoryPathNotFound);
     }
-    
+
     #endregion
 
     #region Nuget Debug (0x0005)
@@ -377,12 +378,190 @@ public static class AppLoggerExtensions
 
     #endregion
 
+    #region InvalidMetaDataExportPath event logger message (0x000a)
+
+    public const int EVENT_ID_InvalidMetaDataExportPath = 0x000a;
+
+    public static readonly EventId InvalidMetaDataExportPath = new(EVENT_ID_InvalidMetaDataExportPath, nameof(InvalidMetaDataExportPath));
+
+    private const string MESSAGE_InvalidMetaDataExportPath1 = "Package metadata export path is invalid";
+
+    private const string MESSAGE_InvalidMetaDataExportPath2 = "Parent subdirectory of package metadata export path not found";
+
+    private const string MESSAGE_InvalidMetaDataExportPath3 = "Package metadata export path too long";
+
+    private static readonly Action<ILogger, string, Exception?> _invalidMetaDataExportPath1 = LoggerMessage.Define<string>(LogLevel.Critical, InvalidMetaDataExportPath,
+        $"{MESSAGE_InvalidMetaDataExportPath1} ({{Path}}).");
+
+    private static readonly Action<ILogger, string, Exception?> _invalidMetaDataExportPath2 = LoggerMessage.Define<string>(LogLevel.Critical, InvalidMetaDataExportPath,
+        $"{MESSAGE_InvalidMetaDataExportPath2} ({{Path}}).");
+
+    private static readonly Action<ILogger, string, Exception?> _invalidMetaDataExportPath3 = LoggerMessage.Define<string>(LogLevel.Critical, InvalidMetaDataExportPath,
+        $"{MESSAGE_InvalidMetaDataExportPath3} ({{Path}}).");
+
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidMetaDataExportPath"/> event with code 0x000a.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="path">The package metadata export path.</param>
+    /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    /// <typeparam name="T">The type of exception to be created.</typeparam>
+    /// <returns>The exception that was created by the <paramref name="factory"/> function.</returns>
+    public static T LogInvalidMetaDataExportPath<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : Exception
+    {
+        if (exception is not null)
+        {
+            if (exception is DirectoryNotFoundException)
+            {
+                _invalidMetaDataExportPath2(logger, path, exception);
+                return factory(MESSAGE_InvalidMetaDataExportPath2);
+            }
+            if (exception is PathTooLongException)
+            {
+                _invalidMetaDataExportPath3(logger, path, exception);
+                return factory(MESSAGE_InvalidMetaDataExportPath3);
+            }
+        }
+        _invalidMetaDataExportPath1(logger, path, exception);
+        return factory(MESSAGE_InvalidMetaDataExportPath1);
+    }
+
+    #endregion
+
+    #region MetaDataExportPathAccessDenied event logger message (0x000b)
+
+    public const int EVENT_ID_MetaDataExportPathAccessDenied = 0x000b;
+
+    public static readonly EventId MetaDataExportPathAccessDenied = new(EVENT_ID_MetaDataExportPathAccessDenied, nameof(MetaDataExportPathAccessDenied));
+
+    private const string MESSAGE_MetaDataExportPathAccessDenied1 = "Access to package metadata export path is denied";
+
+    private const string MESSAGE_MetaDataExportPathAccessDenied2 = "Caller has insufficient permissions to package metadata export path";
+
+    private static readonly Action<ILogger, string, Exception?> _metaDataExportPathAccessDenied1 = LoggerMessage.Define<string>(LogLevel.Critical, MetaDataExportPathAccessDenied,
+        $"{MESSAGE_MetaDataExportPathAccessDenied1} ({{Path}}).");
+
+    private static readonly Action<ILogger, string, Exception?> _metaDataExportPathAccessDenied2 = LoggerMessage.Define<string>(LogLevel.Critical, MetaDataExportPathAccessDenied,
+        $"{MESSAGE_MetaDataExportPathAccessDenied2} ({{Path}}).");
+
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="MetaDataExportPathAccessDenied"/> event with code 0x000b.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="path">The package metadata export path.</param>
+    /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    /// <typeparam name="T">The type of exception to be created.</typeparam>
+    /// <returns>The exception that was created by the <paramref name="factory"/> function.</returns>
+    public static T LogMetaDataExportPathAccessDenied<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : Exception
+    {
+        if (exception is System.Security.SecurityException)
+        {
+            _metaDataExportPathAccessDenied2(logger, path, exception);
+            return factory(MESSAGE_MetaDataExportPathAccessDenied2);
+        }
+        _metaDataExportPathAccessDenied1(logger, path, exception);
+        return factory(MESSAGE_MetaDataExportPathAccessDenied1);
+    }
+
+    #endregion
+
+    #region PackageDeleted event logger message (0x000c)
+
+    public const int EVENT_ID_PackageDeleted = 0x000c;
+
+    public static readonly EventId PackageDeleted = new(EVENT_ID_PackageDeleted, nameof(PackageDeleted));
+
+    private static readonly Action<ILogger, string, string, Exception?> _packageDeleted = LoggerMessage.Define<string, string>(LogLevel.Warning, PackageDeleted,
+        "Package {PackageId} has been deleted from local repository ({RepositoryPath}).");
+
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Warning"/> message for a <see cref="PackageDeleted"/> event with event code 0x000c.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="packageId">The ID of the package that was deleted.</param>
+    /// <param name="repositoryPath">The path of the local NuGet repository.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    public static void LogPackageDeleted(this ILogger logger, string packageId, string repositoryPath, Exception? exception = null) => _packageDeleted(logger, packageId, repositoryPath, exception);
+
+    #endregion
+
+    #region PackageNotFound event logger message (0x000d)
+
+    public const int EVENT_ID_PackageNotFound = 0x000d;
+
+    public static readonly EventId PackageNotFound = new(EVENT_ID_PackageNotFound, nameof(PackageNotFound));
+
+    private static readonly Action<ILogger, string, Uri, Exception?> _remotePackageNotFound1 = LoggerMessage.Define<string, Uri>(LogLevel.Warning, PackageNotFound,
+        "Package {PackageId} not found in upstream NuGet source ({URL}).");
+
+    private static readonly Action<ILogger, string, string, Exception?> _localPackageNotFound1 = LoggerMessage.Define<string, string>(LogLevel.Warning, PackageNotFound,
+        "Package {PackageId} not found in local NuGet source ({RepositoryPath}).");
+
+    private static readonly Action<ILogger, string, string, Exception?> _upstreamDirPackageNotFound1 = LoggerMessage.Define<string, string>(LogLevel.Warning, PackageNotFound,
+        "Package {PackageId} not found in upstream NuGet source ({RepositoryPath}).");
+
+    private static readonly Action<ILogger, string, NuGetVersion, Uri, Exception?> _remotePackageNotFound2 = LoggerMessage.Define<string, NuGetVersion, Uri>(LogLevel.Warning, PackageNotFound,
+        "Version {Version} of package {PackageId} not found in upstream NuGet source ({URL}).");
+
+    private static readonly Action<ILogger, string, NuGetVersion, string, Exception?> _localPackageNotFound2 = LoggerMessage.Define<string, NuGetVersion, string>(LogLevel.Warning, PackageNotFound,
+        "Version {Version} of package {PackageId} not found in upstream NuGet source ({URL}).");
+
+    private static readonly Action<ILogger, string, NuGetVersion, string, Exception?> _upstreamDirPackageNotFound2 = LoggerMessage.Define<string, NuGetVersion, string>(LogLevel.Warning, PackageNotFound,
+        "Version {Version} of package {PackageId} not found in upstream NuGet source ({URL}).");
+
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Warning"/> message for a <see cref="PackageNotFound"/> event with event code 0x000d.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="packageId">The ID of the package that was not found.</param>
+    /// <param name="repositoryUrl">The URL of the NuGet repository.</param>
+    /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory path.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    public static void LogPackageNotFound(this ILogger logger, string packageId, Uri repositoryUrl, bool isUpstream, Exception? exception = null)
+    {
+        if (repositoryUrl.IsFile)
+        {
+            if (isUpstream)
+                _upstreamDirPackageNotFound1(logger, packageId, repositoryUrl.LocalPath, exception);
+            else
+                _localPackageNotFound1(logger, packageId, repositoryUrl.LocalPath, exception);
+        }
+        else
+            _remotePackageNotFound1(logger, packageId, repositoryUrl, exception);
+    }
+
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Warning"/> message for a <see cref="PackageNotFound"/> event with event code 0x000d.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="packageId">The ID of the package that was not found.</param>
+    /// <param name="version">The version of the package that was not found.</param>
+    /// <param name="repositoryUrl">The URL of the NuGet repository.</param>
+    /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory path.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    public static void LogPackageNotFound(this ILogger logger, string packageId, NuGetVersion version, Uri repositoryUrl, bool isUpstream, Exception? exception = null)
+    {
+        if (repositoryUrl.IsFile)
+        {
+            if (isUpstream)
+                _upstreamDirPackageNotFound2(logger, packageId, version, repositoryUrl.LocalPath, exception);
+            else
+                _localPackageNotFound2(logger, packageId, version, repositoryUrl.LocalPath, exception);
+        }
+        else
+            _remotePackageNotFound2(logger, packageId, version, repositoryUrl, exception);
+    }
+
+    #endregion
+
     #region ValidateUpstreamURL Scope
 
     private static readonly Func<ILogger, string, IDisposable?> _validateUpstreamURLScope = LoggerMessage.DefineScope<string>(
         "Validating upstream NuGet URL {URL}."
     );
-    
+
     /// <summary>
     /// Formats the ValidateUpstreamURL message and creates a scope.
     /// </summary>
@@ -390,15 +569,15 @@ public static class AppLoggerExtensions
     /// <param name="url">The upstream NuGet repository URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
     public static IDisposable? BeginValidateUpstreamURLScope(this ILogger logger, string url) => _validateUpstreamURLScope(logger, url);
-    
+
     #endregion
 
     #region ValidateLocalPath Scope
-    
+
     private static readonly Func<ILogger, string, IDisposable?> _validateLocalPathScope = LoggerMessage.DefineScope<string>(
         "Validating local NuGet path ({Path})."
     );
-    
+
     /// <summary>
     /// Formats the ValidateLocalPath message and creates a scope.
     /// </summary>
@@ -406,16 +585,19 @@ public static class AppLoggerExtensions
     /// <param name="path">The path of the local NuGet repository.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
     public static IDisposable? BeginValidateLocalPathScope(this ILogger logger, string path) => _validateLocalPathScope(logger, path);
-    
+
     #endregion
-    
+
     #region GetDownloadResourceResult Scope
-    
-    private static readonly Func<ILogger, string, NuGetVersion?, string?, Guid?, string?, string, IDisposable?> _getUpstreamDownloadResourceResultScope = LoggerMessage.DefineScope<string, NuGetVersion?, string?, Guid?, string?, string>(
-       "Get NuGet package download resource result from upstream (PackageId={PackageId}; Version={Version}; DownloadDirectory={DownloadDirectory}; ParentId={ParentId}; GlobalPackagesFolder={GlobalPackagesFolder}; RepositoryUrl={RepositoryUrl}).");
+
+    private static readonly Func<ILogger, string, NuGetVersion?, string?, Guid?, string?, Uri, IDisposable?> _getRemoteDownloadResourceResultScope = LoggerMessage.DefineScope<string, NuGetVersion?, string?, Guid?, string?, Uri>(
+       "Get NuGet package download resource result from upstream (PackageId={PackageId}; Version={Version}; DownloadDirectory={DownloadDirectory}; ParentId={ParentId}; GlobalPackagesFolder={GlobalPackagesFolder}; URL={RepositoryUrl}).");
+
+    private static readonly Func<ILogger, string, NuGetVersion?, string?, Guid?, string?, string, IDisposable?> _getUpstreamDirDownloadResourceResultScope = LoggerMessage.DefineScope<string, NuGetVersion?, string?, Guid?, string?, string>(
+       "Get NuGet package download resource result from upstream (PackageId={PackageId}; Version={Version}; DownloadDirectory={DownloadDirectory}; ParentId={ParentId}; GlobalPackagesFolder={GlobalPackagesFolder}; Path={RepositoryPath}).");
 
     private static readonly Func<ILogger, string, NuGetVersion?, string?, Guid?, string?, string, IDisposable?> _getLocalDownloadResourceResultScope = LoggerMessage.DefineScope<string, NuGetVersion?, string?, Guid?, string?, string>(
-       "Get NuGet package download resource result from local (PackageId={PackageId}; Version={Version}; DownloadDirectory={DownloadDirectory}; ParentId={ParentId}; GlobalPackagesFolder={GlobalPackagesFolder}; RepositoryUrl={RepositoryUrl}).");
+       "Get NuGet package download resource result from local (PackageId={PackageId}; Version={Version}; DownloadDirectory={DownloadDirectory}; ParentId={ParentId}; GlobalPackagesFolder={GlobalPackagesFolder}; Path={RepositoryPath}).");
 
     /// <summary>
     /// Formats the GetDownloadResourceResult message and creates a scope.
@@ -428,32 +610,43 @@ public static class AppLoggerExtensions
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
     public static IDisposable? BeginGetDownloadResourceResultScope(this ILogger logger, PackageIdentity identity, PackageDownloadContext downloadContext, string? globalPackagesFolder,
-        string repositoryUrl, bool isUpstream)
+        Uri repositoryUrl, bool isUpstream)
     {
-        if (isUpstream)
-            return _getUpstreamDownloadResourceResultScope(logger, identity.Id, identity.Version, downloadContext.DirectDownload ? downloadContext.DirectDownloadDirectory : null, downloadContext.ParentId, globalPackagesFolder, repositoryUrl);
-        return _getLocalDownloadResourceResultScope(logger, identity.Id, identity.Version, downloadContext.DirectDownload ? downloadContext.DirectDownloadDirectory : null, downloadContext.ParentId, globalPackagesFolder, repositoryUrl);
+        if (repositoryUrl.IsFile)
+        {
+            if (isUpstream)
+                return _getUpstreamDirDownloadResourceResultScope(logger, identity.Id, identity.Version, downloadContext.DirectDownload ? downloadContext.DirectDownloadDirectory : null, downloadContext.ParentId, globalPackagesFolder, repositoryUrl.LocalPath);
+            return _getLocalDownloadResourceResultScope(logger, identity.Id, identity.Version, downloadContext.DirectDownload ? downloadContext.DirectDownloadDirectory : null, downloadContext.ParentId, globalPackagesFolder, repositoryUrl.LocalPath);
+        }
+        return _getRemoteDownloadResourceResultScope(logger, identity.Id, identity.Version, downloadContext.DirectDownload ? downloadContext.DirectDownloadDirectory : null, downloadContext.ParentId, globalPackagesFolder, repositoryUrl);
     }
 
     #endregion
 
-    /// string packageId, bool includePrerelease, bool includeUnlisted, string repositoryUrl
     #region GetMetadata Scope
-    
-    private static readonly Func<ILogger, string, bool, bool, string, IDisposable?> _getUpstreamMetadataScope1 = LoggerMessage.DefineScope<string, bool, bool, string>(
-       "Get NuGet package metadata from upstream (PackageId={PackageId}; IncludePreRelease={IncludePreRelease}; IncludeUnlisted={IncludeUnlisted}; RepositoryUrl={RepositoryUrl})."
+
+    private static readonly Func<ILogger, string, bool, bool, Uri, IDisposable?> _getRemoteMetadataScope1 = LoggerMessage.DefineScope<string, bool, bool, Uri>(
+       "Get NuGet package metadata from upstream (PackageId={PackageId}; IncludePreRelease={IncludePreRelease}; IncludeUnlisted={IncludeUnlisted}; URL={RepositoryUrl})."
     );
 
     private static readonly Func<ILogger, string, bool, bool, string, IDisposable?> _getLocalMetadataScope1 = LoggerMessage.DefineScope<string, bool, bool, string>(
-       "Get NuGet package metadata from local (PackageId={PackageId}; IncludePreRelease={IncludePreRelease}; IncludeUnlisted={IncludeUnlisted}; RepositoryUrl={RepositoryUrl})."
+       "Get NuGet package metadata from local (PackageId={PackageId}; IncludePreRelease={IncludePreRelease}; IncludeUnlisted={IncludeUnlisted}; Path={RepositoryPath})."
     );
-    
-    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _getUpstreamMetadataScope2 = LoggerMessage.DefineScope<string, NuGetVersion, string>(
-       "Get NuGet package metadata from upstream (PackageId={PackageId}; Version={Version}; RepositoryUrl={RepositoryUrl})."
+
+    private static readonly Func<ILogger, string, NuGetVersion, Uri, IDisposable?> _getRemoteMetadataScope2 = LoggerMessage.DefineScope<string, NuGetVersion, Uri>(
+       "Get NuGet package metadata from upstream (PackageId={PackageId}; Version={Version}; URL={RepositoryUrl})."
     );
 
     private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _getLocalMetadataScope2 = LoggerMessage.DefineScope<string, NuGetVersion, string>(
-       "Get NuGet package metadata from local (PackageId={PackageId}; Version={Version}; RepositoryUrl={RepositoryUrl})."
+       "Get NuGet package metadata from local (PackageId={PackageId}; Version={Version}; Path={RepositoryPath})."
+    );
+
+    private static readonly Func<ILogger, string, bool, bool, string, IDisposable?> _getUpstreamDirMetadataScope1 = LoggerMessage.DefineScope<string, bool, bool, string>(
+       "Get NuGet package metadata from upstream (PackageId={PackageId}; IncludePreRelease={IncludePreRelease}; IncludeUnlisted={IncludeUnlisted}; Path={RepositoryPath})."
+    );
+
+    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _getUpstreamDirMetadataScope2 = LoggerMessage.DefineScope<string, NuGetVersion, string>(
+       "Get NuGet package metadata from upstream (PackageId={PackageId}; Version={Version}; Path={RepositoryPath})."
     );
 
     /// <summary>
@@ -466,25 +659,37 @@ public static class AppLoggerExtensions
     /// <param name="repositoryUrl">The NuGet repository URL.</param>
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetMetadataScope(this ILogger logger, string packageId, bool includePreRelease, bool includeUnlisted, string repositoryUrl, bool isUpstream)
+    public static IDisposable? BeginGetMetadataScope(this ILogger logger, string packageId, bool includePreRelease, bool includeUnlisted, Uri repositoryUrl, bool isUpstream)
     {
-        if (isUpstream)
-            return _getUpstreamMetadataScope1(logger, packageId, includePreRelease, includeUnlisted, repositoryUrl);
-        return _getLocalMetadataScope1(logger, packageId, includePreRelease, includeUnlisted, repositoryUrl);
+        if (repositoryUrl.IsFile)
+        {
+            if (isUpstream)
+                return _getUpstreamDirMetadataScope1(logger, packageId, includePreRelease, includeUnlisted, repositoryUrl.LocalPath);
+            return _getLocalMetadataScope1(logger, packageId, includePreRelease, includeUnlisted, repositoryUrl.LocalPath);
+        }
+        return _getRemoteMetadataScope1(logger, packageId, includePreRelease, includeUnlisted, repositoryUrl);
     }
 
-    public static IDisposable? BeginGetMetadataScope(this ILogger logger, string packageId, NuGetVersion version, string repositoryUrl, bool isUpstream)
+    public static IDisposable? BeginGetMetadataScope(this ILogger logger, string packageId, NuGetVersion version, Uri repositoryUrl, bool isUpstream)
     {
-        if (isUpstream)
-            return _getUpstreamMetadataScope2(logger, packageId, version, repositoryUrl);
-        return _getLocalMetadataScope2(logger, packageId, version, repositoryUrl);
+        if (repositoryUrl.IsFile)
+        {
+            if (isUpstream)
+                return _getUpstreamDirMetadataScope2(logger, packageId, version, repositoryUrl.LocalPath);
+            return _getLocalMetadataScope2(logger, packageId, version, repositoryUrl.LocalPath);
+        }
+        return _getRemoteMetadataScope2(logger, packageId, version, repositoryUrl);
     }
 
     #endregion
 
     #region GetAllVersions Scope
-    
-    private static readonly Func<ILogger, string, string, IDisposable?> _getAllUpstreamVersionsScope = LoggerMessage.DefineScope<string, string>(
+
+    private static readonly Func<ILogger, string, Uri, IDisposable?> _getAllRemoteVersionsScope = LoggerMessage.DefineScope<string, Uri>(
+       "Get all NuGet package versions from upstream (PackageId={PackageId}; RepositoryUrl={RepositoryUrl})."
+    );
+
+    private static readonly Func<ILogger, string, string, IDisposable?> _getAllUpstreamDirVersionsScope = LoggerMessage.DefineScope<string, string>(
        "Get all NuGet package versions from upstream (PackageId={PackageId}; RepositoryUrl={RepositoryUrl})."
     );
 
@@ -500,23 +705,31 @@ public static class AppLoggerExtensions
     /// <param name="repositoryUrl">The NuGet repository URL.</param>
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetAllVersionsScope(this ILogger logger, string packageId, string repositoryUrl, bool isUpstream)
+    public static IDisposable? BeginGetAllVersionsScope(this ILogger logger, string packageId, Uri repositoryUrl, bool isUpstream)
     {
-        if (isUpstream)
-            return _getAllUpstreamVersionsScope(logger, packageId, repositoryUrl);
-        return _getAllLocalVersionsScope(logger, packageId, repositoryUrl);
+        if (repositoryUrl.IsFile)
+        {
+            if (isUpstream)
+                return _getAllUpstreamDirVersionsScope(logger, packageId, repositoryUrl.LocalPath);
+            return _getAllLocalVersionsScope(logger, packageId, repositoryUrl.LocalPath);
+        }
+        return _getAllRemoteVersionsScope(logger, packageId, repositoryUrl);
     }
 
     #endregion
 
     #region ResolvePackage Scope
-    
-    private static readonly Func<ILogger, string, NuGetVersion, NuGetFramework, string, IDisposable?> _resolveUpstreamPackageScope = LoggerMessage.DefineScope<string, NuGetVersion, NuGetFramework, string>(
-       "Getting upstream package dependencies (PackageId={PackageId}; Version={Version}; Framework={Framework}; RepositoryUrl={RepositoryUrl})."
+
+    private static readonly Func<ILogger, string, NuGetVersion, NuGetFramework, Uri, IDisposable?> _resolveRemotePackageScope = LoggerMessage.DefineScope<string, NuGetVersion, NuGetFramework, Uri>(
+       "Getting upstream package dependencies (PackageId={PackageId}; Version={Version}; Framework={Framework}; URL={RepositoryUrl})."
     );
-    
+
+    private static readonly Func<ILogger, string, NuGetVersion, NuGetFramework, string, IDisposable?> _resolveUpstreamDirPackageScope = LoggerMessage.DefineScope<string, NuGetVersion, NuGetFramework, string>(
+       "Getting upstream package dependencies (PackageId={PackageId}; Version={Version}; Framework={Framework}; Path={RepositoryPath})."
+    );
+
     private static readonly Func<ILogger, string, NuGetVersion, NuGetFramework, string, IDisposable?> _resolveLocalPackageScope = LoggerMessage.DefineScope<string, NuGetVersion, NuGetFramework, string>(
-       "Getting local package dependencies (PackageId={PackageId}; Version={Version}; Framework={Framework}; RepositoryUrl={RepositoryUrl})."
+       "Getting local package dependencies (PackageId={PackageId}; Version={Version}; Framework={Framework}; Path={RepositoryPath})."
     );
 
     /// <summary>
@@ -529,31 +742,43 @@ public static class AppLoggerExtensions
     /// <param name="repositoryUrl">The NuGet repository URL.</param>
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginResolvePackageScope(this ILogger logger, string packageId, NuGetVersion version, NuGetFramework framework, string repositoryUrl, bool isUpstream)
+    public static IDisposable? BeginResolvePackageScope(this ILogger logger, string packageId, NuGetVersion version, NuGetFramework framework, Uri repositoryUrl, bool isUpstream)
     {
-        if (isUpstream)
-            return _resolveUpstreamPackageScope(logger, packageId, version, framework, repositoryUrl);
-        return _resolveLocalPackageScope(logger, packageId, version, framework, repositoryUrl);
+        if (repositoryUrl.IsFile)
+        {
+            if (isUpstream)
+                return _resolveUpstreamDirPackageScope(logger, packageId, version, framework, repositoryUrl.LocalPath);
+            return _resolveLocalPackageScope(logger, packageId, version, framework, repositoryUrl.LocalPath);
+        }
+        return _resolveRemotePackageScope(logger, packageId, version, framework, repositoryUrl);
     }
 
     #endregion
 
     #region ResolvePackages Scope
-    
-    private static readonly Func<ILogger, string, string, IDisposable?> _resolveUpstreamPackagesScope1 = LoggerMessage.DefineScope<string, string>(
-       "Getting upstream package dependencies (PackageId={PackageId}; RepositoryUrl={RepositoryUrl})."
-    );
-    
-    private static readonly Func<ILogger, string, string, IDisposable?> _resolveLocalPackagesScope1 = LoggerMessage.DefineScope<string, string>(
-       "Getting local package dependencies (PackageId={PackageId}; RepositoryUrl={RepositoryUrl})."
+
+    private static readonly Func<ILogger, string, Uri, IDisposable?> _resolveRemotePackagesScope1 = LoggerMessage.DefineScope<string, Uri>(
+       "Getting upstream package dependencies (PackageId={PackageId}; URL={RepositoryUrl})."
     );
 
-    private static readonly Func<ILogger, string, NuGetFramework, string, IDisposable?> _resolveUpstreamPackagesScope2 = LoggerMessage.DefineScope<string, NuGetFramework, string>(
-       "Getting upstream package dependencies (PackageId={PackageId}; Framework={Framework}; RepositoryUrl={RepositoryUrl})."
+    private static readonly Func<ILogger, string, string, IDisposable?> _resolveUpstreamDirPackagesScope1 = LoggerMessage.DefineScope<string, string>(
+       "Getting upstream package dependencies (PackageId={PackageId}; Path={RepositoryPath})."
     );
-    
+
+    private static readonly Func<ILogger, string, string, IDisposable?> _resolveLocalPackagesScope1 = LoggerMessage.DefineScope<string, string>(
+       "Getting local package dependencies (PackageId={PackageId}; Path={RepositoryPath})."
+    );
+
+    private static readonly Func<ILogger, string, NuGetFramework, Uri, IDisposable?> _resolveRemotePackagesScope2 = LoggerMessage.DefineScope<string, NuGetFramework, Uri>(
+       "Getting upstream package dependencies (PackageId={PackageId}; Framework={Framework}; URL={RepositoryUrl})."
+    );
+
+    private static readonly Func<ILogger, string, NuGetFramework, string, IDisposable?> _resolveUpstreamDirPackagesScope2 = LoggerMessage.DefineScope<string, NuGetFramework, string>(
+       "Getting upstream package dependencies (PackageId={PackageId}; Framework={Framework}; Path={RepositoryPath})."
+    );
+
     private static readonly Func<ILogger, string, NuGetFramework, string, IDisposable?> _resolveLocalPackagesScope2 = LoggerMessage.DefineScope<string, NuGetFramework, string>(
-       "Getting local package dependencies (PackageId={PackageId}; Framework={Framework}; RepositoryUrl={RepositoryUrl})."
+       "Getting local package dependencies (PackageId={PackageId}; Framework={Framework}; Path={RepositoryPath})."
     );
 
     /// <summary>
@@ -564,11 +789,15 @@ public static class AppLoggerExtensions
     /// <param name="repositoryUrl">The NuGet repository URL.</param>
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginResolvePackagesScope(this ILogger logger, string packageId, string repositoryUrl, bool isUpstream)
+    public static IDisposable? BeginResolvePackagesScope(this ILogger logger, string packageId, Uri repositoryUrl, bool isUpstream)
     {
-        if (isUpstream)
-            return _resolveUpstreamPackagesScope1(logger, packageId, repositoryUrl);
-        return _resolveLocalPackagesScope1(logger, packageId, repositoryUrl);
+        if (repositoryUrl.IsFile)
+        {
+            if (isUpstream)
+                return _resolveUpstreamDirPackagesScope1(logger, packageId, repositoryUrl.LocalPath);
+            return _resolveLocalPackagesScope1(logger, packageId, repositoryUrl.LocalPath);
+        }
+        return _resolveRemotePackagesScope1(logger, packageId, repositoryUrl);
     }
 
     /// <summary>
@@ -580,21 +809,29 @@ public static class AppLoggerExtensions
     /// <param name="repositoryUrl">The NuGet repository URL.</param>
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginResolvePackagesScope(this ILogger logger, string packageId, NuGetFramework framework, string repositoryUrl, bool isUpstream)
+    public static IDisposable? BeginResolvePackagesScope(this ILogger logger, string packageId, NuGetFramework framework, Uri repositoryUrl, bool isUpstream)
     {
-        if (isUpstream)
-            return _resolveUpstreamPackagesScope2(logger, packageId, framework, repositoryUrl);
-        return _resolveLocalPackagesScope2(logger, packageId, framework, repositoryUrl);
+        if (repositoryUrl.IsFile)
+        {
+            if (isUpstream)
+                return _resolveUpstreamDirPackagesScope2(logger, packageId, framework, repositoryUrl.LocalPath);
+            return _resolveLocalPackagesScope2(logger, packageId, framework, repositoryUrl.LocalPath);
+        }
+        return _resolveRemotePackagesScope2(logger, packageId, framework, repositoryUrl);
     }
 
     #endregion
 
     #region GetDependencyInfo Scope
 
-    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _getUpstreamDependencyInfoScope = LoggerMessage.DefineScope<string, NuGetVersion, string>(
+    private static readonly Func<ILogger, string, NuGetVersion, Uri, IDisposable?> _getRemoteDependencyInfoScope = LoggerMessage.DefineScope<string, NuGetVersion, Uri>(
        "Get dependency information from upstream (PackageId={PackageId}; Version={Version}; RepositoryUrl={RepositoryUrl})."
     );
-    
+
+    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _getUpstreamDirDependencyInfoScope = LoggerMessage.DefineScope<string, NuGetVersion, string>(
+       "Get dependency information from upstream (PackageId={PackageId}; Version={Version}; RepositoryUrl={RepositoryUrl})."
+    );
+
     private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _getLocalDependencyInfoScope = LoggerMessage.DefineScope<string, NuGetVersion, string>(
        "Get dependency information from local (PackageId={PackageId}; Version={Version}; RepositoryUrl={RepositoryUrl})."
     );
@@ -608,21 +845,29 @@ public static class AppLoggerExtensions
     /// <param name="repositoryUrl">The NuGet repository URL.</param>
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetDependencyInfoScope(this ILogger logger, string packageId, NuGetVersion version, string repositoryUrl, bool isUpstream)
+    public static IDisposable? BeginGetDependencyInfoScope(this ILogger logger, string packageId, NuGetVersion version, Uri repositoryUrl, bool isUpstream)
     {
-        if (isUpstream)
-            return _getUpstreamDependencyInfoScope(logger, packageId, version, repositoryUrl);
-        return _getLocalDependencyInfoScope(logger, packageId, version, repositoryUrl);
+        if (repositoryUrl.IsFile)
+        {
+            if (isUpstream)
+                return _getUpstreamDirDependencyInfoScope(logger, packageId, version, repositoryUrl.LocalPath);
+            return _getLocalDependencyInfoScope(logger, packageId, version, repositoryUrl.LocalPath);
+        }
+        return _getRemoteDependencyInfoScope(logger, packageId, version, repositoryUrl);
     }
 
     #endregion
 
     #region DoesPackageExist Scope
-    
-    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _doesUpstreamPackageExistScope = LoggerMessage.DefineScope<string, NuGetVersion, string>(
+
+    private static readonly Func<ILogger, string, NuGetVersion, Uri, IDisposable?> _doesRemotePackageExistScope = LoggerMessage.DefineScope<string, NuGetVersion, Uri>(
        "Get dependency information from upstream (PackageId={PackageId}; Version={Version}; RepositoryUrl={RepositoryUrl})."
     );
-    
+
+    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _doesUpstreamDirPackageExistScope = LoggerMessage.DefineScope<string, NuGetVersion, string>(
+       "Get dependency information from upstream (PackageId={PackageId}; Version={Version}; RepositoryUrl={RepositoryUrl})."
+    );
+
     private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _doesLocalPackageExistScope = LoggerMessage.DefineScope<string, NuGetVersion, string>(
        "Get dependency information from local (PackageId={PackageId}; Version={Version}; RepositoryUrl={RepositoryUrl})."
     );
@@ -636,23 +881,31 @@ public static class AppLoggerExtensions
     /// <param name="repositoryUrl">The NuGet repository URL.</param>
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginDoesPackageExistScope(this ILogger logger, string packageId, NuGetVersion version, string repositoryUrl, bool isUpstream)
+    public static IDisposable? BeginDoesPackageExistScope(this ILogger logger, string packageId, NuGetVersion version, Uri repositoryUrl, bool isUpstream)
     {
-        if (isUpstream)
-            return _doesUpstreamPackageExistScope(logger, packageId, version, repositoryUrl);
-        return _doesLocalPackageExistScope(logger, packageId, version, repositoryUrl);
+        if (repositoryUrl.IsFile)
+        {
+            if (isUpstream)
+                return _doesUpstreamDirPackageExistScope(logger, packageId, version, repositoryUrl.LocalPath);
+            return _doesLocalPackageExistScope(logger, packageId, version, repositoryUrl.LocalPath);
+        }
+        return _doesRemotePackageExistScope(logger, packageId, version, repositoryUrl);
     }
 
     #endregion
 
     #region GetPackageDependencies Scope
-    
-    private static readonly Func<ILogger, string, NuGetVersion, NuGetFramework, string, IDisposable?> _getUpstreamPackageDependenciesScope = LoggerMessage.DefineScope<string, NuGetVersion, NuGetFramework, string>(
-       "Get package dependencies from upstream (PackageId={PackageId}; Version={Version}; Framework={Framework}; RepositoryUrl={RepositoryUrl})."
+
+    private static readonly Func<ILogger, string, NuGetVersion, NuGetFramework, Uri, IDisposable?> _getRemotePackageDependenciesScope = LoggerMessage.DefineScope<string, NuGetVersion, NuGetFramework, Uri>(
+       "Get package dependencies from upstream (PackageId={PackageId}; Version={Version}; Framework={Framework}; URL={RepositoryUrl})."
+    );
+
+    private static readonly Func<ILogger, string, NuGetVersion, NuGetFramework, string, IDisposable?> _getUpstreamDirPackageDependenciesScope = LoggerMessage.DefineScope<string, NuGetVersion, NuGetFramework, string>(
+       "Get package dependencies from upstream (PackageId={PackageId}; Version={Version}; Framework={Framework}; Path={RepositoryPath})."
     );
 
     private static readonly Func<ILogger, string, NuGetVersion, NuGetFramework, string, IDisposable?> _getLocalPackageDependenciesScope = LoggerMessage.DefineScope<string, NuGetVersion, NuGetFramework, string>(
-       "Get package dependencies from local (PackageId={PackageId}; Version={Version}; Framework={Framework}; RepositoryUrl={RepositoryUrl})."
+       "Get package dependencies from local (PackageId={PackageId}; Version={Version}; Framework={Framework}; Path={RepositoryPath})."
     );
 
     /// <summary>
@@ -665,11 +918,15 @@ public static class AppLoggerExtensions
     /// <param name="repositoryUrl">The NuGet repository URL.</param>
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetPackageDependenciesScope(this ILogger logger, string packageId, NuGetVersion version, NuGetFramework framework, string repositoryUrl, bool isUpstream)
+    public static IDisposable? BeginGetPackageDependenciesScope(this ILogger logger, string packageId, NuGetVersion version, NuGetFramework framework, Uri repositoryUrl, bool isUpstream)
     {
-        if (isUpstream)
-            return _getUpstreamPackageDependenciesScope(logger, packageId, version, framework, repositoryUrl);
-        return _getLocalPackageDependenciesScope(logger, packageId, version, framework, repositoryUrl);
+        if (repositoryUrl.IsFile)
+        {
+            if (isUpstream)
+                return _getUpstreamDirPackageDependenciesScope(logger, packageId, version, framework, repositoryUrl.LocalPath);
+            return _getLocalPackageDependenciesScope(logger, packageId, version, framework, repositoryUrl.LocalPath);
+        }
+        return _getRemotePackageDependenciesScope(logger, packageId, version, framework, repositoryUrl);
     }
 
     #endregion
@@ -679,7 +936,7 @@ public static class AppLoggerExtensions
     private static readonly Func<ILogger, string, bool, IDisposable?> _nugetSourceScope = LoggerMessage.DefineScope<string, bool>(
        "Using NuGet source {URL} (IsUpstream={IsUpstream})."
     );
-    
+
     /// <summary>
     /// Formats the NugetSource message and creates a scope.
     /// </summary>
@@ -688,67 +945,84 @@ public static class AppLoggerExtensions
     /// <param name="isUpstream"><see langword="true"/>  if the repository is upstream; otherwise, <see langword="false"/>.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
     public static IDisposable? BeginNugetSourceScope(this ILogger logger, string url, bool isUpstream) => _nugetSourceScope(logger, url, isUpstream);
-    
+
     #endregion
 
     #region DeleteLocalPackage Scope
-    
+
     private static readonly Func<ILogger, string, string, IDisposable?> _deleteLocalPackageScope = LoggerMessage.DefineScope<string, string>(
-        "Delete local package {PackageId} from {URL}."
+        "Delete local package {PackageId} from {RepositoryPath}."
     );
-    
+
     /// <summary>
     /// Formats the DeleteLocalPackage message and creates a scope.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The ID of the local package to delete.</param>
-    /// <param name="url">The local repository URL.</param>
+    /// <param name="repositoryPath">The local repository URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginDeleteLocalPackageScope(this ILogger logger, string packageId, string url) => _deleteLocalPackageScope(logger, packageId, url);
-    
+    public static IDisposable? BeginDeleteLocalPackageScope(this ILogger logger, string packageId, string repositoryPath) => _deleteLocalPackageScope(logger, packageId, repositoryPath);
+
     #endregion
 
     #region DeleteLocalPackageVersion Scope
-    
+
     private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _deleteLocalPackageVersionScope = LoggerMessage.DefineScope<string, NuGetVersion, string>(
-        "Delete local package {PackageId}, version {Version} from {URL}."
+        "Delete local package {PackageId}, version {Version} from {RepositoryPath}."
     );
-    
+
     /// <summary>
     /// Formats the DeleteLocalPackageVersion message and creates a scope.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The ID of the local package to delete.</param>
     /// <param name="version">The package version.</param>
-    /// <param name="url">The local repository URL.</param>
+    /// <param name="repositoryPath">The local repository URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginDeleteLocalPackageVersionScope(this ILogger logger, string packageId, NuGetVersion version, string url) => _deleteLocalPackageVersionScope(logger, packageId, version, url);
-    
+    public static IDisposable? BeginDeleteLocalPackageVersionScope(this ILogger logger, string packageId, NuGetVersion version, string repositoryPath) => _deleteLocalPackageVersionScope(logger, packageId, version, repositoryPath);
+
     #endregion
 
     #region AddLocalPackage Scope
-    
+
     private static readonly Func<ILogger, string, string, IDisposable?> _addLocalPackageScope = LoggerMessage.DefineScope<string, string>(
-        "Add local package {PackageId} to {URL}."
+        "Add local package {PackageId} to {RepositoryPath}."
     );
-    
+
     /// <summary>
     /// Formats the AddLocalPackage message and creates a scope.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The ID of the upstream package to add locally.</param>
-    /// <param name="url">The local repository URL.</param>
+    /// <param name="repositoryPath">The local repository URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginAddLocalPackageScope(this ILogger logger, string packageId, string url) => _addLocalPackageScope(logger, packageId, url);
-    
+    public static IDisposable? BeginAddLocalPackageScope(this ILogger logger, string packageId, string repositoryPath) => _addLocalPackageScope(logger, packageId, repositoryPath);
+
+    #endregion
+
+    #region UpdateLocalPackage Scope
+
+    private static readonly Func<ILogger, string, string, IDisposable?> _updateLocalPackageScope = LoggerMessage.DefineScope<string, string>(
+        "Update local package {PackageId} to {RepositoryPath}."
+    );
+
+    /// <summary>
+    /// Formats the UpdateLocalPackage message and creates a scope.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="packageId">The ID of the upstream package to update locally.</param>
+    /// <param name="repositoryPath">The local repository URL.</param>
+    /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
+    public static IDisposable? BeginUpdateLocalPackageScope(this ILogger logger, string packageId, string repositoryPath) => _updateLocalPackageScope(logger, packageId, repositoryPath);
+
     #endregion
 
     #region GetAllLocalPackages Scope
-    
+
     private static readonly Func<ILogger, string, IDisposable?> _getAllLocalPackagesScope = LoggerMessage.DefineScope<string>(
         "Getting all packages from {URL}."
     );
-    
+
     /// <summary>
     /// Formats the GetAllLocalPackages message and creates a scope.
     /// </summary>
@@ -756,6 +1030,6 @@ public static class AppLoggerExtensions
     /// <param name="url">The local repository URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
     public static IDisposable? BeginGetAllLocalPackagesScope(this ILogger logger, string url) => _getAllLocalPackagesScope(logger, url);
-    
+
     #endregion
 }

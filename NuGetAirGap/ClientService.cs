@@ -11,11 +11,11 @@ public abstract class ClientService : IDisposable
     private bool _isDisposed;
     private readonly object _syncRoot = new();
     protected NugetLogWrapper NuGetLogger { get; }
-    private readonly Task<SourceRepository> _getSourceReposityAsync;
-    private Task<(DownloadResource Resource, string URL)>? _getDownloadResourceAsync;
-    private Task<(PackageMetadataResource Resource, string URL)>? _getPackageMetadataResourceAsync;
-    private Task<(FindPackageByIdResource Resource, string URL)>? _getFindPackageByIdResourceAsync;
-    private Task<(DependencyInfoResource Resource, string URL)>? _getDependencyInfoResourceAsync;
+    private readonly Task<SourceRepository> _getSourceRepositoryAsync;
+    private Task<DownloadResource>? _getDownloadResourceAsync;
+    private Task<PackageMetadataResource>? _getPackageMetadataResourceAsync;
+    private Task<FindPackageByIdResource>? _getFindPackageByIdResourceAsync;
+    private Task<DependencyInfoResource>? _getDependencyInfoResourceAsync;
     protected SourceCacheContext CacheContext { get; } = new();
 
     public abstract bool IsUpstream { get; }
@@ -23,23 +23,40 @@ public abstract class ClientService : IDisposable
     protected ILogger Logger { get; }
 
     protected ClientService(ILogger logger, Task<SourceRepository> getSourceReposityAsync) =>
-        (NuGetLogger, _getSourceReposityAsync) = (new(Logger = logger), getSourceReposityAsync);
+        (NuGetLogger, _getSourceRepositoryAsync) = (new(Logger = logger), getSourceReposityAsync);
 
     protected async Task<T> WithSourceRepositoryAsync<T>(Func<SourceRepository, CancellationToken, Task<T>> asyncFunc, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        SourceRepository sourceRepository = await _getSourceReposityAsync;
+        SourceRepository sourceRepository = await _getSourceRepositoryAsync;
+        _sourceUri = sourceRepository.PackageSource.SourceUri;
         return await asyncFunc(sourceRepository, cancellationToken);
+    }
+
+    protected async Task<T> WithSourceRepositoryAsync<T>(Func<SourceRepository, Uri, CancellationToken, Task<T>> asyncFunc, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        SourceRepository sourceRepository = await _getSourceRepositoryAsync;
+        _sourceUri = sourceRepository.PackageSource.SourceUri;
+        return await asyncFunc(sourceRepository, _sourceUri, cancellationToken);
+    }
+
+    private Uri _sourceUri = null!;
+
+    public async Task<Uri> GetPackageSourceUriAsync()
+    {
+        _sourceUri ??= (await _getSourceRepositoryAsync).PackageSource.SourceUri;
+        return _sourceUri;
     }
 
     #region DownloadResource methods
 
-    private async Task<T> WithDownloadResourceScopeAsync<T>(Func<string, IDisposable?> scopeFactory, Func<DownloadResource, CancellationToken, Task<T>> asyncFunc, CancellationToken cancellationToken)
+    private async Task<T> WithDownloadResourceScopeAsync<T>(Func<Uri, IDisposable?> scopeFactory, Func<DownloadResource, CancellationToken, Task<T>> asyncFunc, CancellationToken cancellationToken)
     {
         lock (_syncRoot)
-            _getDownloadResourceAsync ??= WithSourceRepositoryAsync(async (s, c) => (await s.GetResourceAsync<DownloadResource>(cancellationToken), s.PackageSource.SourceUri.OriginalString), cancellationToken);
-        (var resource, var uri) = await _getDownloadResourceAsync;
-        using var scope = scopeFactory(uri);
+            _getDownloadResourceAsync ??= WithSourceRepositoryAsync(async (s, c) => await s.GetResourceAsync<DownloadResource>(cancellationToken), cancellationToken);
+        var resource = await _getDownloadResourceAsync;
+        using var scope = scopeFactory(_sourceUri);
         return await asyncFunc(resource, cancellationToken);
     }
 
@@ -61,12 +78,12 @@ public abstract class ClientService : IDisposable
     
     #region Methods using the PackageUpdateResource API.
 
-    private async Task<T> WithPackageMetadataResourceScopeAsync<T>(Func<string, IDisposable?> scopeFactory, Func<PackageMetadataResource, CancellationToken, Task<T>> asyncFunc, CancellationToken cancellationToken)
+    private async Task<T> WithPackageMetadataResourceScopeAsync<T>(Func<Uri, IDisposable?> scopeFactory, Func<PackageMetadataResource, CancellationToken, Task<T>> asyncFunc, CancellationToken cancellationToken)
     {
         lock (_syncRoot)
-            _getPackageMetadataResourceAsync ??= WithSourceRepositoryAsync(async (s, c) => (await s.GetResourceAsync<PackageMetadataResource>(cancellationToken), s.PackageSource.SourceUri.OriginalString), cancellationToken);
-        (var resource, var uri) = await _getPackageMetadataResourceAsync;
-        using var scope = scopeFactory(uri);
+            _getPackageMetadataResourceAsync ??= WithSourceRepositoryAsync(async (s, c) => await s.GetResourceAsync<PackageMetadataResource>(cancellationToken), cancellationToken);
+        var resource = await _getPackageMetadataResourceAsync;
+        using var scope = scopeFactory(_sourceUri);
         return await asyncFunc(resource, cancellationToken);
     }
 
@@ -128,20 +145,28 @@ public abstract class ClientService : IDisposable
     
     #region Methods using the NuGet V3 Package Content API
 
+    protected async Task WithFindPackageByIdResourceScopeAsync(Func<FindPackageByIdResource, CancellationToken, Task> asyncAction, CancellationToken cancellationToken)
+    {
+        lock (_syncRoot)
+            _getFindPackageByIdResourceAsync ??= WithSourceRepositoryAsync(async (s, c) => await s.GetResourceAsync<FindPackageByIdResource>(cancellationToken), cancellationToken);
+        var resource = await _getFindPackageByIdResourceAsync;
+        await asyncAction(resource, cancellationToken);
+    }
+
     protected async Task<T> WithFindPackageByIdResourceScopeAsync<T>(Func<FindPackageByIdResource, CancellationToken, Task<T>> asyncFunc, CancellationToken cancellationToken)
     {
         lock (_syncRoot)
-            _getFindPackageByIdResourceAsync ??= WithSourceRepositoryAsync(async (s, c) => (await s.GetResourceAsync<FindPackageByIdResource>(cancellationToken), s.PackageSource.SourceUri.OriginalString), cancellationToken);
-        (var resource, var uri) = await _getFindPackageByIdResourceAsync;
+            _getFindPackageByIdResourceAsync ??= WithSourceRepositoryAsync(async (s, c) => await s.GetResourceAsync<FindPackageByIdResource>(cancellationToken), cancellationToken);
+        var resource = await _getFindPackageByIdResourceAsync;
         return await asyncFunc(resource, cancellationToken);
     }
 
-    protected async Task<T> WithFindPackageByIdResourceScopeAsync<T>(Func<string, IDisposable?> scopeFactory, Func<FindPackageByIdResource, CancellationToken, Task<T>> asyncFunc, CancellationToken cancellationToken)
+    protected async Task<T> WithFindPackageByIdResourceScopeAsync<T>(Func<Uri, IDisposable?> scopeFactory, Func<FindPackageByIdResource, CancellationToken, Task<T>> asyncFunc, CancellationToken cancellationToken)
     {
         lock (_syncRoot)
-            _getFindPackageByIdResourceAsync ??= WithSourceRepositoryAsync(async (s, c) => (await s.GetResourceAsync<FindPackageByIdResource>(cancellationToken), s.PackageSource.SourceUri.OriginalString), cancellationToken);
-        (var resource, var uri) = await _getFindPackageByIdResourceAsync;
-        using var scope = scopeFactory(uri);
+            _getFindPackageByIdResourceAsync ??= WithSourceRepositoryAsync(async (s, c) => await s.GetResourceAsync<FindPackageByIdResource>(cancellationToken), cancellationToken);
+        var resource = await _getFindPackageByIdResourceAsync;
+        using var scope = scopeFactory(_sourceUri);
         return await asyncFunc(resource, cancellationToken);
     }
 
@@ -199,12 +224,12 @@ public abstract class ClientService : IDisposable
     
     #region DependencyInfoResource methods
 
-    private async Task<T> WithDependencyInfoResourceScopeAsync<T>(Func<string, IDisposable?> scopeFactory, Func<DependencyInfoResource, CancellationToken, Task<T>> asyncFunc, CancellationToken cancellationToken)
+    private async Task<T> WithDependencyInfoResourceScopeAsync<T>(Func<Uri, IDisposable?> scopeFactory, Func<DependencyInfoResource, CancellationToken, Task<T>> asyncFunc, CancellationToken cancellationToken)
     {
         lock (_syncRoot)
-            _getDependencyInfoResourceAsync ??= WithSourceRepositoryAsync(async (s, c) => (await s.GetResourceAsync<DependencyInfoResource>(cancellationToken), s.PackageSource.SourceUri.OriginalString), cancellationToken);
-        (var resource, var uri) = await _getDependencyInfoResourceAsync;
-        using var scope = scopeFactory(uri);
+            _getDependencyInfoResourceAsync ??= WithSourceRepositoryAsync(async (s, c) => await s.GetResourceAsync<DependencyInfoResource>(cancellationToken), cancellationToken);
+        var resource = await _getDependencyInfoResourceAsync;
+        using var scope = scopeFactory(_sourceUri);
         return await asyncFunc(resource, cancellationToken);
     }
 
