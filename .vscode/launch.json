@@ -2,13 +2,24 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Launch NuGetAirGap",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "Build NuGetAirGap",
+            "program": "${workspaceFolder}/NuGetAirGap/bin/Debug/net6.0/NuGetAirGap.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/CdnServer",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
             // Use IntelliSense to find out which attributes exist for C# debugging
             // Use hover for the description of the existing attributes
             // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
-            "name": ".NET Core Launch (web)",
+            "name": "CdnServer",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
+            "preLaunchTask": "Build CdnServer",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/CdnServer/bin/Debug/net6.0/CdnServer.dll",
             "args": [],
@@ -24,10 +35,10 @@
             }
         },
         {
-            "name": ".NET Core Launch (console)",
+            "name": "CdnGetter",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
+            "preLaunchTask": "Build CdnGetter",
             "program": "${workspaceFolder}/CdnGetter/bin/Debug/net6.0/CdnGetter.dll",
             "args": ["--Show=CDNs"],
             "cwd": "${workspaceFolder}/CdnGetter",
