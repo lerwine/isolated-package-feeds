@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
@@ -9,10 +10,17 @@ namespace CdnGetter.Versioning
         {
             if (zeroPadCount < 0)
                 throw new ArgumentOutOfRangeException(nameof(zeroPadCount));
+            if (suffix is null || suffix.Length == 0)
+                Suffix = null;
+            else
+            {
+                if (char.IsNumber(suffix.First()))
+                    throw new ArgumentOutOfRangeException(nameof(suffix));
+                Suffix = suffix;
+            }
             Value = value;
             IsNegative = isNegative;
             ZeroPadCount = zeroPadCount;
-            Suffix = (suffix is not null && suffix.Length > 0) ? suffix : null;
         }
         
         public VersionNumber(uint value, bool isNegative, int zeroPadCount, string suffix) : this(value, isNegative, zeroPadCount, string.IsNullOrEmpty(suffix) ? null : (suffix.Length > 1) ? new StringComponent(suffix) : new CharacterComponent(suffix[0])) { }
@@ -35,6 +43,14 @@ namespace CdnGetter.Versioning
         {
             if (zeroPadCount < 0)
                 throw new ArgumentOutOfRangeException(nameof(zeroPadCount));
+            if (suffix is null || suffix.Length == 0)
+                Suffix = null;
+            else
+            {
+                if (char.IsNumber(suffix.First()))
+                    throw new ArgumentOutOfRangeException(nameof(suffix));
+                Suffix = suffix;
+            }
             if (value < 0)
             {
                 Value = (uint)(0 - value);
@@ -46,42 +62,11 @@ namespace CdnGetter.Versioning
                 IsNegative = false;
             }
             ZeroPadCount = zeroPadCount;
-            Suffix = (suffix is not null && suffix.Length > 0) ? suffix : null;
         }
         
         public VersionNumber(int value, int zeroPadCount, string suffix) : this(value, zeroPadCount, string.IsNullOrEmpty(suffix) ? null : (suffix.Length > 1) ? new StringComponent(suffix) : new CharacterComponent(suffix[0])) { }
         
         public VersionNumber(int value, int zeroPadCount, char suffix) : this(value, zeroPadCount, new CharacterComponent(suffix)) { }
-        
-        // public VersionNumber(uint value, ITextComponent? suffix)
-        // {
-
-        // }
-        
-        // public VersionNumber(uint value, string suffix)
-        // {
-
-        // }
-        
-        // public VersionNumber(uint value, char suffix)
-        // {
-
-        // }
-        
-        // public VersionNumber(int value, ITextComponent? suffix)
-        // {
-
-        // }
-        
-        // public VersionNumber(int value, string suffix)
-        // {
-
-        // }
-        
-        // public VersionNumber(int value, char suffix)
-        // {
-
-        // }
         
         public uint Value { get; }
         
@@ -90,6 +75,8 @@ namespace CdnGetter.Versioning
         public int ZeroPadCount { get; }
 
         public ITextComponent? Suffix { get; }
+
+        public DelimitedVersionNumber AsDelimited(ITextComponent delimiter) => new(delimiter, this);
 
         public int CompareTo(IVersionNumber? other)
         {
@@ -137,6 +124,11 @@ namespace CdnGetter.Versioning
         }
 
         public int CompareTo(sbyte other)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int CompareTo(IVersionComponent? other)
         {
             throw new NotImplementedException();
         }
@@ -196,21 +188,62 @@ namespace CdnGetter.Versioning
             throw new NotImplementedException();
         }
 
-        public override bool Equals([NotNullWhen(true)] object? obj)
-        {
-            return base.Equals(obj);
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        public string ToString(bool omitPaddedZeroes)
+        public bool Equals(IVersionComponent? other)
         {
             throw new NotImplementedException();
         }
 
-        public override string ToString() => ToString(false);
+        public IEnumerable<char> GetCharacters(bool includePaddedZeroes)
+        {
+            if (Suffix is null)
+                return (includePaddedZeroes && ZeroPadCount > 0) ? (IsNegative ? Enumerable.Repeat('-', 1).Concat(Enumerable.Repeat('0', ZeroPadCount)) : Enumerable.Repeat('0', ZeroPadCount)).Concat(Value.ToString()) :
+                    IsNegative ? Enumerable.Repeat('-', 1).Concat(Value.ToString()) : Value.ToString();
+            return (includePaddedZeroes && ZeroPadCount > 0) ? (IsNegative ? Enumerable.Repeat('-', 1).Concat(Enumerable.Repeat('0', ZeroPadCount)).Concat(Suffix) :
+                Enumerable.Repeat('0', ZeroPadCount)).Concat(Value.ToString()).Concat(Suffix) :
+                (IsNegative ? Enumerable.Repeat('-', 1).Concat(Value.ToString()) : Value.ToString()).Concat(Suffix);
+        }
+
+        public IEnumerator<char> GetEnumerator()
+        {
+            if (Suffix is null)
+                return (IsNegative ? Enumerable.Repeat('-', 1).Concat(Value.ToString()) : Value.ToString()).GetEnumerator();
+            return (IsNegative ? Enumerable.Repeat('-', 1).Concat(Value.ToString()) : Value.ToString()).Concat(Suffix).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            if (Suffix is null)
+                return ((IEnumerable)(IsNegative ? Enumerable.Repeat('-', 1).Concat(Value.ToString()) : Value.ToString())).GetEnumerator();
+            return ((IEnumerable)(IsNegative ? Enumerable.Repeat('-', 1).Concat(Value.ToString()) : Value.ToString()).Concat(Suffix)).GetEnumerator();
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 21 + Value.GetHashCode();
+                return (Suffix is null) ? hash : 7 * hash + Suffix.GetHashCode();
+            }
+        }
+
+        public string ToString(bool includePaddedZeroes)
+        {
+            if (Suffix is null)
+            {
+                if (includePaddedZeroes)
+                    return IsNegative ? $"-{Enumerable.Repeat('-', ZeroPadCount)}{Value}" : $"{Enumerable.Repeat('-', ZeroPadCount)}{Value}";
+                return IsNegative ? $"-{Value}" : Value.ToString();
+            }
+            if (includePaddedZeroes)
+                return IsNegative ? $"-{Enumerable.Repeat('-', ZeroPadCount)}{Value}{Suffix}" : $"{Enumerable.Repeat('-', ZeroPadCount)}{Value}{Suffix}";
+            return IsNegative ? $"-{Value}{Suffix}" : $"{Value}{Suffix}";
+        }
+
+        public override string ToString()
+        {
+            if (Suffix is null)
+                return IsNegative ? $"-{Value}" : Value.ToString();
+            return IsNegative ? $"-{Value}{Suffix}" : $"{Value}{Suffix}";
+        }
     }
 }

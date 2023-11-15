@@ -17,23 +17,13 @@ The initial scope is to create NuGet and NPM Package Feed services as well as co
 - [Make HTTP requests with the HttpClient class](https://learn.microsoft.com/en-us/dotnet/fundamentals/networking/http/httpclient)
   - [JsonContent Class](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.json.jsoncontent?view=net-7.0)
   - [StringContent Class](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.stringcontent?view=net-7.0)
+- [NUnit.org](https://nunit.org/)
+  - [NUnit Documentation Site](https://docs.nunit.org/)
+  - [Unit testing C# with NUnit and .NET Core](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-with-nunit)
+  - [Most Complete NUnit Unit Testing Framework Cheat Sheet](https://www.automatetheplanet.com/nunit-cheat-sheet/)
+  - [CodeProject: Unit Testing Using NUnit](https://www.codeproject.com/articles/178635/unit-testing-using-nunit)
 - [XUnit Testing](https://xunit.net)
 - [c# Documentation Comments](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/documentation-comments)
-
-### NuGet
-
-- [Overview of Hosting Your Own NuGet Feeds | Microsoft Learn](https://learn.microsoft.com/en-au/nuget/hosting-packages/overview)
-  - [Using NuGet.Server to Host NuGet Feeds | Microsoft Learn](https://learn.microsoft.com/en-au/nuget/hosting-packages/overview)
-  - [Setting up Local NuGet Feeds | Microsoft Learn](https://learn.microsoft.com/en-au/nuget/hosting-packages/local-feeds)
-- [NuGet Command-Line Interface (CLI) Reference | Microsoft Learn](https://learn.microsoft.com/en-us/nuget/reference/nuget-exe-cli-reference?source=recommendations)
-- [Creating a local NuGet repository for offline development | Codurance](https://www.codurance.com/publications/2015/05/04/creating-a-local-nuget-repository)
-- [Installing a .nupkg on an offline machine | Nathan Manzi's Blog](https://nmanzi.com/blog/installing-nupkg-offline)
-
-#### NuGet Alternatives
-
-- [NuGet packages in the Package Registry | GitLab](https://docs.gitlab.com/ee/user/packages/nuget_repository/): May require licensing.
-- [svenkle/nuget-server: A stand-alone hosted wrapper of the NuGet.Server package](https://github.com/lerwine/nuget-server): Uses Nuget.Server and has an MSI package. Developer is not a U.S. citizen and does not show prior history in GitHub.
-- [NSubstitute](https://nsubstitute.github.io/) ([Creating a local NuGet repository for offline development | Codurance](https://www.codurance.com/publications/2015/05/04/creating-a-local-nuget-repository)): May not work in environments that are never routable to the public internet.
 
 ### NPM
 

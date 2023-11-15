@@ -12,7 +12,7 @@ class Program
     static void Main(string[] args)
     {
         HostApplicationBuilder builder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder();
-        builder.Environment.ContentRootPath = Directory.GetCurrentDirectory();
+        builder.Environment.ContentRootPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)!;
         builder.Logging.ClearProviders();
         Log.Logger = new LoggerConfiguration()
             .ReadFrom.Configuration(builder.Configuration)

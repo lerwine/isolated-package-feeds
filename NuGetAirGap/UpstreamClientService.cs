@@ -12,7 +12,7 @@ public sealed class UpstreamClientService : ClientService
     
     public UpstreamClientService(IOptions<AppSettings> appSettings, IHostEnvironment hostingEnvironment, ILogger<UpstreamClientService> logger) : base(logger, Task.Run(() =>
     {
-        var uriString = appSettings.Value.ServiceIndexUrl.DefaultIfWhiteSpace(() => AppSettings.DEFAULT_SERVICE_INDEX_URL);
+        var uriString = appSettings.Value.UpstreamServiceIndex.DefaultIfWhiteSpace(() => AppSettings.DEFAULT_SERVICE_INDEX_URL);
         using var scope = logger.BeginValidateUpstreamURLScope(uriString);
         Uri? uri;
         try
