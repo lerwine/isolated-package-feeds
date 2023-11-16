@@ -589,15 +589,15 @@ public static class AppLoggerExtensions
     #endregion
 
     #region GetDownloadResource Scope
-    
+
     private static readonly Func<ILogger, string, IDisposable?> _getRemoteDownloadResourceScope = LoggerMessage.DefineScope<string>(
         "Getting Download Resource from upstream NuGet repository at {RepositoryUrl}."
     );
-    
+
     private static readonly Func<ILogger, string, IDisposable?> _getUpstreamDirDownloadResourceScope = LoggerMessage.DefineScope<string>(
         "Getting Download Resource from upstream NuGet repository at {Path}."
     );
-    
+
     private static readonly Func<ILogger, string, IDisposable?> _getLocalDownloadResourceScope = LoggerMessage.DefineScope<string>(
         "Getting Download Resource from local NuGet repository at {Path}."
     );

@@ -33,7 +33,7 @@ public class AppSettings
     public string? Update { get; set; }
 
     #endregion
-    
+
     #region Add
 
     public const string COMMAND_LINE_SWITCH_a = "-a";
@@ -46,7 +46,7 @@ public class AppSettings
     public string? Add { get; set; }
 
     #endregion
-    
+
     #region Delete
 
     public const string COMMAND_LINE_SWITCH_d = "-d";
@@ -59,7 +59,7 @@ public class AppSettings
     public string? Delete { get; set; }
 
     #endregion
-    
+
     #region ListLocal
 
     public const string COMMAND_LINE_SWITCH_l = "-l";
@@ -73,7 +73,7 @@ public class AppSettings
     #endregion
 
     #region ExportLocalPackageListing
-    
+
     public const string COMMAND_LINE_SWITCH_export_2D_package_2D_listing = "--export-package-listing";
 
     /// <summary>
@@ -123,7 +123,7 @@ public class AppSettings
     #endregion
 
     #region GlobalPackagesFolder
-    
+
     public const string COMMAND_LINE_SWITCH_global_2D_packages_2D_folder = "--global-packages-folder";
 
     /// <summary>

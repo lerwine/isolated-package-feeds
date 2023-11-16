@@ -15,7 +15,7 @@ public sealed class LocalRepositoryProvider : IRepositoryProvider
     private Uri? _uri;
 
     public string OriginalString { get; }
-    
+
     private bool TryParseUri()
     {
         var path = OriginalString;
@@ -127,12 +127,12 @@ public sealed class LocalRepositoryProvider : IRepositoryProvider
         finally { Monitor.Exit(_syncRoot); }
         return _uri!;
     }
-    
+
     public SourceRepository GetSourceRepository() => _sourceRepository ??= Repository.Factory.GetCoreV3(GetUri().LocalPath);
 
     public LocalRepositoryProvider(IOptions<AppSettings> options, IHostEnvironment hostingEnvironment, ILogger<LocalRepositoryProvider> logger)
     {
-        OriginalString = options.Value.UpstreamServiceIndex.DefaultIfWhiteSpace(() => Path.Combine(hostingEnvironment.ContentRootPath, AppSettings.DEFAULT_LOCAL_REPOSITORY));;
+        OriginalString = options.Value.UpstreamServiceIndex.DefaultIfWhiteSpace(() => Path.Combine(hostingEnvironment.ContentRootPath, AppSettings.DEFAULT_LOCAL_REPOSITORY)); ;
         _logger = logger;
     }
 }

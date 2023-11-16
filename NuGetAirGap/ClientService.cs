@@ -5,7 +5,6 @@ using NuGet.Frameworks;
 using NuGet.Packaging.Core;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
-using System.Threading.Tasks;
 
 namespace NuGetAirGap;
 
@@ -29,11 +28,11 @@ public abstract class ClientService : IDisposable
     protected ILogger Logger { get; }
 
     public IRepositoryProvider RepositoryProvider { get; }
-    
+
     public string PackageSourceLocation => RepositoryProvider.GetPath();
 
     internal static string GetDefaultGlobalPackagesFolder() => SettingsUtility.GetGlobalPackagesFolder(Settings.LoadDefaultSettings(root: null));
-    
+
     protected ClientService(IRepositoryProvider repositoryProvider, IOptions<AppSettings> options, ILogger logger, bool isUpstream)
     {
         GlobalPackagesFolder = options.Value.GlobalPackagesFolder ?? GetDefaultGlobalPackagesFolder();
@@ -87,7 +86,7 @@ public abstract class ClientService : IDisposable
     }
 
     #endregion
-    
+
     #region Methods using the PackageUpdateResource API.
 
     protected async Task<PackageMetadataResource> GetPackageMetadataResourceAsync(CancellationToken cancellationToken)
@@ -159,7 +158,7 @@ public abstract class ClientService : IDisposable
     }
 
     #endregion
-    
+
     #region Methods using the NuGet V3 Package Content API
 
     protected async Task<FindPackageByIdResource> GetFindPackageByIdResourceAsync(CancellationToken cancellationToken)
@@ -208,7 +207,7 @@ public abstract class ClientService : IDisposable
         using var scope = await GetFindPackageByIdResourceScopeAsync(() => Logger.BeginGetDependencyInfoScope(packageId, version, RepositoryProvider, IsUpstream), cancellationToken);
         return await scope.Context.GetDependencyInfoAsync(packageId.ToLower(), version, CacheContext, NuGetLogger, cancellationToken);
     }
-    
+
     /// <summary>
     /// Asynchronously checks whether the exact package id and version exists at this source.
     /// </summary>
@@ -229,7 +228,7 @@ public abstract class ClientService : IDisposable
     }
 
     #endregion
-    
+
     #region DependencyInfoResource methods
 
     protected async Task<DependencyInfoResource> GetDependencyInfoResourceAsync(CancellationToken cancellationToken)
@@ -272,7 +271,7 @@ public abstract class ClientService : IDisposable
         using var scope = await GeDependencyInfoResourceScopeAsync(() => Logger.BeginResolvePackagesScope(packageId, framework, RepositoryProvider, IsUpstream), cancellationToken);
         return await scope.Context.ResolvePackages(packageId, framework, CacheContext, NuGetLogger, cancellationToken);
     }
-    
+
     /// <summary>
     /// Retrieve dependency info for all versions of a single package.
     /// </summary>
@@ -330,7 +329,7 @@ public abstract class ClientService : IDisposable
     }
 
     #endregion
-    
+
     protected virtual void Dispose(bool disposing)
     {
         if (_isDisposed)

@@ -1,12 +1,6 @@
-using System;
-using System.Collections.ObjectModel;
-using System.Security.Cryptography.Xml;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NuGet.Packaging.Core;
-using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 
@@ -18,7 +12,7 @@ public sealed class LocalClientService : ClientService
     private Task<PackageUpdateResource>? _getPackageUpdateResourceAsync;
 
     public LocalClientService(LocalRepositoryProvider localRepositoryProvider, IOptions<AppSettings> options, ILogger<UpstreamClientService> logger) : base(localRepositoryProvider, options, logger, false) { }
- 
+
     #region Methods using the Search Query API
 
     private Task<PackageSearchResource>? _getPackageSearchResourceAsync;
@@ -90,7 +84,7 @@ public sealed class LocalClientService : ClientService
         var packageUpdate = await GetPackageUpdateResourceAsync(cancellationToken);
         return await DeleteAsync(packageIds, findPackageById, packageUpdate, cancellationToken);
     }
-    
+
     private async Task<IEnumerable<string>> AddAsync(IEnumerable<string> packageIds, FindPackageByIdResource findPackageById, PackageUpdateResource resource, UpstreamClientService upstreamClientService, CancellationToken cancellationToken)
     {
         HashSet<string> result = new(StringComparer.CurrentCultureIgnoreCase);
@@ -124,7 +118,7 @@ public sealed class LocalClientService : ClientService
         var resource = await GetPackageUpdateResourceAsync(cancellationToken);
         return await AddAsync(packageIds, findPackageById, resource, upstreamClientService, cancellationToken);
     }
-    
+
     private async Task UpdateAsync(string packageId, NuGetVersion version, PackageDownloadContext downloadContext, UpstreamClientService upstreamClientService, Dictionary<string, HashSet<NuGetVersion>> updated, CancellationToken cancellationToken)
     {
         var localPackage = await GetDependencyInfoAsync(packageId, version, cancellationToken);
@@ -183,7 +177,7 @@ public sealed class LocalClientService : ClientService
             if (!(upstreamVersions = upstreamVersions.Where(v => !localVersions.Contains(v, VersionComparer.VersionReleaseMetadata))).Any())
                 continue;
             PackageDownloadContext downloadContext = new(CacheContext);
-            
+
             foreach (NuGetVersion version in upstreamVersions)
             {
 

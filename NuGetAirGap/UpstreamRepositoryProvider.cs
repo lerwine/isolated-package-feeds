@@ -95,7 +95,7 @@ public sealed class UpstreamRepositoryProvider : IRepositoryProvider
             _logger.LogInvalidRepositoryUrl(uri, true, message => new InvalidRepositoryUrlException(uriString, true));
         return false;
     }
-    
+
     public string GetPath()
     {
         Monitor.Enter(_syncRoot);
@@ -142,12 +142,12 @@ public sealed class UpstreamRepositoryProvider : IRepositoryProvider
         finally { Monitor.Exit(_syncRoot); }
         return _uri!;
     }
-    
+
     public SourceRepository GetSourceRepository() => _sourceRepository ??= Repository.Factory.GetCoreV3(GetUri().LocalPath);
 
     public UpstreamRepositoryProvider(IOptions<AppSettings> options, IHostEnvironment hostingEnvironment, ILogger<LocalRepositoryProvider> logger)
     {
-        OriginalString = options.Value.UpstreamServiceIndex.DefaultIfWhiteSpace(() => Path.Combine(hostingEnvironment.ContentRootPath, AppSettings.DEFAULT_LOCAL_REPOSITORY));;
+        OriginalString = options.Value.UpstreamServiceIndex.DefaultIfWhiteSpace(() => Path.Combine(hostingEnvironment.ContentRootPath, AppSettings.DEFAULT_LOCAL_REPOSITORY)); ;
         _logger = logger;
     }
 }
