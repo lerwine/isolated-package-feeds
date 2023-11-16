@@ -264,22 +264,22 @@ public partial class ValidateAppSettings : IValidateOptions<AppSettings>
             return ValidateOptionsResult.Success;
         }
         FileInfo fileInfo;
-        try { options.LocalRepository = (fileInfo = new(options.ExportLocalMetaData)).FullName; }
+        try { options.ExportLocalMetaData = (fileInfo = new(options.ExportLocalMetaData)).FullName; }
         catch (System.Security.SecurityException error)
         {
-            return ValidateOptionsResult.Fail(_logger.LogMetaDataExportPathAccessDenied(options.LocalRepository, error));
+            return ValidateOptionsResult.Fail(_logger.LogMetaDataExportPathAccessDenied(options.ExportLocalMetaData, error));
         }
         catch (PathTooLongException error)
         {
-            return ValidateOptionsResult.Fail(_logger.LogInvalidExportLocalMetaData(options.LocalRepository, error));
+            return ValidateOptionsResult.Fail(_logger.LogInvalidExportLocalMetaData(options.ExportLocalMetaData, error));
         }
         catch (ArgumentException error)
         {
-            return ValidateOptionsResult.Fail(_logger.LogInvalidExportLocalMetaData(options.LocalRepository, error));
+            return ValidateOptionsResult.Fail(_logger.LogInvalidExportLocalMetaData(options.ExportLocalMetaData, error));
         }
         if (fileInfo.Exists || (fileInfo.Directory is not null && fileInfo.Directory.Exists))
             return ValidateOptionsResult.Success;
-        return ValidateOptionsResult.Fail(_logger.LogExportLocalMetaDataDirectoryNotFound(options.LocalRepository));
+        return ValidateOptionsResult.Fail(_logger.LogExportLocalMetaDataDirectoryNotFound(options.ExportLocalMetaData));
     }
 
     private ValidationResult? ValidateExportLocalMetaData(AppSettings options)
@@ -290,7 +290,7 @@ public partial class ValidateAppSettings : IValidateOptions<AppSettings>
             return null;
         }
         FileInfo fileInfo;
-        try { options.LocalRepository = (fileInfo = new(options.ExportLocalMetaData)).FullName; }
+        try { options.ExportLocalMetaData = (fileInfo = new(options.ExportLocalMetaData)).FullName; }
         catch (System.Security.SecurityException error)
         {
             return new ValidationResult(_logger.LogMetaDataExportPathAccessDenied(options.ExportLocalMetaData, error), Enumerable.Repeat(nameof(AppSettings.ExportLocalMetaData), 1));
@@ -311,43 +311,43 @@ public partial class ValidateAppSettings : IValidateOptions<AppSettings>
     private ValidateOptionsResult ValidateGlobalPackagesFolderOld(AppSettings options)
     {
         DirectoryInfo directoryInfo;
-        try { options.LocalRepository = (directoryInfo = new(options.GlobalPackagesFolder)).FullName; }
+        try { options.GlobalPackagesFolder = (directoryInfo = new(options.GlobalPackagesFolder)).FullName; }
         catch (System.Security.SecurityException error)
         {
-            return ValidateOptionsResult.Fail(_logger.LogGlobalPackagesFolderSecurityException(options.LocalRepository, error));
+            return ValidateOptionsResult.Fail(_logger.LogGlobalPackagesFolderSecurityException(options.GlobalPackagesFolder, error));
         }
         catch (PathTooLongException error)
         {
-            return ValidateOptionsResult.Fail(_logger.LogInvalidGlobalPackagesFolder(options.LocalRepository, error));
+            return ValidateOptionsResult.Fail(_logger.LogInvalidGlobalPackagesFolder(options.GlobalPackagesFolder, error));
         }
         catch (ArgumentException error)
         {
-            return ValidateOptionsResult.Fail(_logger.LogInvalidGlobalPackagesFolder(options.LocalRepository, error));
+            return ValidateOptionsResult.Fail(_logger.LogInvalidGlobalPackagesFolder(options.GlobalPackagesFolder, error));
         }
         if (directoryInfo.Exists)
             return ValidateOptionsResult.Success;
-        return ValidateOptionsResult.Fail(_logger.LogGlobalPackagesFolderNotFound(options.LocalRepository));
+        return ValidateOptionsResult.Fail(_logger.LogGlobalPackagesFolderNotFound(options.GlobalPackagesFolder));
     }
 
     private ValidationResult? ValidateGlobalPackagesFolder(AppSettings options)
     {
         DirectoryInfo directoryInfo;
-        try { options.LocalRepository = (directoryInfo = new(options.GlobalPackagesFolder)).FullName; }
+        try { options.GlobalPackagesFolder = (directoryInfo = new(options.GlobalPackagesFolder)).FullName; }
         catch (System.Security.SecurityException error)
         {
-            return new ValidationResult(_logger.LogGlobalPackagesFolderSecurityException(options.LocalRepository, error), Enumerable.Repeat(nameof(AppSettings.GlobalPackagesFolder), 1));
+            return new ValidationResult(_logger.LogGlobalPackagesFolderSecurityException(options.GlobalPackagesFolder, error), Enumerable.Repeat(nameof(AppSettings.GlobalPackagesFolder), 1));
         }
         catch (PathTooLongException error)
         {
-            return new ValidationResult(_logger.LogInvalidGlobalPackagesFolder(options.LocalRepository, error), Enumerable.Repeat(nameof(AppSettings.GlobalPackagesFolder), 1));
+            return new ValidationResult(_logger.LogInvalidGlobalPackagesFolder(options.GlobalPackagesFolder, error), Enumerable.Repeat(nameof(AppSettings.GlobalPackagesFolder), 1));
         }
         catch (ArgumentException error)
         {
-            return new ValidationResult(_logger.LogInvalidGlobalPackagesFolder(options.LocalRepository, error), Enumerable.Repeat(nameof(AppSettings.GlobalPackagesFolder), 1));
+            return new ValidationResult(_logger.LogInvalidGlobalPackagesFolder(options.GlobalPackagesFolder, error), Enumerable.Repeat(nameof(AppSettings.GlobalPackagesFolder), 1));
         }
         if (directoryInfo.Exists)
             return null;
-        return new ValidationResult(_logger.LogGlobalPackagesFolderNotFound(options.LocalRepository), Enumerable.Repeat(nameof(AppSettings.GlobalPackagesFolder), 1));
+        return new ValidationResult(_logger.LogGlobalPackagesFolderNotFound(options.GlobalPackagesFolder), Enumerable.Repeat(nameof(AppSettings.GlobalPackagesFolder), 1));
     }
 
     public ValidateOptionsResult Validate(string? name, AppSettings options)
