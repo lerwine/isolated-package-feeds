@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NuGet.Packaging.Core;
+using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 
@@ -11,7 +12,8 @@ public sealed class LocalClientService : ClientService
     private readonly object _syncRoot = new();
     private Task<PackageUpdateResource>? _getPackageUpdateResourceAsync;
 
-    public LocalClientService(LocalRepositoryProvider localRepositoryProvider, IOptions<AppSettings> options, ILogger<UpstreamClientService> logger) : base(localRepositoryProvider, options, logger, false) { }
+    public LocalClientService(IOptions<AppSettings> options, ILogger<UpstreamClientService> logger) :
+        base(Repository.Factory.GetCoreV3(options.Value.LocalRepository), options, logger, false) { }
 
     #region Methods using the Search Query API
 
@@ -20,7 +22,7 @@ public sealed class LocalClientService : ClientService
     private async Task<PackageSearchResource> GetPackageSearchResourceAsync(CancellationToken cancellationToken)
     {
         lock (_syncRoot)
-            _getPackageSearchResourceAsync ??= RepositoryProvider.GetSourceRepository().GetResourceAsync<PackageSearchResource>(cancellationToken);
+            _getPackageSearchResourceAsync ??= SourceRepository.GetResourceAsync<PackageSearchResource>(cancellationToken);
         return await _getPackageSearchResourceAsync;
     }
 
@@ -29,7 +31,7 @@ public sealed class LocalClientService : ClientService
 
     public async Task<List<IPackageSearchMetadata>> GetAllPackagesAsync(CancellationToken cancellationToken)
     {
-        using var scope = await GePackageSearchResourceScopeAsync(() => Logger.BeginGetAllLocalPackagesScope(RepositoryProvider.GetPath()), cancellationToken);
+        using var scope = await GePackageSearchResourceScopeAsync(() => Logger.BeginGetAllLocalPackagesScope(SourceRepository.PackageSource.Source), cancellationToken);
         var resource = scope.Context;
         List<IPackageSearchMetadata> result = new();
         var skip = 0;
@@ -49,7 +51,7 @@ public sealed class LocalClientService : ClientService
     private async Task<PackageUpdateResource> GetPackageUpdateResourceAsync(CancellationToken cancellationToken)
     {
         lock (_syncRoot)
-            _getPackageUpdateResourceAsync ??= RepositoryProvider.GetSourceRepository().GetResourceAsync<PackageUpdateResource>(cancellationToken);
+            _getPackageUpdateResourceAsync ??= SourceRepository.GetResourceAsync<PackageUpdateResource>(cancellationToken);
         return await _getPackageUpdateResourceAsync;
     }
 
@@ -124,7 +126,7 @@ public sealed class LocalClientService : ClientService
         var localPackage = await GetDependencyInfoAsync(packageId, version, cancellationToken);
         if (localPackage is null)
         {
-            Logger.LogPackageNotFound(packageId, version, RepositoryProvider, false);
+            Logger.LogPackageNotFound(packageId, version, this, false);
             return;
         }
         if (updated.TryGetValue(packageId, out HashSet<NuGetVersion>? versionsUpdated))
@@ -141,7 +143,7 @@ public sealed class LocalClientService : ClientService
         var downloaded = await upstreamClientService.GetDownloadResourceResultAsync(new PackageIdentity(packageId, version), downloadContext, GlobalPackagesFolder, cancellationToken);
         if (downloaded is null)
         {
-            Logger.LogPackageNotFound(packageId, version, upstreamClientService.RepositoryProvider, true);
+            Logger.LogPackageNotFound(packageId, version, this, true);
             return;
         }
     }
@@ -165,13 +167,13 @@ public sealed class LocalClientService : ClientService
                 if (deletedIds.Contains(lc, StringComparer.CurrentCultureIgnoreCase))
                     Logger.LogPackageDeleted(id, PackageSourceLocation);
                 else
-                    Logger.LogPackageNotFound(id, RepositoryProvider, false);
+                    Logger.LogPackageNotFound(id, this, false);
                 continue;
             }
             var upstreamVersions = await upstreamClientService.GetAllVersionsAsync(lc, cancellationToken);
             if (upstreamVersions is null || !upstreamVersions.Any())
             {
-                Logger.LogPackageNotFound(id, RepositoryProvider, true);
+                Logger.LogPackageNotFound(id, this, true);
                 continue;
             }
             if (!(upstreamVersions = upstreamVersions.Where(v => !localVersions.Contains(v, VersionComparer.VersionReleaseMetadata))).Any())

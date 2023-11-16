@@ -72,16 +72,16 @@ public class AppSettings
 
     #endregion
 
-    #region ExportLocalPackageListing
+    #region ExportLocalMetaData
 
-    public const string COMMAND_LINE_SWITCH_export_2D_package_2D_listing = "--export-package-listing";
+    public const string COMMAND_LINE_SWITCH_export_2D_local_2D_metadata = "--export-local-metadata";
 
     /// <summary>
     /// Specifies the relative or absolute path of the local package list export.
     /// </summary>
     /// <remarks>The package listing is exported as a JSON array. If this path is not absolute, it will be resolved relative to the current working directory.
-    /// This can be specified using the <see cref="COMMAND_LINE_SWITCH_export_2D_package_2D_listing"/> command line switch.</remarks>
-    public string? ExportLocalPackageListing { get; }
+    /// This can be specified using the <see cref="COMMAND_LINE_SWITCH_export_2D_local_2D_metadata"/> command line switch.</remarks>
+    public string? ExportLocalMetaData { get; set; }
 
     #endregion
 
@@ -100,7 +100,7 @@ public class AppSettings
     /// <remarks>The default value of this setting is defined in the <see cref="DEFAULT_UPSTREAM_SERVICE_INDEX" /> constant.
     /// This can be overridden using the <see cref="COMMAND_LINE_SWITCH_upstream_2D_service_2D_index"/> command line switch.</remarks>
     /// <seealso href="https://learn.microsoft.com/en-us/nuget/api/overview#service-index"/>
-    public string? UpstreamServiceIndex { get; set; }
+    public string UpstreamServiceIndex { get; set; } = null!;
 
     #endregion
 
@@ -118,7 +118,7 @@ public class AppSettings
     /// </summary>
     /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory. The default value of this setting is defined in the <see cref="DEFAULT_LOCAL_REPOSITORY" /> constant.
     /// This can be overridden using the <see cref="COMMAND_LINE_SWITCH_local_2D_repository"/> command line switch.</remarks>
-    public string? LocalRepository { get; set; }
+    public string LocalRepository { get; set; } = null!;
 
     #endregion
 
@@ -131,7 +131,7 @@ public class AppSettings
     /// </summary>
     /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory.
     /// This can be overridden using the <see cref="COMMAND_LINE_SWITCH_global_2D_packages_2D_folder"/> command line switch.</remarks>
-    public string? GlobalPackagesFolder { get; set; }
+    public string GlobalPackagesFolder { get; set; } = null!;
 
     #endregion
 
@@ -168,7 +168,7 @@ public class AppSettings
     {
         { COMMAND_LINE_SWITCH_a, $"{nameof(NuGetAirGap)}:{nameof(Add)}" },
         { COMMAND_LINE_SWITCH_d, $"{nameof(NuGetAirGap)}:{nameof(Delete)}" },
-        { COMMAND_LINE_SWITCH_export_2D_package_2D_listing, $"{nameof(NuGetAirGap)}:{nameof(ExportLocalPackageListing)}" },
+        { COMMAND_LINE_SWITCH_export_2D_local_2D_metadata, $"{nameof(NuGetAirGap)}:{nameof(ExportLocalMetaData)}" },
         { COMMAND_LINE_SWITCH_local_2D_repository, $"{nameof(NuGetAirGap)}:{nameof(LocalRepository)}" },
         { COMMAND_LINE_SWITCH_upstream_2D_service_2D_index, $"{nameof(NuGetAirGap)}:{nameof(UpstreamServiceIndex)}" },
         { COMMAND_LINE_SWITCH_global_2D_packages_2D_folder, $"{nameof(NuGetAirGap)}:{nameof(GlobalPackagesFolder)}" }

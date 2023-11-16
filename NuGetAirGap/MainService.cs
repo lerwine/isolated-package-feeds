@@ -25,7 +25,7 @@ namespace NuGetAirGap
             try { return new StreamWriter(path, false, new System.Text.UTF8Encoding(false, false)); }
             catch (ArgumentException exception)
             {
-                throw _logger.LogInvalidMetaDataExportPath(path, m => new MetaDataExportPathException(path, m, exception), exception);
+                throw _logger.LogInvalidExportLocalMetaData(path, m => new MetaDataExportPathException(path, m, exception), exception);
             }
             catch (UnauthorizedAccessException exception)
             {
@@ -33,15 +33,15 @@ namespace NuGetAirGap
             }
             catch (DirectoryNotFoundException exception)
             {
-                throw _logger.LogInvalidMetaDataExportPath(path, m => new MetaDataExportPathException(path, m, exception), exception);
+                throw _logger.LogInvalidExportLocalMetaData(path, m => new MetaDataExportPathException(path, m, exception), exception);
             }
             catch (PathTooLongException exception)
             {
-                throw _logger.LogInvalidMetaDataExportPath(path, m => new MetaDataExportPathException(path, m, exception), exception);
+                throw _logger.LogInvalidExportLocalMetaData(path, m => new MetaDataExportPathException(path, m, exception), exception);
             }
             catch (IOException exception)
             {
-                throw _logger.LogInvalidMetaDataExportPath(path, m => new MetaDataExportPathException(path, m, exception), exception);
+                throw _logger.LogInvalidExportLocalMetaData(path, m => new MetaDataExportPathException(path, m, exception), exception);
             }
             catch (System.Security.SecurityException exception)
             {
@@ -121,12 +121,12 @@ namespace NuGetAirGap
                 if (appSettings.ListLocal)
                 {
                     var packages = await localClientService.GetAllPackagesAsync(stoppingToken);
-                    await ListLocalPackagesAsync(packages, appSettings.ExportLocalPackageListing, stoppingToken);
+                    await ListLocalPackagesAsync(packages, appSettings.ExportLocalMetaData, stoppingToken);
                 }
-                else if (!string.IsNullOrWhiteSpace(appSettings.ExportLocalPackageListing))
+                else if (!string.IsNullOrWhiteSpace(appSettings.ExportLocalMetaData))
                 {
                     var packages = await localClientService.GetAllPackagesAsync(stoppingToken);
-                    await ExportLocalPackageMetaDataAsync(packages, appSettings.ExportLocalPackageListing, stoppingToken);
+                    await ExportLocalPackageMetaDataAsync(packages, appSettings.ExportLocalMetaData, stoppingToken);
                 }
                 else if (appSettings.UpdateAll)
                 {

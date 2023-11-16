@@ -43,5 +43,5 @@ public class MetaDataExportPathException : Exception, ILogTrackable
         base.GetObjectData(info, context);
     }
 
-    void ILogTrackable.Log(ILogger logger, bool force) => logger.LogInvalidMetaDataExportPath(Path, m => this, InnerException);
+    void ILogTrackable.Log(ILogger logger, bool force) => logger.LogInvalidExportLocalMetaData(Path, m => this, InnerException);
 }

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NuGet.Configuration;
 using Serilog;
 
@@ -20,19 +21,24 @@ class Program
             .ReadFrom.Configuration(builder.Configuration)
             .CreateLogger();
         builder.Logging.AddSerilog();
-        var nuGetSettings = Settings.LoadDefaultSettings(root: null);
-        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
-        {
-            [$"{nameof(NuGetAirGap)}:{nameof(AppSettings.GlobalPackagesFolder)}"] = ClientService.GetDefaultGlobalPackagesFolder(nuGetSettings),
-            [$"{nameof(NuGetAirGap)}:{nameof(AppSettings.UpstreamServiceIndex)}"] = AppSettings.DEFAULT_UPSTREAM_SERVICE_INDEX
-        });
-        builder.Services.Configure<AppSettings>(builder.Configuration.GetSection(nameof(NuGetAirGap)));
         AppSettings.Configure(args, builder.Configuration);
+        builder.Services
+            .AddOptions<AppSettings>()
+            .Bind(builder.Configuration.GetSection(nameof(NuGetAirGap)))
+            .ValidateDataAnnotations();
         builder.Services.AddHostedService<MainService>()
-            .AddSingleton<LocalRepositoryProvider>()
-            .AddSingleton<UpstreamRepositoryProvider>()
             .AddSingleton<LocalClientService>()
-            .AddSingleton<UpstreamClientService>();
+            .AddSingleton<UpstreamClientService>()
+            .AddSingleton<IValidateOptions<AppSettings>, ValidateAppSettings>()
+            .PostConfigure<AppSettings>(settings =>
+        {
+            if (string.IsNullOrWhiteSpace(settings.GlobalPackagesFolder))
+                settings.GlobalPackagesFolder = SettingsUtility.GetGlobalPackagesFolder(Settings.LoadDefaultSettings(root: null));
+            if (string.IsNullOrWhiteSpace(settings.UpstreamServiceIndex))
+                settings.UpstreamServiceIndex = AppSettings.DEFAULT_UPSTREAM_SERVICE_INDEX;
+            if (string.IsNullOrWhiteSpace(settings.LocalRepository))
+                settings.LocalRepository = Path.Combine(builder.Environment.ContentRootPath, AppSettings.DEFAULT_LOCAL_REPOSITORY);
+        });
         (Host = builder.Build()).Run();
     }
 }
