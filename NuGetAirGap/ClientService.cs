@@ -31,7 +31,7 @@ public abstract class ClientService : IDisposable
 
     public string PackageSourceLocation => RepositoryProvider.GetPath();
 
-    internal static string GetDefaultGlobalPackagesFolder() => SettingsUtility.GetGlobalPackagesFolder(Settings.LoadDefaultSettings(root: null));
+    internal static string GetDefaultGlobalPackagesFolder(ISettings? settings = null) => SettingsUtility.GetGlobalPackagesFolder(settings ?? Settings.LoadDefaultSettings(root: null));
 
     protected ClientService(IRepositoryProvider repositoryProvider, IOptions<AppSettings> options, ILogger logger, bool isUpstream)
     {

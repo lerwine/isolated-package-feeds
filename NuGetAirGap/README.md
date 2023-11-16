@@ -10,6 +10,15 @@
 - `--export-package-listing=[path.json]` - Export package metadata for packages stored in local repository.
 - `--local-repository=[subdirectory]` - Override path of local NuGet repository subdirectory.
 - `--upstream-service-index=[URL_or_subdirectory]` - Override URL of upstream NuGet server. This can also be the path to a subdirectory to use a local folder as the upstream repository.
+- `--global-packages-folder=[subdirectory]` - Override path of the global NuGet packages folder.
+
+## App Settings
+
+Following are the configuration options for the `NuGetAirGap` section of [appsettings.json](./appsettings.json):
+
+- `UpstreamServiceIndex` - The URL of the upstream NuGet server. The default is `https://api.nuget.org/v3/index.json`. This can also be the path to a subdirectory.
+- `LocalRepository` - The path of local NuGet repository subdirectory, relative to the current working directory. The default value is a folder named `LocalSource`, relative to the assembly location.
+- `GlobalPackagesFolder` - Overrides the path of the global NuGet packages folder.
 
 ## Development
 

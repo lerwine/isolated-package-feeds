@@ -85,19 +85,19 @@ public class AppSettings
 
     #endregion
 
-    #region ServiceIndexUrl
+    #region UpstreamServiceIndex
 
     /// <summary>
     /// The default remote endpoint URL for the V3 NGet API.
     /// </summary>
-    public const string DEFAULT_SERVICE_INDEX_URL = "https://api.nuget.org/v3/index.json";
+    public const string DEFAULT_UPSTREAM_SERVICE_INDEX = "https://api.nuget.org/v3/index.json";
 
     public const string COMMAND_LINE_SWITCH_upstream_2D_service_2D_index = "--upstream-service-index";
 
     /// <summary>
     /// Specifies the remote endpoint URL for the V3 NGet API.
     /// </summary>
-    /// <remarks>The default value of this setting is defined in the <see cref="DEFAULT_SERVICE_INDEX_URL" /> constant.
+    /// <remarks>The default value of this setting is defined in the <see cref="DEFAULT_UPSTREAM_SERVICE_INDEX" /> constant.
     /// This can be overridden using the <see cref="COMMAND_LINE_SWITCH_upstream_2D_service_2D_index"/> command line switch.</remarks>
     /// <seealso href="https://learn.microsoft.com/en-us/nuget/api/overview#service-index"/>
     public string? UpstreamServiceIndex { get; set; }

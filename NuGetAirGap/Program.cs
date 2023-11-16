@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NuGet.Configuration;
 using Serilog;
 
 namespace NuGetAirGap;
@@ -19,9 +20,10 @@ class Program
             .ReadFrom.Configuration(builder.Configuration)
             .CreateLogger();
         builder.Logging.AddSerilog();
+        var nuGetSettings = Settings.LoadDefaultSettings(root: null);
         builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
         {
-            [$"{nameof(NuGetAirGap)}:{nameof(AppSettings.GlobalPackagesFolder)}"] = ClientService.GetDefaultGlobalPackagesFolder()
+            [$"{nameof(NuGetAirGap)}:{nameof(AppSettings.GlobalPackagesFolder)}"] = ClientService.GetDefaultGlobalPackagesFolder(nuGetSettings)
         });
         builder.Services.Configure<AppSettings>(builder.Configuration.GetSection(nameof(NuGetAirGap)));
         AppSettings.Configure(args, builder.Configuration);

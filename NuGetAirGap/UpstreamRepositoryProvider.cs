@@ -147,7 +147,7 @@ public sealed class UpstreamRepositoryProvider : IRepositoryProvider
 
     public UpstreamRepositoryProvider(IOptions<AppSettings> options, IHostEnvironment hostingEnvironment, ILogger<LocalRepositoryProvider> logger)
     {
-        OriginalString = options.Value.UpstreamServiceIndex.DefaultIfWhiteSpace(() => Path.Combine(hostingEnvironment.ContentRootPath, AppSettings.DEFAULT_LOCAL_REPOSITORY)); ;
+        OriginalString = options.Value.UpstreamServiceIndex.DefaultIfWhiteSpace(() => AppSettings.DEFAULT_UPSTREAM_SERVICE_INDEX);
         _logger = logger;
     }
 }
