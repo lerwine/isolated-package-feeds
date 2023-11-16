@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
@@ -18,9 +19,13 @@ class Program
             .ReadFrom.Configuration(builder.Configuration)
             .CreateLogger();
         builder.Logging.AddSerilog();
-        builder.Services.Configure<AppSettings>(builder.Configuration.GetSection(nameof(NuGetAirGap)));
+        var section = builder.Configuration.GetSection(nameof(NuGetAirGap));
+        builder.Services.Configure<AppSettings>(section);
         AppSettings.Configure(args, builder.Configuration);
+        var appSettings = section.Get<AppSettings>();
         builder.Services.AddHostedService<MainService>()
+            .AddSingleton<LocalRepositoryProvider>()
+            .AddSingleton<UpstreamRepositoryProvider>()
             .AddSingleton<LocalClientService>()
             .AddSingleton<UpstreamClientService>();
         (Host = builder.Build()).Run();
