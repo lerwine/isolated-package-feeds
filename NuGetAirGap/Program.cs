@@ -23,7 +23,8 @@ class Program
         var nuGetSettings = Settings.LoadDefaultSettings(root: null);
         builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
         {
-            [$"{nameof(NuGetAirGap)}:{nameof(AppSettings.GlobalPackagesFolder)}"] = ClientService.GetDefaultGlobalPackagesFolder(nuGetSettings)
+            [$"{nameof(NuGetAirGap)}:{nameof(AppSettings.GlobalPackagesFolder)}"] = ClientService.GetDefaultGlobalPackagesFolder(nuGetSettings),
+            [$"{nameof(NuGetAirGap)}:{nameof(AppSettings.UpstreamServiceIndex)}"] = AppSettings.DEFAULT_UPSTREAM_SERVICE_INDEX
         });
         builder.Services.Configure<AppSettings>(builder.Configuration.GetSection(nameof(NuGetAirGap)));
         AppSettings.Configure(args, builder.Configuration);
