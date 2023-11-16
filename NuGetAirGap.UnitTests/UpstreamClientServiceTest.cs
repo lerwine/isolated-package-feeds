@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -14,18 +13,22 @@ public class UpstreamClientServiceTest
     [SetUp]
     public void Setup()
     {
-        HostApplicationBuilder builder = Host.CreateApplicationBuilder();
         var testContext = TestContext.CurrentContext;
-        builder.Environment.ContentRootPath = testContext.WorkDirectory;
+        HostApplicationBuilder builder = AppHost.CreateBuilder(testContext.WorkDirectory);
+        AppHost.ConfigureSettings(builder);
+        AppHost.ConfigureLogging(builder);
         builder.Logging.AddDebug();
-        builder.Services.Configure<AppSettings>(builder.Configuration.GetSection(nameof(NuGetAirGap)));
-        builder.Services.AddSingleton<UpstreamClientService>();
+        AppHost.ConfigureServices(builder, settings => AppHost.DefaultPostConfigure(settings, builder));
         _host = builder.Build();
         _host.Start();
     }
 
     [TearDown]
-    public void TearDown() => _host.Dispose();
+    public async Task TearDown()
+    {
+        try { await _host.StopAsync(); }
+        finally { _host.Dispose(); }
+    }
 
     [Test]
     public async Task GetMetadataTest1()
