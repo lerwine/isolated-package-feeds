@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NuGet.Configuration;
 using NuGet.Frameworks;
 using NuGet.Packaging.Core;
@@ -16,7 +17,9 @@ public abstract class ClientService : IDisposable
     private Task<PackageMetadataResource>? _getPackageMetadataResourceAsync;
     private Task<FindPackageByIdResource>? _getFindPackageByIdResourceAsync;
     private Task<DependencyInfoResource>? _getDependencyInfoResourceAsync;
-    
+
+    protected string GlobalPackagesFolder { get; }
+
     protected NugetLogWrapper NuGetLogger { get; }
 
     protected SourceCacheContext CacheContext { get; } = new();
@@ -29,8 +32,11 @@ public abstract class ClientService : IDisposable
     
     public string PackageSourceLocation => RepositoryProvider.GetPath();
 
-    protected ClientService(IRepositoryProvider repositoryProvider, ILogger logger, bool isUpstream)
+    internal static string GetDefaultGlobalPackagesFolder() => SettingsUtility.GetGlobalPackagesFolder(Settings.LoadDefaultSettings(root: null));
+    
+    protected ClientService(IRepositoryProvider repositoryProvider, IOptions<AppSettings> options, ILogger logger, bool isUpstream)
     {
+        GlobalPackagesFolder = options.Value.GlobalPackagesFolder ?? GetDefaultGlobalPackagesFolder();
         NuGetLogger = new(Logger = logger);
         RepositoryProvider = repositoryProvider;
         IsUpstream = isUpstream;

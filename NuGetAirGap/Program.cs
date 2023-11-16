@@ -19,10 +19,12 @@ class Program
             .ReadFrom.Configuration(builder.Configuration)
             .CreateLogger();
         builder.Logging.AddSerilog();
-        var section = builder.Configuration.GetSection(nameof(NuGetAirGap));
-        builder.Services.Configure<AppSettings>(section);
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            [$"{nameof(NuGetAirGap)}:{nameof(AppSettings.GlobalPackagesFolder)}"] = ClientService.GetDefaultGlobalPackagesFolder()
+        });
+        builder.Services.Configure<AppSettings>(builder.Configuration.GetSection(nameof(NuGetAirGap)));
         AppSettings.Configure(args, builder.Configuration);
-        var appSettings = section.Get<AppSettings>();
         builder.Services.AddHostedService<MainService>()
             .AddSingleton<LocalRepositoryProvider>()
             .AddSingleton<UpstreamRepositoryProvider>()

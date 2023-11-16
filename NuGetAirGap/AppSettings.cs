@@ -122,6 +122,19 @@ public class AppSettings
 
     #endregion
 
+    #region GlobalPackagesFolder
+    
+    public const string COMMAND_LINE_SWITCH_global_2D_packages_2D_folder = "--global-packages-folder";
+
+    /// <summary>
+    /// Specifies the relative or absolute path of the NuGet global packages folder.
+    /// </summary>
+    /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory.
+    /// This can be overridden using the <see cref="COMMAND_LINE_SWITCH_global_2D_packages_2D_folder"/> command line switch.</remarks>
+    public string? GlobalPackagesFolder { get; set; }
+
+    #endregion
+
     #region Help
 
     /// <summary>
@@ -157,7 +170,8 @@ public class AppSettings
         { COMMAND_LINE_SWITCH_d, $"{nameof(NuGetAirGap)}:{nameof(Delete)}" },
         { COMMAND_LINE_SWITCH_export_2D_package_2D_listing, $"{nameof(NuGetAirGap)}:{nameof(ExportLocalPackageListing)}" },
         { COMMAND_LINE_SWITCH_local_2D_repository, $"{nameof(NuGetAirGap)}:{nameof(LocalRepository)}" },
-        { COMMAND_LINE_SWITCH_upstream_2D_service_2D_index, $"{nameof(NuGetAirGap)}:{nameof(UpstreamServiceIndex)}" }
+        { COMMAND_LINE_SWITCH_upstream_2D_service_2D_index, $"{nameof(NuGetAirGap)}:{nameof(UpstreamServiceIndex)}" },
+        { COMMAND_LINE_SWITCH_global_2D_packages_2D_folder, $"{nameof(NuGetAirGap)}:{nameof(GlobalPackagesFolder)}" }
     });
 
     internal static void Configure(string[] args, IConfigurationBuilder builder)

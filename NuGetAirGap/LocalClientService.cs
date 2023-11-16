@@ -17,7 +17,7 @@ public sealed class LocalClientService : ClientService
     private readonly object _syncRoot = new();
     private Task<PackageUpdateResource>? _getPackageUpdateResourceAsync;
 
-    public LocalClientService(LocalRepositoryProvider localRepositoryProvider, ILogger<UpstreamClientService> logger) : base(localRepositoryProvider, logger, false) { }
+    public LocalClientService(LocalRepositoryProvider localRepositoryProvider, IOptions<AppSettings> options, ILogger<UpstreamClientService> logger) : base(localRepositoryProvider, options, logger, false) { }
  
     #region Methods using the Search Query API
 
@@ -125,7 +125,7 @@ public sealed class LocalClientService : ClientService
         return await AddAsync(packageIds, findPackageById, resource, upstreamClientService, cancellationToken);
     }
     
-    private async Task UpdateAsync(string packageId, NuGetVersion version, PackageDownloadContext downloadContext, string globalPackagesFolder, UpstreamClientService upstreamClientService, Dictionary<string, HashSet<NuGetVersion>> updated, CancellationToken cancellationToken)
+    private async Task UpdateAsync(string packageId, NuGetVersion version, PackageDownloadContext downloadContext, UpstreamClientService upstreamClientService, Dictionary<string, HashSet<NuGetVersion>> updated, CancellationToken cancellationToken)
     {
         var localPackage = await GetDependencyInfoAsync(packageId, version, cancellationToken);
         if (localPackage is null)
@@ -144,7 +144,7 @@ public sealed class LocalClientService : ClientService
             updated.Add(packageId, versionsUpdated);
         }
         versionsUpdated.Add(version);
-        var downloaded = await upstreamClientService.GetDownloadResourceResultAsync(new PackageIdentity(packageId, version), downloadContext, globalPackagesFolder, cancellationToken);
+        var downloaded = await upstreamClientService.GetDownloadResourceResultAsync(new PackageIdentity(packageId, version), downloadContext, GlobalPackagesFolder, cancellationToken);
         if (downloaded is null)
         {
             Logger.LogPackageNotFound(packageId, version, upstreamClientService.RepositoryProvider, true);
@@ -154,7 +154,6 @@ public sealed class LocalClientService : ClientService
 
     private async Task UpdateAsync(HashSet<string> toUpdate, FindPackageByIdResource findPackageById, PackageUpdateResource resource, UpstreamClientService upstreamClientService, HashSet<string> deletedIds, CancellationToken cancellationToken)
     {
-        PackageDownloadContext downloadContext = new(CacheContext);
         Dictionary<string, HashSet<NuGetVersion>> updated = new(StringComparer.CurrentCultureIgnoreCase);
         while (toUpdate.Count > 0)
         {
@@ -183,6 +182,8 @@ public sealed class LocalClientService : ClientService
             }
             if (!(upstreamVersions = upstreamVersions.Where(v => !localVersions.Contains(v, VersionComparer.VersionReleaseMetadata))).Any())
                 continue;
+            PackageDownloadContext downloadContext = new(CacheContext);
+            
             foreach (NuGetVersion version in upstreamVersions)
             {
 

@@ -8,5 +8,5 @@ namespace NuGetAirGap;
 
 public sealed class UpstreamClientService : ClientService
 {
-    public UpstreamClientService(UpstreamRepositoryProvider repositoryProvider, ILogger<UpstreamClientService> logger) : base(repositoryProvider, logger, true) { }
+    public UpstreamClientService(UpstreamRepositoryProvider repositoryProvider, IOptions<AppSettings> options, ILogger<UpstreamClientService> logger) : base(repositoryProvider, options, logger, true) { }
 }
