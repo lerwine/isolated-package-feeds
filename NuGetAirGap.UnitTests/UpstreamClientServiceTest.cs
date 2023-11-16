@@ -9,12 +9,25 @@ namespace NuGetAirGap.UnitTests;
 public class UpstreamClientServiceTest
 {
     private IHost _host;
+    private DirectoryInfo _baseDirectory = null!;
+    private DirectoryInfo _cwd = null!;
+    private string _previousCwd = null!;
+
+    private const string DIRNAME_CWD = "CWD";
+
+    private const string DIRNAME_ContentRoot = "ContentRoot";
 
     [SetUp]
     public void Setup()
     {
         var testContext = TestContext.CurrentContext;
-        HostApplicationBuilder builder = AppHost.CreateBuilder(testContext.WorkDirectory);
+        if (!(_baseDirectory = new DirectoryInfo(Path.Combine(testContext.WorkDirectory, nameof(UpstreamClientServiceTest)))).Exists)
+            _baseDirectory.Create();
+        if (!(_cwd = new DirectoryInfo(Path.Combine(_baseDirectory.FullName, DIRNAME_CWD))).Exists)
+            _cwd.Create();
+        _previousCwd = Environment.CurrentDirectory;
+        Environment.CurrentDirectory = _cwd.FullName;
+        HostApplicationBuilder builder = AppHost.CreateBuilder(testContext.TestDirectory);
         AppHost.ConfigureSettings(builder);
         AppHost.ConfigureLogging(builder);
         builder.Logging.AddDebug();
@@ -27,7 +40,11 @@ public class UpstreamClientServiceTest
     public async Task TearDown()
     {
         try { await _host.StopAsync(); }
-        finally { _host.Dispose(); }
+        finally
+        {
+            try { _host.Dispose(); }
+            finally { Environment.CurrentDirectory = _previousCwd; }
+        }
     }
 
     [Test]
