@@ -15,113 +15,69 @@ public partial class ValidateAppSettings : IValidateOptions<AppSettings>
 
     public ValidateAppSettings(ILogger<ValidateAppSettings> logger, HostingEnvironment hostingEnvironment) => (_logger, _hostingEnvironment) = (logger, hostingEnvironment);
 
-    public string? TryParseAbsoluteFileOrHttpUri(string? settingValue, string primaryName, string? overrideValue, string overrideName,
-        out bool isUnsupportedScheme, out string settingName, out Uri? uri)
+    private static string? GetFileOrHttpUri(Uri uri, out bool isUnsupportedScheme, out Uri? result)
     {
-        if (string.IsNullOrWhiteSpace(overrideValue))
+        if (uri.IsFile)
         {
-            settingName = primaryName;
-            if (string.IsNullOrWhiteSpace(settingValue))
-            {
-                isUnsupportedScheme = false;
-                uri = null;
-                return null;
-            }
-            settingValue = Environment.ExpandEnvironmentVariables(settingValue);
-            if (Uri.TryCreate(settingValue, UriKind.Absolute, out uri))
-            {
-                if (uri.IsFile)
-                {
-                    isUnsupportedScheme = false;
-                    return uri.LocalPath;
-                }
-                isUnsupportedScheme = uri.Scheme != Uri.UriSchemeHttps && uri.Scheme != Uri.UriSchemeHttp;
-                if (isUnsupportedScheme)
-                    uri = null;
-                else if (uri.AbsoluteUri != uri.OriginalString)
-                    uri = new(uri.AbsoluteUri, UriKind.Absolute);
-                return null;
-            }
             isUnsupportedScheme = false;
-            if (Path.GetInvalidPathChars().Any(c => settingValue.Contains(c)))
-                try
-                {
-                    string localPath = Path.GetFullPath(Path.Combine(_hostingEnvironment.ContentRootPath, settingValue));
-                    if (!Uri.TryCreate(localPath, UriKind.Absolute, out uri))
-                        uri = null;
-                    return localPath;
-                } catch { /* okay to ignore */ }
+            result = uri;
+            return uri.LocalPath;
         }
-        else
-        {
-            settingName = overrideName;
-            overrideValue = Environment.ExpandEnvironmentVariables(overrideValue);
-            if (Uri.TryCreate(overrideValue, UriKind.Absolute, out uri))
-            {
-                if (uri.IsFile)
-                {
-                    isUnsupportedScheme = false;
-                    return uri.LocalPath;
-                }
-                isUnsupportedScheme = uri.Scheme != Uri.UriSchemeHttps && uri.Scheme != Uri.UriSchemeHttp;
-                if (isUnsupportedScheme)
-                    uri = null;
-                else if (uri.AbsoluteUri != uri.OriginalString)
-                    uri = new(uri.AbsoluteUri, UriKind.Absolute);
-                return null;
-            }
-            isUnsupportedScheme = false;
-            if (Path.GetInvalidPathChars().Any(c => overrideValue.Contains(c)))
-                try
-                {
-                    string localPath = Path.GetFullPath(overrideValue);
-                    if (!Uri.TryCreate(localPath, UriKind.Absolute, out uri))
-                        uri = null;
-                    return localPath;
-                } catch { /* okay to ignore */ }
-        }
-        uri = null;
+        isUnsupportedScheme = uri.Scheme != Uri.UriSchemeHttps && uri.Scheme != Uri.UriSchemeHttp;
+        result = isUnsupportedScheme ? null : (uri.AbsoluteUri != uri.OriginalString) ? new(uri.AbsoluteUri, UriKind.Absolute) : uri;
         return null;
     }
 
-    public bool TryParseFullLocalPath(string? settingValue, string primaryName, string? overrideValue, string overrideName,
-        out bool isUri, out string settingName, [NotNullWhen(true)] out string? localPath)
+    /// <summary>
+    /// Attempts to parse a string value as an absolute filesystem path or as a URI with the <c>https</c> or <c>https</c> scheme.
+    /// </summary>
+    /// <param name="uriOrPath">The string value to parse.</param>
+    /// <param name="basePath">The base filesystem path for any relative path.</param>
+    /// <param name="isUnsupportedScheme">Returns <see langword="true"/> if the <paramref name="uriOrPath"/> parameter contains a URI string that has neither the <c>file</c>, <c>https</c> nor the <c>https</c> scheme; otherwise, <see langword="false"/>.</param>
+    /// <param name="uri">The <paramref name="uriOrPath"/> parsed as an absolute <see cref="Uri"/> or <see langword="null"/> if it couldn't be parsed an absolute <see cref="Uri"/> or the scheme was not <c>https</c>, <c>http</c>, or <c>file</c>.</param>
+    /// <returns>The absolute filesystem path or <see langword="null"/> if <paramref name="overrideValue"/>/<paramref name="settingValue"/> does not represent a filesystem path.</returns>
+    /// <exception cref="ArgumentException"><paramref name="overrideValue"/> or <paramref name="settingValue"/> contains invalid characters or system could not retrieve the absolute path.</exception>
+    /// <exception cref="System.Security.SecurityException">The caller does not have the required permissions to the path specified <paramref name="overrideValue"/> or <paramref name="settingValue"/>.</exception>
+    /// <exception cref="NotSupportedException"><paramref name="overrideValue"/> or <paramref name="settingValue"/> contains a colon (":") that is not part of a volume identifier.</exception>
+    /// <exception cref="PathTooLongException">The specified path, file name, or both exceed the system-defined maximum length for <paramref name="overrideValue"/> or <paramref name="settingValue"/>.</exception>
+    internal static string? TryParseAbsoluteFileOrHttpUri(string uriOrPath, string? basePath, out bool isUnsupportedScheme, out Uri? uri)
     {
-        if (string.IsNullOrWhiteSpace(overrideValue))
+        if (string.IsNullOrWhiteSpace(uriOrPath))
         {
-            settingName = primaryName;
-            if (string.IsNullOrWhiteSpace(settingValue))
-                isUri = false;
-            else
-            {
-                settingValue = Environment.ExpandEnvironmentVariables(settingValue);
-                if (Uri.TryCreate(settingValue, UriKind.Absolute, out Uri? uri))
-                {
-                    isUri = true;
-                    if (uri.IsFile)
-                    {
-                        localPath = uri.LocalPath;
-                        return true;
-                    }
-                }
-                else
-                {
-                    isUri = false;
-                    if (!Path.GetInvalidPathChars().Any(c => settingValue.Contains(c)))
-                    try
-                    {
-                        localPath = Path.GetFullPath(Path.IsPathFullyQualified(settingValue) ? settingValue : Path.Combine(_hostingEnvironment.ContentRootPath, settingValue));
-                        return true;
-                    }
-                    catch { /* okay to ignore */ }
-                }
-            }
+            isUnsupportedScheme = false;
+            uri = null;
+            return null;
         }
+        uriOrPath = Environment.ExpandEnvironmentVariables(uriOrPath);
+        if (Uri.TryCreate(uriOrPath, UriKind.Absolute, out uri))
+            return GetFileOrHttpUri(uri, out isUnsupportedScheme, out uri);
+        uriOrPath = Path.GetFullPath(Path.IsPathFullyQualified(uriOrPath) ? uriOrPath : string.IsNullOrEmpty(basePath) ? uriOrPath : Path.Combine(basePath, uriOrPath));
+        isUnsupportedScheme = false;
+        if (!Uri.TryCreate(uriOrPath, UriKind.Absolute, out uri))
+            uri = null;
+        return uriOrPath;
+    }
+
+    /// <summary>
+    /// Attempts to get the absolute filesystem path of a setting/override value.
+    /// </summary>
+    /// <param name="uriOrPath">The string value to parse.</param>
+    /// <param name="basePath">The base filesystem path for any relative path.</param>
+    /// <param name="isUri">Returns <see langword="true"/> if <paramref name="uriOrPath"/> was successfully parsed as an absolute URI; otherwise, <see langword="false"/>.</param>
+    /// <param name="localPath">Returns the absolute filesystem path or <see langword="null"/> if the input value was not a filesystem path.</param>
+    /// <returns><see langword="true"/> if <paramref name="localPath"/> returns an absolute filesystem path; otherwise, <see langword="false"/>.</returns>
+    /// <exception cref="ArgumentException"><paramref name="overrideValue"/> or <paramref name="uriOrPath"/> contains invalid characters or system could not retrieve the absolute path.</exception>
+    /// <exception cref="System.Security.SecurityException">The caller does not have the required permissions to the path specified <paramref name="overrideValue"/> or <paramref name="uriOrPath"/>.</exception>
+    /// <exception cref="NotSupportedException"><paramref name="overrideValue"/> or <paramref name="uriOrPath"/> contains a colon (":") that is not part of a volume identifier.</exception>
+    /// <exception cref="PathTooLongException">The specified path, file name, or both exceed the system-defined maximum length for <paramref name="overrideValue"/>/<paramref name="uriOrPath"/>.</exception>
+    internal static bool TryGetAbsoluteLocalPath(string? uriOrPath, string? basePath, out bool isUri, [NotNullWhen(true)] out string? localPath)
+    {
+        if (string.IsNullOrWhiteSpace(uriOrPath))
+            isUri = false;
         else
         {
-            settingName = overrideName;
-            overrideValue = Environment.ExpandEnvironmentVariables(overrideValue);
-            if (Uri.TryCreate(overrideValue, UriKind.Absolute, out Uri? uri))
+            uriOrPath = Environment.ExpandEnvironmentVariables(uriOrPath);
+            if (Uri.TryCreate(uriOrPath, UriKind.Absolute, out Uri? uri))
             {
                 isUri = true;
                 if (uri.IsFile)
@@ -133,47 +89,49 @@ public partial class ValidateAppSettings : IValidateOptions<AppSettings>
             else
             {
                 isUri = false;
-                if (!Path.GetInvalidPathChars().Any(c => overrideValue.Contains(c)))
-                try
-                {
-                    localPath = Path.GetFullPath(overrideValue);
-                    return true;
-                }
-                catch { /* okay to ignore */ }
+                localPath = Path.GetFullPath(Path.IsPathFullyQualified(uriOrPath) ? uriOrPath : string.IsNullOrEmpty(basePath) ? uriOrPath : Path.Combine(basePath, uriOrPath));
+                return true;
             }
         }
         localPath = null;
         return false;
     }
-
+    
     private ValidationResult? ValidateUpstreamServiceIndex(AppSettings options)
     {
-        string? localPath = TryParseAbsoluteFileOrHttpUri(options.UpstreamServiceIndex, nameof(AppSettings.UpstreamServiceIndex), options.OverrideUpstreamServiceIndex,
-            nameof(AppSettings.OverrideUpstreamServiceIndex), out bool isUnsupportedScheme, out string settingName, out Uri? uri);
-        if (localPath is null)
-        {
-            if (uri is null)
-            {
-                if (isUnsupportedScheme)
-                    return new ValidationResult(_logger.LogUnsupportedRepositoryUrlScheme(options.OverrideUpstreamServiceIndex.DefaultIfWhiteSpace(options.UpstreamServiceIndex), true));
-                return new ValidationResult(_logger.LogInvalidRepositoryUrl(options.OverrideUpstreamServiceIndex.DefaultIfWhiteSpace(options.UpstreamServiceIndex), true));
-            }
-            options.UpstreamServiceIndex = uri.AbsoluteUri;
-            return null;
-        }
+        string settingsValue = options.OverrideUpstreamServiceIndex.DefaultIfWhiteSpace<(string SettingName, string BasePath)>(() => (nameof(AppSettings.OverrideUpstreamServiceIndex), Environment.CurrentDirectory), options.UpstreamServiceIndex, () => (nameof(AppSettings.UpstreamServiceIndex), _hostingEnvironment.ContentRootPath), out var opt);
         DirectoryInfo directoryInfo;
-        try { options.UpstreamServiceIndex = (directoryInfo = new(options.UpstreamServiceIndex)).FullName; }
-        catch (System.Security.SecurityException error)
+        try
         {
-            return new ValidationResult(_logger.LogRepositorySecurityException(localPath, true, error), Enumerable.Repeat(nameof(AppSettings.UpstreamServiceIndex), 1));
+            string? localPath = TryParseAbsoluteFileOrHttpUri(settingsValue, opt.BasePath, out bool isUnsupportedScheme, out Uri? uri);
+            if (localPath is null)
+            {
+                if (uri is null)
+                {
+                    if (isUnsupportedScheme)
+                        return new ValidationResult(_logger.LogUnsupportedRepositoryUrlScheme(settingsValue, true), Enumerable.Repeat(opt.SettingName, 1));
+                    return new ValidationResult(_logger.LogInvalidRepositoryUrl(settingsValue, true), Enumerable.Repeat(opt.SettingName, 1));
+                }
+                options.UpstreamServiceIndex = uri.AbsoluteUri;
+                return null;
+            }
+            options.UpstreamServiceIndex = (directoryInfo = new(settingsValue)).FullName;
         }
-        catch (PathTooLongException error)
+        catch (System.Security.SecurityException error) // The caller does not have the required permissions to the path
         {
-            return new ValidationResult(_logger.LogInvalidRepositoryUrl(localPath, true, error), Enumerable.Repeat(nameof(AppSettings.UpstreamServiceIndex), 1));
+            return new ValidationResult(_logger.LogRepositorySecurityException(settingsValue, true, error), Enumerable.Repeat(opt.SettingName, 1));
         }
-        catch (ArgumentException error)
+        catch (NotSupportedException error) // Path contains a colon (":") that is not part of a volume identifier.
         {
-            return new ValidationResult(_logger.LogInvalidRepositoryUrl(localPath, true, error), Enumerable.Repeat(nameof(AppSettings.UpstreamServiceIndex), 1));
+            return new ValidationResult(_logger.LogInvalidRepositoryUrl(settingsValue, true, error), Enumerable.Repeat(opt.SettingName, 1));
+        }
+        catch (PathTooLongException error) // Path, file name, or both exceed the system-defined maximum length
+        {
+            return new ValidationResult(_logger.LogInvalidRepositoryUrl(settingsValue, true, error), Enumerable.Repeat(opt.SettingName, 1));
+        }
+        catch (ArgumentException error) // Path contains invalid characters or system could not retrieve the absolute path
+        {
+            return new ValidationResult(_logger.LogInvalidRepositoryUrl(settingsValue, true, error), Enumerable.Repeat(opt.SettingName, 1));
         }
         if (directoryInfo.Exists)
             return null;
@@ -182,49 +140,52 @@ public partial class ValidateAppSettings : IValidateOptions<AppSettings>
 
     private ValidationResult? ValidateLocalRepository(AppSettings options)
     {
-        if (TryParseFullLocalPath(options.LocalRepository, nameof(AppSettings.LocalRepository), options.OverrideLocalRepository, nameof(AppSettings.OverrideLocalRepository),
-            out bool isUri, out string settingName, out string? localPath))
+        string settingsValue = options.OverrideLocalRepository.DefaultIfWhiteSpace<(string SettingName, string BasePath)>(() => (nameof(AppSettings.OverrideLocalRepository), Environment.CurrentDirectory), options.LocalRepository, () => (nameof(AppSettings.LocalRepository), _hostingEnvironment.ContentRootPath), out var opt);
+        DirectoryInfo directoryInfo;
+        try
         {
-            DirectoryInfo directoryInfo;
-            try { options.LocalRepository = (directoryInfo = new(localPath)).FullName; }
-            catch (System.Security.SecurityException error)
+            if (TryGetAbsoluteLocalPath(settingsValue, opt.BasePath, out bool isUri, out string? localPath))
             {
-                return new ValidationResult(_logger.LogRepositorySecurityException(options.LocalRepository, false, error), Enumerable.Repeat(settingName, 1));
-            }
-            catch (PathTooLongException error)
-            {
-                return new ValidationResult(_logger.LogInvalidRepositoryUrl(options.LocalRepository, false, error), Enumerable.Repeat(settingName, 1));
-            }
-            catch (ArgumentException error)
-            {
-                return new ValidationResult(_logger.LogInvalidRepositoryUrl(options.LocalRepository, false, error), Enumerable.Repeat(settingName, 1));
-            }
-            if (!directoryInfo.Exists)
-            {
-                if (directoryInfo.Parent is not null && directoryInfo.Parent.Exists && !File.Exists(directoryInfo.FullName))
-                    try { directoryInfo.Create(); }
-                    catch (DirectoryNotFoundException exception)
-                    {
-                        return new ValidationResult(_logger.LogRepositoryPathNotFound(options.LocalRepository, false, exception), Enumerable.Repeat(settingName, 1));
-                    }
-                    catch (IOException exception)
-                    {
-                        return new ValidationResult(_logger.LogLocalRepositoryIOException(options.LocalRepository, exception), Enumerable.Repeat(settingName, 1));
-                    }
-                    catch (System.Security.SecurityException exception)
-                    {
-                        return new ValidationResult(_logger.LogRepositorySecurityException(options.LocalRepository, false, exception), Enumerable.Repeat(settingName, 1));
-                    }
-                else
+                options.LocalRepository = settingsValue = (directoryInfo = new(localPath)).FullName;
+                if (!directoryInfo.Exists)
                 {
-                    return new ValidationResult(_logger.LogRepositoryPathNotFound(options.LocalRepository, false), Enumerable.Repeat(settingName, 1));
+                    if (directoryInfo.Parent is not null && directoryInfo.Parent.Exists && !File.Exists(directoryInfo.FullName))
+                        directoryInfo.Create();
+                    else
+                    {
+                        return new ValidationResult(_logger.LogRepositoryPathNotFound(settingsValue, false), Enumerable.Repeat(opt.SettingName, 1));
+                    }
                 }
+                return null;
             }
-            return null;
+            if (isUri)
+                return new ValidationResult(_logger.LogUnsupportedRepositoryUrlScheme(settingsValue, false), Enumerable.Repeat(opt.SettingName, 1));
+            return new ValidationResult(_logger.LogInvalidRepositoryUrl(settingsValue, false), Enumerable.Repeat(opt.SettingName, 1));
         }
-        if (isUri)
-            return new ValidationResult(_logger.LogUnsupportedRepositoryUrlScheme(options.OverrideLocalRepository.DefaultIfWhiteSpace(options.LocalRepository), false), Enumerable.Repeat(settingName, 1));
-        return new ValidationResult(_logger.LogInvalidRepositoryUrl(options.OverrideLocalRepository.DefaultIfWhiteSpace(options.LocalRepository), false), Enumerable.Repeat(settingName, 1));
+        catch (DirectoryNotFoundException exception) // Parent directory not found.
+        {
+            return new ValidationResult(_logger.LogRepositoryPathNotFound(settingsValue, false, exception), Enumerable.Repeat(opt.SettingName, 1));
+        }
+        catch (System.Security.SecurityException error) // The caller does not have the required permissions to the path
+        {
+            return new ValidationResult(_logger.LogRepositorySecurityException(settingsValue, false, error), Enumerable.Repeat(opt.SettingName, 1));
+        }
+        catch (NotSupportedException error) // Path contains a colon (":") that is not part of a volume identifier.
+        {
+            return new ValidationResult(_logger.LogInvalidRepositoryUrl(settingsValue, true, error), Enumerable.Repeat(opt.SettingName, 1));
+        }
+        catch (PathTooLongException error) // Path, file name, or both exceed the system-defined maximum length
+        {
+            return new ValidationResult(_logger.LogInvalidRepositoryUrl(settingsValue, true, error), Enumerable.Repeat(opt.SettingName, 1));
+        }
+        catch (IOException exception) // Error creating folder.
+        {
+            return new ValidationResult(_logger.LogLocalRepositoryIOException(settingsValue, exception), Enumerable.Repeat(opt.SettingName, 1));
+        }
+        catch (ArgumentException error) // Path contains invalid characters or system could not retrieve the absolute path
+        {
+            return new ValidationResult(_logger.LogInvalidRepositoryUrl(settingsValue, false, error), Enumerable.Repeat(opt.SettingName, 1));
+        }
     }
     
     private ValidationResult? ValidateExportLocalMetaData(AppSettings options)
@@ -235,16 +196,20 @@ public partial class ValidateAppSettings : IValidateOptions<AppSettings>
             return null;
         }
         FileInfo fileInfo;
-        try { options.ExportLocalMetaData = (fileInfo = new(options.ExportLocalMetaData)).FullName; }
-        catch (System.Security.SecurityException error)
+        try { options.ExportLocalMetaData = (fileInfo = new(Environment.ExpandEnvironmentVariables(options.ExportLocalMetaData))).FullName; }
+        catch (System.Security.SecurityException error) // The caller does not have the required permissions to the path
         {
             return new ValidationResult(_logger.LogMetaDataExportPathAccessDenied(options.ExportLocalMetaData, error), Enumerable.Repeat(nameof(AppSettings.ExportLocalMetaData), 1));
         }
-        catch (PathTooLongException error)
+        catch (NotSupportedException error) // Path contains a colon (":") that is not part of a volume identifier.
         {
             return new ValidationResult(_logger.LogInvalidExportLocalMetaData(options.ExportLocalMetaData, error), Enumerable.Repeat(nameof(AppSettings.ExportLocalMetaData), 1));
         }
-        catch (ArgumentException error)
+        catch (PathTooLongException error) // Path, file name, or both exceed the system-defined maximum length
+        {
+            return new ValidationResult(_logger.LogInvalidExportLocalMetaData(options.ExportLocalMetaData, error), Enumerable.Repeat(nameof(AppSettings.ExportLocalMetaData), 1));
+        }
+        catch (ArgumentException error) // Path contains invalid characters or system could not retrieve the absolute path
         {
             return new ValidationResult(_logger.LogInvalidExportLocalMetaData(options.ExportLocalMetaData, error), Enumerable.Repeat(nameof(AppSettings.ExportLocalMetaData), 1));
         }
@@ -255,56 +220,38 @@ public partial class ValidateAppSettings : IValidateOptions<AppSettings>
 
     private ValidationResult? ValidateGlobalPackagesFolder(AppSettings options)
     {
+        string settingsValue = options.OverrideGlobalPackagesFolder.DefaultIfWhiteSpace<(string SettingName, string BasePath)>(() => (nameof(AppSettings.OverrideGlobalPackagesFolder), Environment.CurrentDirectory), options.GlobalPackagesFolder, () => (nameof(AppSettings.GlobalPackagesFolder), _hostingEnvironment.ContentRootPath), out var opt);
         DirectoryInfo directoryInfo;
-        string settingsName;
-        Uri? uri;
-        if (string.IsNullOrEmpty(options.OverrideGlobalPackagesFolder))
+        try
         {
-            settingsName = nameof(AppSettings.GlobalPackagesFolder);
-            options.LocalRepository = Environment.ExpandEnvironmentVariables(options.LocalRepository);
-            if (options.LocalRepository.StartsWith(SCHEME_START_FILE))
-            {
-                if (Uri.TryCreate(options.LocalRepository, UriKind.Absolute, out uri))
-                {
-                    if (!uri.IsFile)
-                        return new ValidationResult(_logger.LogInvalidRepositoryUrl(uri, false), Enumerable.Repeat(settingsName, 1));
-                    options.LocalRepository = uri.LocalPath;
-                }
-                else
-                    return new ValidationResult(_logger.LogInvalidRepositoryUrl(options.LocalRepository, false), Enumerable.Repeat(settingsName, 1));
-            }
+            if (TryGetAbsoluteLocalPath(settingsValue, opt.BasePath, out bool isUri, out string? localPath))
+                options.GlobalPackagesFolder = settingsValue = (directoryInfo = new(settingsValue = localPath)).FullName;
             else
-                try
-                {
-                    if (!Path.IsPathFullyQualified(options.LocalRepository))
-                        options.LocalRepository = Path.Combine(_hostingEnvironment.ContentRootPath, options.LocalRepository);
-                }
-                catch (ArgumentException exception)
-                {
-                    return new ValidationResult(_logger.LogInvalidRepositoryUrl(options.LocalRepository, false, exception), Enumerable.Repeat(settingsName, 1));
-                }
+            {
+                if (isUri)
+                    return new ValidationResult(_logger.LogGlobalPackagesFolderNotFileUri(settingsValue), Enumerable.Repeat(opt.SettingName, 1));
+                return new ValidationResult(_logger.LogInvalidGlobalPackagesFolder(settingsValue), Enumerable.Repeat(opt.SettingName, 1));
+            }
         }
-        else
+        catch (System.Security.SecurityException error) // The caller does not have the required permissions to the path
         {
-            settingsName = nameof(AppSettings.OverrideGlobalPackagesFolder);
-
+            return new ValidationResult(_logger.LogGlobalPackagesFolderSecurityException(settingsValue, error), Enumerable.Repeat(opt.SettingName, 1));
         }
-        try { options.GlobalPackagesFolder = (directoryInfo = new(options.GlobalPackagesFolder)).FullName; }
-        catch (System.Security.SecurityException error)
+        catch (NotSupportedException error) // Path contains a colon (":") that is not part of a volume identifier.
         {
-            return new ValidationResult(_logger.LogGlobalPackagesFolderSecurityException(options.GlobalPackagesFolder, error), Enumerable.Repeat(nameof(AppSettings.GlobalPackagesFolder), 1));
+            return new ValidationResult(_logger.LogInvalidGlobalPackagesFolder(settingsValue, error), Enumerable.Repeat(opt.SettingName, 1));
         }
-        catch (PathTooLongException error)
+        catch (PathTooLongException error) // Path, file name, or both exceed the system-defined maximum length
         {
-            return new ValidationResult(_logger.LogInvalidGlobalPackagesFolder(options.GlobalPackagesFolder, error), Enumerable.Repeat(nameof(AppSettings.GlobalPackagesFolder), 1));
+            return new ValidationResult(_logger.LogInvalidGlobalPackagesFolder(settingsValue, error), Enumerable.Repeat(opt.SettingName, 1));
         }
-        catch (ArgumentException error)
+        catch (ArgumentException error) // Path contains invalid characters or system could not retrieve the absolute path
         {
-            return new ValidationResult(_logger.LogInvalidGlobalPackagesFolder(options.GlobalPackagesFolder, error), Enumerable.Repeat(nameof(AppSettings.GlobalPackagesFolder), 1));
+            return new ValidationResult(_logger.LogInvalidGlobalPackagesFolder(settingsValue, error), Enumerable.Repeat(opt.SettingName, 1));
         }
-        if (directoryInfo.Exists)
-            return null;
-        return new ValidationResult(_logger.LogGlobalPackagesFolderNotFound(options.GlobalPackagesFolder), Enumerable.Repeat(nameof(AppSettings.GlobalPackagesFolder), 1));
+        if (!directoryInfo.Exists)
+            return new ValidationResult(_logger.LogGlobalPackagesFolderNotFound(settingsValue), Enumerable.Repeat(opt.SettingName, 1));
+        return null;
     }
 
     public ValidateOptionsResult Validate(string? name, AppSettings options)

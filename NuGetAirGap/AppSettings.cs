@@ -5,82 +5,101 @@ using Microsoft.Extensions.Configuration;
 namespace NuGetAirGap;
 
 /// <summary>
-/// Binds to application settings and command line options.
+/// Application settings bound to <c>appsettings.json</c> and command line switches.
 /// </summary>
 public class AppSettings
 {
     #region UpdateAll
 
+    /// <summary>
+    /// Gets the command line switch that sets <see cref="UpdateAll" /> to <see langword="true"/>.
+    /// </summary>
     public const string COMMAND_LINE_SWITCH_update_2D_all = "--update-all";
 
     /// <summary>
-    /// Update all existing packages in the local NuGet source.
+    /// If true, then all existing packages in the local NuGet repository should be checked and updated to their latest versions.
     /// </summary>
-    /// <remarks>This can be set with the <see cref="COMMAND_LINE_SWITCH_update_2D_all"/> command line option.</remarks>
+    /// <remarks>This is mapped from the <c>--update-all</c> (<see cref="COMMAND_LINE_SWITCH_update_2D_all"/>) command line switch.</remarks>
     public bool UpdateAll { get; set; }
 
     #endregion
 
     #region Update
 
+    /// <summary>
+    /// Gets the command line switch that sets the <see cref="Update" /> value.
+    /// </summary>
     public const string COMMAND_LINE_SWITCH_u = "-u";
 
     /// <summary>
-    /// Comma-separated list of package IDs for packages in the local repository to update.
+    /// Gets an optional comma-separated list of package IDs for packages in the local repository that should be checked and updated to their latest versions.
     /// </summary>
-    /// <remarks>If a package is referenced in this option as well as the <see cref="Delete" /> option, it will be deleted and not updated.
-    /// This can be specified using the <see cref="COMMAND_LINE_SWITCH_u"/> command line switch.</remarks>
+    /// <remarks>If a package is referenced in this option as well as the <c>-d</c> (<see cref="COMMAND_LINE_SWITCH_d"/>) command line switch, it will result in a warning stating that the package was not found in the local repository.
+    /// <para>This is mapped from the <c>-u</c> (<see cref="COMMAND_LINE_SWITCH_u"/>) command line switch.</para></remarks>
     public string? Update { get; set; }
 
     #endregion
 
     #region Add
 
+    /// <summary>
+    /// Gets the command line switch that sets the <see cref="Add" /> value.
+    /// </summary>
     public const string COMMAND_LINE_SWITCH_a = "-a";
 
     /// <summary>
-    /// Comma-separated list of package IDs for packages to be added to the local repository.
+    /// Gets an optional comma-separated list of package IDs for packages that should be downloaded from the upstream repository and added to the local repository.
     /// </summary>
-    /// <remarks>If a package is referenced in this option as well as the <see cref="Delete" />, it will be deleted and then re-added.
-    /// This can be specified using the <see cref="COMMAND_LINE_SWITCH_a"/> command line switch.</remarks>
+    /// <remarks>Packages that are referenced in this option as well as the <c>-d</c> (<see cref="COMMAND_LINE_SWITCH_d"/>) command line switch, will effectively be deleted and then re-added.
+    /// <para>This is mapped from the <c>-a</c> (<see cref="COMMAND_LINE_SWITCH_a"/>) command line switch.</para></remarks>
     public string? Add { get; set; }
 
     #endregion
 
     #region Delete
 
+    /// <summary>
+    /// Gets the command line switch that sets the <see cref="Delete" /> value.
+    /// </summary>
     public const string COMMAND_LINE_SWITCH_d = "-d";
 
     /// <summary>
     /// Comma-separated list of package IDs for packages to be deleted from the local reository.
     /// </summary>
-    /// <remarks>If a package is referenced in this option as well as the <see cref="Add" />, it will be deleted and then re-added.
-    /// This can be specified using the <see cref="COMMAND_LINE_SWITCH_d"/> command line switch.</remarks>
+    /// <remarks>Packages that are referenced in this option as well as the <c>-a</c> (<see cref="COMMAND_LINE_SWITCH_a"/>) command line switch, will effectively be deleted and then re-added.
+    /// <para>This is mapped from the <c>-d</c> (<see cref="COMMAND_LINE_SWITCH_d"/>) command line switch.</para></remarks>
     public string? Delete { get; set; }
 
     #endregion
 
     #region ListLocal
 
+    /// <summary>
+    /// Gets the command line switch that sets <see cref="ListLocal" /> to <see langword="true"/>.
+    /// </summary>
     public const string COMMAND_LINE_SWITCH_l = "-l";
 
     /// <summary>
-    /// List packages in the local NuGet source.
+    /// If true, then all packages in the local NuGet source will be displayed in the output.
     /// </summary>
-    /// <remarks>This can be set with the <see cref="COMMAND_LINE_SWITCH_l"/> command line option.</remarks>
+    /// <remarks>This is mapped from the <c>-l</c> (<see cref="COMMAND_LINE_SWITCH_l"/>) command line switch.</remarks>
     public bool ListLocal { get; set; }
 
     #endregion
 
     #region ExportLocalMetaData
 
+    /// <summary>
+    /// Gets the command line switch that sets the <see cref="ExportLocalMetaData" /> value.
+    /// </summary>
     public const string COMMAND_LINE_SWITCH_export_2D_local_2D_metadata = "--export-local-metadata";
 
     /// <summary>
-    /// Specifies the relative or absolute path of the local package list export.
+    /// Gets the value of the command line switch for exporting the metadata for all packages in the local repository. This refers to a relative or absolute file path.
     /// </summary>
-    /// <remarks>The package listing is exported as a JSON array. If this path is not absolute, it will be resolved relative to the current working directory.
-    /// This can be specified using the <see cref="COMMAND_LINE_SWITCH_export_2D_local_2D_metadata"/> command line switch.</remarks>
+    /// <remarks>The package listing is exported as a JSON array. If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Environment.CurrentDirectory"/>).
+    /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
+    /// <para>This is mapped from the <c>--export-local-metadata</c> (<see cref="COMMAND_LINE_SWITCH_export_2D_local_2D_metadata"/>) command line switch.</para></remarks>
     public string? ExportLocalMetaData { get; set; }
 
     #endregion
@@ -88,23 +107,34 @@ public class AppSettings
     #region UpstreamServiceIndex
 
     /// <summary>
-    /// The default remote endpoint URL for the V3 NGet API.
+    /// Gets the default value for <see cref="UpstreamServiceIndex"/>.
     /// </summary>
     public const string DEFAULT_UPSTREAM_SERVICE_INDEX = "https://api.nuget.org/v3/index.json";
 
-    public const string COMMAND_LINE_SWITCH_upstream_2D_service_2D_index = "--upstream-service-index";
-
     /// <summary>
-    /// Specifies the remote endpoint URL for the V3 NGet API.
+    /// Specifies the remote endpoint URL for the V3 NGet API or a subdirectory path that contains the upstream NuGet repository.
     /// </summary>
     /// <remarks>The default value of this setting is defined in the <see cref="DEFAULT_UPSTREAM_SERVICE_INDEX" /> constant.
-    /// This can be overridden using the <see cref="COMMAND_LINE_SWITCH_upstream_2D_service_2D_index"/> command line switch.</remarks>
+    /// If this refers to a subdirectory and is not absolute, it will be resolved relative to the application assembly directory (<see cref="Microsoft.Extensions.Hosting.IHostEnvironment.ContentRootPath" />).
+    /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
+    /// <para>This can be overridden using the <c>--upstream-service-index</c> (<see cref="COMMAND_LINE_SWITCH_upstream_2D_service_2D_index"/>) command line switch.</para></remarks>
     /// <seealso href="https://learn.microsoft.com/en-us/nuget/api/overview#service-index"/>
     public string UpstreamServiceIndex { get; set; } = null!;
 
-    #endregion
+    /// <summary>
+    /// Gets the command line switch that sets the <see cref="OverrideUpstreamServiceIndex" /> value.
+    /// </summary>
+    public const string COMMAND_LINE_SWITCH_upstream_2D_service_2D_index = "--upstream-service-index";
 
+    /// <summary>
+    /// Overrides the <see cref="UpstreamServiceIndex" /> setting.
+    /// </summary>
+    /// <remarks>If this refers to a subdirectory and is not absolute, it will be resolved relative to the current working directory (<see cref="Environment.CurrentDirectory"/>).
+    /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
+    /// <para>This is mapped from the <c>--upstream-service-index</c> (<see cref="COMMAND_LINE_SWITCH_upstream_2D_service_2D_index"/>) command line switch.</para></remarks>
     public string OverrideUpstreamServiceIndex { get; set; } = null!;
+
+    #endregion
 
     #region LocalRepository
 
@@ -113,40 +143,50 @@ public class AppSettings
     /// </summary>
     public const string DEFAULT_LOCAL_REPOSITORY = "LocalSource";
 
-    public const string COMMAND_LINE_SWITCH_local_2D_repository = "--local-repository";
-
     /// <summary>
-    /// Specifies the relative or absolute path of the local repository.
+    /// Specifies the relative or absolute path of a subdirectory for a local Nuget repository.
     /// </summary>
-    /// <remarks>If this path is not absolute, it will be resolved relative to the application assemblly directory. The default value of this setting is defined in the <see cref="DEFAULT_LOCAL_REPOSITORY" /> constant.
-    /// This can be overridden using the <see cref="COMMAND_LINE_SWITCH_local_2D_repository"/> command line switch.</remarks>
+    /// <remarks>If this path is not absolute, it will be resolved relative to the application assembly directory (<see cref="Microsoft.Extensions.Hosting.IHostEnvironment.ContentRootPath" />). The default value of this setting is defined in the <see cref="DEFAULT_LOCAL_REPOSITORY" /> constant.
+    /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
+    /// <para>This can be overridden using the <c>--local-repository</c> (<see cref="COMMAND_LINE_SWITCH_local_2D_repository"/>) command line switch.</para></remarks>
     public string LocalRepository { get; set; } = null!;
 
     /// <summary>
-    /// Overrides the relative or absolute path of the local repository.
+    /// Gets the command line switch that sets the <see cref="OverrideLocalRepository" /> value.
     /// </summary>
-    /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory. If this is not specified, the <see cref="LocalRepository" /> will be used.
-    /// This is mapped from the <see cref="COMMAND_LINE_SWITCH_local_2D_repository"/> command line switch.</remarks>
+    public const string COMMAND_LINE_SWITCH_local_2D_repository = "--local-repository";
+
+    /// <summary>
+    /// Overrides the <see cref="LocalRepository" /> setting.
+    /// </summary>
+    /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Environment.CurrentDirectory"/>).
+    /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
+    /// <para>This is mapped from the <c>--local-repository</c> (<see cref="COMMAND_LINE_SWITCH_local_2D_repository"/>) command line switch.</para></remarks>
     public string OverrideLocalRepository { get; set; } = null!;
 
     #endregion
 
     #region GlobalPackagesFolder
 
-    public const string COMMAND_LINE_SWITCH_global_2D_packages_2D_folder = "--global-packages-folder";
-
     /// <summary>
     /// Specifies the relative or absolute path of the NuGet global packages folder.
     /// </summary>
-    /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory.
-    /// This can be overridden using the <see cref="COMMAND_LINE_SWITCH_global_2D_packages_2D_folder"/> command line switch.</remarks>
+    /// <remarks>If this path is not absolute, it will be resolved relative to the application assembly directory (<see cref="Microsoft.Extensions.Hosting.IHostEnvironment.ContentRootPath" />).
+    /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
+    /// <para>This can be overridden using the <c>--global-packages-folder</c> (<see cref="COMMAND_LINE_SWITCH_global_2D_packages_2D_folder"/>) command line switch.</para></remarks>
     public string GlobalPackagesFolder { get; set; } = null!;
 
     /// <summary>
-    /// Specifies the relative or absolute path of the NuGet global packages folder.
+    /// Gets the command line switch that sets the <see cref="OverrideGlobalPackagesFolder" /> value.
     /// </summary>
-    /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory.
-    /// This can be overridden using the <see cref="COMMAND_LINE_SWITCH_global_2D_packages_2D_folder"/> command line switch.</remarks>
+    public const string COMMAND_LINE_SWITCH_global_2D_packages_2D_folder = "--global-packages-folder";
+
+    /// <summary>
+    /// Overrides the <see cref="GlobalPackagesFolder" /> setting.
+    /// </summary>
+    /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Environment.CurrentDirectory"/>).
+    /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
+    /// <para>This is mapped from the <c>--global-packages-folder</c> (<see cref="COMMAND_LINE_SWITCH_global_2D_packages_2D_folder"/>) command line switch.</para></remarks>
     public string OverrideGlobalPackagesFolder { get; set; } = null!;
 
     #endregion
@@ -154,20 +194,25 @@ public class AppSettings
     #region Help
 
     /// <summary>
-    /// Gets the command line option for the <c><see cref="Config.AppSettings.Help" /></c> setting.
+    /// Gets the command line switch that sets <see cref="Help" /> to <see langword="true"/>.
+    /// </summary>
+    public const string COMMAND_LINE_SWITCH_help = "--help";
+
+    /// <summary>
+    /// Gets the command line switch that sets <see cref="Help" /> to <see langword="true"/>.
     /// </summary>
     public const string COMMAND_LINE_SWITCH_h = "-h";
 
     /// <summary>
-    /// Gets the command line switch for the <see cref="Config.AppSettings.Help" /> application option option.
+    /// Gets the command line switch that sets <see cref="Help" /> to <see langword="true"/>.
     /// </summary>
     public const string COMMAND_LINE_SWITCH__3F_ = "-?";
 
     /// <summary>
     /// Gets or sets the value indicating whether to write help information to the console.
     /// </summary>
-    /// <remarks>If this option is used, then all other options are ignored.</remarks>
-    /// <remarks>This can be set with the <see cref="SHORTHAND_h"/> or <see cref="SHORTHAND__3F_"/> command line option.</remarks>
+    /// <remarks>If this option is used, then all other options are ignored.
+    /// <para>This is mapped from the <c>-?</c> (<see cref="COMMAND_LINE_SWITCH__3F_"/>), <c>-h</c> (<see cref="COMMAND_LINE_SWITCH_h"/>), and <c>--help</c> (<see cref="COMMAND_LINE_SWITCH_help"/>) command line switches.</para></remarks>
     public bool Help { get; set; }
 
     #endregion
@@ -177,7 +222,8 @@ public class AppSettings
         { COMMAND_LINE_SWITCH_update_2D_all, $"{nameof(NuGetAirGap)}:{nameof(UpdateAll)}" },
         { COMMAND_LINE_SWITCH_l, $"{nameof(NuGetAirGap)}:{nameof(ListLocal)}" },
         { COMMAND_LINE_SWITCH_h, $"{nameof(NuGetAirGap)}:{nameof(Help)}" },
-        { COMMAND_LINE_SWITCH__3F_, $"{nameof(NuGetAirGap)}:{nameof(Help)}" }
+        { COMMAND_LINE_SWITCH__3F_, $"{nameof(NuGetAirGap)}:{nameof(Help)}" },
+        { COMMAND_LINE_SWITCH_help, $"{nameof(NuGetAirGap)}:{nameof(Help)}" }
     });
 
     private static readonly ReadOnlyDictionary<string, string> _valueSwitchMappings = new(new Dictionary<string, string>()
@@ -186,8 +232,8 @@ public class AppSettings
         { COMMAND_LINE_SWITCH_d, $"{nameof(NuGetAirGap)}:{nameof(Delete)}" },
         { COMMAND_LINE_SWITCH_export_2D_local_2D_metadata, $"{nameof(NuGetAirGap)}:{nameof(ExportLocalMetaData)}" },
         { COMMAND_LINE_SWITCH_local_2D_repository, $"{nameof(NuGetAirGap)}:{nameof(OverrideLocalRepository)}" },
-        { COMMAND_LINE_SWITCH_upstream_2D_service_2D_index, $"{nameof(NuGetAirGap)}:{nameof(UpstreamServiceIndex)}" },
-        { COMMAND_LINE_SWITCH_global_2D_packages_2D_folder, $"{nameof(NuGetAirGap)}:{nameof(GlobalPackagesFolder)}" }
+        { COMMAND_LINE_SWITCH_upstream_2D_service_2D_index, $"{nameof(NuGetAirGap)}:{nameof(OverrideLocalRepository)}" },
+        { COMMAND_LINE_SWITCH_global_2D_packages_2D_folder, $"{nameof(NuGetAirGap)}:{nameof(OverrideGlobalPackagesFolder)}" }
     });
 
     internal static void Configure(string[] args, IConfigurationBuilder builder)

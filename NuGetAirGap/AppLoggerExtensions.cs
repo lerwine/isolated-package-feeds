@@ -179,7 +179,7 @@ public static class AppLoggerExtensions
     /// <param name="path">The local repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogLocalRepositoryIOException(this ILogger logger, string path,Exception? exception = null)
+    public static string LogLocalRepositoryIOException(this ILogger logger, string path, Exception? exception = null)
     {
         _localRepositoryIOException(logger, path, exception);
         return MESSAGE_LocalRepositoryIOException;
@@ -637,7 +637,7 @@ public static class AppLoggerExtensions
     /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="GlobalPackagesFolderNotFound"/> event with code 0x000e.
     /// </summary>
     /// <param name="logger">The current logger.</param>
-    /// <param name="path">The NuGet repository path.</param>
+    /// <param name="path">The Global packages folder path.</param>
     /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
@@ -664,7 +664,7 @@ public static class AppLoggerExtensions
     /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="GlobalPackagesFolderSecurityException"/> event with code 0x000f.
     /// </summary>
     /// <param name="logger">The current logger.</param>
-    /// <param name="path">The NuGet repository path.</param>
+    /// <param name="path">The Global packages folder path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
     public static string LogGlobalPackagesFolderSecurityException(this ILogger logger, string path, Exception? exception = null)
@@ -691,25 +691,40 @@ public static class AppLoggerExtensions
     private static readonly Action<ILogger, string, Exception?> _invalidGlobalPackagesFolder = LoggerMessage.Define<string>(LogLevel.Critical, InvalidGlobalPackagesFolder,
         $"{MESSAGE_InvalidGlobalPackagesFolder} ({{Path}}).");
 
+    private const string MESSAGE_GlobalPackagesFolderNotFileUri = "NuGet Global Packages Folder must refer to a filesystem subdirectory";
 
-    /// <summary>
-    /// </summary>
+    private static readonly Action<ILogger, string, Exception?> _globalPackagesFolderNotFileUri = LoggerMessage.Define<string>(LogLevel.Critical, InvalidGlobalPackagesFolder,
+        $"{MESSAGE_GlobalPackagesFolderNotFileUri} ({{URI}}).");
+
     /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidGlobalPackagesFolder"/> event with event code 0x0010.
     /// </summary>
     /// <param name="logger">The current logger.</param>
-    /// <param name="url">The invalid NuGet repository URL.</param>
+    /// <param name="path">The invalid global packages folder path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogInvalidGlobalPackagesFolder(this ILogger logger, string url, Exception? exception = null)
+    public static string LogInvalidGlobalPackagesFolder(this ILogger logger, string path, Exception? exception = null)
     {
         if (exception is PathTooLongException)
         {
-            _globalPackagesFolderPathTooLong(logger, url, exception);
+            _globalPackagesFolderPathTooLong(logger, path, exception);
             return MESSAGE_GlobalPackagesFolderPathTooLong;
         }
-        _invalidGlobalPackagesFolder(logger, url, exception);
+        _invalidGlobalPackagesFolder(logger, path, exception);
         return $"{MESSAGE_InvalidGlobalPackagesFolder}.";
+    }
+
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidGlobalPackagesFolder"/> event with event code 0x0010.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="url">The invalid global packages folder url.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    /// <returns>The validation message.</returns>
+    public static string LogGlobalPackagesFolderNotFileUri(this ILogger logger, string url, Exception? exception = null)
+    {
+        _globalPackagesFolderNotFileUri(logger, url, exception);
+        return $"{MESSAGE_GlobalPackagesFolderNotFileUri}.";
     }
 
     #endregion
