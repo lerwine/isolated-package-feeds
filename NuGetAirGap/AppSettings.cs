@@ -116,9 +116,16 @@ public class AppSettings
     /// <summary>
     /// Specifies the relative or absolute path of the local repository.
     /// </summary>
-    /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory. The default value of this setting is defined in the <see cref="DEFAULT_LOCAL_REPOSITORY" /> constant.
+    /// <remarks>If this path is not absolute, it will be resolved relative to the application assemblly directory. The default value of this setting is defined in the <see cref="DEFAULT_LOCAL_REPOSITORY" /> constant.
     /// This can be overridden using the <see cref="COMMAND_LINE_SWITCH_local_2D_repository"/> command line switch.</remarks>
     public string LocalRepository { get; set; } = null!;
+
+    /// <summary>
+    /// Overrides the relative or absolute path of the local repository.
+    /// </summary>
+    /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory. If this is not specified, the <see cref="LocalRepository" /> will be used.
+    /// This is mapped from the <see cref="COMMAND_LINE_SWITCH_local_2D_repository"/> command line switch.</remarks>
+    public string OverrideLocalRepository { get; set; } = null!;
 
     #endregion
 
@@ -132,6 +139,13 @@ public class AppSettings
     /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory.
     /// This can be overridden using the <see cref="COMMAND_LINE_SWITCH_global_2D_packages_2D_folder"/> command line switch.</remarks>
     public string GlobalPackagesFolder { get; set; } = null!;
+
+    /// <summary>
+    /// Specifies the relative or absolute path of the NuGet global packages folder.
+    /// </summary>
+    /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory.
+    /// This can be overridden using the <see cref="COMMAND_LINE_SWITCH_global_2D_packages_2D_folder"/> command line switch.</remarks>
+    public string OverrideGlobalPackagesFolder { get; set; } = null!;
 
     #endregion
 
@@ -169,7 +183,7 @@ public class AppSettings
         { COMMAND_LINE_SWITCH_a, $"{nameof(NuGetAirGap)}:{nameof(Add)}" },
         { COMMAND_LINE_SWITCH_d, $"{nameof(NuGetAirGap)}:{nameof(Delete)}" },
         { COMMAND_LINE_SWITCH_export_2D_local_2D_metadata, $"{nameof(NuGetAirGap)}:{nameof(ExportLocalMetaData)}" },
-        { COMMAND_LINE_SWITCH_local_2D_repository, $"{nameof(NuGetAirGap)}:{nameof(LocalRepository)}" },
+        { COMMAND_LINE_SWITCH_local_2D_repository, $"{nameof(NuGetAirGap)}:{nameof(OverrideLocalRepository)}" },
         { COMMAND_LINE_SWITCH_upstream_2D_service_2D_index, $"{nameof(NuGetAirGap)}:{nameof(UpstreamServiceIndex)}" },
         { COMMAND_LINE_SWITCH_global_2D_packages_2D_folder, $"{nameof(NuGetAirGap)}:{nameof(GlobalPackagesFolder)}" }
     });

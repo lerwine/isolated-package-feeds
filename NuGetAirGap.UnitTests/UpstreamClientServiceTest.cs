@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -10,22 +9,43 @@ namespace NuGetAirGap.UnitTests;
 public class UpstreamClientServiceTest
 {
     private IHost _host;
+    private DirectoryInfo _baseDirectory = null!;
+    private DirectoryInfo _cwd = null!;
+    private string _previousCwd = null!;
+
+    private const string DIRNAME_CWD = "CWD";
+
+    private const string DIRNAME_ContentRoot = "ContentRoot";
 
     [SetUp]
     public void Setup()
     {
-        HostApplicationBuilder builder = Host.CreateApplicationBuilder();
         var testContext = TestContext.CurrentContext;
-        builder.Environment.ContentRootPath = testContext.WorkDirectory;
+        if (!(_baseDirectory = new DirectoryInfo(Path.Combine(testContext.WorkDirectory, nameof(UpstreamClientServiceTest)))).Exists)
+            _baseDirectory.Create();
+        if (!(_cwd = new DirectoryInfo(Path.Combine(_baseDirectory.FullName, DIRNAME_CWD))).Exists)
+            _cwd.Create();
+        _previousCwd = Environment.CurrentDirectory;
+        Environment.CurrentDirectory = _cwd.FullName;
+        HostApplicationBuilder builder = AppHost.CreateBuilder(testContext.TestDirectory);
+        AppHost.ConfigureSettings(builder);
+        AppHost.ConfigureLogging(builder);
         builder.Logging.AddDebug();
-        builder.Services.Configure<AppSettings>(builder.Configuration.GetSection(nameof(NuGetAirGap)));
-        builder.Services.AddSingleton<UpstreamClientService>();
+        AppHost.ConfigureServices(builder, settings => AppHost.DefaultPostConfigure(settings, builder));
         _host = builder.Build();
         _host.Start();
     }
 
     [TearDown]
-    public void TearDown() => _host.Dispose();
+    public async Task TearDown()
+    {
+        try { await _host.StopAsync(); }
+        finally
+        {
+            try { _host.Dispose(); }
+            finally { Environment.CurrentDirectory = _previousCwd; }
+        }
+    }
 
     [Test]
     public async Task GetMetadataTest1()

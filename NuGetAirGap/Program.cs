@@ -1,10 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using NuGet.Configuration;
-using Serilog;
 
 namespace NuGetAirGap;
 
@@ -14,31 +9,11 @@ class Program
 
     static void Main(string[] args)
     {
-        HostApplicationBuilder builder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder();
-        builder.Environment.ContentRootPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)!;
-        builder.Logging.ClearProviders();
-        Log.Logger = new LoggerConfiguration()
-            .ReadFrom.Configuration(builder.Configuration)
-            .CreateLogger();
-        builder.Logging.AddSerilog();
-        AppSettings.Configure(args, builder.Configuration);
-        builder.Services
-            .AddOptions<AppSettings>()
-            .Bind(builder.Configuration.GetSection(nameof(NuGetAirGap)))
-            .ValidateDataAnnotations();
-        builder.Services.AddHostedService<MainService>()
-            .AddSingleton<LocalClientService>()
-            .AddSingleton<UpstreamClientService>()
-            .AddSingleton<IValidateOptions<AppSettings>, ValidateAppSettings>()
-            .PostConfigure<AppSettings>(settings =>
-        {
-            if (string.IsNullOrWhiteSpace(settings.GlobalPackagesFolder))
-                settings.GlobalPackagesFolder = SettingsUtility.GetGlobalPackagesFolder(Settings.LoadDefaultSettings(root: null));
-            if (string.IsNullOrWhiteSpace(settings.UpstreamServiceIndex))
-                settings.UpstreamServiceIndex = AppSettings.DEFAULT_UPSTREAM_SERVICE_INDEX;
-            if (string.IsNullOrWhiteSpace(settings.LocalRepository))
-                settings.LocalRepository = Path.Combine(builder.Environment.ContentRootPath, AppSettings.DEFAULT_LOCAL_REPOSITORY);
-        });
+        HostApplicationBuilder builder = AppHost.CreateBuilder(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)!);
+        AppHost.ConfigureSettings(builder, args);
+        AppHost.ConfigureLogging(builder);
+        builder.Services.AddHostedService<MainService>();
+        AppHost.ConfigureServices(builder, settings => AppHost.DefaultPostConfigure(settings, builder));
         (Host = builder.Build()).Run();
     }
 }

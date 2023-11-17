@@ -4,7 +4,15 @@ The goal of this project is to develop content feed provders for environments th
 
 The initial scope is to create NuGet and NPM Package Feed services as well as content from CDN providers.
 
-[Click here to view project](https://github.com/users/lerwine/projects/4)
+[Click here to view GitHub project](https://github.com/users/lerwine/projects/4)
+
+## Projects in solution
+
+- [CdnGetter](./CdnGetter/README.md) - Console application to manage local repository of libraries hosted by upstream content delivery networks.
+- [CdnGetter.UnitTests](./CdnGetter.UnitTests/README.md) - Unit tests for `CdnGetter` application.
+- [CdnServer](./CdnServer/README.md) - CDN website for hosting libraries downloaded by the `CdnGetter` application.
+- [NuGetAirGap](./NuGetAirGap/README.md) - Console application to manage local repository of packages hosted by an upstream NuGet repository.
+- [NuGetAirGap.UnitTests](./NuGetAirGap.UnitTests/README.md) - Unit tests for NuGetAirGap application.
 
 ## References
 
