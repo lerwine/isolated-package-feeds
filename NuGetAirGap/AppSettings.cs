@@ -104,6 +104,8 @@ public class AppSettings
 
     #endregion
 
+    public string OverrideUpstreamServiceIndex { get; set; } = null!;
+
     #region LocalRepository
 
     /// <summary>

@@ -45,6 +45,16 @@ public static class AppLoggerExtensions
     private static readonly Action<ILogger, string, Exception?> _invalidUpstreamRepositoryUrl = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
         $"{MESSAGE_InvalidUpstreamRepositoryUrl} ({{URL}}).");
 
+    private const string MESSAGE_UnsupportedUpstreamRepositoryUrlScheme = "Invalid scheme ror Upstream NuGet repository URL";
+
+    private static readonly Action<ILogger, string, Exception?> _unsupportedUpstreamRepositoryUrlScheme = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
+        $"{MESSAGE_UnsupportedUpstreamRepositoryUrlScheme} ({{URL}}).");
+
+    private const string MESSAGE_UnsupportedLocalRepositoryUrlScheme = "Invalid scheme ror Local NuGet repository URL";
+
+    private static readonly Action<ILogger, string, Exception?> _unsupportedLocalRepositoryUrlScheme = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
+        $"{MESSAGE_UnsupportedLocalRepositoryUrlScheme} ({{URL}}).");
+
     /// <summary>
     /// </summary>
     /// <summary>
@@ -99,6 +109,17 @@ public static class AppLoggerExtensions
 
         _invalidLocalRepositoryUrl(logger, url.OriginalString, exception);
         return $"{MESSAGE_InvalidLocalRepositoryUrl}.";
+    }
+
+    public static string LogUnsupportedRepositoryUrlScheme(this ILogger logger, string uriString, bool isUpstream, Exception? exception = null)
+    {
+        if (isUpstream)
+        {
+            _unsupportedUpstreamRepositoryUrlScheme(logger, uriString, exception);
+            return $"{MESSAGE_UnsupportedUpstreamRepositoryUrlScheme}.";
+        }
+        _unsupportedLocalRepositoryUrlScheme(logger, uriString, exception);
+        return $"{MESSAGE_UnsupportedLocalRepositoryUrlScheme}.";
     }
 
     #endregion
