@@ -729,6 +729,65 @@ public static class AppLoggerExtensions
 
     #endregion
 
+    #region MultipleSettingsWithSameRepositoryLocation event logger message (0x0011)
+    
+    public const int EVENT_ID_MultipleSettingsWithSameRepositoryLocation = 0x0011;
+    
+    public static readonly EventId MultipleSettingsWithSameRepositoryLocation = new(EVENT_ID_MultipleSettingsWithSameRepositoryLocation, nameof(MultipleSettingsWithSameRepositoryLocation));
+    
+    private const string MESSAGE_LocalSameAsUpstreamNugetRepository = "Local NuGet repository path cannot be the same as the upstream NuGet repository path";
+
+    private const string MESSAGE_LocalRepositorySameAsGlobalPackagesFolder = "Local NuGet repository path cannot be the same as the upstream NuGet repository path";
+
+    private const string MESSAGE_UpstreamRepositorySameAsGlobalPackagesFolder = "Local NuGet repository path cannot be the same as the upstream NuGet repository path";
+
+    private static readonly Action<ILogger, string, Exception?> _localSameAsUpstreamNugetRepository = LoggerMessage.Define<string>(LogLevel.Critical, MultipleSettingsWithSameRepositoryLocation,
+        $"{MESSAGE_LocalSameAsUpstreamNugetRepository} ({{Path}}).");
+
+    private static readonly Action<ILogger, string, Exception?> _localRepositorySameAsGlobalPackagesFolder = LoggerMessage.Define<string>(LogLevel.Critical, MultipleSettingsWithSameRepositoryLocation,
+        $"{MESSAGE_LocalRepositorySameAsGlobalPackagesFolder} ({{Path}}).");
+
+    private static readonly Action<ILogger, string, Exception?> _upstreamRepositorySameAsGlobalPackagesFolder = LoggerMessage.Define<string>(LogLevel.Critical, MultipleSettingsWithSameRepositoryLocation,
+        $"{MESSAGE_UpstreamRepositorySameAsGlobalPackagesFolder} ({{Path}}).");
+
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="MultipleSettingsWithSameRepositoryLocation"/> event with event code 0x0011.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="path">The NuGet repository path.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    public static string LogLocalSameAsUpstreamNugetRepository(this ILogger logger, string path, Exception? exception = null)
+    {
+        _localSameAsUpstreamNugetRepository(logger, path, exception);
+        return MESSAGE_LocalSameAsUpstreamNugetRepository;
+    }
+
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="MultipleSettingsWithSameRepositoryLocation"/> event with event code 0x0011.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="path">The NuGet repository path.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    public static string LogLocalRepositorySameAsGlobalPackagesFolder(this ILogger logger, string path, Exception? exception = null)
+    {
+        _localRepositorySameAsGlobalPackagesFolder(logger, path, exception);
+        return MESSAGE_LocalRepositorySameAsGlobalPackagesFolder;
+    }
+
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="MultipleSettingsWithSameRepositoryLocation"/> event with event code 0x0011.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="path">The NuGet repository path.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    public static string LogUpstreamRepositorySameAsGlobalPackagesFolder(this ILogger logger, string path, Exception? exception = null)
+    {
+        _upstreamRepositorySameAsGlobalPackagesFolder(logger, path, exception);
+        return MESSAGE_UpstreamRepositorySameAsGlobalPackagesFolder;
+    }
+
+    #endregion
+    
     #region GetDownloadResource Scope
 
     private static readonly Func<ILogger, string, IDisposable?> _getRemoteDownloadResourceScope = LoggerMessage.DefineScope<string>(

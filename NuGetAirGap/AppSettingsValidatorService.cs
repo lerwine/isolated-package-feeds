@@ -164,7 +164,17 @@ public partial class AppSettingsValidatorService : IValidateOptions<AppSettings>
             validationResults.Add(validationResult);
         if ((validationResult = ValidateGlobalPackagesFolder(options)) is not null)
             validationResults.Add(validationResult);
-        ValidateOptionsResult vr = (validationResults.Count > 0) ? ValidateOptionsResult.Fail(validationResults.Select(r => r.ToString())) : ValidateOptionsResult.Success;
-        return vr;
+        if (validationResults.Count == 0)
+        {
+            if (StringComparer.CurrentCultureIgnoreCase.Equals(options.LocalRepository, options.UpstreamServiceIndex))
+                validationResults.Add(new ValidationResult(_logger.LogLocalSameAsUpstreamNugetRepository(options.LocalRepository), new string[] { nameof(AppSettings.LocalRepository), nameof(AppSettings.UpstreamServiceIndex) }));
+            else if (StringComparer.CurrentCultureIgnoreCase.Equals(options.LocalRepository, options.GlobalPackagesFolder))
+                validationResults.Add(new ValidationResult(_logger.LogLocalRepositorySameAsGlobalPackagesFolder(options.LocalRepository), new string[] { nameof(AppSettings.LocalRepository), nameof(AppSettings.GlobalPackagesFolder) }));
+            else if (StringComparer.CurrentCultureIgnoreCase.Equals(options.UpstreamServiceIndex, options.GlobalPackagesFolder))
+                validationResults.Add(new ValidationResult(_logger.LogUpstreamRepositorySameAsGlobalPackagesFolder(options.LocalRepository), new string[] { nameof(AppSettings.UpstreamServiceIndex), nameof(AppSettings.GlobalPackagesFolder) }));
+            else
+                return ValidateOptionsResult.Success;
+        }
+        return ValidateOptionsResult.Fail(validationResults.Select(r => r.ToString()));
     }
 }

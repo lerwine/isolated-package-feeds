@@ -1,11 +1,13 @@
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace NuGetAirGap;
 
 /// <summary>
 /// Utility methods for parsing URIs and file system paths.
 /// </summary>
-public class ResourceLocatorUtil
+public static class ResourceLocatorUtil
 {
     private static string CombinePath(string? basePath, string path)
     {
@@ -126,9 +128,9 @@ public class ResourceLocatorUtil
             if (Uri.TryCreate(pathOrUriString, UriKind.Absolute, out Uri? uri))
             {
                 absoluteUri = uri;
-                if (uri.IsFile)
+                if (absoluteUri.IsFile)
                 {
-                    fullPath = Path.GetFullPath(uri.LocalPath);
+                    fullPath = Path.GetFullPath(absoluteUri.LocalPath);
                     return true;
                 }
                 fullPath = null;
@@ -344,4 +346,167 @@ public class ResourceLocatorUtil
     /// <see cref="Uri.UriSchemeHttp"/>, or <see cref="Uri.UriSchemeFile"/>.</exception>
     public static bool TryParseHttpOrFileAsDirectoryInfo(string? basePath, string pathOrUriString, out Uri absoluteUri, [NotNullWhen(true)] out DirectoryInfo? directoryInfo) =>
         TryParseHttpOrFileAsFileSystemInfo(basePath, pathOrUriString, p => new DirectoryInfo(pathOrUriString), out absoluteUri, out directoryInfo);
+    
+    public static Uri Normalize2(Uri uri)
+    {
+        string path, query, fragment;
+        if (uri.IsAbsoluteUri)
+        {
+            string portNumber = uri.GetComponents(UriComponents.Port, UriFormat.UriEscaped);
+            if (portNumber.Length > 0 && int.TryParse(portNumber, out int p))
+                switch (p)
+                {
+                    case 443:
+                        if (uri.Scheme == Uri.UriSchemeHttps)
+                            portNumber = string.Empty;
+                        break;
+                    case 80:
+                        if (uri.Scheme == Uri.UriSchemeHttp)
+                            portNumber = string.Empty;
+                        break;
+                    default:
+                        portNumber = p.ToString();
+                        break;
+                }
+            path = uri.GetComponents(UriComponents.Path, UriFormat.UriEscaped);
+            int len = path.Length;
+            int pos = len - 1;
+            while (pos >= 0 && path[pos] == '/')
+                pos--;
+            if (pos < 0)
+                path = string.Empty;
+            else if (++pos < len)
+                path = path[..pos];
+            query = uri.GetComponents(UriComponents.Query, UriFormat.UriEscaped);
+            fragment = uri.GetComponents(UriComponents.Fragment, UriFormat.UriEscaped);
+            if (portNumber.Length > 0)
+            {
+                if (path.Length > 0)
+                {
+                    if (query.Length > 0)
+                    {
+                        if (fragment.Length > 0)
+                            return new Uri($"{uri.GetComponents(UriComponents.Scheme | UriComponents.UserInfo | UriComponents.Host, UriFormat.UriEscaped)}:{portNumber}/{path}?{query}#{fragment}");
+                        return new Uri($"{uri.GetComponents(UriComponents.Scheme | UriComponents.UserInfo | UriComponents.Host, UriFormat.UriEscaped)}:{portNumber}/{path}?{query}");
+                    }
+                    if (fragment.Length > 0)
+                        return new Uri($"{uri.GetComponents(UriComponents.Scheme | UriComponents.UserInfo | UriComponents.Host, UriFormat.UriEscaped)}:{portNumber}/{path}#{fragment}");
+                    return new Uri($"{uri.GetComponents(UriComponents.Scheme | UriComponents.UserInfo | UriComponents.Host, UriFormat.UriEscaped)}:{portNumber}/{path}");
+                }
+                if (query.Length > 0)
+                {
+                    if (fragment.Length > 0)
+                        return new Uri($"{uri.GetComponents(UriComponents.Scheme | UriComponents.UserInfo | UriComponents.Host, UriFormat.UriEscaped)}:{portNumber}?{query}#{fragment}");
+                    return new Uri($"{uri.GetComponents(UriComponents.Scheme | UriComponents.UserInfo | UriComponents.Host, UriFormat.UriEscaped)}:{portNumber}?{query}");
+                }
+                if (fragment.Length > 0)
+                    return new Uri($"{uri.GetComponents(UriComponents.Scheme | UriComponents.UserInfo | UriComponents.Host, UriFormat.UriEscaped)}:{portNumber}#{fragment}");
+                return new Uri($"{uri.GetComponents(UriComponents.Scheme | UriComponents.UserInfo | UriComponents.Host, UriFormat.UriEscaped)}:{portNumber}");
+            }
+            if (path.Length > 0)
+            {
+                if (query.Length > 0)
+                {
+                    if (fragment.Length > 0)
+                        return new Uri($"{uri.GetComponents(UriComponents.Scheme | UriComponents.UserInfo | UriComponents.Host, UriFormat.UriEscaped)}/{path}?{query}#{fragment}");
+                    return new Uri($"{uri.GetComponents(UriComponents.Scheme | UriComponents.UserInfo | UriComponents.Host, UriFormat.UriEscaped)}/{path}?{query}");
+                }
+                if (fragment.Length > 0)
+                    return new Uri($"{uri.GetComponents(UriComponents.Scheme | UriComponents.UserInfo | UriComponents.Host, UriFormat.UriEscaped)}/{path}#{fragment}");
+                return new Uri($"{uri.GetComponents(UriComponents.Scheme | UriComponents.UserInfo | UriComponents.Host, UriFormat.UriEscaped)}/{path}");
+            }
+            if (query.Length > 0)
+            {
+                if (fragment.Length > 0)
+                    return new Uri($"{uri.GetComponents(UriComponents.Scheme | UriComponents.UserInfo | UriComponents.Host, UriFormat.UriEscaped)}?{query}#{fragment}");
+                return new Uri($"{uri.GetComponents(UriComponents.Scheme | UriComponents.UserInfo | UriComponents.Host, UriFormat.UriEscaped)}?{query}");
+            }
+            if (fragment.Length > 0)
+                return new Uri($"{uri.GetComponents(UriComponents.Scheme | UriComponents.UserInfo | UriComponents.Host, UriFormat.UriEscaped)}#{fragment}");
+            return new Uri(uri.GetComponents(UriComponents.Scheme | UriComponents.UserInfo | UriComponents.Host, UriFormat.UriEscaped));
+        }
+
+        switch ((path = uri.OriginalString).Length)
+        {
+            case 0:
+                return uri;
+            case 1:
+                return path[0] switch
+                {
+                    '\\' => new Uri("/", UriKind.Relative),
+                    '?' or '#' => new Uri(string.Empty, UriKind.Relative),
+                    _ => ((fragment = Uri.EscapeDataString(path)) == path) ? uri : new Uri(fragment, UriKind.Relative),
+                };
+        }
+        int index = path.IndexOf('#');
+        if (index < 0)
+        {
+            fragment = string.Empty;
+            if ((index = path.IndexOf('?')) < 0)
+            {
+                path = path.Replace('\\', '/').Replace(' ', '+').Replace("%20", "+");
+                query = string.Empty;
+            }
+            else if (index == 0)
+            {
+                query = path[1..].Replace(' ', '+').Replace("%20", "+");
+                path = string.Empty;
+            }
+            else
+            {
+                query = path[(index + 1)..].Replace(' ', '+').Replace("%20", "+");
+                path = path[..index].Replace(' ', '+').Replace("%20", "+");
+            }
+        }
+        else if (index == 0)
+        {
+            fragment = path[1..].Replace(' ', '+').Replace("%20", "+");
+            path = query = string.Empty;
+        }
+        else
+        {
+            fragment = path[(index + 1)..];
+            path = path[..index].Replace(' ', '+').Replace("%20", "+");
+            if ((index = path.IndexOf('?')) < 0)
+                query = string.Empty;
+            else if (index == 0)
+            {
+                query = path[1..];
+                path = string.Empty;
+            }
+            else
+            {
+                query = path[(index + 1)..];
+                path = path[..index];
+            }
+        }
+        bool leadsWithSlash = path.Length > 0;
+        if (leadsWithSlash)
+        {
+            leadsWithSlash = path[0] == '/';
+            if (leadsWithSlash)
+                path = path[0..];
+            int len = path.Length;
+            int pos = len - 1;
+            while (pos >= 0 && path[pos] == '/')
+                pos--;
+            if (pos < 0)
+                path = string.Empty;
+            else if (++pos < len)
+                path = path[..pos];
+        }
+        if (query.Length > 0)
+        {
+            if (fragment.Length > 0)
+               path = new Uri($"http://tempuri.org/{path}?{query}#{fragment}", UriKind.Absolute).GetComponents(UriComponents.Path | UriComponents.Query |
+                UriComponents.Fragment, UriFormat.UriEscaped);
+            else
+               path = new Uri($"http://tempuri.org/{path}?{query}", UriKind.Absolute).GetComponents(UriComponents.Path | UriComponents.Query, UriFormat.UriEscaped);
+        }
+        else if (fragment.Length > 0)
+            path = new Uri($"http://tempuri.org/{path}#{fragment}", UriKind.Absolute).GetComponents(UriComponents.Path | UriComponents.Fragment, UriFormat.UriEscaped);
+        else
+            path = new Uri($"file:///{path}").GetComponents(UriComponents.Path, UriFormat.UriEscaped);
+        return  new(leadsWithSlash ? $"/{path}" : path, UriKind.Relative);
+    }
 }
