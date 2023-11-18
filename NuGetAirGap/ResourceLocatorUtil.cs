@@ -1,6 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
 
 namespace NuGetAirGap;
+
+/// <summary>
+/// Utility methods for parsing URIs and file system paths.
+/// </summary>
 public class ResourceLocatorUtil
 {
     private static string CombinePath(string? basePath, string path)
@@ -166,7 +170,8 @@ public class ResourceLocatorUtil
     /// <exception cref="PathTooLongException">The combined path, file name, or both exceed the system-defined maximum length.</exception>
     /// <exception cref="System.Security.SecurityException">The caller does not have the required permissions.</exception>
     /// <exception cref="UnauthorizedAccessException">Access to combined path is denied.</exception>
-    public static bool TryParseAsFileOrDirectory(string? basePath, string pathOrUriString, out Uri absoluteUri, [NotNullWhen(true)] out FileSystemInfo? fileSystemInfo) => TryParseAsFileSystemInfo(basePath, pathOrUriString, p => File.Exists(pathOrUriString) ? new FileInfo(pathOrUriString) : new DirectoryInfo(pathOrUriString), out absoluteUri, out fileSystemInfo);
+    public static bool TryParseAsFileOrDirectory(string? basePath, string pathOrUriString, out Uri absoluteUri, [NotNullWhen(true)] out FileSystemInfo? fileSystemInfo) =>
+        TryParseAsFileSystemInfo(basePath, pathOrUriString, p => File.Exists(pathOrUriString) ? new FileInfo(pathOrUriString) : new DirectoryInfo(pathOrUriString), out absoluteUri, out fileSystemInfo);
 
     /// <summary>
     /// Parses or builds a <see cref="Uri.UriSchemeFile"/>, <see cref="Uri.UriSchemeHttps"/>, or <see cref="Uri.UriSchemeHttp"/> URI and tries extract a <see cref="FileSystemInfo"/>,
