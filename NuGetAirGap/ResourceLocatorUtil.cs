@@ -3,9 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 namespace NuGetAirGap;
 public class ResourceLocatorUtil
 {
-    // <exception cref="ArgumentNullException"><paramref name="path"/> is null.</exception>
-    // <exception cref="ArgumentException"><paramref name="path"/> is empty or has invalid characters.</exception>
-    // <exception cref="UriSchemeNotSupportedException"><paramref name="path"/> is an absolute URI, but the scheme is not <see cref="Uri.UriSchemeFile"/>.</exception>
     private static string CombinePath(string? basePath, string path)
     {
         if (path is null)
@@ -21,8 +18,6 @@ public class ResourceLocatorUtil
         return (string.IsNullOrWhiteSpace(basePath) || Path.IsPathFullyQualified(path)) ? path : Path.Combine(basePath, path);
     }
 
-    // <exception cref="ArgumentNullException"><paramref name="pathOrUriString"/> is null.</exception>
-    // <exception cref="ArgumentException"><paramref name="pathOrUriString"/> is empty or has invalid characters.</exception>
     private static string? CombinePath(string? basePath, string pathOrUriString, out Uri? absoluteUri)
     {
         if (pathOrUriString is null)
@@ -35,17 +30,12 @@ public class ResourceLocatorUtil
         return (string.IsNullOrWhiteSpace(basePath) || Path.IsPathFullyQualified(pathOrUriString)) ? pathOrUriString : Path.Combine(basePath, pathOrUriString);
     }
 
-    // <exception cref="ArgumentNullException"><paramref name="path"/> is null.</exception>
-    // <exception cref="ArgumentException"><paramref name="path"/> is empty or has invalid characters.</exception>
-    // <exception cref="UriSchemeNotSupportedException"><paramref name="path"/> is an absolute URI, but the scheme is not <see cref="Uri.UriSchemeFile"/>.</exception>
     private static T GetFileSystemInfo<T>(string? basePath, string path, Func<string, T> factory) where T : FileSystemInfo
     {
         try { return factory(CombinePath(basePath, path)); }
         catch (NotSupportedException exception) { throw new ArgumentException(exception.Message, nameof(path)); }
     }
 
-    // <exception cref="ArgumentNullException"><paramref name="pathOrUriString"/> is null.</exception>
-    // <exception cref="ArgumentException"><paramref name="pathOrUriString"/> is empty or has invalid characters.</exception>
     private static bool TryParseAsFileSystemInfo<T>(string? basePath, string pathOrUriString, Func<string, T> factory, out Uri absoluteUri, [NotNullWhen(true)] out T? result) where T : FileSystemInfo
     {
         if ((basePath = CombinePath(basePath, pathOrUriString, out Uri? uri)) is null)
@@ -62,10 +52,6 @@ public class ResourceLocatorUtil
         return true;
     }
 
-    // <exception cref="ArgumentNullException"><paramref name="pathOrUriString"/> is null.</exception>
-    // <exception cref="ArgumentException"><paramref name="pathOrUriString"/> is empty or has invalid characters.</exception>
-    // <exception cref="UriSchemeNotSupportedException"><paramref name="pathOrUriString"/> is an absolute URI, but the scheme is not <see cref="Uri.UriSchemeHttps"/>,
-    // <see cref="Uri.UriSchemeHttp"/>, or <see cref="Uri.UriSchemeFile"/>.</exception>
     private static bool TryParseHttpOrFileAsFileSystemInfo<T>(string? basePath, string pathOrUriString, Func<string, T> factory, out Uri absoluteUri, [NotNullWhen(true)] out T? result) where T : FileSystemInfo
     {
         if ((basePath = CombinePath(basePath, pathOrUriString, out Uri? uri)) is null)

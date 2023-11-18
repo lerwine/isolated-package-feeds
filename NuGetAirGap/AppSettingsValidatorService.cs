@@ -5,12 +5,12 @@ using Microsoft.Extensions.Options;
 
 namespace NuGetAirGap;
 
-public partial class ValidateAppSettings : IValidateOptions<AppSettings>
+public partial class AppSettingsValidatorService : IValidateOptions<AppSettings>
 {
-    private readonly ILogger<ValidateAppSettings> _logger;
+    private readonly ILogger<AppSettingsValidatorService> _logger;
     private readonly HostingEnvironment _hostingEnvironment;
 
-    public ValidateAppSettings(ILogger<ValidateAppSettings> logger, HostingEnvironment hostingEnvironment) => (_logger, _hostingEnvironment) = (logger, hostingEnvironment);
+    public AppSettingsValidatorService(ILogger<AppSettingsValidatorService> logger, HostingEnvironment hostingEnvironment) => (_logger, _hostingEnvironment) = (logger, hostingEnvironment);
 
     private ValidationResult? ValidateUpstreamServiceIndex(AppSettings options)
     {

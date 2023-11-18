@@ -37,7 +37,7 @@ public static class AppHost
 
     public static void ConfigureServices(HostApplicationBuilder builder, Action<AppSettings> onPostConfigure) => builder.Services.AddSingleton<LocalClientService>()
         .AddSingleton<UpstreamClientService>()
-        .AddSingleton<IValidateOptions<AppSettings>, ValidateAppSettings>()
+        .AddSingleton<IValidateOptions<AppSettings>, AppSettingsValidatorService>()
         .PostConfigure(onPostConfigure);
 
     public static void DefaultPostConfigure(AppSettings settings, HostApplicationBuilder builder)
