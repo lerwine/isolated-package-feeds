@@ -15,7 +15,11 @@ public partial class AppSettingsValidatorService : IValidateOptions<AppSettings>
 
     private ValidationResult? ValidateUpstreamServiceIndex(AppSettings options)
     {
-        string settingsValue = options.OverrideUpstreamServiceIndex.DefaultIfWhiteSpace<(string SettingName, string BasePath)>(() => (nameof(AppSettings.OverrideUpstreamServiceIndex), Environment.CurrentDirectory), options.UpstreamServiceIndex, () => (nameof(AppSettings.UpstreamServiceIndex), _hostingEnvironment.ContentRootPath), out var opt);
+        string settingsValue = options.OverrideUpstreamServiceIndex.DefaultIfWhiteSpace(
+            ifPrimaryValue: () => (SettingName: nameof(AppSettings.OverrideUpstreamServiceIndex), BasePath: Environment.CurrentDirectory),
+            defaultValue: options.UpstreamServiceIndex,
+            ifDefaultValue: () => (SettingName: nameof(AppSettings.UpstreamServiceIndex), BasePath: _hostingEnvironment.ContentRootPath),
+            result: out (string SettingName, string BasePath) opt);
         try
         {
             if (ResourceLocatorUtil.TryParseHttpOrFileAsDirectoryInfo(opt.BasePath, settingsValue, out Uri absoluteUri, out DirectoryInfo? directory))
@@ -49,7 +53,11 @@ public partial class AppSettingsValidatorService : IValidateOptions<AppSettings>
 
     private ValidationResult? ValidateLocalRepository(AppSettings options)
     {
-        string settingsValue = options.OverrideLocalRepository.DefaultIfWhiteSpace<(string SettingName, string BasePath)>(() => (nameof(AppSettings.OverrideLocalRepository), Environment.CurrentDirectory), options.LocalRepository, () => (nameof(AppSettings.LocalRepository), _hostingEnvironment.ContentRootPath), out var opt);
+        string settingsValue = options.OverrideLocalRepository.DefaultIfWhiteSpace(
+            ifPrimaryValue: () => (SettingName: nameof(AppSettings.OverrideLocalRepository), BasePath: Environment.CurrentDirectory),
+            defaultValue: options.LocalRepository,
+            ifDefaultValue: () => (SettingName: nameof(AppSettings.LocalRepository), BasePath: _hostingEnvironment.ContentRootPath),
+            result: out (string SettingName, string BasePath) opt);
         try
         {
             DirectoryInfo directoryInfo = ResourceLocatorUtil.GetDirectoryInfo(opt.BasePath, settingsValue);
@@ -126,7 +134,11 @@ public partial class AppSettingsValidatorService : IValidateOptions<AppSettings>
 
     private ValidationResult? ValidateGlobalPackagesFolder(AppSettings options)
     {
-        string settingsValue = options.OverrideGlobalPackagesFolder.DefaultIfWhiteSpace<(string SettingName, string BasePath)>(() => (nameof(AppSettings.OverrideGlobalPackagesFolder), Environment.CurrentDirectory), options.GlobalPackagesFolder, () => (nameof(AppSettings.GlobalPackagesFolder), _hostingEnvironment.ContentRootPath), out var opt);
+        string settingsValue = options.OverrideGlobalPackagesFolder.DefaultIfWhiteSpace(
+            ifPrimaryValue: () => (SettingName: nameof(AppSettings.OverrideGlobalPackagesFolder), BasePath: Environment.CurrentDirectory),
+            defaultValue: options.GlobalPackagesFolder,
+            ifDefaultValue: () => (SettingName: nameof(AppSettings.GlobalPackagesFolder), BasePath: _hostingEnvironment.ContentRootPath),
+            result: out (string SettingName, string BasePath) opt);
         try
         {
             DirectoryInfo directoryInfo = ResourceLocatorUtil.GetDirectoryInfo(opt.BasePath, settingsValue);
