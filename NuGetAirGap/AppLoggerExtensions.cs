@@ -787,7 +787,7 @@ public static class AppLoggerExtensions
     }
 
     #endregion
-    
+
     #region GetDownloadResource Scope
 
     private static readonly Func<ILogger, string, IDisposable?> _getRemoteDownloadResourceScope = LoggerMessage.DefineScope<string>(

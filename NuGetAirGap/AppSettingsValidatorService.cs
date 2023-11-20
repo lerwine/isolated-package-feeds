@@ -9,6 +9,7 @@ public partial class AppSettingsValidatorService : IValidateOptions<AppSettings>
 {
     private readonly ILogger<AppSettingsValidatorService> _logger;
     private readonly HostingEnvironment _hostingEnvironment;
+    
 
     public AppSettingsValidatorService(ILogger<AppSettingsValidatorService> logger, HostingEnvironment hostingEnvironment) => (_logger, _hostingEnvironment) = (logger, hostingEnvironment);
 
