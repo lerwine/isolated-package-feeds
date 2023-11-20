@@ -94,9 +94,7 @@ public static class Constants
     public static IEnumerable<string> GetSwitchNames(string propertyName)
     {
         Type t = typeof(AppSettings);
-        var propertyInfo = t.GetProperty(propertyName);
-        if (propertyInfo is null)
-            throw new InvalidOperationException("Property not found.");
+        var propertyInfo = t.GetProperty(propertyName) ?? throw new InvalidOperationException("Property not found.");
         var attribute = propertyInfo.GetCustomAttribute<CommandLineShorthandAttribute>(false);
         return (attribute is null) ? Enumerable.Empty<string>() : attribute.Switches;
     }
