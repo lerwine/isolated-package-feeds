@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 namespace CdnGetter;
 
 /// <summary>
-/// Based upon the <see cref="Microsoft.Extensions.Configuration.CommandLine.CommandLineConfigurationSource"/>, adding supports stand-alone command line switches are not followed by a value. 
+/// Based upon the <see cref="Microsoft.Extensions.Configuration.CommandLine.CommandLineConfigurationSource"/>, adding support for stand-alone command line switches are not followed by a value. 
 /// </summary>
 public class FlagSwitchCommandLineConfigSource : IConfigurationSource
 {
