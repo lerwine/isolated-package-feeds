@@ -127,7 +127,7 @@ public class AppSettings
     public const string COMMAND_LINE_SWITCH_upstream_2D_service_2D_index = "--upstream-service-index";
 
     /// <summary>
-    /// Overrides the <see cref="UpstreamServiceIndex" /> setting.
+    /// Gets the override value for the <see cref="UpstreamServiceIndex" /> setting.
     /// </summary>
     /// <remarks>If this refers to a subdirectory and is not absolute, it will be resolved relative to the current working directory (<see cref="Environment.CurrentDirectory"/>).
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
@@ -157,7 +157,7 @@ public class AppSettings
     public const string COMMAND_LINE_SWITCH_local_2D_repository = "--local-repository";
 
     /// <summary>
-    /// Overrides the <see cref="LocalRepository" /> setting.
+    /// Gets the override value for the <see cref="LocalRepository" /> setting.
     /// </summary>
     /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Environment.CurrentDirectory"/>).
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
@@ -182,7 +182,7 @@ public class AppSettings
     public const string COMMAND_LINE_SWITCH_global_2D_packages_2D_folder = "--global-packages-folder";
 
     /// <summary>
-    /// Overrides the <see cref="GlobalPackagesFolder" /> setting.
+    /// Gets the override value for the <see cref="GlobalPackagesFolder" /> setting.
     /// </summary>
     /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Environment.CurrentDirectory"/>).
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
