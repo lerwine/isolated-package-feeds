@@ -660,4 +660,6 @@ for ($r = 0; $r -lt 50; $r++) {
     }
 }
 #>
-[System.IO.File]::WriteAllText(($PSScriptRoot | Join-Path -ChildPath 'TestData.txt'), $StringWriter.ToString(), [System.Text.UTF8Encoding]::new($false, $false));
+$BasePath = $PSScriptRoot | Join-Path -ChildPath 'Output';
+if (-not ($BasePath | Test-Path)) { (New-Item -Path $PSScriptRoot -ItemType Directory -Name 'Output' -ErrorAction Stop) | Out-Null; }
+[System.IO.File]::WriteAllText(($BasePath | Join-Path -ChildPath 'TestData.txt'), $StringWriter.ToString(), [System.Text.UTF8Encoding]::new($false, $false));
