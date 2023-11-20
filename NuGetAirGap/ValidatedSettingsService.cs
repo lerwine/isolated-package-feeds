@@ -67,7 +67,7 @@ public class ValidatedSettingsService
         }
         catch (UriSchemeNotSupportedException error) // Path is a URI, but not an https, http or file.
         {
-            _logger.LogInvalidRepositoryUrl(settingsValue, true, error);
+            _logger.LogUnsupportedRepositoryUrlScheme(settingsValue, error.UnsupportedScheme!, true, error);
         }
         catch (PathTooLongException error) // Path, file name, or both exceed the system-defined maximum length
         {
@@ -104,9 +104,9 @@ public class ValidatedSettingsService
         {
             _logger.LogRepositoryPathNotFound(settingsValue, false, exception);
         }
-        catch (UriSchemeNotSupportedException error) // Path is a URI, but not an https, http or file.
+        catch (UriSchemeNotSupportedException error) // Path is a URI, but not a file.
         {
-            _logger.LogUnsupportedRepositoryUrlScheme(settingsValue, false, error);
+            _logger.LogUnsupportedRepositoryUrlScheme(settingsValue, error.UnsupportedScheme!, false, error);
         }
         catch (System.Security.SecurityException error) // The caller does not have the required permissions to the path
         {
