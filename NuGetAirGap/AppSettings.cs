@@ -7,7 +7,7 @@ namespace NuGetAirGap;
 /// <summary>
 /// Application settings bound to <c>appsettings.json</c> and command line switches.
 /// </summary>
-public class AppSettings
+public partial class AppSettings
 {
     #region UpdateAll
 
@@ -132,7 +132,7 @@ public class AppSettings
     /// <remarks>If this refers to a subdirectory and is not absolute, it will be resolved relative to the current working directory (<see cref="Environment.CurrentDirectory"/>).
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
     /// <para>This is mapped from the <c>--upstream-service-index</c> (<see cref="COMMAND_LINE_SWITCH_upstream_2D_service_2D_index"/>) command line switch.</para></remarks>
-    public string OverrideUpstreamServiceIndex { get; set; } = null!;
+    public string? OverrideUpstreamServiceIndex { get; set; }
 
     #endregion
 
@@ -162,7 +162,7 @@ public class AppSettings
     /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Environment.CurrentDirectory"/>).
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
     /// <para>This is mapped from the <c>--local-repository</c> (<see cref="COMMAND_LINE_SWITCH_local_2D_repository"/>) command line switch.</para></remarks>
-    public string OverrideLocalRepository { get; set; } = null!;
+    public string? OverrideLocalRepository { get; set; }
 
     #endregion
 
@@ -187,7 +187,7 @@ public class AppSettings
     /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Environment.CurrentDirectory"/>).
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
     /// <para>This is mapped from the <c>--global-packages-folder</c> (<see cref="COMMAND_LINE_SWITCH_global_2D_packages_2D_folder"/>) command line switch.</para></remarks>
-    public string OverrideGlobalPackagesFolder { get; set; } = null!;
+    public string? OverrideGlobalPackagesFolder { get; set; }
 
     #endregion
 
@@ -240,4 +240,6 @@ public class AppSettings
     {
         builder.Add(new FlagSwitchCommandLineConfigSource(args?.ToImmutableArray() ?? ImmutableArray<string>.Empty, _booleanSwitchMappings, _valueSwitchMappings));
     }
+
+    internal ValidatedAppSettings Validated { get; } = new();
 }

@@ -55,7 +55,7 @@ namespace NuGetAirGap
             {
                 case 0:
                     Console.WriteLine("0 packages in local NuGet source.");
-                    if (!string.IsNullOrWhiteSpace(exportPath))
+                    if (exportPath is not null)
                     {
                         using var writer = OpenPackageMetaDataWriterAsync(exportPath);
                         await writer.WriteLineAsync("[]");
@@ -70,7 +70,12 @@ namespace NuGetAirGap
                     Console.WriteLine("{0} packages in local NuGet source:", packages.Count);
                     break;
             }
-            if (!string.IsNullOrWhiteSpace(exportPath))
+            if (exportPath is null)
+            {
+                foreach (var p in packages)
+                    Console.WriteLine("{0}: {1}", p.Identity.Id, p.Title);
+            }
+            else
             {
                 using var writer = OpenPackageMetaDataWriterAsync(exportPath);
                 await writer.WriteLineAsync('[');
@@ -84,9 +89,6 @@ namespace NuGetAirGap
                 await writer.FlushAsync();
                 writer.Close();
             }
-            else
-                foreach (var p in packages)
-                    Console.WriteLine("{0}: {1}", p.Identity.Id, p.Title);
         }
 
         private async Task ExportLocalPackageMetaDataAsync(List<IPackageSearchMetadata> packages, string exportPath, CancellationToken cancellationToken)
@@ -121,12 +123,12 @@ namespace NuGetAirGap
                 if (appSettings.ListLocal)
                 {
                     var packages = await localClientService.GetAllPackagesAsync(stoppingToken);
-                    await ListLocalPackagesAsync(packages, appSettings.ExportLocalMetaData, stoppingToken);
+                    await ListLocalPackagesAsync(packages, appSettings.Validated.ExportLocalMetaDataPath, stoppingToken);
                 }
-                else if (!string.IsNullOrWhiteSpace(appSettings.ExportLocalMetaData))
+                else if (appSettings.Validated.ExportLocalMetaDataPath is not null)
                 {
                     var packages = await localClientService.GetAllPackagesAsync(stoppingToken);
-                    await ExportLocalPackageMetaDataAsync(packages, appSettings.ExportLocalMetaData, stoppingToken);
+                    await ExportLocalPackageMetaDataAsync(packages, appSettings.Validated.ExportLocalMetaDataPath, stoppingToken);
                 }
                 else if (appSettings.UpdateAll)
                 {

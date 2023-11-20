@@ -13,7 +13,7 @@ public sealed class LocalClientService : ClientService
     private Task<PackageUpdateResource>? _getPackageUpdateResourceAsync;
 
     public LocalClientService(IOptions<AppSettings> options, ILogger<UpstreamClientService> logger) :
-        base(Repository.Factory.GetCoreV3(options.Value.LocalRepository), options, logger, false) { }
+        base(Repository.Factory.GetCoreV3(options.Value.Validated.LocalRepositoryPath), options, logger, false) { }
 
     #region Methods using the Search Query API
 
