@@ -16,59 +16,64 @@ public static class Constants
     public const string DEFAULT_LocalStoragePath = "Content";
 
     /// <summary>
-    /// Gets the command line option for the <c><see cref="Config.AppSettings.Upstream" /></c> setting.
+    /// Gets the command line option for the <see cref="AppSettings.Upstream" /> setting.
     /// </summary>
-    public const char SHORTHAND_u = 'u';
+    public const string SHORTHAND_u = "-u";
 
     /// <summary>
-    /// Gets the command line option for the <c><see cref="Config.AppSettings.Version" /></c> setting.
+    /// Gets the command line option for the <see cref="AppSettings.Version" /> setting.
     /// </summary>
-    public const char SHORTHAND_v = 'v';
+    public const string SHORTHAND_v = "-v";
 
     /// <summary>
-    /// Gets the command line option for the <c><see cref="Config.AppSettings.AddLibrary" /></c> setting.
+    /// Gets the command line option for the <see cref="AppSettings.AddLibrary" /> setting.
     /// </summary>
-    public const char SHORTHAND_a = 'a';
+    public const string SHORTHAND_a = "-a";
 
     /// <summary>
-    /// Gets the command line option for the <c><see cref="Config.AppSettings.GetNewVersions" /></c> setting.
+    /// Gets the command line option for the <see cref="AppSettings.GetNewVersions" /> setting.
     /// </summary>
-    public const char SHORTHAND_n = 'n';
+    public const string SHORTHAND_n = "-n";
 
     /// <summary>
-    /// Gets the command line option for the <c><see cref="Config.AppSettings.RemoveLibrary" /></c> setting.
+    /// Gets the command line option for the <see cref="AppSettings.RemoveLibrary" /> setting.
     /// </summary>
-    public const char SHORTHAND_d = 'd';
+    public const string SHORTHAND_d = "-d";
 
     /// <summary>
-    /// Gets the command line option for the <c><see cref="Config.AppSettings.ReloadLibrary" /></c> setting.
+    /// Gets the command line option for the <see cref="AppSettings.ReloadLibrary" /> setting.
     /// </summary>
-    public const char SHORTHAND_r = 'r';
+    public const string SHORTHAND_r = "-r";
 
     /// <summary>
-    /// Gets the command line option for the <c><see cref="Config.AppSettings.ReloadExistingVersions" /></c> setting.
+    /// Gets the command line option for the <see cref="AppSettings.ReloadExistingVersions" /> setting.
     /// </summary>
-    public const char SHORTHAND_e = 'e';
+    public const string SHORTHAND_e = "-e";
 
     /// <summary>
-    /// Gets the command line option for the <c><see cref="Config.AppSettings.Library" /></c> setting.
+    /// Gets the command line option for the <see cref="AppSettings.Library" /> setting.
     /// </summary>
-    public const char SHORTHAND_l = 'l';
+    public const string SHORTHAND_l = "-l";
 
     /// <summary>
-    /// Gets the command line option for the <c><see cref="Config.AppSettings.Show" /></c> setting.
+    /// Gets the command line option for the <see cref="AppSettings.Show" /> setting.
     /// </summary>
-    public const char SHORTHAND_s = 's';
+    public const string SHORTHAND_s = "-s";
 
     /// <summary>
-    /// Gets the command line option for the <c><see cref="Config.AppSettings.Help" /></c> setting.
+    /// Gets the command line option for the <see cref="AppSettings.ShowHelp" /> setting.
     /// </summary>
-    public const char SHORTHAND_h = 'h';
+    public const string SHORTHAND_h = "-h";
 
     /// <summary>
-    /// Gets the command line switch for the <see cref="Config.AppSettings.Help" /> application option option.
+    /// Gets the command line switch for the <see cref="AppSettings.ShowHelp" /> application option option.
     /// </summary>
-    public const char SHORTHAND__3F_ = '?';
+    public const string SHORTHAND__3F_ = "-?";
+
+    /// <summary>
+    /// Gets the command line switch for the <see cref="AppSettings.ShowHelp" /> application option option.
+    /// </summary>
+    public const string SHORTHAND_help = "--help";
 
     public const string SHOW_CDNs = "CDNs";
 
@@ -78,23 +83,23 @@ public static class Constants
 
     public const string SHOW_Files = "Files";
 
-    public static string GetSwitchName(string propertyName)
+    public static string GetDefaultSwitchName(string propertyName)
     {
         Type t = typeof(AppSettings);
-        var propertyInfo = t.GetProperty(propertyName);
-        if (propertyInfo is null)
-            throw new InvalidOperationException("Property not found.");
+        var propertyInfo = t.GetProperty(propertyName) ?? throw new InvalidOperationException("Property not found.");
         var attribute = propertyInfo.GetCustomAttribute<CommandLineShorthandAttribute>(false);
-        return (attribute is null) ? $"--{nameof(CdnGetter)}:{propertyInfo.Name}" : $"-{attribute.SwitchCharacter}";
+        return GetSwitchNames(propertyName).DefaultIfEmpty($"--{nameof(CdnGetter)}:{propertyInfo.Name}").First();
     }
 
-    public static string GetSwitchNameForLog(string propertyName)
+    public static IEnumerable<string> GetSwitchNames(string propertyName)
     {
         Type t = typeof(AppSettings);
         var propertyInfo = t.GetProperty(propertyName);
         if (propertyInfo is null)
             throw new InvalidOperationException("Property not found.");
         var attribute = propertyInfo.GetCustomAttribute<CommandLineShorthandAttribute>(false);
-        return (attribute is null) ? $"--{nameof(CdnGetter)}:{propertyInfo.Name}" : $"-{attribute.SwitchCharacter} (--{nameof(CdnGetter)}:{propertyInfo.Name})";
+        return (attribute is null) ? Enumerable.Empty<string>() : attribute.Switches;
     }
+
+    public static string GetSwitchNameForLog(string propertyName) => GetSwitchNames(propertyName).Take(1).Select(s => $"{s} (--{nameof(CdnGetter)}:{propertyName})").DefaultIfEmpty($"--{nameof(CdnGetter)}:{propertyName}").First();
 }
