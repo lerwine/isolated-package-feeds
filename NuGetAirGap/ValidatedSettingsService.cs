@@ -1,40 +1,57 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NuGet.Protocol.Core.Types;
 
 namespace NuGetAirGap;
 
 public class ValidatedSettingsService
 {
     private readonly IOptions<AppSettings> _settingsOptions;
-    private readonly ILogger<AppSettingsValidatorService> _logger;
+    private readonly ILogger<ValidatedSettingsService> _logger;
     private readonly HostingEnvironment _hostingEnvironment;
     private readonly object _syncRoot = new();
     private Task<bool>? _validateAsync;
 
+    /// <summary>
+    /// Gets the URL for the upstream NuGet repository.
+    /// </summary>
+    /// <value>The <see cref="Uri.UriSchemeHttps"/>, <see cref="Uri.UriSchemeHttp"/>, or <see cref="Uri.UriSchemeFile"/> URL for the upstream NuGet repository.</value>
     public Uri UpstreamRepositoryUrl { get; private set; } = null!;
-    
+
+    /// <summary>
+    /// Gets the location of the upstream NuGet repository.
+    /// </summary>
+    /// <value>The local location of the upstream NuGet repository or <see langword="null"/> if the upstream NuGet repository is remote.</value>
     public DirectoryInfo? UpstreamRepository { get; private set; }
 
+    /// <summary>
+    /// Gets the location of the local NuGet repository.
+    /// </summary>
+    /// <value>The location of the local NuGet repository subdirectory.</value>
     public DirectoryInfo LocalRepository { get; private set; } = null!;
 
-    public FileInfo ExportLocalMetaData { get; private set; } = null!;
+    /// <summary>
+    /// Gets local metadata export path.
+    /// </summary>
+    /// <value>The location of the file for exporting local repository metadata or <see langword="null"/> if local repository metadata is not to be exported.</value>
+    public FileInfo? ExportLocalMetaData { get; private set; }
 
+    /// <summary>
+    /// Gets the location of the global NuGet packages folder.
+    /// </summary>
+    /// <value>The location of the global NuGet packages subdirectory.</value>
     public DirectoryInfo GlobalPackagesFolder { get; private set; } = null!;
 
-    public ValidatedSettingsService(IOptions<AppSettings> settingsOptions, ILogger<AppSettingsValidatorService> logger, HostingEnvironment hostingEnvironment) =>
+    public ValidatedSettingsService(IOptions<AppSettings> settingsOptions, ILogger<ValidatedSettingsService> logger, HostingEnvironment hostingEnvironment) =>
         (_settingsOptions, _logger, _hostingEnvironment) = (settingsOptions, logger, hostingEnvironment);
 
     private bool ValidateUpstreamServiceIndex(AppSettings options)
     {
-        string settingsValue = options.OverrideUpstreamServiceIndex.DefaultIfWhiteSpace<(string SettingName, string BasePath)>(() =>
-            (nameof(AppSettings.OverrideUpstreamServiceIndex), Environment.CurrentDirectory), options.UpstreamServiceIndex, () =>
-                (nameof(AppSettings.UpstreamServiceIndex), _hostingEnvironment.ContentRootPath), out var opt);
+        string settingsValue = options.OverrideUpstreamServiceIndex.DefaultIfWhiteSpace(
+            ifPrimaryValue: () => (SettingName: nameof(AppSettings.OverrideUpstreamServiceIndex), BasePath: Environment.CurrentDirectory),
+            defaultValue: options.UpstreamServiceIndex,
+            ifDefaultValue: () => (SettingName: nameof(AppSettings.UpstreamServiceIndex), BasePath: _hostingEnvironment.ContentRootPath),
+            result: out (string SettingName, string BasePath) opt);
         try
         {
             if (ResourceLocatorUtil.TryParseHttpOrFileAsDirectoryInfo(opt.BasePath, settingsValue, out Uri UpstreamRepositoryUrl, out DirectoryInfo? directory) && !(UpstreamRepository = directory).Exists)
@@ -62,10 +79,14 @@ public class ValidatedSettingsService
         }
         return false;
     }
-    
+
     private bool ValidateLocalRepository(AppSettings options)
     {
-        string settingsValue = options.OverrideLocalRepository.DefaultIfWhiteSpace<(string SettingName, string BasePath)>(() => (nameof(AppSettings.OverrideLocalRepository), Environment.CurrentDirectory), options.LocalRepository, () => (nameof(AppSettings.LocalRepository), _hostingEnvironment.ContentRootPath), out var opt);
+        string settingsValue = options.OverrideLocalRepository.DefaultIfWhiteSpace(
+            ifPrimaryValue: () => (SettingName: nameof(AppSettings.OverrideLocalRepository), BasePath: Environment.CurrentDirectory),
+            defaultValue: options.LocalRepository,
+            ifDefaultValue: () => (SettingName: nameof(AppSettings.LocalRepository), BasePath: _hostingEnvironment.ContentRootPath),
+            result: out (string SettingName, string BasePath) opt);
         try
         {
             settingsValue = (LocalRepository = ResourceLocatorUtil.GetDirectoryInfo(opt.BasePath, settingsValue)).FullName;
@@ -143,7 +164,11 @@ public class ValidatedSettingsService
 
     private bool ValidateGlobalPackagesFolder(AppSettings options)
     {
-        string settingsValue = options.OverrideGlobalPackagesFolder.DefaultIfWhiteSpace<(string SettingName, string BasePath)>(() => (nameof(AppSettings.OverrideGlobalPackagesFolder), Environment.CurrentDirectory), options.GlobalPackagesFolder, () => (nameof(AppSettings.GlobalPackagesFolder), _hostingEnvironment.ContentRootPath), out var opt);
+        string settingsValue = options.OverrideGlobalPackagesFolder.DefaultIfWhiteSpace(
+            ifPrimaryValue: () => (SettingName: nameof(AppSettings.OverrideGlobalPackagesFolder), BasePath: Environment.CurrentDirectory),
+            defaultValue: options.GlobalPackagesFolder,
+            ifDefaultValue: () => (SettingName: nameof(AppSettings.GlobalPackagesFolder), BasePath: _hostingEnvironment.ContentRootPath),
+            result: out (string SettingName, string BasePath) opt);
         try
         {
             settingsValue = (GlobalPackagesFolder = ResourceLocatorUtil.GetDirectoryInfo(opt.BasePath, settingsValue)).FullName;
@@ -172,6 +197,7 @@ public class ValidatedSettingsService
 
     private bool Validate(CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         AppSettings options = _settingsOptions.Value;
         bool isValid = ValidateUpstreamServiceIndex(options);
         if (!ValidateLocalRepository(options))
@@ -193,7 +219,7 @@ public class ValidatedSettingsService
         }
         return false;
     }
-    
+
     public async Task<bool> IsValidAsync(CancellationToken cancellationToken)
     {
         lock (_syncRoot)

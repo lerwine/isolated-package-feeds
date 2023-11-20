@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using NuGet.Configuration;
 using NuGet.Frameworks;
 using NuGet.Packaging.Core;
 using NuGet.Protocol.Core.Types;
@@ -65,6 +64,7 @@ public static class AppLoggerExtensions
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
+    // TODO: Change to void return.
     public static string LogInvalidRepositoryUrl(this ILogger logger, string url, bool isUpstream, Exception? exception = null)
     {
         if (exception is PathTooLongException)
@@ -85,7 +85,7 @@ public static class AppLoggerExtensions
         _invalidLocalRepositoryUrl(logger, url, exception);
         return $"{MESSAGE_InvalidLocalRepositoryUrl}.";
     }
-
+    // TODO: Change to void return.
     public static string LogInvalidRepositoryUrl(this ILogger logger, Uri url, bool isUpstream, Exception? exception = null)
     {
         if (url.IsAbsoluteUri)
@@ -110,7 +110,7 @@ public static class AppLoggerExtensions
         _invalidLocalRepositoryUrl(logger, url.OriginalString, exception);
         return $"{MESSAGE_InvalidLocalRepositoryUrl}.";
     }
-
+    // TODO: Change to void return.
     public static string LogUnsupportedRepositoryUrlScheme(this ILogger logger, string uriString, bool isUpstream, Exception? exception = null)
     {
         if (isUpstream)
@@ -148,6 +148,7 @@ public static class AppLoggerExtensions
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
+    // TODO: Change to void return.
     public static string LogRepositorySecurityException(this ILogger logger, string path, bool isUpstream, Exception? exception = null)
     {
         if (isUpstream)
@@ -179,6 +180,7 @@ public static class AppLoggerExtensions
     /// <param name="path">The local repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
+    // TODO: Change to void return.
     public static string LogLocalRepositoryIOException(this ILogger logger, string path, Exception? exception = null)
     {
         _localRepositoryIOException(logger, path, exception);
@@ -212,6 +214,7 @@ public static class AppLoggerExtensions
     /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
+    // TODO: Change to void return.
     public static string LogRepositoryPathNotFound(this ILogger logger, string path, bool isUpstream, Exception? exception = null)
     {
         if (isUpstream)
@@ -450,6 +453,7 @@ public static class AppLoggerExtensions
     /// <param name="url">The invalid NuGet repository URL.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
+    // TODO: Change to void return.
     public static string LogInvalidExportLocalMetaData(this ILogger logger, string url, Exception? exception = null)
     {
         if (exception is PathTooLongException)
@@ -469,6 +473,7 @@ public static class AppLoggerExtensions
     /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
+    // TODO: Change to void return.
     public static string LogExportLocalMetaDataDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
     {
         _exportLocalMetaDataDirectoryNotFound(logger, path, exception);
@@ -520,6 +525,7 @@ public static class AppLoggerExtensions
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
+    // TODO: Change to void return.
     public static string LogMetaDataExportPathAccessDenied(this ILogger logger, string path, Exception? exception = null)
     {
         if (exception is System.Security.SecurityException)
@@ -641,6 +647,7 @@ public static class AppLoggerExtensions
     /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
+    // TODO: Change to void return.
     public static string LogGlobalPackagesFolderNotFound(this ILogger logger, string path, Exception? exception = null)
     {
         _globalPackagesFolderNotFound(logger, path, exception);
@@ -667,6 +674,7 @@ public static class AppLoggerExtensions
     /// <param name="path">The Global packages folder path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
+    // TODO: Change to void return.
     public static string LogGlobalPackagesFolderSecurityException(this ILogger logger, string path, Exception? exception = null)
     {
         _globalPackagesFolderSecurityException(logger, path, exception);
@@ -703,6 +711,7 @@ public static class AppLoggerExtensions
     /// <param name="path">The invalid global packages folder path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
+    // TODO: Change to void return.
     public static string LogInvalidGlobalPackagesFolder(this ILogger logger, string path, Exception? exception = null)
     {
         if (exception is PathTooLongException)
@@ -721,6 +730,7 @@ public static class AppLoggerExtensions
     /// <param name="url">The invalid global packages folder url.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
+    // TODO: Change to void return.
     public static string LogGlobalPackagesFolderNotFileUri(this ILogger logger, string url, Exception? exception = null)
     {
         _globalPackagesFolderNotFileUri(logger, url, exception);
@@ -730,11 +740,11 @@ public static class AppLoggerExtensions
     #endregion
 
     #region MultipleSettingsWithSameRepositoryLocation event logger message (0x0011)
-    
+
     public const int EVENT_ID_MultipleSettingsWithSameRepositoryLocation = 0x0011;
-    
+
     public static readonly EventId MultipleSettingsWithSameRepositoryLocation = new(EVENT_ID_MultipleSettingsWithSameRepositoryLocation, nameof(MultipleSettingsWithSameRepositoryLocation));
-    
+
     private const string MESSAGE_LocalSameAsUpstreamNugetRepository = "Local NuGet repository path cannot be the same as the upstream NuGet repository path";
 
     private const string MESSAGE_LocalRepositorySameAsGlobalPackagesFolder = "Local NuGet repository path cannot be the same as the upstream NuGet repository path";
@@ -756,6 +766,7 @@ public static class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
+    // TODO: Change to void return.
     public static string LogLocalSameAsUpstreamNugetRepository(this ILogger logger, string path, Exception? exception = null)
     {
         _localSameAsUpstreamNugetRepository(logger, path, exception);
@@ -768,6 +779,7 @@ public static class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
+    // TODO: Change to void return.
     public static string LogLocalRepositorySameAsGlobalPackagesFolder(this ILogger logger, string path, Exception? exception = null)
     {
         _localRepositorySameAsGlobalPackagesFolder(logger, path, exception);
@@ -780,6 +792,7 @@ public static class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
+    // TODO: Change to void return.
     public static string LogUpstreamRepositorySameAsGlobalPackagesFolder(this ILogger logger, string path, Exception? exception = null)
     {
         _upstreamRepositorySameAsGlobalPackagesFolder(logger, path, exception);
