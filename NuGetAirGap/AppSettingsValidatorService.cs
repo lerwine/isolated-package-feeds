@@ -21,7 +21,7 @@ public partial class AppSettingsValidatorService : IValidateOptions<AppSettings>
             {
                 options.Validated.UpstreamServiceLocation = directory.FullName;
                 if (!directory.Exists)
-                    return new ValidationResult(_logger.LogRepositoryPathNotFound(options.UpstreamServiceIndex, true));
+                    return new ValidationResult(_logger.LogRepositoryPathNotFound( options.Validated.UpstreamServiceLocation, true));
             }
             else
                 options.Validated.UpstreamServiceLocation = absoluteUri.AbsoluteUri;
