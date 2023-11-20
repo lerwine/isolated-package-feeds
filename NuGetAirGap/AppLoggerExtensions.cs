@@ -14,66 +14,111 @@ public static class AppLoggerExtensions
 
     public static readonly EventId InvalidRepositoryUrl = new(EVENT_ID_InvalidRepositoryUrl, nameof(InvalidRepositoryUrl));
 
+    private const string MESSAGE_LocalRepositoryUrlIsNotLocal = "Local NuGet repository URL does not reference a local path";
+
     private static readonly Action<ILogger, string, Exception?> _localRepositoryUrlIsNotLocal = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
-        "Local NuGet repository URL {URL} does not reference a local path.");
+        $"{MESSAGE_LocalRepositoryUrlIsNotLocal} ({{URL}}).");
+
+    private const string MESSAGE_UpstreamRepositoryUrlIsNotAbsolute = "Upstream NuGet repository URL cannot be relative";
 
     private static readonly Action<ILogger, string, Exception?> _upstreamRepositoryUrlIsNotAbsolute = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
-        "Upstream NuGet repository URL {URL} cannot be relative.");
+        $"{MESSAGE_UpstreamRepositoryUrlIsNotAbsolute} ({{URL}}).");
+
+    private const string MESSAGE_UpstreamRepositoryPathTooLong = "Upstream NuGet repository path is too long";
 
     private static readonly Action<ILogger, string, Exception?> _upstreamRepositoryPathTooLong = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
-        "Upstream NuGet repository path is too long: {Path}");
+        $"{MESSAGE_UpstreamRepositoryPathTooLong} ({{Path}}).");
+
+    private const string MESSAGE_LocalRepositoryPathTooLong = "Local NuGet repository path is too long";
 
     private static readonly Action<ILogger, string, Exception?> _localRepositoryPathTooLong = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
-        "Local NuGet repository path is too long: {Path}");
+        $"{MESSAGE_LocalRepositoryPathTooLong} ({{Path}}).");
+
+    private const string MESSAGE_InvalidLocalRepositoryUrl = "Local NuGet repository URL is invalid";
 
     private static readonly Action<ILogger, string, Exception?> _invalidLocalRepositoryUrl = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
-        "Local NuGet repository URL {URL} is invalid.");
+        $"{MESSAGE_InvalidLocalRepositoryUrl} ({{URL}}).");
+
+    private const string MESSAGE_InvalidUpstreamRepositoryUrl = "Upstream NuGet repository URL is invalid";
 
     private static readonly Action<ILogger, string, Exception?> _invalidUpstreamRepositoryUrl = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
-        "Upstream NuGet repository URL {URL} is invalid.");
+        $"{MESSAGE_InvalidUpstreamRepositoryUrl} ({{URL}}).");
 
-    private static readonly Action<ILogger, string, string, Exception?> _unsupportedUpstreamRepositoryUrlScheme = LoggerMessage.Define<string, string>(LogLevel.Critical, InvalidRepositoryUrl,
-        "URI scheme {SchemeName} for Upstream NuGet repository URL is not supported (URL={URL}).");
+    private const string MESSAGE_UnsupportedUpstreamRepositoryUrlScheme = "Invalid scheme or Upstream NuGet repository URL";
 
-    private static readonly Action<ILogger, string, string, Exception?> _unsupportedLocalRepositoryUrlScheme = LoggerMessage.Define<string, string>(LogLevel.Critical, InvalidRepositoryUrl,
-        "URI scheme {SchemeName} for Local NuGet repository URL is not supported (URL={URL}).");
+    private static readonly Action<ILogger, string, Exception?> _unsupportedUpstreamRepositoryUrlScheme = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
+        $"{MESSAGE_UnsupportedUpstreamRepositoryUrlScheme} ({{URL}}).");
 
+    private const string MESSAGE_UnsupportedLocalRepositoryUrlScheme = "Invalid scheme or Local NuGet repository URL";
+
+    private static readonly Action<ILogger, string, Exception?> _unsupportedLocalRepositoryUrlScheme = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
+        $"{MESSAGE_UnsupportedLocalRepositoryUrlScheme} ({{URL}}).");
+
+    /// <summary>
+    /// </summary>
     /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidRepositoryUrl"/> event with event code 0x0001.
     /// </summary>
     /// <param name="logger">The current logger.</param>
-    /// <param name="uriString">The invalid NuGet repository URL.</param>
+    /// <param name="url">The invalid NuGet repository URL.</param>
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogInvalidRepositoryUrl(this ILogger logger, string uriString, bool isUpstream, Exception? exception = null)
+    /// <returns>The validation message.</returns>
+    public static string LogInvalidRepositoryUrl(this ILogger logger, string url, bool isUpstream, Exception? exception = null)
     {
         if (exception is PathTooLongException)
         {
             if (isUpstream)
-                _upstreamRepositoryPathTooLong(logger, uriString, exception);
-            else
-                _localRepositoryPathTooLong(logger, uriString, exception);
+            {
+                _upstreamRepositoryPathTooLong(logger, url, exception);
+                return MESSAGE_UpstreamRepositoryPathTooLong;
+            }
+            _localRepositoryPathTooLong(logger, url, exception);
+            return MESSAGE_LocalRepositoryPathTooLong;
         }
-        else if (isUpstream)
-            _invalidUpstreamRepositoryUrl(logger, uriString, exception);
-        else
-            _invalidLocalRepositoryUrl(logger, uriString, exception);
+        if (isUpstream)
+        {
+            _invalidUpstreamRepositoryUrl(logger, url, exception);
+            return $"{MESSAGE_InvalidUpstreamRepositoryUrl}.";
+        }
+        _invalidLocalRepositoryUrl(logger, url, exception);
+        return $"{MESSAGE_InvalidLocalRepositoryUrl}.";
     }
 
-    /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidRepositoryUrl"/> event with event code 0x0001.
-    /// </summary>
-    /// <param name="logger">The current logger.</param>
-    /// <param name="schemeName">The unsupported URI scheme name.</param>
-    /// <param name="uriString">The invalid NuGet repository URL.</param>
-    /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
-    /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogUnsupportedRepositoryUrlScheme(this ILogger logger, string schemeName, string uriString, bool isUpstream, Exception? exception = null)
+    public static string LogInvalidRepositoryUrl(this ILogger logger, Uri url, bool isUpstream, Exception? exception = null)
+    {
+        if (url.IsAbsoluteUri)
+        {
+            if (isUpstream)
+            {
+                _invalidUpstreamRepositoryUrl(logger, url.OriginalString, exception);
+                return $"{MESSAGE_InvalidUpstreamRepositoryUrl}.";
+            }
+            if (!url.IsFile)
+            {
+                _localRepositoryUrlIsNotLocal(logger, url.OriginalString, exception);
+                return $"{MESSAGE_LocalRepositoryUrlIsNotLocal}.";
+            }
+        }
+        else if (isUpstream)
+        {
+            _upstreamRepositoryUrlIsNotAbsolute(logger, url.OriginalString, exception);
+            return $"{MESSAGE_UpstreamRepositoryUrlIsNotAbsolute}.";
+        }
+
+        _invalidLocalRepositoryUrl(logger, url.OriginalString, exception);
+        return $"{MESSAGE_InvalidLocalRepositoryUrl}.";
+    }
+
+    public static string LogUnsupportedRepositoryUrlScheme(this ILogger logger, string uriString, bool isUpstream, Exception? exception = null)
     {
         if (isUpstream)
-            _unsupportedUpstreamRepositoryUrlScheme(logger, schemeName, uriString, exception);
-        else
-            _unsupportedLocalRepositoryUrlScheme(logger, schemeName, uriString, exception);
+        {
+            _unsupportedUpstreamRepositoryUrlScheme(logger, uriString, exception);
+            return $"{MESSAGE_UnsupportedUpstreamRepositoryUrlScheme}.";
+        }
+        _unsupportedLocalRepositoryUrlScheme(logger, uriString, exception);
+        return $"{MESSAGE_UnsupportedLocalRepositoryUrlScheme}.";
     }
 
     #endregion
@@ -84,11 +129,15 @@ public static class AppLoggerExtensions
 
     public static readonly EventId RepositorySecurityException = new(EVENT_ID_RepositorySecurityException, nameof(RepositorySecurityException));
 
+    private const string MESSAGE_UpstreamRepositorySecurityException = "Access denied while accessing upstream NuGet repository path";
+
+    private const string MESSAGE_LocalRepositorySecurityException = "Access denied while accessing local NuGet repository path";
+
     private static readonly Action<ILogger, string, Exception?> _upstreamRepositorySecurityException = LoggerMessage.Define<string>(LogLevel.Critical, RepositorySecurityException,
-        "Access denied while accessing upstream NuGet repository path {Path}.");
+        $"{MESSAGE_UpstreamRepositorySecurityException} ({{Path}}).");
 
     private static readonly Action<ILogger, string, Exception?> _localRepositorySecurityException = LoggerMessage.Define<string>(LogLevel.Critical, RepositorySecurityException,
-        "Access denied while accessing local NuGet repository path {Path}.");
+        $"{MESSAGE_LocalRepositorySecurityException} ({{Path}}).");
 
     /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="RepositorySecurityException"/> event with code 0x0002.
@@ -97,12 +146,16 @@ public static class AppLoggerExtensions
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogRepositorySecurityException(this ILogger logger, string path, bool isUpstream, Exception? exception = null)
+    /// <returns>The validation message.</returns>
+    public static string LogRepositorySecurityException(this ILogger logger, string path, bool isUpstream, Exception? exception = null)
     {
         if (isUpstream)
+        {
             _upstreamRepositorySecurityException(logger, path, exception);
-        else
-            _localRepositorySecurityException(logger, path, exception);
+            return MESSAGE_UpstreamRepositorySecurityException;
+        }
+        _localRepositorySecurityException(logger, path, exception);
+        return MESSAGE_LocalRepositorySecurityException;
     }
 
     #endregion
@@ -113,8 +166,10 @@ public static class AppLoggerExtensions
 
     public static readonly EventId LocalRepositoryIOException = new(EVENT_ID_LocalRepositoryIOException, nameof(LocalRepositoryIOException));
 
+    private const string MESSAGE_LocalRepositoryIOException = "I/O error while creating local repository folder";
+
     private static readonly Action<ILogger, string, Exception?> _localRepositoryIOException = LoggerMessage.Define<string>(LogLevel.Critical, LocalRepositoryIOException,
-        "I/O error while creating local repository folder {Path}.");
+        $"{MESSAGE_LocalRepositoryIOException} {{Path}}.");
 
     /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="LocalRepositoryIOException"/> event with code 0x0003.
@@ -122,7 +177,12 @@ public static class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The local repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogLocalRepositoryIOException(this ILogger logger, string path, Exception? exception = null) => _localRepositoryIOException(logger, path, exception);
+    /// <returns>The validation message.</returns>
+    public static string LogLocalRepositoryIOException(this ILogger logger, string path, Exception? exception = null)
+    {
+        _localRepositoryIOException(logger, path, exception);
+        return MESSAGE_LocalRepositoryIOException;
+    }
 
     #endregion
 
@@ -132,11 +192,15 @@ public static class AppLoggerExtensions
 
     public static readonly EventId RepositoryPathNotFound = new(EVENT_ID_RepositoryPathNotFound, nameof(RepositoryPathNotFound));
 
+    private const string MESSAGE_UpstreamRepositoryPathNotFound = "Upstream repository path not found";
+
     private static readonly Action<ILogger, string, Exception?> _upstreamRepositoryPathNotFound = LoggerMessage.Define<string>(LogLevel.Critical, RepositoryPathNotFound,
-        "Upstream repository path not found: {Path}");
+        $"{MESSAGE_UpstreamRepositoryPathNotFound} ({{Path}}).");
+
+    private const string MESSAGE_LocalRepositoryPathNotFound = "Local repository path not found";
 
     private static readonly Action<ILogger, string, Exception?> _localRepositoryPathNotFound = LoggerMessage.Define<string>(LogLevel.Critical, RepositoryPathNotFound,
-        "Local repository path not found: {Path}.");
+        $"{MESSAGE_UpstreamRepositoryPathNotFound} ({{Path}}).");
 
     /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="RepositoryPathNotFound"/> event with code 0x0004.
@@ -146,12 +210,16 @@ public static class AppLoggerExtensions
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory path.</param>
     /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogRepositoryPathNotFound(this ILogger logger, string path, bool isUpstream, Exception? exception = null)
+    /// <returns>The validation message.</returns>
+    public static string LogRepositoryPathNotFound(this ILogger logger, string path, bool isUpstream, Exception? exception = null)
     {
         if (isUpstream)
+        {
             _upstreamRepositoryPathNotFound(logger, path, exception);
-        else
-            _localRepositoryPathNotFound(logger, path, exception);
+            return MESSAGE_UpstreamRepositoryPathNotFound;
+        }
+        _localRepositoryPathNotFound(logger, path, exception);
+        return MESSAGE_LocalRepositoryPathNotFound;
     }
 
     #endregion
@@ -373,6 +441,8 @@ public static class AppLoggerExtensions
     }
 
     /// <summary>
+    /// </summary>
+    /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidExportLocalMetaData"/> event with event code 0x000a.
     /// </summary>
     /// <param name="logger">The current logger.</param>
@@ -557,8 +627,10 @@ public static class AppLoggerExtensions
 
     public static readonly EventId GlobalPackagesFolderNotFound = new(EVENT_ID_GlobalPackagesFolderNotFound, nameof(GlobalPackagesFolderNotFound));
 
+    private const string MESSAGE_GlobalPackagesFolderNotFound = "Global packages folder not found";
+
     private static readonly Action<ILogger, string, Exception?> _globalPackagesFolderNotFound = LoggerMessage.Define<string>(LogLevel.Critical, GlobalPackagesFolderNotFound,
-        "Global packages folder not found: {Path}.");
+        $"{MESSAGE_GlobalPackagesFolderNotFound} ({{Path}}).");
 
     /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="GlobalPackagesFolderNotFound"/> event with code 0x000e.
@@ -567,7 +639,12 @@ public static class AppLoggerExtensions
     /// <param name="path">The Global packages folder path.</param>
     /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogGlobalPackagesFolderNotFound(this ILogger logger, string path, Exception? exception = null) => _globalPackagesFolderNotFound(logger, path, exception);
+    /// <returns>The validation message.</returns>
+    public static string LogGlobalPackagesFolderNotFound(this ILogger logger, string path, Exception? exception = null)
+    {
+        _globalPackagesFolderNotFound(logger, path, exception);
+        return MESSAGE_GlobalPackagesFolderNotFound;
+    }
 
     #endregion
 
@@ -577,8 +654,10 @@ public static class AppLoggerExtensions
 
     public static readonly EventId GlobalPackagesFolderSecurityException = new(EVENT_ID_GlobalPackagesFolderSecurityException, nameof(GlobalPackagesFolderSecurityException));
 
+    private const string MESSAGE_GlobalPackagesFolderSecurityException = "Access denied while accessing global packages folder";
+
     private static readonly Action<ILogger, string, Exception?> _globalPackagesFolderSecurityException = LoggerMessage.Define<string>(LogLevel.Critical, GlobalPackagesFolderSecurityException,
-        "Access denied while accessing global packages folder {Path}.");
+        $"{MESSAGE_GlobalPackagesFolderSecurityException} ({{Path}}).");
 
     /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="GlobalPackagesFolderSecurityException"/> event with code 0x000f.
@@ -586,7 +665,12 @@ public static class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The Global packages folder path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogGlobalPackagesFolderSecurityException(this ILogger logger, string path, Exception? exception = null) => _globalPackagesFolderSecurityException(logger, path, exception);
+    /// <returns>The validation message.</returns>
+    public static string LogGlobalPackagesFolderSecurityException(this ILogger logger, string path, Exception? exception = null)
+    {
+        _globalPackagesFolderSecurityException(logger, path, exception);
+        return MESSAGE_GlobalPackagesFolderSecurityException;
+    }
 
     #endregion
 
@@ -596,14 +680,20 @@ public static class AppLoggerExtensions
 
     public static readonly EventId InvalidGlobalPackagesFolder = new(EVENT_ID_InvalidGlobalPackagesFolder, nameof(InvalidGlobalPackagesFolder));
 
+    private const string MESSAGE_GlobalPackagesFolderPathTooLong = "NuGet Global Packages Folder path is too long";
+
     private static readonly Action<ILogger, string, Exception?> _globalPackagesFolderPathTooLong = LoggerMessage.Define<string>(LogLevel.Critical, InvalidGlobalPackagesFolder,
-        "NuGet Global Packages Folder path is too long: {Path}");
+        $"{MESSAGE_GlobalPackagesFolderPathTooLong} ({{Path}}).");
+
+    private const string MESSAGE_InvalidGlobalPackagesFolder = "NuGet Global Packages Folder path is invalid";
 
     private static readonly Action<ILogger, string, Exception?> _invalidGlobalPackagesFolder = LoggerMessage.Define<string>(LogLevel.Critical, InvalidGlobalPackagesFolder,
-        "NuGet Global Packages Folder path is invalid: {Path}");
+        $"{MESSAGE_InvalidGlobalPackagesFolder} ({{Path}}).");
+
+    private const string MESSAGE_GlobalPackagesFolderNotFileUri = "NuGet Global Packages Folder must refer to a filesystem subdirectory";
 
     private static readonly Action<ILogger, string, Exception?> _globalPackagesFolderNotFileUri = LoggerMessage.Define<string>(LogLevel.Critical, InvalidGlobalPackagesFolder,
-        "NuGet Global Packages Folder location {URI} must refer to a filesystem subdirectory.");
+        $"{MESSAGE_GlobalPackagesFolderNotFileUri} ({{URI}}).");
 
     /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidGlobalPackagesFolder"/> event with event code 0x0010.
@@ -611,12 +701,16 @@ public static class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The invalid global packages folder path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogInvalidGlobalPackagesFolder(this ILogger logger, string path, Exception? exception = null)
+    /// <returns>The validation message.</returns>
+    public static string LogInvalidGlobalPackagesFolder(this ILogger logger, string path, Exception? exception = null)
     {
         if (exception is PathTooLongException)
+        {
             _globalPackagesFolderPathTooLong(logger, path, exception);
-        else
-            _invalidGlobalPackagesFolder(logger, path, exception);
+            return MESSAGE_GlobalPackagesFolderPathTooLong;
+        }
+        _invalidGlobalPackagesFolder(logger, path, exception);
+        return $"{MESSAGE_InvalidGlobalPackagesFolder}.";
     }
 
     /// <summary>
@@ -625,7 +719,12 @@ public static class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="url">The invalid global packages folder url.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogGlobalPackagesFolderNotFileUri(this ILogger logger, string url, Exception? exception = null) => _globalPackagesFolderNotFileUri(logger, url, exception);
+    /// <returns>The validation message.</returns>
+    public static string LogGlobalPackagesFolderNotFileUri(this ILogger logger, string url, Exception? exception = null)
+    {
+        _globalPackagesFolderNotFileUri(logger, url, exception);
+        return $"{MESSAGE_GlobalPackagesFolderNotFileUri}.";
+    }
 
     #endregion
 
@@ -635,14 +734,20 @@ public static class AppLoggerExtensions
 
     public static readonly EventId MultipleSettingsWithSameRepositoryLocation = new(EVENT_ID_MultipleSettingsWithSameRepositoryLocation, nameof(MultipleSettingsWithSameRepositoryLocation));
 
+    private const string MESSAGE_LocalSameAsUpstreamNugetRepository = "Local NuGet repository path cannot be the same as the upstream NuGet repository path";
+
+    private const string MESSAGE_LocalRepositorySameAsGlobalPackagesFolder = "Local NuGet repository path cannot be the same as the upstream NuGet repository path";
+
+    private const string MESSAGE_UpstreamRepositorySameAsGlobalPackagesFolder = "Local NuGet repository path cannot be the same as the upstream NuGet repository path";
+
     private static readonly Action<ILogger, string, Exception?> _localSameAsUpstreamNugetRepository = LoggerMessage.Define<string>(LogLevel.Critical, MultipleSettingsWithSameRepositoryLocation,
-        "Local NuGet repository path cannot be the same as the upstream NuGet repository path: {Path}");
+        $"{MESSAGE_LocalSameAsUpstreamNugetRepository} ({{Path}}).");
 
     private static readonly Action<ILogger, string, Exception?> _localRepositorySameAsGlobalPackagesFolder = LoggerMessage.Define<string>(LogLevel.Critical, MultipleSettingsWithSameRepositoryLocation,
-        "Local NuGet repository path cannot be the same as the upstream NuGet repository path: {Path}");
+        $"{MESSAGE_LocalRepositorySameAsGlobalPackagesFolder} ({{Path}}).");
 
     private static readonly Action<ILogger, string, Exception?> _upstreamRepositorySameAsGlobalPackagesFolder = LoggerMessage.Define<string>(LogLevel.Critical, MultipleSettingsWithSameRepositoryLocation,
-        "Local NuGet repository path cannot be the same as the upstream NuGet repository path: {Path}");
+        $"{MESSAGE_UpstreamRepositorySameAsGlobalPackagesFolder} ({{Path}}).");
 
     /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="MultipleSettingsWithSameRepositoryLocation"/> event with event code 0x0011.
@@ -650,7 +755,11 @@ public static class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogLocalSameAsUpstreamNugetRepository(this ILogger logger, string path, Exception? exception = null) => _localSameAsUpstreamNugetRepository(logger, path, exception);
+    public static string LogLocalSameAsUpstreamNugetRepository(this ILogger logger, string path, Exception? exception = null)
+    {
+        _localSameAsUpstreamNugetRepository(logger, path, exception);
+        return MESSAGE_LocalSameAsUpstreamNugetRepository;
+    }
 
     /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="MultipleSettingsWithSameRepositoryLocation"/> event with event code 0x0011.
@@ -658,7 +767,11 @@ public static class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogLocalRepositorySameAsGlobalPackagesFolder(this ILogger logger, string path, Exception? exception = null) => _localRepositorySameAsGlobalPackagesFolder(logger, path, exception);
+    public static string LogLocalRepositorySameAsGlobalPackagesFolder(this ILogger logger, string path, Exception? exception = null)
+    {
+        _localRepositorySameAsGlobalPackagesFolder(logger, path, exception);
+        return MESSAGE_LocalRepositorySameAsGlobalPackagesFolder;
+    }
 
     /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="MultipleSettingsWithSameRepositoryLocation"/> event with event code 0x0011.
@@ -666,7 +779,11 @@ public static class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogUpstreamRepositorySameAsGlobalPackagesFolder(this ILogger logger, string path, Exception? exception = null) => _upstreamRepositorySameAsGlobalPackagesFolder(logger, path, exception);
+    public static string LogUpstreamRepositorySameAsGlobalPackagesFolder(this ILogger logger, string path, Exception? exception = null)
+    {
+        _upstreamRepositorySameAsGlobalPackagesFolder(logger, path, exception);
+        return MESSAGE_UpstreamRepositorySameAsGlobalPackagesFolder;
+    }
 
     #endregion
 
