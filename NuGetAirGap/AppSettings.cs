@@ -97,7 +97,7 @@ public partial class AppSettings
     /// <summary>
     /// Gets the value of the command line switch for exporting the metadata for all packages in the local repository. This refers to a relative or absolute file path.
     /// </summary>
-    /// <remarks>The package listing is exported as a JSON array. If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Environment.CurrentDirectory"/>).
+    /// <remarks>The package listing is exported as a JSON array. If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Directory.GetCurrentDirectory"/>).
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
     /// <para>This is mapped from the <c>--export-local-metadata</c> (<see cref="COMMAND_LINE_SWITCH_export_2D_local_2D_metadata"/>) command line switch.</para></remarks>
     public string? ExportLocalMetaData { get; set; }
@@ -129,7 +129,7 @@ public partial class AppSettings
     /// <summary>
     /// Gets the override value for the <see cref="UpstreamServiceIndex" /> setting.
     /// </summary>
-    /// <remarks>If this refers to a subdirectory and is not absolute, it will be resolved relative to the current working directory (<see cref="Environment.CurrentDirectory"/>).
+    /// <remarks>If this refers to a subdirectory and is not absolute, it will be resolved relative to the current working directory (<see cref="Directory.GetCurrentDirectory"/>).
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
     /// <para>This is mapped from the <c>--upstream-service-index</c> (<see cref="COMMAND_LINE_SWITCH_upstream_2D_service_2D_index"/>) command line switch.</para></remarks>
     public string? OverrideUpstreamServiceIndex { get; set; }
@@ -159,7 +159,7 @@ public partial class AppSettings
     /// <summary>
     /// Gets the override value for the <see cref="LocalRepository" /> setting.
     /// </summary>
-    /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Environment.CurrentDirectory"/>).
+    /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Directory.GetCurrentDirectory"/>).
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
     /// <para>This is mapped from the <c>--local-repository</c> (<see cref="COMMAND_LINE_SWITCH_local_2D_repository"/>) command line switch.</para></remarks>
     public string? OverrideLocalRepository { get; set; }
@@ -184,7 +184,7 @@ public partial class AppSettings
     /// <summary>
     /// Gets the override value for the <see cref="GlobalPackagesFolder" /> setting.
     /// </summary>
-    /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Environment.CurrentDirectory"/>).
+    /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Directory.GetCurrentDirectory"/>).
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
     /// <para>This is mapped from the <c>--global-packages-folder</c> (<see cref="COMMAND_LINE_SWITCH_global_2D_packages_2D_folder"/>) command line switch.</para></remarks>
     public string? OverrideGlobalPackagesFolder { get; set; }

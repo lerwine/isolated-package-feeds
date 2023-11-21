@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using Microsoft.Extensions.Hosting.Internal;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -8,20 +8,20 @@ namespace NuGetAirGap;
 public partial class AppSettingsValidatorService : IValidateOptions<AppSettings>
 {
     private readonly ILogger<AppSettingsValidatorService> _logger;
-    private readonly HostingEnvironment _hostingEnvironment;
+    private readonly IHostEnvironment _hostEnvironment;
 
-    public AppSettingsValidatorService(ILogger<AppSettingsValidatorService> logger, HostingEnvironment hostingEnvironment) => (_logger, _hostingEnvironment) = (logger, hostingEnvironment);
+    public AppSettingsValidatorService(ILogger<AppSettingsValidatorService> logger, IHostEnvironment hostEnvironment) => (_logger, _hostEnvironment) = (logger, hostEnvironment);
 
     private ValidationResult? ValidateUpstreamServiceIndex(AppSettings options)
     {
-        options.Validated.UpstreamServiceLocation = options.OverrideUpstreamServiceIndex.DefaultIfWhiteSpace<(string SettingName, string BasePath)>(() => (nameof(AppSettings.OverrideUpstreamServiceIndex), Environment.CurrentDirectory), options.UpstreamServiceIndex, () => (nameof(AppSettings.UpstreamServiceIndex), _hostingEnvironment.ContentRootPath), out var opt);
+        options.Validated.UpstreamServiceLocation = options.OverrideUpstreamServiceIndex.DefaultIfWhiteSpace<(string SettingName, string BasePath)>(() => (nameof(AppSettings.OverrideUpstreamServiceIndex), Directory.GetCurrentDirectory()), options.UpstreamServiceIndex, () => (nameof(AppSettings.UpstreamServiceIndex), _hostEnvironment.ContentRootPath), out var opt);
         try
         {
             if (ResourceLocatorUtil.TryParseHttpOrFileAsDirectoryInfo(opt.BasePath, options.Validated.UpstreamServiceLocation, out Uri absoluteUri, out DirectoryInfo? directory))
             {
                 options.Validated.UpstreamServiceLocation = directory.FullName;
                 if (!directory.Exists)
-                    return new ValidationResult(_logger.LogRepositoryPathNotFound( options.Validated.UpstreamServiceLocation, true));
+                    return new ValidationResult(_logger.LogRepositoryPathNotFound(options.Validated.UpstreamServiceLocation, true));
             }
             else
                 options.Validated.UpstreamServiceLocation = absoluteUri.AbsoluteUri;
@@ -48,7 +48,7 @@ public partial class AppSettingsValidatorService : IValidateOptions<AppSettings>
 
     private ValidationResult? ValidateLocalRepository(AppSettings options)
     {
-        options.Validated.LocalRepositoryPath = options.OverrideLocalRepository.DefaultIfWhiteSpace<(string SettingName, string BasePath)>(() => (nameof(AppSettings.OverrideLocalRepository), Environment.CurrentDirectory), options.LocalRepository, () => (nameof(AppSettings.LocalRepository), _hostingEnvironment.ContentRootPath), out var opt);
+        options.Validated.LocalRepositoryPath = options.OverrideLocalRepository.DefaultIfWhiteSpace<(string SettingName, string BasePath)>(() => (nameof(AppSettings.OverrideLocalRepository), Directory.GetCurrentDirectory()), options.LocalRepository, () => (nameof(AppSettings.LocalRepository), _hostEnvironment.ContentRootPath), out var opt);
         try
         {
             DirectoryInfo directoryInfo = ResourceLocatorUtil.GetDirectoryInfo(opt.BasePath, options.Validated.LocalRepositoryPath);
@@ -96,7 +96,7 @@ public partial class AppSettingsValidatorService : IValidateOptions<AppSettings>
         }
         try
         {
-            FileInfo fileInfo = ResourceLocatorUtil.GetFileInfo(Environment.CurrentDirectory, options.Validated.ExportLocalMetaDataPath);
+            FileInfo fileInfo = ResourceLocatorUtil.GetFileInfo(Directory.GetCurrentDirectory(), options.Validated.ExportLocalMetaDataPath);
             options.Validated.ExportLocalMetaDataPath = fileInfo.FullName;
             if (!fileInfo.Exists && (fileInfo.Directory is null || !fileInfo.Directory.Exists))
                 return new ValidationResult(_logger.LogExportLocalMetaDataDirectoryNotFound(options.Validated.ExportLocalMetaDataPath), Enumerable.Repeat(nameof(AppSettings.ExportLocalMetaData), 1));
@@ -126,7 +126,7 @@ public partial class AppSettingsValidatorService : IValidateOptions<AppSettings>
 
     private ValidationResult? ValidateGlobalPackagesFolder(AppSettings options)
     {
-        options.Validated.GlobalPackagesFolderPath = options.OverrideGlobalPackagesFolder.DefaultIfWhiteSpace<(string SettingName, string BasePath)>(() => (nameof(AppSettings.OverrideGlobalPackagesFolder), Environment.CurrentDirectory), options.GlobalPackagesFolder, () => (nameof(AppSettings.GlobalPackagesFolder), _hostingEnvironment.ContentRootPath), out var opt);
+        options.Validated.GlobalPackagesFolderPath = options.OverrideGlobalPackagesFolder.DefaultIfWhiteSpace<(string SettingName, string BasePath)>(() => (nameof(AppSettings.OverrideGlobalPackagesFolder), Directory.GetCurrentDirectory()), options.GlobalPackagesFolder, () => (nameof(AppSettings.GlobalPackagesFolder), _hostEnvironment.ContentRootPath), out var opt);
         try
         {
             DirectoryInfo directoryInfo = ResourceLocatorUtil.GetDirectoryInfo(opt.BasePath, options.Validated.GlobalPackagesFolderPath);
