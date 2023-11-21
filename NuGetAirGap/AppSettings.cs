@@ -7,7 +7,7 @@ namespace NuGetAirGap;
 /// <summary>
 /// Application settings bound to <c>appsettings.json</c> and command line switches.
 /// </summary>
-public class AppSettings
+public partial class AppSettings
 {
     #region UpdateAll
 
@@ -97,7 +97,7 @@ public class AppSettings
     /// <summary>
     /// Gets the value of the command line switch for exporting the metadata for all packages in the local repository. This refers to a relative or absolute file path.
     /// </summary>
-    /// <remarks>The package listing is exported as a JSON array. If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Environment.CurrentDirectory"/>).
+    /// <remarks>The package listing is exported as a JSON array. If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Directory.GetCurrentDirectory"/>).
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
     /// <para>This is mapped from the <c>--export-local-metadata</c> (<see cref="COMMAND_LINE_SWITCH_export_2D_local_2D_metadata"/>) command line switch.</para></remarks>
     public string? ExportLocalMetaData { get; set; }
@@ -127,12 +127,12 @@ public class AppSettings
     public const string COMMAND_LINE_SWITCH_upstream_2D_service_2D_index = "--upstream-service-index";
 
     /// <summary>
-    /// Overrides the <see cref="UpstreamServiceIndex" /> setting.
+    /// Gets the override value for the <see cref="UpstreamServiceIndex" /> setting.
     /// </summary>
-    /// <remarks>If this refers to a subdirectory and is not absolute, it will be resolved relative to the current working directory (<see cref="Environment.CurrentDirectory"/>).
+    /// <remarks>If this refers to a subdirectory and is not absolute, it will be resolved relative to the current working directory (<see cref="Directory.GetCurrentDirectory"/>).
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
     /// <para>This is mapped from the <c>--upstream-service-index</c> (<see cref="COMMAND_LINE_SWITCH_upstream_2D_service_2D_index"/>) command line switch.</para></remarks>
-    public string OverrideUpstreamServiceIndex { get; set; } = null!;
+    public string? OverrideUpstreamServiceIndex { get; set; }
 
     #endregion
 
@@ -157,12 +157,12 @@ public class AppSettings
     public const string COMMAND_LINE_SWITCH_local_2D_repository = "--local-repository";
 
     /// <summary>
-    /// Overrides the <see cref="LocalRepository" /> setting.
+    /// Gets the override value for the <see cref="LocalRepository" /> setting.
     /// </summary>
-    /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Environment.CurrentDirectory"/>).
+    /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Directory.GetCurrentDirectory"/>).
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
     /// <para>This is mapped from the <c>--local-repository</c> (<see cref="COMMAND_LINE_SWITCH_local_2D_repository"/>) command line switch.</para></remarks>
-    public string OverrideLocalRepository { get; set; } = null!;
+    public string? OverrideLocalRepository { get; set; }
 
     #endregion
 
@@ -182,12 +182,12 @@ public class AppSettings
     public const string COMMAND_LINE_SWITCH_global_2D_packages_2D_folder = "--global-packages-folder";
 
     /// <summary>
-    /// Overrides the <see cref="GlobalPackagesFolder" /> setting.
+    /// Gets the override value for the <see cref="GlobalPackagesFolder" /> setting.
     /// </summary>
-    /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Environment.CurrentDirectory"/>).
+    /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Directory.GetCurrentDirectory"/>).
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
     /// <para>This is mapped from the <c>--global-packages-folder</c> (<see cref="COMMAND_LINE_SWITCH_global_2D_packages_2D_folder"/>) command line switch.</para></remarks>
-    public string OverrideGlobalPackagesFolder { get; set; } = null!;
+    public string? OverrideGlobalPackagesFolder { get; set; }
 
     #endregion
 
@@ -240,4 +240,6 @@ public class AppSettings
     {
         builder.Add(new FlagSwitchCommandLineConfigSource(args?.ToImmutableArray() ?? ImmutableArray<string>.Empty, _booleanSwitchMappings, _valueSwitchMappings));
     }
+
+    internal ValidatedAppSettings Validated { get; } = new();
 }

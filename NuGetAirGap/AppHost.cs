@@ -10,15 +10,41 @@ namespace NuGetAirGap;
 
 public static class AppHost
 {
-    public static HostApplicationBuilder CreateBuilder(string contentRootPath)
+    public static HostApplicationBuilder CreateBuilder(string contentRootPath, params string[] args)
     {
-        HostApplicationBuilder builder = Host.CreateApplicationBuilder();
-        builder.Environment.ContentRootPath = contentRootPath;
+        if (string.IsNullOrWhiteSpace(contentRootPath))
+            throw new ArgumentException($"'{nameof(contentRootPath)}' cannot be null or whitespace.", nameof(contentRootPath));
+        HostApplicationBuilder builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings()
+        {
+            ContentRootPath = contentRootPath,
+            Args = args
+        });
+        // var fp = builder.Configuration.GetFileProvider();
+        // builder.Configuration.SetBasePath(contentRootPath);
+        // if (builder.Environment.IsDevelopment())
+        //     builder.Configuration.AddUserSecrets(System.Reflection.Assembly.GetExecutingAssembly(), true);
+        // fp = builder.Configuration.GetFileProvider();
         return builder;
+    }
+
+    public static void ConfigureLogging(HostApplicationBuilder builder)
+    {
+        if (builder is null)
+            throw new ArgumentNullException(nameof(builder));
+        builder.Logging.ClearProviders();
+        // var section = builder.Configuration.GetSection("Serilog:MinimumLevel:Default");
+        // section = builder.Configuration.GetSection("Logging:LogLevel:Default");
+        // section = builder.Configuration.GetRequiredSection("Serilog");
+        Log.Logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(builder.Configuration)
+            .CreateLogger();
+        builder.Logging.AddSerilog();
     }
 
     public static void ConfigureSettings(HostApplicationBuilder builder, params string[] args)
     {
+        if (builder is null)
+            throw new ArgumentNullException(nameof(builder));
         AppSettings.Configure(args, builder.Configuration);
         builder.Services
             .AddOptions<AppSettings>()
@@ -26,22 +52,23 @@ public static class AppHost
             .ValidateDataAnnotations();
     }
 
-    public static void ConfigureLogging(HostApplicationBuilder builder)
+    public static void ConfigureServices(HostApplicationBuilder builder, Action<AppSettings> onPostConfigure)
     {
-        builder.Logging.ClearProviders();
-        Log.Logger = new LoggerConfiguration()
-            .ReadFrom.Configuration(builder.Configuration)
-            .CreateLogger();
-        builder.Logging.AddSerilog();
-    }
-
-    public static void ConfigureServices(HostApplicationBuilder builder, Action<AppSettings> onPostConfigure) => builder.Services.AddSingleton<LocalClientService>()
-        .AddSingleton<UpstreamClientService>()
+        if (builder is null)
+            throw new ArgumentNullException(nameof(builder));
+        builder.Services
         .AddSingleton<IValidateOptions<AppSettings>, AppSettingsValidatorService>()
+        .AddSingleton<LocalClientService>()
+        .AddSingleton<UpstreamClientService>()
         .PostConfigure(onPostConfigure);
+    }
 
     public static void DefaultPostConfigure(AppSettings settings, HostApplicationBuilder builder)
     {
+        if (settings is null)
+            throw new ArgumentNullException(nameof(settings));
+        if (builder is null)
+            throw new ArgumentNullException(nameof(builder));
         if (string.IsNullOrWhiteSpace(settings.GlobalPackagesFolder))
             settings.GlobalPackagesFolder = SettingsUtility.GetGlobalPackagesFolder(Settings.LoadDefaultSettings(root: null));
         if (string.IsNullOrWhiteSpace(settings.UpstreamServiceIndex))

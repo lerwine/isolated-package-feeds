@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using Microsoft.Extensions.Configuration;
 
-namespace NuGetAirGap;
+namespace CdnGetter;
 
 /// <summary>
 /// Based upon the <see cref="Microsoft.Extensions.Configuration.CommandLine.CommandLineConfigurationSource"/>, adding support for stand-alone command line switches are not followed by a value. 

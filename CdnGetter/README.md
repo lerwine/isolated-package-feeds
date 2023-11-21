@@ -97,3 +97,15 @@ Optional Switch
 
 - `--ReloadExistingVersions=[name]`*[,name,...]* - The library name(s) to be reloaded.
 - `--Version=[string]`*[,string,...]* - The specific version(s) to reload.
+
+## References and Links
+
+- [cdnjs](https://cdnjs.com/)
+  - [API Documentation](https://cdnjs.com/api)
+  - [Main Git Repository](https://github.com/lerwine/cdnjs)
+    - [Vue/Nuxt website for cdnjs.com](https://github.com/lerwine/static-website)
+    - [API server for api.cdnjs.com](https://github.com/lerwine/api-server)
+    - [Package configurations](https://github.com/lerwine/packages)
+    - [Brand and design assets for cdnjs](https://github.com/lerwine/brand)
+- [jsdelivr](https://www.jsdelivr.com/)
+  - [API Documentation](https://www.jsdelivr.com/docs/data.jsdelivr.com#overview)

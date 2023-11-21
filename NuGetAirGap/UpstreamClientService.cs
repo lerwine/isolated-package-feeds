@@ -8,5 +8,5 @@ namespace NuGetAirGap;
 public sealed class UpstreamClientService : ClientService
 {
     public UpstreamClientService(IOptions<AppSettings> options, ILogger<UpstreamClientService> logger) :
-        base(Repository.Factory.GetCoreV3(options.Value.UpstreamServiceIndex), options, logger, true) { }
+        base(Repository.Factory.GetCoreV3(options.Value.Validated.UpstreamServiceLocation), options, logger, true) { }
 }

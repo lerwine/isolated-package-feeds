@@ -25,8 +25,8 @@ public class UpstreamClientServiceTest
             _baseDirectory.Create();
         if (!(_cwd = new DirectoryInfo(Path.Combine(_baseDirectory.FullName, DIRNAME_CWD))).Exists)
             _cwd.Create();
-        _previousCwd = Environment.CurrentDirectory;
-        Environment.CurrentDirectory = _cwd.FullName;
+        _previousCwd = Directory.GetCurrentDirectory();
+        Directory.SetCurrentDirectory(_cwd.FullName);
         HostApplicationBuilder builder = AppHost.CreateBuilder(testContext.TestDirectory);
         AppHost.ConfigureSettings(builder);
         AppHost.ConfigureLogging(builder);
@@ -43,7 +43,7 @@ public class UpstreamClientServiceTest
         finally
         {
             try { _host.Dispose(); }
-            finally { Environment.CurrentDirectory = _previousCwd; }
+            finally { Directory.SetCurrentDirectory(_previousCwd); }
         }
     }
 
@@ -57,7 +57,7 @@ public class UpstreamClientServiceTest
         var result = await service.GetMetadataAsync(packageId, includePrerelease, includeUnlisted, CancellationToken.None);
         Assert.That(result, Is.Not.Null.And.Not.Empty);
     }
-    
+
     [Test]
     public async Task GetMetadataTest2()
     {
@@ -67,7 +67,7 @@ public class UpstreamClientServiceTest
         var result = await service.GetMetadataAsync(packageId, version, CancellationToken.None);
         Assert.That(result, Is.Not.Null);
     }
-    
+
     [Test]
     public async Task GetAllVersionsTest()
     {
@@ -76,7 +76,7 @@ public class UpstreamClientServiceTest
         var result = await service.GetAllVersionsAsync(packageId, CancellationToken.None);
         Assert.That(result, Is.Not.Null.And.Not.Empty);
     }
-    
+
     [Test]
     public async Task GetDependencyInfoTest()
     {

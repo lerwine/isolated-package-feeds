@@ -35,7 +35,7 @@ public abstract class ClientService : IDisposable
 
     protected ClientService(SourceRepository sourceRepository, IOptions<AppSettings> options, ILogger logger, bool isUpstream)
     {
-        GlobalPackagesFolder = options.Value.GlobalPackagesFolder;
+        GlobalPackagesFolder = options.Value.Validated.GlobalPackagesFolderPath;
         NuGetLogger = new(Logger = logger);
         SourceRepository = sourceRepository;
         IsUpstream = isUpstream;

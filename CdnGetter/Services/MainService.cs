@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using CdnGetter.Config;
 using CdnGetter.Model;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -34,7 +35,7 @@ public partial class MainService : BackgroundService
         {
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine();
-            Console.WriteLine($"{exe} -{SHORTHAND_s}={SHOW_CDNs}");
+            Console.WriteLine($"{exe} {GetDefaultSwitchName(nameof(AppSettings.Show))}={SHOW_CDNs}");
             WriteDescription("Show the upstream CDN names in the database.");
         }
         finally { Console.ResetColor(); }
@@ -48,11 +49,11 @@ public partial class MainService : BackgroundService
         {
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine();
-            Console.WriteLine($"{exe} -{SHORTHAND_s}={SHOW_Libraries}");
+            Console.WriteLine($"{exe} {GetDefaultSwitchName(nameof(AppSettings.Show))}={SHOW_Libraries}");
             WriteDescription("Show the libraries in the database.");
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("Optional switch:");
-            Console.Write($"\t-{SHORTHAND_u}=");
+            Console.Write($"\t{GetDefaultSwitchName(nameof(AppSettings.Upstream))}=");
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write("cdn_name");
             Console.ForegroundColor = ConsoleColor.Green;
@@ -71,7 +72,7 @@ public partial class MainService : BackgroundService
         {
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine();
-            Console.Write($"{exe} -{SHORTHAND_s}={SHOW_Versions} -{SHORTHAND_l}=");
+            Console.Write($"{exe} {GetDefaultSwitchName(nameof(AppSettings.Show))}={SHOW_Versions} {GetDefaultSwitchName(nameof(AppSettings.Library))}=");
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write("library_name");
             Console.ForegroundColor = ConsoleColor.Green;
@@ -79,7 +80,7 @@ public partial class MainService : BackgroundService
             WriteDescription("Show the library versions in the database.");
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("Optional switch:");
-            Console.Write($"\t-{SHORTHAND_u}=");
+            Console.Write($"\t{GetDefaultSwitchName(nameof(AppSettings.Upstream))}=");
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write("cdn_name");
             Console.ForegroundColor = ConsoleColor.Green;
@@ -98,7 +99,7 @@ public partial class MainService : BackgroundService
         {
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine();
-            Console.Write($"{exe} -{SHORTHAND_s}={SHOW_Files} -{SHORTHAND_l}=");
+            Console.Write($"{exe} {GetDefaultSwitchName(nameof(AppSettings.Show))}={SHOW_Files} {GetDefaultSwitchName(nameof(AppSettings.Library))}=");
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write("library_name");
             Console.ForegroundColor = ConsoleColor.Green;
@@ -106,14 +107,14 @@ public partial class MainService : BackgroundService
             WriteDescription("Show the library files in the database.");
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("Optional switches:");
-            Console.Write($"\t-{SHORTHAND_v}=");
+            Console.Write($"\t{GetDefaultSwitchName(nameof(AppSettings.Version))}=");
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write("version_string");
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write(",version_string,...");
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine(" - The library version(s) to show files for.");
-            Console.Write($"\t-{SHORTHAND_u}=");
+            Console.Write($"\t{GetDefaultSwitchName(nameof(AppSettings.Upstream))}=");
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write("cdn_name");
             Console.ForegroundColor = ConsoleColor.Green;
@@ -132,19 +133,19 @@ public partial class MainService : BackgroundService
         {
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine();
-            Console.Write($"{exe} -{SHORTHAND_a}=");
+            Console.Write($"{exe} {GetDefaultSwitchName(nameof(AppSettings.AddLibrary))}=");
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write("library_name");
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write(",library_name,...");
-            Console.Write($" -{SHORTHAND_u}=");
+            Console.Write($" {GetDefaultSwitchName(nameof(AppSettings.Upstream))}=");
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write("cdn_name");
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine(",cdn_name,...");
             WriteDescription("Add libraries to the database.");
             Console.WriteLine("Optional switch:");
-            Console.Write($"\t-{SHORTHAND_v}=");
+            Console.Write($"\t{GetDefaultSwitchName(nameof(AppSettings.Version))}=");
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write("version_string");
             Console.ForegroundColor = ConsoleColor.Green;
@@ -163,7 +164,7 @@ public partial class MainService : BackgroundService
         {
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine();
-            Console.WriteLine($"{exe} {SHORTHAND_n}=");
+            Console.WriteLine($"{exe} {GetDefaultSwitchName(nameof(AppSettings.GetNewVersions))}=");
             WriteDescription("Show the upstream CDN names in the database.");
         }
         finally { Console.ResetColor(); }
@@ -177,7 +178,7 @@ public partial class MainService : BackgroundService
         {
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine();
-            Console.WriteLine($"{exe} {SHORTHAND_d}");
+            Console.WriteLine($"{exe} {GetDefaultSwitchName(nameof(AppSettings.RemoveLibrary))}");
             WriteDescription("Show the upstream CDN names in the database.");
         }
         finally { Console.ResetColor(); }
@@ -191,7 +192,7 @@ public partial class MainService : BackgroundService
         {
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine();
-            Console.WriteLine($"{exe} {SHORTHAND_r}");
+            Console.WriteLine($"{exe} {GetDefaultSwitchName(nameof(AppSettings.ReloadLibrary))}");
             WriteDescription("Show the upstream CDN names in the database.");
         }
         finally { Console.ResetColor(); }
@@ -205,7 +206,7 @@ public partial class MainService : BackgroundService
         {
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine();
-            Console.WriteLine($"{exe} {SHORTHAND_e}");
+            Console.WriteLine($"{exe} {GetDefaultSwitchName(nameof(AppSettings.ReloadExistingVersions))}");
             WriteDescription("Show the upstream CDN names in the database.");
         }
         finally { Console.ResetColor(); }
@@ -229,7 +230,7 @@ public partial class MainService : BackgroundService
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("\tor");
             Console.ForegroundColor = ConsoleColor.White;
-            Console.Write($"{exe} -{SHORTHAND_s}=");
+            Console.Write($"{exe} {GetDefaultSwitchName(nameof(AppSettings.Show))}=");
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("[");
             Console.ForegroundColor = ConsoleColor.Cyan;
@@ -250,10 +251,10 @@ public partial class MainService : BackgroundService
             Console.WriteLine("]");
             WriteDescription("Show database information.");
 
-            void writeSyntaxStart(int optionSet, char shorthand)
+            void writeSyntaxStart(int optionSet, string shorthand)
             {
                 writeOptionSet(optionSet);
-                Console.Write($"{exe} -{shorthand}=");
+                Console.Write($"{exe} {shorthand}=");
             }
             
             static void writeSyntaxEnd(string value)
@@ -264,7 +265,7 @@ public partial class MainService : BackgroundService
                 Console.WriteLine($",{value},...");
             }
             
-            void writeCommandSyntax2(int optionSet, char shorthand1, string value1, char shorthand2, string value2)
+            void writeCommandSyntax2(int optionSet, string shorthand1, string value1, string shorthand2, string value2)
             {
                 writeSyntaxStart(optionSet, shorthand1);
                 Console.ForegroundColor = ConsoleColor.Cyan;
@@ -272,14 +273,14 @@ public partial class MainService : BackgroundService
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.Write($",{value1},...");
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.Write($" -{shorthand2}=");
+                Console.Write($" {shorthand2}=");
                 writeSyntaxEnd(value2);
             }
 
             writeCommandSyntax2(2, SHORTHAND_a, "library_name", SHORTHAND_u, "cdn_name");
             WriteDescription("Add libraries from an upstream CDN to the database.");
 
-            void writeCommandSyntax(int optionSet, char shorthand, string value)
+            void writeCommandSyntax(int optionSet, string shorthand, string value)
             {
                 writeSyntaxStart(optionSet, shorthand);
                 writeSyntaxEnd(value);
@@ -295,29 +296,29 @@ public partial class MainService : BackgroundService
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("  or");
             Console.ForegroundColor = ConsoleColor.White;
-            Console.Write($"{exe} -{SHORTHAND_u}=");
+            Console.Write($"{exe} {GetDefaultSwitchName(nameof(AppSettings.Upstream))}=");
             writeSyntaxEnd("library_name");
             WriteDescription("Reloads libraries in the database.");
 
             writeCommandSyntax2(6, SHORTHAND_e, "library_name", SHORTHAND_u, "cdn_name");
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("  or");
-            Console.Write($"{exe} -{SHORTHAND_e}=");
+            Console.Write($"{exe} {GetDefaultSwitchName(nameof(AppSettings.ReloadExistingVersions))}=");
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write("library_name");
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write(",libary_name,...");
             Console.ForegroundColor = ConsoleColor.White;
-            Console.Write($" -{SHORTHAND_v}=");
+            Console.Write($" {GetDefaultSwitchName(nameof(AppSettings.Version))}=");
             writeSyntaxEnd("version_string");
             WriteDescription("Reloads existing library versions in the database.");
 
             writeOptionSet(7);
-            Console.Write($"-{SHORTHAND__3F_}=true");
+            Console.Write(SHORTHAND__3F_);
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("\tor");
             Console.ForegroundColor = ConsoleColor.White;
-            Console.Write($"-{SHORTHAND_h}=true");
+            Console.Write(SHORTHAND_h);
             WriteDescription("Displays this help information.");
             Console.WriteLine("If this option is used, then all other options are ignored.");
         }
@@ -534,7 +535,7 @@ public partial class MainService : BackgroundService
                             _logger.LogMutuallyExclusiveSwitchWarning(GetSwitchNameForLog(nameof(Config.AppSettings.Upstream)), GetSwitchNameForLog(nameof(Config.AppSettings.Show)), SHOW_CDNs);
                         else
                         {
-                            if (appSettings.ShowHelp())
+                            if (appSettings.ShowHelp)
                                 WriteShowCDNsHelpToConsole();
                             else
                                 _operation = OperationType.ShowCDNs;
@@ -549,7 +550,7 @@ public partial class MainService : BackgroundService
                             _logger.LogMutuallyExclusiveSwitchWarning(GetSwitchNameForLog(nameof(Config.AppSettings.Library)), GetSwitchNameForLog(nameof(Config.AppSettings.Show)), SHOW_Libraries);
                         else if (appSettings.Version.FromCsv().Any())
                             _logger.LogMutuallyExclusiveSwitchWarning(GetSwitchNameForLog(nameof(Config.AppSettings.Version)), GetSwitchNameForLog(nameof(Config.AppSettings.Show)), SHOW_Libraries);
-                        else if (!appSettings.ShowHelp())
+                        else if (!appSettings.ShowHelp)
                         {
                             _operation = OperationType.ShowCDNs;
                             _cdnNames = appSettings.Upstream.FromCsv().Distinct().ToImmutableArray();
@@ -562,7 +563,7 @@ public partial class MainService : BackgroundService
                     case SHOW_Versions:
                         if (appSettings.Version.FromCsv().Any())
                             _logger.LogMutuallyExclusiveSwitchWarning(GetSwitchNameForLog(nameof(Config.AppSettings.Version)), GetSwitchNameForLog(nameof(Config.AppSettings.Show)), SHOW_Versions);
-                        else if (!appSettings.ShowHelp())
+                        else if (!appSettings.ShowHelp)
                         {
                             if ((_libraryNames = appSettings.Library.FromCsv().Distinct().ToImmutableArray()).Length > 0)
                             {
@@ -576,7 +577,7 @@ public partial class MainService : BackgroundService
                         WriteShowVersionsHelpToConsole();
                         break;
                     case SHOW_Files:
-                        if (!appSettings.ShowHelp())
+                        if (!appSettings.ShowHelp)
                         {
                             if ((_libraryNames = appSettings.Library.FromCsv().Distinct().ToImmutableArray()).Length > 0)
                             {
@@ -609,7 +610,7 @@ public partial class MainService : BackgroundService
                     _logger.LogMutuallyExclusiveSwitchWarning(GetSwitchNameForLog(nameof(Config.AppSettings.ReloadExistingVersions)), GetSwitchNameForLog(nameof(Config.AppSettings.AddLibrary)));
                 else if (appSettings.Library.FromCsv().Any())
                     _logger.LogMutuallyExclusiveSwitchWarning(GetSwitchNameForLog(nameof(Config.AppSettings.Library)), GetSwitchNameForLog(nameof(Config.AppSettings.AddLibrary)));
-                else if (!appSettings.ShowHelp())
+                else if (!appSettings.ShowHelp)
                 {
                     if ((_cdnNames = appSettings.Upstream.FromCsv().ToImmutableArray()).Length > 0)
                     {
@@ -633,7 +634,7 @@ public partial class MainService : BackgroundService
                     _logger.LogMutuallyExclusiveSwitchWarning(GetSwitchNameForLog(nameof(Config.AppSettings.ReloadExistingVersions)), GetSwitchNameForLog(nameof(Config.AppSettings.GetNewVersions)));
                 else if (appSettings.Library.FromCsv().Any())
                     _logger.LogMutuallyExclusiveSwitchWarning(GetSwitchNameForLog(nameof(Config.AppSettings.Library)), GetSwitchNameForLog(nameof(Config.AppSettings.GetNewVersions)));
-                else if (!appSettings.ShowHelp())
+                else if (!appSettings.ShowHelp)
                 {
                     if ((_cdnNames = appSettings.Upstream.FromCsv().ToImmutableArray()).Length > 0)
                     {
@@ -655,7 +656,7 @@ public partial class MainService : BackgroundService
                     _logger.LogMutuallyExclusiveSwitchWarning(GetSwitchNameForLog(nameof(Config.AppSettings.ReloadLibrary)), GetSwitchNameForLog(nameof(Config.AppSettings.ReloadExistingVersions)));
                 else if (appSettings.Library.FromCsv().Any())
                     _logger.LogMutuallyExclusiveSwitchWarning(GetSwitchNameForLog(nameof(Config.AppSettings.Library)), GetSwitchNameForLog(nameof(Config.AppSettings.ReloadExistingVersions)));
-                else if (!appSettings.ShowHelp())
+                else if (!appSettings.ShowHelp)
                 {
                     _versions = appSettings.Version.FromCsv().ToImmutableArray();
                     if ((_cdnNames = appSettings.Upstream.FromCsv().ToImmutableArray()).Length > 0 || _versions.Length > 0)
@@ -665,7 +666,7 @@ public partial class MainService : BackgroundService
                         return;
                     }
                     else
-                        _logger.LogRequiredAltDependentParameterWarning(GetSwitchName(nameof(Config.AppSettings.Upstream)), GetSwitchName(nameof(Config.AppSettings.Version)), GetSwitchName(nameof(Config.AppSettings.ReloadExistingVersions)));
+                        _logger.LogRequiredAltDependentParameterWarning(GetSwitchNameForLog(nameof(Config.AppSettings.Upstream)), GetSwitchNameForLog(nameof(Config.AppSettings.Version)), GetSwitchNameForLog(nameof(Config.AppSettings.ReloadExistingVersions)));
                 }
                 WriteReloadExistingHelpToConsole();
             }
@@ -677,7 +678,7 @@ public partial class MainService : BackgroundService
                     _logger.LogMutuallyExclusiveSwitchWarning(GetSwitchNameForLog(nameof(Config.AppSettings.Library)), GetSwitchNameForLog(nameof(Config.AppSettings.ReloadLibrary)));
                 else if (appSettings.Version.FromCsv().Any())
                     _logger.LogMutuallyExclusiveSwitchWarning(GetSwitchNameForLog(nameof(Config.AppSettings.Version)), GetSwitchNameForLog(nameof(Config.AppSettings.ReloadLibrary)));
-                else if (!appSettings.ShowHelp())
+                else if (!appSettings.ShowHelp)
                 {
                     _libraryNames = libraries;
                     _cdnNames = appSettings.Upstream.FromCsv().ToImmutableArray();
@@ -691,7 +692,7 @@ public partial class MainService : BackgroundService
             {
                 if (appSettings.Library.FromCsv().Any())
                     _logger.LogMutuallyExclusiveSwitchWarning(GetSwitchNameForLog(nameof(Config.AppSettings.Library)), GetSwitchNameForLog(nameof(Config.AppSettings.RemoveLibrary)));
-                else if (!appSettings.ShowHelp())
+                else if (!appSettings.ShowHelp)
                 {
                     _libraryNames = libraries;
                     _cdnNames = appSettings.Upstream.FromCsv().ToImmutableArray();
@@ -705,7 +706,7 @@ public partial class MainService : BackgroundService
             {
                 if (appSettings.Library.FromCsv().Any())
                     _logger.LogMutuallyExclusiveSwitchWarning(GetSwitchNameForLog(nameof(Config.AppSettings.Library)), GetSwitchNameForLog(nameof(Config.AppSettings.Upstream)));
-                else if (!appSettings.ShowHelp())
+                else if (!appSettings.ShowHelp)
                 {
                     _libraryNames = ImmutableArray<string>.Empty;
                     _cdnNames = libraries;
@@ -717,7 +718,7 @@ public partial class MainService : BackgroundService
             }
             else
             {
-                if (!appSettings.ShowHelp())
+                if (!appSettings.ShowHelp)
                 {
                     if (appSettings.Library.FromCsv().Any())
                         _logger.LogRequiredAltDependentParameterWarning(GetSwitchNameForLog(nameof(Config.AppSettings.Show)), SHOW_Libraries, SHOW_Versions, GetSwitchNameForLog(nameof(Config.AppSettings.Library)));

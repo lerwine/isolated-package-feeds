@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using NuGet.Configuration;
 using NuGet.Frameworks;
 using NuGet.Packaging.Core;
 using NuGet.Protocol.Core.Types;
@@ -45,12 +44,12 @@ public static class AppLoggerExtensions
     private static readonly Action<ILogger, string, Exception?> _invalidUpstreamRepositoryUrl = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
         $"{MESSAGE_InvalidUpstreamRepositoryUrl} ({{URL}}).");
 
-    private const string MESSAGE_UnsupportedUpstreamRepositoryUrlScheme = "Invalid scheme ror Upstream NuGet repository URL";
+    private const string MESSAGE_UnsupportedUpstreamRepositoryUrlScheme = "Invalid scheme or Upstream NuGet repository URL";
 
     private static readonly Action<ILogger, string, Exception?> _unsupportedUpstreamRepositoryUrlScheme = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
         $"{MESSAGE_UnsupportedUpstreamRepositoryUrlScheme} ({{URL}}).");
 
-    private const string MESSAGE_UnsupportedLocalRepositoryUrlScheme = "Invalid scheme ror Local NuGet repository URL";
+    private const string MESSAGE_UnsupportedLocalRepositoryUrlScheme = "Invalid scheme or Local NuGet repository URL";
 
     private static readonly Action<ILogger, string, Exception?> _unsupportedLocalRepositoryUrlScheme = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
         $"{MESSAGE_UnsupportedLocalRepositoryUrlScheme} ({{URL}}).");
@@ -730,11 +729,11 @@ public static class AppLoggerExtensions
     #endregion
 
     #region MultipleSettingsWithSameRepositoryLocation event logger message (0x0011)
-    
+
     public const int EVENT_ID_MultipleSettingsWithSameRepositoryLocation = 0x0011;
-    
+
     public static readonly EventId MultipleSettingsWithSameRepositoryLocation = new(EVENT_ID_MultipleSettingsWithSameRepositoryLocation, nameof(MultipleSettingsWithSameRepositoryLocation));
-    
+
     private const string MESSAGE_LocalSameAsUpstreamNugetRepository = "Local NuGet repository path cannot be the same as the upstream NuGet repository path";
 
     private const string MESSAGE_LocalRepositorySameAsGlobalPackagesFolder = "Local NuGet repository path cannot be the same as the upstream NuGet repository path";

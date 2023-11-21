@@ -373,7 +373,9 @@ foreach ($u in [Enum]::GetValues([System.Globalization.UnicodeCategory])) {
         }
     }
 }
-$Writer = [System.Xml.XmlWriter]::Create('C:\Users\Lenny\Source\Repositories\isolated-package-feeds\UnicodeCategories.html', ([System.Xml.XmlWriterSettings]@{
+$BasePath = $PSScriptRoot | Join-Path -ChildPath 'Output';
+if (-not ($BasePath | Test-Path)) { (New-Item -Path $PSScriptRoot -ItemType Directory -Name 'Output' -ErrorAction Stop) | Out-Null; }
+$Writer = [System.Xml.XmlWriter]::Create(($BasePath | Join-Path -ChildPath 'UnicodeCategories.html'), ([System.Xml.XmlWriterSettings]@{
     Indent = $true;
     Encoding = [System.Text.UTF8Encoding]::new($false, $true);
 }));
@@ -381,7 +383,7 @@ try {
     $UnicodeCategories.WriteTo($Writer);
     $Writer.Flush();
 } finally { $Writer.Close() }
-$Writer = [System.Xml.XmlWriter]::Create('C:\Users\Lenny\Source\Repositories\isolated-package-feeds\CharacterTypes.html', ([System.Xml.XmlWriterSettings]@{
+$Writer = [System.Xml.XmlWriter]::Create(($BasePath | Join-Path -ChildPath 'CharacterTypes.html'), ([System.Xml.XmlWriterSettings]@{
     Indent = $true;
     Encoding = [System.Text.UTF8Encoding]::new($false, $true);
 }));
