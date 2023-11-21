@@ -7,8 +7,14 @@
             "request": "launch",
             "preLaunchTask": "Build NuGetAirGap",
             "program": "${workspaceFolder}/NuGetAirGap/bin/Debug/net6.0/NuGetAirGap.dll",
-            "args": [ "-l" ],
-            "cwd": "${workspaceFolder}/CdnServer",
+            "args": [
+                "-l"
+            ],
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "DOTNET_ENVIRONMENT": "Development"
+            },
+            "cwd": "${workspaceFolder}/NuGetAirGap",
             "stopAtEntry": false,
             "console": "internalConsole"
         },
@@ -31,7 +37,8 @@
                 "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
             },
             "env": {
-                "ASPNETCORE_ENVIRONMENT": "Development"
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "DOTNET_ENVIRONMENT": "Development"
             }
         },
         {
@@ -40,7 +47,13 @@
             "request": "launch",
             "preLaunchTask": "Build CdnGetter",
             "program": "${workspaceFolder}/CdnGetter/bin/Debug/net6.0/CdnGetter.dll",
-            "args": ["--Show=CDNs"],
+            "args": [
+                "--Show=CDNs"
+            ],
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "DOTNET_ENVIRONMENT": "Development"
+            },
             "cwd": "${workspaceFolder}/CdnGetter",
             "stopAtEntry": false,
             "console": "internalConsole"
