@@ -8,7 +8,8 @@
             "preLaunchTask": "Build NuGetAirGap",
             "program": "${workspaceFolder}/NuGetAirGap/bin/Debug/net6.0/NuGetAirGap.dll",
             "args": [
-                "-l"
+                "-l",
+                "-a", "Microsoft.CodeAnalysis.CSharp"
             ],
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
