@@ -94,6 +94,6 @@ public class UpstreamClientServiceTest
         string packageId = "Microsoft.Extensions.Logging.Abstractions";
         var version = NuGetVersion.Parse("7.0.0");
         var result = await service.DoesPackageExistAsync(packageId, version, CancellationToken.None);
-        Assert.True(result);
+        Assert.That(result, Is.True);
     }
 }
