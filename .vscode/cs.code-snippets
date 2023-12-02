@@ -619,7 +619,6 @@
             "/// <summary>",
             "/// Represents a ${1:Name} exception."
             "/// </summary>",
-            "[Serializable]",
             "public class ${1}Exception : Exception",
             "{",
             "    /// <summary>",
@@ -643,17 +642,6 @@
             "    /// <param name=\"message\">The message that describes the error.</param>",
             "    /// <param name=\"innerException\">The optional exception that is the cause of the current exception.</param>",
             "    public ${1}Exception(${3} ${4/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, string message, Exception? innerException = null) : base(message, innerException) => ${4} = ${4/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/};",
-            "",
-            "    protected ${1}Exception(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context)",
-            "    {",
-            "        ${0}// ${4} = info.GetString(nameof(${4}));",
-            "    }",
-            "",
-            "    public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)",
-            "    {",
-            "        info.AddValue(nameof(${4}), ${4});",
-            "        base.GetObjectData(info, context);",
-            "    }"
             "}"
         ],
         "description": "Exception with 1 custom property."
@@ -664,7 +652,6 @@
             "/// <summary>",
             "/// Represents a ${1:Name} exception."
             "/// </summary>",
-            "[Serializable]",
             "public class ${1}Exception : Exception",
             "{",
             "    /// <summary>",
@@ -697,19 +684,6 @@
             "    /// <param name=\"innerException\">The optional exception that is the cause of the current exception.</param>",
             "    public ${1}Exception(${3} ${4/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${6} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, string message, Exception? innerException = null) : base(message, innerException) =>",
             "        (${4}, ${7}) = (${4/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/});",
-            "",
-            "    protected ${1}Exception(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context)",
-            "    {",
-            "        ${0}// ${4} = info.GetString(nameof(${4}));",
-            "        // ${7} = info.GetString(nameof(${7}));",
-            "    }",
-            "",
-            "    public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)",
-            "    {",
-            "        info.AddValue(nameof(${4}), ${4});",
-            "        info.AddValue(nameof(${7}), ${7});",
-            "        base.GetObjectData(info, context);",
-            "    }"
             "}"
         ],
         "description": "Exception with 2 custom properties."
@@ -720,7 +694,6 @@
             "/// <summary>",
             "/// Represents a ${1:Name} exception."
             "/// </summary>",
-            "[Serializable]",
             "public class ${1}Exception : Exception",
             "{",
             "    /// <summary>",
@@ -760,21 +733,6 @@
             "    /// <param name=\"innerException\">The optional exception that is the cause of the current exception.</param>",
             "    public ${1}Exception(${3} ${4/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${6} ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${9} ${10/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, string message, Exception? innerException = null) : base(message, innerException) =>",
             "        (${4}, ${7}) = (${4/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${7/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}, ${10/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/});",
-            "",
-            "    protected ${1}Exception(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context)",
-            "    {",
-            "        ${0}// ${4} = info.GetString(nameof(${4}));",
-            "        // ${7} = info.GetString(nameof(${7}));",
-            "        // ${10} = info.GetString(nameof(${10}));",
-            "    }",
-            "",
-            "    public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)",
-            "    {",
-            "        info.AddValue(nameof(${4}), ${4});",
-            "        info.AddValue(nameof(${7}), ${7});",
-            "        info.AddValue(nameof(${10}), ${10});",
-            "        base.GetObjectData(info, context);",
-            "    }"
             "}"
         ],
         "description": "Exception with 3 custom properties."
