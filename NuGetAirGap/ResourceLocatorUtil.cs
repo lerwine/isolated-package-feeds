@@ -11,8 +11,7 @@ public static class ResourceLocatorUtil
 {
     private static string CombinePath(string? basePath, string path)
     {
-        if (path is null)
-            throw new ArgumentNullException(nameof(path));
+        ArgumentNullException.ThrowIfNull(path);
         if (path.Length == 0 || !(path = Environment.ExpandEnvironmentVariables(path)).Any(c => !char.IsWhiteSpace(c)))
             throw new ArgumentException($"{nameof(path)} cannot be empty.");
         if (Uri.TryCreate(path, UriKind.Absolute, out Uri? uri))
@@ -26,8 +25,7 @@ public static class ResourceLocatorUtil
 
     private static string? CombinePath(string? basePath, string pathOrUriString, out Uri? absoluteUri)
     {
-        if (pathOrUriString is null)
-            throw new ArgumentNullException(nameof(pathOrUriString));
+        ArgumentNullException.ThrowIfNull(pathOrUriString);
         if (pathOrUriString.Length == 0 || !(pathOrUriString = Environment.ExpandEnvironmentVariables(pathOrUriString)).Any(c => !char.IsWhiteSpace(c)))
             throw new ArgumentException($"{nameof(pathOrUriString)} cannot be empty.");
         if (Uri.TryCreate(pathOrUriString, UriKind.Absolute, out absoluteUri))
@@ -88,8 +86,7 @@ public static class ResourceLocatorUtil
     /// <exception cref="UriSchemeNotSupportedException"><paramref name="path"/> is an absolute URI, but the scheme is not <see cref="Uri.UriSchemeFile"/>.</exception>
     public static string GetLocalPath(string? basePath, string path)
     {
-        if (path is null)
-            throw new ArgumentNullException(nameof(path));
+        ArgumentNullException.ThrowIfNull(path);
         if (path.Length == 0 || !(path = Environment.ExpandEnvironmentVariables(path)).Any(c => !char.IsWhiteSpace(c)))
             throw new ArgumentException($"{nameof(path)} cannot be empty.");
         try
@@ -119,8 +116,7 @@ public static class ResourceLocatorUtil
     /// <exception cref="PathTooLongException">The combined path, file name, or both exceed the system-defined maximum length.</exception>
     public static bool TryParseLocalPath(string? basePath, string pathOrUriString, out Uri absoluteUri, [NotNullWhen(true)] out string? fullPath)
     {
-        if (pathOrUriString is null)
-            throw new ArgumentNullException(nameof(pathOrUriString));
+        ArgumentNullException.ThrowIfNull(pathOrUriString);
         if (pathOrUriString.Length == 0 || !(pathOrUriString = Environment.ExpandEnvironmentVariables(pathOrUriString)).Any(c => !char.IsWhiteSpace(c)))
             throw new ArgumentException($"{nameof(pathOrUriString)} cannot be empty.");
         try
@@ -346,7 +342,7 @@ public static class ResourceLocatorUtil
     /// <see cref="Uri.UriSchemeHttp"/>, or <see cref="Uri.UriSchemeFile"/>.</exception>
     public static bool TryParseHttpOrFileAsDirectoryInfo(string? basePath, string pathOrUriString, out Uri absoluteUri, [NotNullWhen(true)] out DirectoryInfo? directoryInfo) =>
         TryParseHttpOrFileAsFileSystemInfo(basePath, pathOrUriString, p => new DirectoryInfo(pathOrUriString), out absoluteUri, out directoryInfo);
-    
+
     public static Uri Normalize2(Uri uri)
     {
         string path, query, fragment;
@@ -498,15 +494,15 @@ public static class ResourceLocatorUtil
         if (query.Length > 0)
         {
             if (fragment.Length > 0)
-               path = new Uri($"http://tempuri.org/{path}?{query}#{fragment}", UriKind.Absolute).GetComponents(UriComponents.Path | UriComponents.Query |
-                UriComponents.Fragment, UriFormat.UriEscaped);
+                path = new Uri($"http://tempuri.org/{path}?{query}#{fragment}", UriKind.Absolute).GetComponents(UriComponents.Path | UriComponents.Query |
+                 UriComponents.Fragment, UriFormat.UriEscaped);
             else
-               path = new Uri($"http://tempuri.org/{path}?{query}", UriKind.Absolute).GetComponents(UriComponents.Path | UriComponents.Query, UriFormat.UriEscaped);
+                path = new Uri($"http://tempuri.org/{path}?{query}", UriKind.Absolute).GetComponents(UriComponents.Path | UriComponents.Query, UriFormat.UriEscaped);
         }
         else if (fragment.Length > 0)
             path = new Uri($"http://tempuri.org/{path}#{fragment}", UriKind.Absolute).GetComponents(UriComponents.Path | UriComponents.Fragment, UriFormat.UriEscaped);
         else
             path = new Uri($"file:///{path}").GetComponents(UriComponents.Path, UriFormat.UriEscaped);
-        return  new(leadsWithSlash ? $"/{path}" : path, UriKind.Relative);
+        return new(leadsWithSlash ? $"/{path}" : path, UriKind.Relative);
     }
 }

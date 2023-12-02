@@ -29,8 +29,7 @@ public static class AppHost
 
     public static void ConfigureLogging(HostApplicationBuilder builder)
     {
-        if (builder is null)
-            throw new ArgumentNullException(nameof(builder));
+        ArgumentNullException.ThrowIfNull(builder);
         builder.Logging.ClearProviders();
         // var section = builder.Configuration.GetSection("Serilog:MinimumLevel:Default");
         // section = builder.Configuration.GetSection("Logging:LogLevel:Default");
@@ -43,8 +42,7 @@ public static class AppHost
 
     public static void ConfigureSettings(HostApplicationBuilder builder, params string[] args)
     {
-        if (builder is null)
-            throw new ArgumentNullException(nameof(builder));
+        ArgumentNullException.ThrowIfNull(builder);
         AppSettings.Configure(args, builder.Configuration);
         builder.Services
             .AddOptions<AppSettings>()
@@ -54,8 +52,7 @@ public static class AppHost
 
     public static void ConfigureServices(HostApplicationBuilder builder, Action<AppSettings> onPostConfigure)
     {
-        if (builder is null)
-            throw new ArgumentNullException(nameof(builder));
+        ArgumentNullException.ThrowIfNull(builder);
         builder.Services
         .AddSingleton<IValidateOptions<AppSettings>, AppSettingsValidatorService>()
         .AddSingleton<LocalClientService>()
@@ -65,10 +62,8 @@ public static class AppHost
 
     public static void DefaultPostConfigure(AppSettings settings, HostApplicationBuilder builder)
     {
-        if (settings is null)
-            throw new ArgumentNullException(nameof(settings));
-        if (builder is null)
-            throw new ArgumentNullException(nameof(builder));
+        ArgumentNullException.ThrowIfNull(settings);
+        ArgumentNullException.ThrowIfNull(builder);
         if (string.IsNullOrWhiteSpace(settings.GlobalPackagesFolder))
             settings.GlobalPackagesFolder = SettingsUtility.GetGlobalPackagesFolder(Settings.LoadDefaultSettings(root: null));
         if (string.IsNullOrWhiteSpace(settings.UpstreamServiceIndex))

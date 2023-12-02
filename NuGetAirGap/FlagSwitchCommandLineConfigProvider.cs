@@ -25,8 +25,7 @@ public class FlagSwitchCommandLineConfigProvider : ConfigurationProvider
     public FlagSwitchCommandLineConfigProvider(ImmutableArray<string> args, IDictionary<string, string> booleanSwitchMappings, IDictionary<string, string>? switchValueMappings = null)
     {
         Args = args;
-        if (booleanSwitchMappings is null)
-            throw new ArgumentNullException(nameof(booleanSwitchMappings));
+        ArgumentNullException.ThrowIfNull(booleanSwitchMappings);
         foreach (var mapping in booleanSwitchMappings)
         {
             // Only keys start with "--" or "-" are acceptable
