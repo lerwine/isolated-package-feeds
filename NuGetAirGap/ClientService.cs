@@ -41,15 +41,10 @@ public abstract class ClientService : IDisposable
         IsUpstream = isUpstream;
     }
 
-    public sealed class ContextScope<T> : IDisposable
+    public sealed class ContextScope<T>(T context, IDisposable? scope) : IDisposable
     {
-        public ContextScope(T context, IDisposable? scope)
-        {
-            Context = context;
-            _scope = scope;
-        }
-        private readonly IDisposable? _scope;
-        public T Context { get; }
+        private readonly IDisposable? _scope = scope;
+        public T Context { get; } = context;
 
         public void Dispose()
         {

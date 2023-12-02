@@ -2,11 +2,9 @@ using Microsoft.Extensions.Logging;
 
 namespace NuGetAirGap;
 
-public class NugetLogWrapper : NuGet.Common.ILogger
+public class NugetLogWrapper(ILogger logger) : NuGet.Common.ILogger
 {
-    private readonly ILogger _underlyingLogger;
-
-    public NugetLogWrapper(ILogger logger) => _underlyingLogger = logger;
+    private readonly ILogger _underlyingLogger = logger;
 
     public void Log(NuGet.Common.LogLevel level, string data)
     {

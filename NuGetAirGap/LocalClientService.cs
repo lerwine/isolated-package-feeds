@@ -7,13 +7,10 @@ using NuGet.Versioning;
 
 namespace NuGetAirGap;
 
-public sealed class LocalClientService : ClientService
+public sealed class LocalClientService(IOptions<AppSettings> options, ILogger<UpstreamClientService> logger) : ClientService(Repository.Factory.GetCoreV3(options.Value.Validated.LocalRepositoryPath), options, logger, false)
 {
     private readonly object _syncRoot = new();
     private Task<PackageUpdateResource>? _getPackageUpdateResourceAsync;
-
-    public LocalClientService(IOptions<AppSettings> options, ILogger<UpstreamClientService> logger) :
-        base(Repository.Factory.GetCoreV3(options.Value.Validated.LocalRepositoryPath), options, logger, false) { }
 
     #region Methods using the Search Query API
 
