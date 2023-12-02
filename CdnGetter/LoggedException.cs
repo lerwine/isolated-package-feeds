@@ -7,9 +7,9 @@ public abstract class LoggedException : Exception, ILogTrackable
     protected LoggedException() { }
 
     protected LoggedException(string message) : base(message) { }
-    
+
     protected LoggedException(string message, System.Exception inner) : base(message, inner) { }
-    
+
     internal static T LogAndCreate<T>(ILogger logger, Func<T> factory)
         where T : LoggedException
     {
