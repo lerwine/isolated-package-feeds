@@ -12,8 +12,7 @@ public static class AppHost
 {
     public static HostApplicationBuilder CreateBuilder(string contentRootPath, params string[] args)
     {
-        if (string.IsNullOrWhiteSpace(contentRootPath))
-            throw new ArgumentException($"'{nameof(contentRootPath)}' cannot be null or whitespace.", nameof(contentRootPath));
+        ArgumentException.ThrowIfNullOrWhiteSpace(contentRootPath);
         HostApplicationBuilder builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings()
         {
             ContentRootPath = contentRootPath,
