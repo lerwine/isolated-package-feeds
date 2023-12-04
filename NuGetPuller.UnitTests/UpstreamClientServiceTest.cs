@@ -3,7 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NuGet.Versioning;
 
-namespace NuGetAirGap.UnitTests;
+namespace NuGetPuller.UnitTests;
 
 [TestFixture]
 public class UpstreamClientServiceTest

@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
-namespace NuGetAirGap;
+namespace NuGetPuller;
 
 public static class StringExtensions
 {

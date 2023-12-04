@@ -14,7 +14,7 @@
 
 ## App Settings
 
-Following are the configuration options for the `NuGetAirGap` section of [appsettings.json](./appsettings.json):
+Following are the configuration options for the `NuGetPuller` section of [appsettings.json](./appsettings.json):
 
 - `UpstreamServiceIndex` - The URL of the upstream NuGet server. The default is `https://api.nuget.org/v3/index.json`. This can also be the path to a subdirectory.
 - `LocalRepository` - The path of local NuGet repository subdirectory, relative to the current working directory. The default value is a folder named `LocalSource`, relative to the assembly location.

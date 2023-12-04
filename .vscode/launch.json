@@ -2,11 +2,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch NuGetAirGap",
+            "name": "Launch NuGetPuller",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "Build NuGetAirGap",
-            "program": "${workspaceFolder}/NuGetAirGap/bin/Debug/net6.0/NuGetAirGap.dll",
+            "preLaunchTask": "Build NuGetPuller",
+            "program": "${workspaceFolder}/NuGetPuller/bin/Debug/net8.0/NuGetPuller.dll",
             "args": [
                 "-l",
                 "-a", "Microsoft.CodeAnalysis.CSharp"
@@ -15,7 +15,7 @@
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "DOTNET_ENVIRONMENT": "Development"
             },
-            "cwd": "${workspaceFolder}/NuGetAirGap",
+            "cwd": "${workspaceFolder}/NuGetPuller",
             "stopAtEntry": false,
             "console": "internalConsole"
         },

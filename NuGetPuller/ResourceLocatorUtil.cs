@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace NuGetAirGap;
+namespace NuGetPuller;
 
 /// <summary>
 /// Utility methods for parsing URIs and file system paths.

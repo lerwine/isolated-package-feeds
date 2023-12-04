@@ -4,7 +4,7 @@ using NuGet.Packaging.Core;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 
-namespace NuGetAirGap;
+namespace NuGetPuller;
 
 public static class AppLoggerExtensions
 {

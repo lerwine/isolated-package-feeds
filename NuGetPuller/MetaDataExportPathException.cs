@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace NuGetAirGap;
+namespace NuGetPuller;
 
 /// <summary>
 /// Represents a MetaDataExportPathException exception.
