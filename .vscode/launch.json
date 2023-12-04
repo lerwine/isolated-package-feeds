@@ -28,7 +28,7 @@
             "request": "launch",
             "preLaunchTask": "Build CdnServer",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/CdnServer/bin/Debug/net6.0/CdnServer.dll",
+            "program": "${workspaceFolder}/CdnServer/bin/Debug/net8.0/CdnServer.dll",
             "args": [],
             "cwd": "${workspaceFolder}/CdnServer",
             "stopAtEntry": false,
@@ -47,7 +47,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "Build CdnGetter",
-            "program": "${workspaceFolder}/CdnGetter/bin/Debug/net6.0/CdnGetter.dll",
+            "program": "${workspaceFolder}/CdnGetter/bin/Debug/net8.0/CdnGetter.dll",
             "args": [
                 "--Show=CDNs"
             ],
