@@ -1,14 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Text.RegularExpressions;
+using static NuGetPuller.Constants;
 
 namespace NuGetPuller;
 
 public static class StringExtensions
 {
-    public static readonly Regex NonNormalizedWhiteSpaceRegex = new(@"( |(?! ))[\r\n\s]+", RegexOptions.Compiled);
-
-    public static readonly Regex LineBreakRegex = new(@"\r?\n|\n", RegexOptions.Compiled);
-
     public static string[] SplitLines(this string? value)
     {
         if (value is null)
@@ -26,7 +22,8 @@ public static class StringExtensions
 
     public static string ToWsNormalizedOrDefaultIfEmpty(this string? value, Func<string> getDefaultValue) => (value is not null && (value = value.Trim()).Length > 0) ? NonNormalizedWhiteSpaceRegex.Replace(value, " ") : getDefaultValue();
 
-    public static string ToWsNormalizedOrDefaultIfEmpty(this string? value, string defaultValue) => (value is not null && (value = value.Trim()).Length > 0) ? NonNormalizedWhiteSpaceRegex.Replace(value, " ") : defaultValue;
+    public static string ToWsNormalizedOrDefaultIfEmpty(this string? value, string defaultValue) => (value is not null && (value = value.Trim()).Length > 0) ?
+        NonNormalizedWhiteSpaceRegex.Replace(value, " ") : defaultValue;
 
     public static string ToTrimmedOrEmptyIfNull(this string? value) => (value is null) ? "" : value.Trim();
 
@@ -237,6 +234,4 @@ public static class StringExtensions
     }
 
     public static string ToTrimmedOrDefaultIfEmpty(this string? value, string defaultValue) => (value is not null && (value = value.Trim()).Length > 0) ? value : defaultValue;
-
-
 }

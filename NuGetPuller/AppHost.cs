@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NuGet.Configuration;
 using Serilog;
+using static NuGetPuller.Constants;
 
 namespace NuGetPuller;
 
@@ -66,8 +67,8 @@ public static class AppHost
         if (string.IsNullOrWhiteSpace(settings.GlobalPackagesFolder))
             settings.GlobalPackagesFolder = SettingsUtility.GetGlobalPackagesFolder(Settings.LoadDefaultSettings(root: null));
         if (string.IsNullOrWhiteSpace(settings.UpstreamServiceIndex))
-            settings.UpstreamServiceIndex = AppSettings.DEFAULT_UPSTREAM_SERVICE_INDEX;
+            settings.UpstreamServiceIndex = DEFAULT_UPSTREAM_SERVICE_INDEX;
         if (string.IsNullOrWhiteSpace(settings.LocalRepository))
-            settings.LocalRepository = Path.Combine(builder.Environment.ContentRootPath, AppSettings.DEFAULT_LOCAL_REPOSITORY);
+            settings.LocalRepository = Path.Combine(builder.Environment.ContentRootPath, DEFAULT_LOCAL_REPOSITORY);
     }
 }
