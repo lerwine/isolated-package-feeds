@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using static NuGetPuller.Constants;
 
 namespace NuGetPuller;
 
@@ -167,11 +168,11 @@ public partial class AppSettingsValidatorService : IValidateOptions<AppSettings>
             validationResults.Add(validationResult);
         if (validationResults.Count == 0)
         {
-            if (StringComparer.CurrentCultureIgnoreCase.Equals(options.Validated.LocalRepositoryPath, options.Validated.UpstreamServiceLocation))
+            if (NoCaseComparer.Equals(options.Validated.LocalRepositoryPath, options.Validated.UpstreamServiceLocation))
                 validationResults.Add(new ValidationResult(_logger.LogLocalSameAsUpstreamNugetRepository(options.Validated.LocalRepositoryPath), new string[] { nameof(AppSettings.LocalRepository), nameof(AppSettings.UpstreamServiceIndex) }));
-            else if (StringComparer.CurrentCultureIgnoreCase.Equals(options.Validated.LocalRepositoryPath, options.Validated.GlobalPackagesFolderPath))
+            else if (NoCaseComparer.Equals(options.Validated.LocalRepositoryPath, options.Validated.GlobalPackagesFolderPath))
                 validationResults.Add(new ValidationResult(_logger.LogLocalRepositorySameAsGlobalPackagesFolder(options.Validated.LocalRepositoryPath), new string[] { nameof(AppSettings.LocalRepository), nameof(AppSettings.GlobalPackagesFolder) }));
-            else if (StringComparer.CurrentCultureIgnoreCase.Equals(options.Validated.UpstreamServiceLocation, options.Validated.GlobalPackagesFolderPath))
+            else if (NoCaseComparer.Equals(options.Validated.UpstreamServiceLocation, options.Validated.GlobalPackagesFolderPath))
                 validationResults.Add(new ValidationResult(_logger.LogUpstreamRepositorySameAsGlobalPackagesFolder(options.Validated.LocalRepositoryPath), new string[] { nameof(AppSettings.UpstreamServiceIndex), nameof(AppSettings.GlobalPackagesFolder) }));
             else
                 return ValidateOptionsResult.Success;
