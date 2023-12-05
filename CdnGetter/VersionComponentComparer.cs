@@ -17,8 +17,8 @@ public class VersionComponentComparer : StringComparer, IEqualityComparer<char>,
             return (y is null) ? 0 : -1;
         if (y is null)
             return 1;
-        IEnumerator<char> a = x.GetEnumerator();
-        IEnumerator<char> b = y.GetEnumerator();
+        using var a = x.GetEnumerator();
+        using var b = y.GetEnumerator();
         while (a.MoveNext())
         {
             if (!b.MoveNext())
@@ -64,8 +64,8 @@ public class VersionComponentComparer : StringComparer, IEqualityComparer<char>,
             return y is null;
         if (y is null)
             return false;
-        IEnumerator<char> a = x.GetEnumerator();
-        IEnumerator<char> b = y.GetEnumerator();
+        using var a = x.GetEnumerator();
+        using var b = y.GetEnumerator();
         while (a.MoveNext())
         {
             if (!(b.MoveNext() && AreEqual(a.Current, b.Current)))
