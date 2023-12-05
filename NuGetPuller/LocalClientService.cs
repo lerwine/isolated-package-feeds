@@ -5,6 +5,7 @@ using NuGet.Packaging.Core;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
+using static NuGetPuller.Constants;
 
 namespace NuGetPuller;
 
@@ -53,13 +54,13 @@ public sealed class LocalClientService(IOptions<AppSettings> options, ILogger<Up
         return await _getPackageUpdateResourceAsync;
     }
 
-    private async Task<ContextScope<PackageUpdateResource>> GetPackageUpdateResourceScopeAsync(Func<IDisposable?> scopeFactory, CancellationToken cancellationToken) =>
-        new(await GetPackageUpdateResourceAsync(cancellationToken), scopeFactory());
+    // private async Task<ContextScope<PackageUpdateResource>> GetPackageUpdateResourceScopeAsync(Func<IDisposable?> scopeFactory, CancellationToken cancellationToken) =>
+    //     new(await GetPackageUpdateResourceAsync(cancellationToken), scopeFactory());
 
     private async Task<IEnumerable<string>> DeleteAsync(IEnumerable<string> packageIds, FindPackageByIdResource findPackageById, PackageUpdateResource resource, CancellationToken cancellationToken)
     {
-        HashSet<string> result = new(StringComparer.CurrentCultureIgnoreCase);
-        foreach (string id in packageIds.Distinct(StringComparer.CurrentCultureIgnoreCase))
+        HashSet<string> result = new(NoCaseComparer);
+        foreach (string id in packageIds.Distinct(NoCaseComparer))
         {
             using var scope = Logger.BeginDeleteLocalPackageScope(id, PackageSourceLocation);
             var lc = id.ToLower();
@@ -69,13 +70,21 @@ public sealed class LocalClientService(IOptions<AppSettings> options, ILogger<Up
             result.Add(id);
             foreach (var v in versions)
             {
-                using var scope2 = Logger.BeginDeleteLocalPackageVersionScope(lc, v, PackageSourceLocation);
-                await resource.Delete(lc, v.ToString(), s => string.Empty, s => true, true, NuGetLogger);
+                using var scope2 = Logger.BeginDeleteLocalPackageVersionScope(id, v, PackageSourceLocation);
+                try { await resource.Delete(lc, v.ToString(), s => string.Empty, s => true, true, NuGetLogger); }
+                catch (ArgumentException error) { Logger.LogPackageVersionDeleteFailure(id, v, error); }
             }
         }
         return result;
     }
 
+    /// <summary>
+    /// Asyncrhonously deletes packages.
+    /// </summary>
+    /// <param name="packageIds">Package IDs of packages to be deleted.</param>
+    /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
+    /// <returns>The Package IDs of the packages that were actually deleted.</returns>
+    /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.8.x/src/NuGet.Core/NuGet.Protocol/Resources/PackageUpdateResource.cs#L157"/>
     public async Task<IEnumerable<string>> DeleteAsync(IEnumerable<string> packageIds, CancellationToken cancellationToken)
     {
         if (packageIds is null || !(packageIds = packageIds.Select(i => i?.Trim()!).Where(i => !string.IsNullOrEmpty(i))).Any())
@@ -85,6 +94,13 @@ public sealed class LocalClientService(IOptions<AppSettings> options, ILogger<Up
         return await DeleteAsync(packageIds, findPackageById, packageUpdate, cancellationToken);
     }
 
+    /// <summary>
+    /// Asynchronously deletes a package.
+    /// </summary>
+    /// <param name="packageId">The identifier of the package to be deleted.</param>
+    /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
+    /// <returns><see langword="true"/> if the package was found and deleted; otherwise, <see langword="false"/>.</returns>
+    /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.8.x/src/NuGet.Core/NuGet.Protocol/Resources/PackageUpdateResource.cs#L157"/>
     public async Task<bool> DeleteAsync(string packageId, CancellationToken cancellationToken)
     {
         if ((packageId = packageId.ToTrimmedOrNullIfEmpty()!) is null)
@@ -99,33 +115,42 @@ public sealed class LocalClientService(IOptions<AppSettings> options, ILogger<Up
         foreach (var v in versions)
         {
             using var scope2 = Logger.BeginDeleteLocalPackageVersionScope(lc, v, PackageSourceLocation);
-            await packageUpdate.Delete(lc, v.ToString(), s => string.Empty, s => true, true, NuGetLogger);
+            try { await packageUpdate.Delete(lc, v.ToString(), s => string.Empty, s => true, true, NuGetLogger); }
+            catch (ArgumentException error) { Logger.LogPackageVersionDeleteFailure(packageId, v, error); }
         }
         return true;
     }
 
-    public async Task<bool> AddPackageAsync(string path, bool skipDuplicate, CancellationToken cancellationToken)
+    /// <summary>
+    /// Asynchronously adds a NuGet package.
+    /// </summary>
+    /// <param name="fileName">The path to the NuGet package file.</param>
+    /// <param name="skipDuplicate">Whether to skip duplicate packages.</param>
+    /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
+    /// <returns><see langword="true"/> if the package was added; otherwise, <see langword="false"/>.</returns>
+    /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.8.x/src/NuGet.Core/NuGet.Protocol/Resources/PackageUpdateResource.cs#L55"/>
+    public async Task<bool> AddPackageAsync(string fileName, bool skipDuplicate, CancellationToken cancellationToken)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        if (File.Exists(path))
+        ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
+        if (File.Exists(fileName))
         {
             var packageUpdateResource = await GetPackageUpdateResourceAsync(cancellationToken);
             try
             {
-                await packageUpdateResource.Push(packagePaths: new string[] { path }, symbolSource: null, timeoutInSecond: 60, disableBuffering: false, getApiKey: s => null, getSymbolApiKey: null, noServiceEndpoint: false, skipDuplicate: skipDuplicate, symbolPackageUpdateResource: null, log: NuGetLogger);
+                await packageUpdateResource.Push(packagePaths: new string[] { fileName }, symbolSource: null, timeoutInSecond: 60, disableBuffering: false, getApiKey: s => null, getSymbolApiKey: null, noServiceEndpoint: false, skipDuplicate: skipDuplicate, symbolPackageUpdateResource: null, log: NuGetLogger);
                 return true;
             }
             catch (InvalidDataException error)
             {
-                Logger.LogPackageFileNotZipArchive(path, error);
+                Logger.LogPackageFileNotZipArchive(fileName, error);
             }
             catch (PackagingException error)
             {
-                Logger.LogPackageFileInvalidContent(path, error);
+                Logger.LogPackageFileInvalidContent(fileName, error);
             }
         }
         else
-            Logger.LogPackageFileNotFound(path);
+            Logger.LogPackageFileNotFound(fileName);
         return false;
     }
 
