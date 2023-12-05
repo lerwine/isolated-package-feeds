@@ -256,7 +256,7 @@ public partial class MainService : BackgroundService
                 writeOptionSet(optionSet);
                 Console.Write($"{exe} {shorthand}=");
             }
-            
+
             static void writeSyntaxEnd(string value)
             {
                 Console.ForegroundColor = ConsoleColor.Cyan;
@@ -264,7 +264,7 @@ public partial class MainService : BackgroundService
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($",{value},...");
             }
-            
+
             void writeCommandSyntax2(int optionSet, string shorthand1, string value1, string shorthand2, string value2)
             {
                 writeSyntaxStart(optionSet, shorthand1);
@@ -502,7 +502,7 @@ public partial class MainService : BackgroundService
                 _applicationLifetime.StopApplication();
         }
     }
-    
+
     public MainService(ILogger<MainService> logger, IServiceProvider services, IOptions<Config.AppSettings> options, IHostApplicationLifetime applicationLifetime, IServiceScopeFactory scopeFactory)
     {
         _logger = logger;
@@ -510,7 +510,7 @@ public partial class MainService : BackgroundService
         _applicationLifetime = applicationLifetime;
         _scopeFactory = scopeFactory;
         var appSettings = options.Value;
-        
+
         if (appSettings.Show.IsTrimmedNotEmpty(out string? show))
         {
             if (appSettings.AddLibrary.FromCsv().Any())

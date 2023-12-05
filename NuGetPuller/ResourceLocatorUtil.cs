@@ -1,6 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.AspNetCore.Authorization.Infrastructure;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace NuGetPuller;
 

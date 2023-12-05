@@ -21,7 +21,7 @@ public partial class ParsedUri
         /// </summary>
         /// <value>The key for the query sub-componet or <see langword="null" /> if the component is value-only.</value>
         public string? Key { get; }
-        
+
         /// <summary>
         /// Gets the value for the query sub-component.
         /// </summary>
@@ -48,13 +48,13 @@ public partial class ParsedUri
         /// <param name="key">The key for the query parameter.</param>
         /// <param name="value">The value of the query parameter.</param>
         public QuerySubComponent(string key, string value) => (Key, Value) = (key ?? "", value ?? "");
-        
+
         /// <summary>
         /// Creates a new leading <c>QuerySubComponent</c> object.
         /// </summary>
         /// <param name="value">The value of the query sub-component.</param>
         public QuerySubComponent(string value) => Value = value;
-        
+
         /// <summary>
         /// Tries to parse query sub-components from a query string.
         /// </summary>
@@ -220,7 +220,7 @@ public partial class ParsedUri
                     return (Value.Length > 0) ? $"{Separator.Value}{EncodeQueryKey(Key, QueryKeyEncodeRegex)}={EncodeQueryValue(Value, QueryValueEncodeRegex)}" : $"{Separator.Value}{EncodeQueryKey(Key, QueryKeyEncodeRegex)}=";
                 return (Value.Length > 0) ? $"{Separator.Value}={EncodeQueryValue(Value, QueryValueEncodeRegex)}" : $"{Separator.Value}=";
             }
-            
+
             if (Key is null)
             {
                 if (Value.Length > 0)

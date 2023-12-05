@@ -5,7 +5,9 @@ namespace CdnGetter;
 
 public partial class SemanticVersion
 {
+#pragma warning disable CA2231
     public readonly struct NumericalToken16 : INumericalToken<ushort>, IComparable<NumericalToken16>, IEquatable<NumericalToken16>
+#pragma warning restore CA2231
     {
         public NumericalToken16(ushort value, bool isNegative = false, int zeroPadLength = 0, ICharacterSpanToken? suffix = null)
         {
@@ -16,17 +18,17 @@ public partial class SemanticVersion
             ZeroPadLength = zeroPadLength;
             Suffix = (suffix is not null && suffix.Length > 0) ? suffix : null;
         }
-        
+
         public NumericalToken16(ushort value, bool isNegative, int zeroPadLength, string? suffix) : this(value, isNegative, zeroPadLength, string.IsNullOrEmpty(suffix) ? null : (suffix.Length == 1) ? new CharacterToken(suffix[0]) : new StringToken(suffix)) { }
-        
+
         public NumericalToken16(ushort value, bool isNegative, int zeroPadLength, char suffix) : this(value, isNegative, zeroPadLength, new CharacterToken(suffix)) { }
-        
+
         public NumericalToken16(ushort value, int zeroPadLength, ICharacterSpanToken? suffix = null) : this(value, false, zeroPadLength, suffix) { }
-        
+
         public NumericalToken16(ushort value, int zeroPadLength, string? suffix) : this(value, false, zeroPadLength, suffix) { }
-        
+
         public NumericalToken16(ushort value, int zeroPadLength, char suffix) : this(value, false, zeroPadLength, suffix) { }
-        
+
         public NumericalToken16(short value, int zeroPadLength = 0, ICharacterSpanToken? suffix = null)
         {
             if (zeroPadLength < 0)
@@ -44,31 +46,31 @@ public partial class SemanticVersion
             ZeroPadLength = zeroPadLength;
             Suffix = (suffix is not null && suffix.Length > 0) ? suffix : null;
         }
-        
+
         public NumericalToken16(short value, int zeroPadLength, string? suffix) : this(value, zeroPadLength, string.IsNullOrEmpty(suffix) ? null : (suffix.Length == 1) ? new CharacterToken(suffix[0]) : new StringToken(suffix)) { }
-        
+
         public NumericalToken16(short value, int zeroPadLength, char suffix) : this(value, zeroPadLength, new CharacterToken(suffix)) { }
 
         public NumericalToken16(ushort value, bool isNegative, ICharacterSpanToken? suffix) : this(value, isNegative, 0, suffix) { }
-        
+
         public NumericalToken16(ushort value, bool isNegative, string? suffix) : this(value, isNegative, 0, suffix) { }
-        
+
         public NumericalToken16(ushort value, bool isNegative, char suffix) : this(value, isNegative, 0, suffix) { }
-        
+
         public NumericalToken16(ushort value, ICharacterSpanToken? suffix) : this(value, false, 0, suffix) { }
-        
+
         public NumericalToken16(ushort value, string? suffix) : this(value, false, 0, suffix) { }
-        
-        public NumericalToken16(ushort value, char suffix)  : this(value, false, 0, suffix) { }
-        
+
+        public NumericalToken16(ushort value, char suffix) : this(value, false, 0, suffix) { }
+
         public NumericalToken16(short value, ICharacterSpanToken? suffix) : this(value, 0, suffix) { }
-        
+
         public NumericalToken16(short value, string? suffix) : this(value, 0, suffix) { }
-        
+
         public NumericalToken16(short value, char suffix) : this(value, 0, suffix) { }
 
         public const int RANGE_MAX_VALUE = ushort.MaxValue;
-        
+
         public const int RANGE_MIN_VALUE = 0 - ushort.MaxValue;
 
         public bool IsNegative { get; }
@@ -90,8 +92,8 @@ public partial class SemanticVersion
             }
             else
             {
-                 if (other.IsNegative)
-                    return 1; 
+                if (other.IsNegative)
+                    return 1;
                 result = Value.CompareTo(other.Value);
             }
             return (result != 0) ? result : CompareCharacterSpanTokens(Suffix, other.Suffix);
@@ -112,7 +114,7 @@ public partial class SemanticVersion
             }
             else
             {
-                 if (other.IsNegative)
+                if (other.IsNegative)
                     return 1;
                 result = 0 - other.CompareTo(Value);
             }

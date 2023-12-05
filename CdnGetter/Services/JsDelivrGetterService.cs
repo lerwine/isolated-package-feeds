@@ -1,15 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using CdnGetter.Config;
 using CdnGetter.Model;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace CdnGetter.Services;
 [ContentGetter(JsDelivrSettings.PROVIDER_ID, JsDelivrSettings.PROVIDER_NAME, Description = "data.jsdelivr.com")]

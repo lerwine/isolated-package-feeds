@@ -13,7 +13,7 @@ public readonly struct OptionalValue<ValueType> : IEquatable<OptionalValue<Value
     private static readonly Comparer<ValueType> _defaultComparer = Comparer<ValueType>.Default;
     private static readonly Func<ValueType, int> _getHashCode;
     private static readonly Func<ValueType, string> _toString;
-    
+
     static OptionalValue()
     {
         Type type = typeof(ValueType);

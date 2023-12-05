@@ -15,7 +15,7 @@ sealed class AsyncLookupEnumerator<TInput, TResult> : IDisposable
         _backingEnumerator = source.GetEnumerator();
         _getResult = getResult;
     }
-    
+
     public async Task<bool> MoveNextAsync(CancellationToken cancellationToken)
     {
         while (_backingEnumerator.MoveNext())

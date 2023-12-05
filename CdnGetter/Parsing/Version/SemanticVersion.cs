@@ -1,12 +1,5 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static CdnGetter.Parsing.Parsing;
-using static CdnGetter.Parsing.Version.Version;
 
 namespace CdnGetter.Parsing.Version;
 

@@ -55,32 +55,32 @@ public partial class SemanticVersion : IComparable<SemanticVersion>, IEquatable<
     }
 
     public static INumericalToken ToNumericalToken(short value) => (value > byte.MaxValue || value < sbyte.MinValue) ? new NumericalToken16(value) : (value < 0) ? new NumericalToken8((sbyte)value) : new NumericalToken8((byte)value);
-    
+
     public static INumericalToken ToNumericalToken(ushort value)
     {
         throw new NotImplementedException();
     }
-    
+
     public static INumericalToken ToNumericalToken(int value)
     {
         throw new NotImplementedException();
     }
-    
+
     public static INumericalToken ToNumericalToken(uint value)
     {
         throw new NotImplementedException();
     }
-    
+
     public static INumericalToken ToNumericalToken(long value)
     {
         throw new NotImplementedException();
     }
-    
+
     public static INumericalToken ToNumericalToken(ulong value)
     {
         throw new NotImplementedException();
     }
-    
+
     public static INumericalToken ToNumericalToken(BigInteger value)
     {
         if (value.IsZero)
@@ -98,7 +98,7 @@ public partial class SemanticVersion : IComparable<SemanticVersion>, IEquatable<
             return new NumericalToken32((uint)value, isNegative);
         return (value > NumericalToken8.RANGE_MAX_VALUE) ? new NumericalToken16((ushort)value, isNegative) : new NumericalToken8((byte)value, isNegative);
     }
-    
+
     public static bool operator ==(SemanticVersion left, SemanticVersion right) => (left is null) ? right is null : left.Equals(right);
 
     public static bool operator !=(SemanticVersion left, SemanticVersion right) => (left is null) ? right is not null : !left.Equals(right);

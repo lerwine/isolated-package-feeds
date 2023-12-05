@@ -1,10 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Security.Claims;
-using System.Security.Principal;
-using System.Threading.Tasks;
 using CdnServer.DTO;
 using Microsoft.EntityFrameworkCore;
 
@@ -29,7 +22,7 @@ public class CdnAppDbContext : DbContext
     public DbSet<LibGroup> Groups { get; set; } = null!;
 
     public DbSet<Library> Libraries { get; set; } = null!;
-    
+
     /// <summary>
     /// Configures the data model.
     /// </summary>

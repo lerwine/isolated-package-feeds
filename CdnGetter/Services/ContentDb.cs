@@ -94,7 +94,7 @@ public class ContentDb : DbContext
     /// <param name="cancellationToken">The token to observe while waiting for the task to complete.</param>
     /// <returns>The matching <see cref="LocalLibrary" /> or <see langword="null" /> if none matched the specified <paramref name="name" />.</returns>
     internal async Task<LocalLibrary?> FindLibraryByNameAsync(string name, CancellationToken cancellationToken) => await LocalLibraries.FirstOrDefaultAsync(cdn => cdn.Name == name, cancellationToken);
-    
+
     /// <summary>
     /// Content libraries retrieved from upstream content delivery networks.
     /// </summary>
@@ -129,14 +129,14 @@ public class ContentDb : DbContext
     /// Files retrieved from upstream content delivery networks.
     /// </summary>
     public DbSet<CdnFile> CdnFiles { get; set; } = null!;
-    
+
     /// <summary>
     /// Activity logs for files retrieved from upstream content delivery networks.
     /// </summary>
     public DbSet<FileLog> FileLogs { get; set; } = null!;
 
     private async Task OnBeforeSaveAsync(CancellationToken cancellationToken = default)
-{
+    {
         if (cancellationToken.IsCancellationRequested)
             return;
         using IDisposable? scope = _logger.BeginExecuteMethodScope(nameof(OnBeforeSaveAsync));
@@ -184,7 +184,7 @@ public class ContentDb : DbContext
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
         using IDisposable? scope = _logger.BeginExecuteMethodScope(nameof(SaveChanges), nameof(acceptAllChangesOnSuccess), acceptAllChangesOnSuccess);
-        OnBeforeSaveAsync().Wait();;
+        OnBeforeSaveAsync().Wait(); ;
         int returnValue = base.SaveChanges(acceptAllChangesOnSuccess);
         _logger.LogDbSaveChangeCompletedTrace(false, acceptAllChangesOnSuccess, returnValue);
         return returnValue;

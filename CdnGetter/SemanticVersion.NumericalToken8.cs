@@ -5,14 +5,16 @@ namespace CdnGetter;
 
 public partial class SemanticVersion
 {
+#pragma warning disable CA2231
     public readonly struct NumericalToken8 : INumericalToken<byte>, IComparable<NumericalToken8>, IEquatable<NumericalToken8>
+#pragma warning restore CA2231
     {
         public static readonly NumericalToken8 Zero = new(0);
-        
+
         public static readonly NumericalToken8 One = new(1);
 
         public static readonly NumericalToken8 NegativeOne = new(-1);
-        
+
         public NumericalToken8(byte value, bool isNegative = false, int zeroPadLength = 0, ICharacterSpanToken? suffix = null)
         {
             if (zeroPadLength < 0)
@@ -22,17 +24,17 @@ public partial class SemanticVersion
             ZeroPadLength = zeroPadLength;
             Suffix = (suffix is not null && suffix.Length > 0) ? suffix : null;
         }
-        
+
         public NumericalToken8(byte value, bool isNegative, int zeroPadLength, string? suffix) : this(value, isNegative, zeroPadLength, string.IsNullOrEmpty(suffix) ? null : (suffix.Length == 1) ? new CharacterToken(suffix[0]) : new StringToken(suffix)) { }
-        
+
         public NumericalToken8(byte value, bool isNegative, int zeroPadLength, char suffix) : this(value, isNegative, zeroPadLength, new CharacterToken(suffix)) { }
-        
+
         public NumericalToken8(byte value, int zeroPadLength, ICharacterSpanToken? suffix = null) : this(value, false, zeroPadLength, suffix) { }
-        
+
         public NumericalToken8(byte value, int zeroPadLength, string? suffix) : this(value, false, zeroPadLength, suffix) { }
-        
+
         public NumericalToken8(byte value, int zeroPadLength, char suffix) : this(value, false, zeroPadLength, suffix) { }
-        
+
         public NumericalToken8(sbyte value, int zeroPadLength = 0, ICharacterSpanToken? suffix = null)
         {
             if (zeroPadLength < 0)
@@ -50,31 +52,31 @@ public partial class SemanticVersion
             ZeroPadLength = zeroPadLength;
             Suffix = (suffix is not null && suffix.Length > 0) ? suffix : null;
         }
-        
+
         public NumericalToken8(sbyte value, int zeroPadLength, string? suffix) : this(value, zeroPadLength, string.IsNullOrEmpty(suffix) ? null : (suffix.Length == 1) ? new CharacterToken(suffix[0]) : new StringToken(suffix)) { }
-        
+
         public NumericalToken8(sbyte value, int zeroPadLength, char suffix) : this(value, zeroPadLength, new CharacterToken(suffix)) { }
 
         public NumericalToken8(byte value, bool isNegative, ICharacterSpanToken? suffix) : this(value, isNegative, 0, suffix) { }
-        
+
         public NumericalToken8(byte value, bool isNegative, string? suffix) : this(value, isNegative, 0, suffix) { }
-        
+
         public NumericalToken8(byte value, bool isNegative, char suffix) : this(value, isNegative, 0, suffix) { }
-        
+
         public NumericalToken8(byte value, ICharacterSpanToken? suffix) : this(value, false, 0, suffix) { }
-        
+
         public NumericalToken8(byte value, string? suffix) : this(value, false, 0, suffix) { }
-        
-        public NumericalToken8(byte value, char suffix)  : this(value, false, 0, suffix) { }
-        
+
+        public NumericalToken8(byte value, char suffix) : this(value, false, 0, suffix) { }
+
         public NumericalToken8(sbyte value, ICharacterSpanToken? suffix) : this(value, 0, suffix) { }
-        
+
         public NumericalToken8(sbyte value, string? suffix) : this(value, 0, suffix) { }
-        
+
         public NumericalToken8(sbyte value, char suffix) : this(value, 0, suffix) { }
 
         public const short RANGE_MAX_VALUE = byte.MaxValue;
-        
+
         public const short RANGE_MIN_VALUE = 0 - byte.MaxValue;
 
         public bool IsNegative { get; }
@@ -96,8 +98,8 @@ public partial class SemanticVersion
             }
             else
             {
-                 if (other.IsNegative)
-                    return 1; 
+                if (other.IsNegative)
+                    return 1;
                 result = Value.CompareTo(other.Value);
             }
             return (result != 0) ? result : CompareCharacterSpanTokens(Suffix, other.Suffix);
@@ -118,11 +120,11 @@ public partial class SemanticVersion
             }
             else
             {
-                 if (other.IsNegative)
+                if (other.IsNegative)
                     return 1;
                 result = 0 - other.CompareTo(Value);
             }
-            
+
             return (result != 0) ? result : CompareCharacterSpanTokens(Suffix, other.Suffix);
         }
 

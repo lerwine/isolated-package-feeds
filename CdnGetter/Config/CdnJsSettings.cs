@@ -8,7 +8,7 @@ public class CdnJsSettings : ICdnSettings
     /// The unique GUID string value for the <see cref="Model.UpstreamCdn.Id" /> property of the associated database entity.
     /// </summary>
     public const string PROVIDER_ID = "026ce2f6-c574-4869-bd4c-73bd73dfb640";
-    
+
     /// <summary>
     /// The unique provider name that is specified in the <see cref="Services.ContentGetterAttribute.Name" /> attribute property and used for the <see cref="Model.UpstreamCdn.Name" /> property of the associated database entity.
     /// </summary>

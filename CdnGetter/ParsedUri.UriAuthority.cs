@@ -32,7 +32,7 @@ public partial class ParsedUri
         /// <value><see langword="true" /> if the <see cref="Port" /> is implied, based upon the associated <see cref="SchemeName" />;
         /// otherwise <see langword="false" /> if the <see cref="Port" /> is explicitly specified.</value>
         public bool PortIsImplicit { get; }
-        
+
         /// <summary>
         /// Creates a new <c>UriAuthority</c> object.
         /// </summary>
@@ -49,7 +49,7 @@ public partial class ParsedUri
         /// <param name="userInfo">The user info.</param>
         /// <param name="hostName">The host name.</param>
         public UriAuthority(UserInfo userInfo, string hostName) => (UserInfo, HostName) = (userInfo, hostName ?? "");
-        
+
         /// <summary>
         /// Creates a new <c>UriAuthority</c> object.
         /// </summary>

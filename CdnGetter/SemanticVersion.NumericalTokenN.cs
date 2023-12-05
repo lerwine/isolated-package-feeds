@@ -1,12 +1,13 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
-using CdnGetter.Parsing.Version;
 
 namespace CdnGetter;
 
 public partial class SemanticVersion
 {
+#pragma warning disable CA2231
     public readonly struct NumericalTokenN : INumericalToken<BigInteger>, IComparable<NumericalTokenN>, IEquatable<NumericalTokenN>
+#pragma warning restore CA2231
     {
         public NumericalTokenN(BigInteger value, int zeroPadLength = 0, ICharacterSpanToken? suffix = null)
         {
@@ -25,17 +26,17 @@ public partial class SemanticVersion
             ZeroPadLength = zeroPadLength;
             Suffix = (suffix is not null && suffix.Length > 0) ? suffix : null;
         }
-        
+
         public NumericalTokenN(BigInteger value, int zeroPadLength, string? suffix) : this(value, zeroPadLength, string.IsNullOrEmpty(suffix) ? null : (suffix.Length == 1) ? new CharacterToken(suffix[0]) : new StringToken(suffix)) { }
-        
+
         public NumericalTokenN(BigInteger value, int zeroPadLength, char suffix) : this(value, zeroPadLength, new CharacterToken(suffix)) { }
-        
+
         public NumericalTokenN(BigInteger value, ICharacterSpanToken? suffix) : this(value, 0, suffix) { }
-        
+
         public NumericalTokenN(BigInteger value, string? suffix) : this(value, 0, suffix) { }
-        
+
         public NumericalTokenN(BigInteger value, char suffix) : this(value, 0, suffix) { }
-        
+
         public bool IsNegative { get; }
 
         public int ZeroPadLength { get; }

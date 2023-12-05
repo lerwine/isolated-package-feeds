@@ -1,5 +1,4 @@
 using System.Collections;
-using static CdnGetter.Parsing.Parsing;
 using static CdnGetter.Parsing.Version.Version;
 
 namespace CdnGetter.Parsing;
@@ -22,14 +21,14 @@ public readonly struct StringToken : IStringToken
     public StringToken(string value)
     {
         if (string.IsNullOrEmpty(value))
-            throw new ArgumentException("Value cannot be empty.",  nameof(value));
+            throw new ArgumentException("Value cannot be empty.", nameof(value));
         Value = value;
     }
 
     public StringToken(ReadOnlySpan<char> value)
     {
         if (value.Length == 0)
-            throw new ArgumentException("Value cannot be empty.",  nameof(value));
+            throw new ArgumentException("Value cannot be empty.", nameof(value));
         Value = new(value);
     }
 
@@ -38,7 +37,7 @@ public readonly struct StringToken : IStringToken
         if (startIndex < 0)
             throw new ArgumentOutOfRangeException(nameof(startIndex));
         if (startIndex >= value.Length)
-            throw new ArgumentException("Value cannot be empty.",  nameof(value));
+            throw new ArgumentException("Value cannot be empty.", nameof(value));
         Value = new((startIndex > 0) ? value[startIndex..] : value);
     }
 

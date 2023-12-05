@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace CdnGetter;
 
-public static class ValueConverters
+public static partial class ValueConverters
 {
     /// <summary>
     /// Defines conversions to and from <c>string</c> and <see cref="JsonNode" /> types.
@@ -21,19 +21,19 @@ public static class ValueConverters
         s => Parsing.Version.Version.ParseSoftwareVersion(s)
     );
 
-    
-    private static readonly Regex PathEncodeRegex = new(@"([^!\$&'\(\)\*\+,;=@\[\]/%\\]+|\\|%(?![a-fA-F\d]{2}))+", RegexOptions.Compiled);
+
+    private static readonly Regex PathEncodeRegex = CreatePathEncodeRegex();
     private static string EncodeUrlPath(string uriString)
     {
         return PathEncodeRegex.IsMatch(uriString) ? PathEncodeRegex.Replace(uriString, match => (match.Length == 1 && match.Value[0] == '\\') ? "/" : Uri.EscapeDataString(match.Value)) : uriString;
     }
-    
-    private static readonly Regex QueryEncodeRegex = new(@"([^!\$&'\(\)\*\+,;=\?@\[\]/%]+|%(?![a-fA-F\d]{2}))+", RegexOptions.Compiled);
+
+    private static readonly Regex QueryEncodeRegex = CreateQueryEncodeRegex();
     private static string EncodeUrlQuery(string uriString)
     {
         return QueryEncodeRegex.IsMatch(uriString) ? QueryEncodeRegex.Replace(uriString, match => Uri.EscapeDataString(match.Value)) : uriString;
     }
-    
+
     /// <summary>
     /// Creates a <see cref="Uri" /> from a string value.
     /// </summary>
@@ -51,7 +51,7 @@ public static class ValueConverters
             return new Uri(uriString, UriKind.Relative);
         try
         {
-            
+
             int i = uriString.IndexOf('#');
             UriBuilder ub = new() { Host = null, Scheme = null };
             if (i > 0)
@@ -77,7 +77,7 @@ public static class ValueConverters
         }
         catch { return new Uri(Uri.EscapeDataString(uriString), UriKind.Relative); }
     }
-    
+
     public static readonly ValueConverter<Uri?, string?> UriConverter = new(
         u => (u == null) ? null : u.IsAbsoluteUri ? u.AbsoluteUri : u.OriginalString,
         s => ForceCreateUri(s)
@@ -117,7 +117,7 @@ public static class ValueConverters
             catch { return null; }
         }
     }
-    
+
     public static bool TryConvertToJsonNode(this string? value, out JsonNode? result)
     {
         string? normalized = value.ToTrimmedOrNullIfEmpty();
@@ -139,7 +139,7 @@ public static class ValueConverters
         result = null;
         return false;
     }
-    
+
     public static JsonObject? ToJsonObject(this Dictionary<string, JsonElement>? source)
     {
         if (source is null)
@@ -160,4 +160,9 @@ public static class ValueConverters
             }
         return result;
     }
+
+    [GeneratedRegex(@"([^!\$&'\(\)\*\+,;=@\[\]/%\\]+|\\|%(?![a-fA-F\d]{2}))+", RegexOptions.Compiled)]
+    private static partial Regex CreatePathEncodeRegex();
+    [GeneratedRegex(@"([^!\$&'\(\)\*\+,;=\?@\[\]/%]+|%(?![a-fA-F\d]{2}))+", RegexOptions.Compiled)]
+    private static partial Regex CreateQueryEncodeRegex();
 }

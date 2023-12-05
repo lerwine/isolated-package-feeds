@@ -20,7 +20,7 @@ public partial class ParsedUri
         /// </summary>
         /// <value></value>
         public string Name { get; }
-        
+
         /// <summary>
         /// Createa a new <c>PathSegment</c> with a leading separator character.
         /// </summary>
@@ -43,7 +43,7 @@ public partial class ParsedUri
         /// A path segment that only contains a single <c>'/'</c> character.
         /// </summary>
         public static readonly PathSegment EmptyRoot = new(DELIMITER_CHAR_SLASH, string.Empty);
-        
+
         /// <summary>
         /// Tries to parse a path string.
         /// </summary>
@@ -114,7 +114,7 @@ public partial class ParsedUri
                 if (Name.Length == 0)
                     return;
             }
-            sb.Append(Encode(Name, PathSegmentEncodeRegex)) ;
+            sb.Append(Encode(Name, PathSegmentEncodeRegex));
         }
     }
 }

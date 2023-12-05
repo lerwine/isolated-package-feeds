@@ -2,7 +2,6 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.Extensions.Logging;
 using static CdnGetter.SqlExtensions;
 
 namespace CdnGetter.Model;
@@ -18,7 +17,7 @@ public abstract class ModificationTrackingModelBase : IValidatableObject
     /// Gets or sets the date and time that the record was last modified.
     /// </summary>
     public DateTime ModifiedOn { get; set; } = DateTime.Now;
-    
+
     IEnumerable<ValidationResult> IValidatableObject.Validate(ValidationContext validationContext)
     {
         var results = new List<ValidationResult>();
@@ -41,7 +40,7 @@ public abstract class ModificationTrackingModelBase : IValidatableObject
                 break;
         }
     }
-    
+
     protected static void OnBuildModificationTrackingModel<TEntity>(EntityTypeBuilder<TEntity> builder)
         where TEntity : ModificationTrackingModelBase
     {

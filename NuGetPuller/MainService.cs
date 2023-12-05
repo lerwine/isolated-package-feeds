@@ -2,13 +2,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NuGet.Frameworks;
-using NuGet.Packaging;
-using NuGet.Packaging.Core;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
-using System.Linq;
 using static NuGetPuller.Constants;
 
 namespace NuGetPuller;
@@ -178,7 +174,7 @@ public class MainService : BackgroundService
     {
         throw new NotImplementedException();
     }
-    
+
     protected async override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try

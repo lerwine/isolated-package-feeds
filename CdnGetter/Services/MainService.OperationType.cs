@@ -1,5 +1,4 @@
 namespace CdnGetter.Services;
-using static CdnGetter.Constants;
 
 public partial class MainService
 {

@@ -1,7 +1,5 @@
 using Microsoft.Extensions.Logging;
 using NuGet.Frameworks;
-using NuGet.Packaging.Core;
-using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 
 namespace NuGetPuller;

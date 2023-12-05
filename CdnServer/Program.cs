@@ -8,8 +8,8 @@ builder.Services.AddControllersWithViews();
 IConfigurationSection section = builder.Configuration.GetSection(nameof(CdnServer));
 builder.Services.Configure<CdnServer.CdnServerAppSettings>(section);
 
-CdnServer.CdnServerAppSettings settings = builder.Configuration.Get<CdnServer.CdnServerAppSettings>();
-string? databaseFilePath = settings.DbFile;
+CdnServer.CdnServerAppSettings? settings = builder.Configuration.Get<CdnServer.CdnServerAppSettings>();
+string? databaseFilePath = settings?.DbFile;
 
 if (string.IsNullOrWhiteSpace(databaseFilePath))
     databaseFilePath = Path.Combine(builder.Environment.WebRootPath, $"{nameof(CdnServer)}.db");

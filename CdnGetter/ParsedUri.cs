@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace CdnGetter;
 
@@ -49,22 +45,22 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
     private static readonly Regex DosPathDelimiterRegex = new(@"[\\/]", RegexOptions.Compiled);
 
     private static readonly Regex PathSegmentRegex = new($@"^[^/:\\]+|\G(?<{GROUP_NAME_sep}>[/:\\])[^/:\\]*", RegexOptions.Compiled);
-    
+
     /// <summary>
     /// Matches a URI scheme name.
     /// </summary>
     private static readonly Regex ValidSchemeNameRegex = new(@"^[a-z][a-z\d+.-]*$", RegexOptions.Compiled);
-    
+
     /// <summary>
     /// Matches a URI scheme name.
     /// </summary>
     private static readonly Regex ValidSchemeSeparatorRegex = new(@"^[:/]+$", RegexOptions.Compiled);
-    
+
     /// <summary>
     /// Matches a Host or UserName character that should be encoded.
     /// </summary>
     private static readonly Regex NameEncodeRegex = new(@"[^!$&'()*+,;=\w.~-]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    
+
     /// <summary>
     /// Matches a URI-encoded character sequence.
     /// </summary>
@@ -78,40 +74,40 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
 
     private const string GROUP_NAME_drive = "drive";
     private static readonly Regex DosPathRegex = new($@"^([\\/]{2}[.?][\\/])?(?<{GROUP_NAME_drive}>[a-z]:)[\\/](?<{GROUP_NAME_path}>[\\/]*[^""*/:<>?\\|]+([\\/]+[^""*/:<>?\\|]+)*[\\/]*|[\\/]+)?$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    
+
     private static readonly Regex UncPathLooseRegex = new($@"^[\\/][\\/]+(?<{GROUP_NAME_host}>[^""*/:<>?\\|]+|[\da-f]{{2}}(::?[\da-f]{{2}}){0,8}|::)[\\/](?<{GROUP_NAME_path}>[\\/]*[^""*/:<>?\\|]+([\\/]+[^""*/:<>?\\|]+)*[\\/]*|[\\/]+)?$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    
+
     private static readonly Regex UncPathAsUriStringRegex = new($@"^\\\\(?<{GROUP_NAME_host}>[^""*/:<>?\\|]+|[\da-f]{{2}}(::?[\da-f]{{2}}){0,8}|::)\\(?<{GROUP_NAME_path}>([^""#&*/:<>?@\\^|]+[\\/]+[^""#&*/:<>?@\\^|]+)*[\\/]*)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    
+
     private static readonly Regex PsPathRegex = new($@"^(?<{GROUP_NAME_drive}>[^\x00-\x1F*:?\[\\\]]+:)[\\/]+(?<{GROUP_NAME_path}>([^""*/:<>?\\|]+[\\/]+[^""*/:<>?\\|]+)*[\\/]*)?$");
-    
+
     private static readonly Regex UnixPathRegex = new(@"^(((/+[^\x00/]+)+|[^\x00/]+(/+[^\x00/]+)*)/*|/+)$");
 
     /// <summary>
     /// Matches a valid IPv4 address.
     /// </summary>
     public static readonly Regex ValidIpV4Regex = new(@"^(([01](\d\d?)?|2([0-4]\d?|5[0-5]?|[6-9])?|[3-9]\d?)\.){3}([01](\d\d?)?|2([0-4]\d?|5[0-5]?|[6-9])?|[3-9]\d?)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    
+
     /// <summary>
     /// Matches a valid IPv6 address that is surrounded by square brackets.
     /// </summary>
     public static readonly Regex ValidUriIpV6Regex = new(@"^\[(:((:[\da-f]{1,4}){1,7}|:)|(?=([^:]+:)+((:[^:]+)+|:)$)([\da-f]{1,4}::?){1,6}(:|[\da-f]{0,4}(::)?)|([\da-f]{1,4}:){7}[\da-f]{1,4})\]$", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
-    
+
     /// <summary>
     /// Matches a valid IPv6 address.
     /// </summary>
     public static readonly Regex ValidIpV6Regex = new(@"^(:((:[\da-f]{1,4}){1,7}|:)|(?=([^:]+:)+((:[^:]+)+|:)$)([\da-f]{1,4}::?){1,6}(:|[\da-f]{0,4}(::)?)|([\da-f]{1,4}:){7}[\da-f]{1,4})$", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
-    
+
     /// <summary>
     /// Matches a valid IPv6 address with an embedded IPv4 address that is surrounded by square brackets.
     /// </summary>
     public static readonly Regex ValidUriIpV6wV4Regex = new(@"^\[(:(:[\da-f]{1,4}){0,5}:|[\da-f]{1,4}:(:([\da-f]{1,4}:){0,4}|[\da-f]{1,4}:(:([\da-f]{1,4}:){0,3}|[\da-f]{1,4}:(:([\da-f]{1,4}:){0,2}|[\da-f]{1,4}:(:([\da-f]{1,4}:)?|[\da-f]{1,4}:([\da-f]{1,4}?)?:)))))(([01](\d\d?)?|2([0-4]\d?|5[0-5]?|[6-9])?|[3-9]\d?)\.){3}([01](\d\d?)?|2([0-4]\d?|5[0-5]?|[6-9])?|[3-9]\d?)\]$", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
-    
+
     /// <summary>
     /// Matches a valid IPv6 address with an embedded IPv4 address.
     /// </summary>
     public static readonly Regex ValidIpV6wV4Regex = new(@"^(:(:[\da-f]{1,4}){0,5}:|[\da-f]{1,4}:(:([\da-f]{1,4}:){0,4}|[\da-f]{1,4}:(:([\da-f]{1,4}:){0,3}|[\da-f]{1,4}:(:([\da-f]{1,4}:){0,2}|[\da-f]{1,4}:(:([\da-f]{1,4}:)?|[\da-f]{1,4}:([\da-f]{1,4}?)?:)))))(([01](\d\d?)?|2([0-4]\d?|5[0-5]?|[6-9])?|[3-9]\d?)\.){3}([01](\d\d?)?|2([0-4]\d?|5[0-5]?|[6-9])?|[3-9]\d?)$", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
-    
+
     #endregion
 
     /// <summary>
@@ -144,7 +140,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
     /// Gets the path segments for this URI.
     /// </summary>
     public ReadOnlyCollection<PathSegment> PathSegments { get; }
-    
+
     /// <summary>
     /// Gets the query sub-components for this URI.
     /// </summary>
@@ -159,7 +155,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
     /// <remarks>Unlike <see cref="Uri.Fragment" />, this is the un-escaped value, and does not include the delimiting <c>#</c> character.
     /// An empty string indicatse that this has an empty fragment component.</remarks>
     public string? Fragment { get; }
-    
+
     #region Constructors
 
     /// <summary>
@@ -178,7 +174,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
         if (!ValidSchemeNameRegex.IsMatch(schemeName))
             throw new ArgumentException($"'{schemeName}' is an invalid scheme name.", nameof(schemeName));
         if (string.IsNullOrEmpty(schemeSeparator))
-           SchemeSeparator = string.Empty;
+            SchemeSeparator = string.Empty;
         else
         {
             if (!ValidSchemeSeparatorRegex.IsMatch(schemeSeparator))
@@ -190,7 +186,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
         Query = new((query is null) ? [] : query.Where(q => q is not null).ToArray());
         Fragment = fragment;
     }
-    
+
     /// <summary>
     /// Creates a new absolute <c>ParsedUri</c> object from un-escaped component values.
     /// </summary>
@@ -212,7 +208,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
         Query = new((query is null) ? [] : query.Where(q => q is not null).ToArray());
         Fragment = fragment;
     }
-    
+
     /// <summary>
     /// Creates a new relative <c>ParsedUri</c> object from un-escaped component values.
     /// </summary>
@@ -225,14 +221,14 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
         Query = new((query is null) ? [] : query.Where(q => q is not null).ToArray());
         Fragment = fragment;
     }
-    
+
     /// <summary>
     /// Creates a new relative <c>ParsedUri</c> object with a query component.
     /// </summary>
     /// <param name="pathSegments">The segments of the URI path component.</param>
     /// <param name="query">The sub-components of the URI query component.</param>
     public ParsedUri(IEnumerable<PathSegment>? pathSegments, params QuerySubComponent[] query) : this(pathSegments, query, null) { }
-    
+
     /// <summary>
     /// Creates a new relative <c>ParsedUri</c> object.
     /// </summary>
@@ -452,7 +448,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
         else if (isRooted)
             uri = new(segments.Select(p => (p.Length > 0) ? new PathSegment(DELIMITER_CHAR_SLASH, p) : PathSegment.EmptyRoot));
         else
-            uri = new(new PathSegment[] { new PathSegment(segments[0])}.Concat(segments.Skip(1).Select(p => (p.Length > 0) ? new PathSegment(DELIMITER_CHAR_SLASH, p) : PathSegment.EmptyRoot)));
+            uri = new(new PathSegment[] { new PathSegment(segments[0]) }.Concat(segments.Skip(1).Select(p => (p.Length > 0) ? new PathSegment(DELIMITER_CHAR_SLASH, p) : PathSegment.EmptyRoot)));
         return true;
     }
 
@@ -536,7 +532,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
             uri = null;
             return false;
         }
-        
+
         throw new NotImplementedException();
     }
 
@@ -779,7 +775,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
     private static ParsedUri ParseDosPath(Match match, NormalizationOptions options)
     {
         string drive = match.Groups[GROUP_NAME_drive].Value;
-        Group g = match.Groups[GROUP_NAME_path]; 
+        Group g = match.Groups[GROUP_NAME_path];
         if (g.Success)
         {
             string[] segments = DosPathDelimiterRegex.Split(g.Value);
@@ -961,7 +957,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
             }
             return string.Empty;
         }
-        
+
         int index = uriString.IndexOf(DELIMITER_CHAR_HASH);
         if ((index) < 0)
         {
@@ -1129,13 +1125,13 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
     public static readonly Regex PasswordEncodeRegex = new(@"[^!$&'()*+,;=\w.~:-]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     public static readonly Regex PathSegmentEncodeRegex = new(@"[^!$&'()*+,:;@=\w.~-]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    
+
     public static readonly Regex QueryKeyEncodeRegex = new(@"[^ !$'()*+,:;@/\w.~-]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    
+
     public static readonly Regex QueryValueEncodeRegex = new(@"[^ !$'()*+,:;@=/\w.~-]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    
+
     public static readonly Regex QuerySpaceEncodeRegex = new(@" |%20", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    
+
     public static readonly Regex FragmentEncodeRegex = new(@"[^!$&'()*+,:;@=/?\w.~-]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     private static string Encode(string value, Regex regex) => regex.IsMatch(value) ? regex.Replace(value, match => Uri.HexEscape(match.Value[0])) : value;

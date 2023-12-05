@@ -18,7 +18,7 @@ public class UpstreamCdn : ModificationTrackingModelBase
     /// Gets or sets the unique identifier of the registered upstream service.
     /// </summary>
     public Guid Id { get; set; }
-    
+
     public const int MAXLENGTH_Name = 1024;
     private string _name = string.Empty;
     /// <summary>
@@ -64,7 +64,7 @@ public class UpstreamCdn : ModificationTrackingModelBase
     /// Gets or sets the content libraries that have been retrieved from the upstream content delivery service.
     /// </summary>
     public Collection<CdnLibrary> Libraries { get; set; } = new();
-    
+
     /// <summary>
     /// CDN acess logs for this content library.
     /// </summary>
@@ -95,7 +95,7 @@ public class UpstreamCdn : ModificationTrackingModelBase
         _ = builder.Property(nameof(Description)).IsRequired();
         ModificationTrackingModelBase.OnBuildModificationTrackingModel(builder);
     }
-    
+
     internal static void CreateTable(Action<string> executeNonQuery)
     {
         executeNonQuery(@$"CREATE TABLE ""{nameof(Services.ContentDb.UpstreamCdns)}"" (
@@ -115,39 +115,39 @@ public class UpstreamCdn : ModificationTrackingModelBase
 
     internal async static Task ShowAsync(Services.ContentDb dbContext, ILogger logger, IServiceScopeFactory scopeFactory, CancellationToken cancellationToken)
     {
-            using IServiceScope scope = scopeFactory.CreateScope();
-            int count = 0;
-            foreach (KeyValuePair<Guid, (Type Type, string Name, string Description)> item in Services.ContentGetterAttribute.UpstreamCdnServices)
+        using IServiceScope scope = scopeFactory.CreateScope();
+        int count = 0;
+        foreach (KeyValuePair<Guid, (Type Type, string Name, string Description)> item in Services.ContentGetterAttribute.UpstreamCdnServices)
+        {
+            Guid id = item.Key;
+            UpstreamCdn? rsvc = await dbContext.UpstreamCdns.FirstOrDefaultAsync(r => r.Id == id, cancellationToken: cancellationToken);
+            (Type type, string name, string description) = item.Value;
+            if (scope.ServiceProvider.GetService(type) is Services.ContentGetterService)
             {
-                Guid id = item.Key;
-                UpstreamCdn? rsvc = await dbContext.UpstreamCdns.FirstOrDefaultAsync(r => r.Id == id, cancellationToken: cancellationToken);
-                (Type type, string name, string description) = item.Value;
-                if (scope.ServiceProvider.GetService(type) is Services.ContentGetterService)
+                count++;
+                if (rsvc is not null)
                 {
-                    count++;
-                    if (rsvc is not null)
-                    {
-                        if (name.Length > 0 && !Services.MainService.NameComparer.Equals(rsvc.Name, name))
-                            Console.WriteLine("{0}; {1}", rsvc.Name, name);
-                        else
-                            Console.WriteLine(rsvc.Name);
-                    }
-                    else if (name.Length > 0)
-                        Console.WriteLine(name);
-                    if (description.Length > 0)
-                        foreach (string d in description.SplitLines().Select(l => l.ToWsNormalizedOrEmptyIfNull()!))
-                            Console.WriteLine((d.Length > 0) ? $"\t{d}" : d);
+                    if (name.Length > 0 && !Services.MainService.NameComparer.Equals(rsvc.Name, name))
+                        Console.WriteLine("{0}; {1}", rsvc.Name, name);
+                    else
+                        Console.WriteLine(rsvc.Name);
                 }
-                else
-                    logger.LogServiceTypeNotFoundError(type);
-            }
-            if (count > 0)
-            {
-                Console.WriteLine("");
-                Console.WriteLine("{0:d} CDNs total.", count);
+                else if (name.Length > 0)
+                    Console.WriteLine(name);
+                if (description.Length > 0)
+                    foreach (string d in description.SplitLines().Select(l => l.ToWsNormalizedOrEmptyIfNull()!))
+                        Console.WriteLine((d.Length > 0) ? $"\t{d}" : d);
             }
             else
-                logger.LogNoUpstreamCdnsFoundWarning();
+                logger.LogServiceTypeNotFoundError(type);
+        }
+        if (count > 0)
+        {
+            Console.WriteLine("");
+            Console.WriteLine("{0:d} CDNs total.", count);
+        }
+        else
+            logger.LogNoUpstreamCdnsFoundWarning();
     }
 
     internal static async Task<LinkedList<UpstreamCdn>> GetByNamesAsync(IEnumerable<string> names, Services.ContentDb dbContext, ILogger logger, CancellationToken cancellationToken)

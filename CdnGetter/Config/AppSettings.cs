@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using static CdnGetter.Constants;
 
 namespace CdnGetter.Config;
+
 /// <summary>
 /// Top-level section for custom app settings.
 /// </summary>

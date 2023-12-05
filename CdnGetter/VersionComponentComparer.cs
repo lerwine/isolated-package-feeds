@@ -8,7 +8,7 @@ public class VersionComponentComparer : StringComparer, IEqualityComparer<char>,
     IComparer<IVersionNumber>, IEqualityComparer<IVersionComponent>, IComparer<IVersionComponent>
 {
     public static readonly VersionComponentComparer Instance = new();
-    
+
     private VersionComponentComparer() { }
 
     public static int CompareTo(string? x, string? y)
@@ -29,7 +29,7 @@ public class VersionComponentComparer : StringComparer, IEqualityComparer<char>,
         }
         return b.MoveNext() ? -1 : 0;
     }
-    
+
     public override int Compare(string? x, string? y) => CompareTo(x, y);
 
     public static int CompareTo(char x, char y) => char.IsUpper(x) ? (char.IsUpper(y) ? x.CompareTo(y) : char.ToLower(x).CompareTo(y)) : x.CompareTo(char.IsUpper(y) ? char.ToLower(y) : y);
@@ -102,7 +102,7 @@ public class VersionComponentComparer : StringComparer, IEqualityComparer<char>,
         }
         return result;
     }
-    
+
     public override int GetHashCode(string obj) => GetHashCodeOf(obj);
 
     public static int GetHashCodeOf([DisallowNull] char obj) => (char.IsUpper(obj) ? char.ToLower(obj) : obj).GetHashCode();

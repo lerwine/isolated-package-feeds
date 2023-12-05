@@ -5,7 +5,9 @@ namespace CdnGetter;
 
 public partial class SemanticVersion
 {
+#pragma warning disable CA2231
     public readonly struct StringToken : IToken<string>, ICharacterSpanToken, IComparable<StringToken>, IEquatable<StringToken>
+#pragma warning restore CA2231
     {
         public string Value { get; }
 
@@ -27,7 +29,7 @@ public partial class SemanticVersion
         {
             throw new NotImplementedException();
         }
-        
+
         public int CompareTo(IToken<string>? other)
         {
             throw new NotImplementedException();

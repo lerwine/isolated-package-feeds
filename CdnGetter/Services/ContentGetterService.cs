@@ -34,7 +34,7 @@ public abstract class ContentGetterService
         _settings = options.Value ?? new();
         _hostEnvironment = hostEnvironment;
     }
-    
+
     /// <summary>
     /// Gets the current logger object.
     /// </summary>
@@ -46,7 +46,7 @@ public abstract class ContentGetterService
     {
         if (_contentDirectory is null)
         {
-            string path = AppSettings.GetLocalStoragePath(_settings); 
+            string path = AppSettings.GetLocalStoragePath(_settings);
             try
             {
                 _contentDirectory = result = new DirectoryInfo(Path.IsPathFullyQualified(path) ? path : Path.Combine(_hostEnvironment.ContentRootPath, path));
@@ -100,7 +100,7 @@ public abstract class ContentGetterService
     protected abstract Task AddNewVersionsAsync(UpstreamCdn upstreamCdn, string libraryName, CancellationToken cancellationToken);
 
     public abstract Task GetNewVersionsAsync(CdnLibrary cdnLibrary, CancellationToken cancellationToken);
-    
+
     // public async Task GetNewVersionsAsync(UpstreamCdn upstreamCdn, ContentDb dbContext, AppSettings appSettings, IEnumerable<string> libraryNames, CancellationToken cancellationToken)
     // {
     //     foreach (string n in libraryNames)
@@ -112,9 +112,9 @@ public abstract class ContentGetterService
     //             await ReloadAsync(existing, cancellationToken);
     //     }
     // }
-    
+
     public abstract Task AddAsync(UpstreamCdn upstreamCdn, IEnumerable<string> libraryNames, CancellationToken cancellationToken);
-    
+
     public async Task ReloadAsync(UpstreamCdn upstreamCdn, IEnumerable<string> libraryNames, CancellationToken cancellationToken)
     {
         foreach (string n in libraryNames)

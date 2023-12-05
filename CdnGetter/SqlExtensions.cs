@@ -49,7 +49,7 @@ public static class SqlExtensions
     /// The maximum length for content encoding properties.
     /// </summary>
     public const int MAXLENGTH_Encoding = 32;
-    
+
     /// <summary>
     /// Ensures that an entity property has a random <see cref="Guid" /> assigned when being added.
     /// </summary>
@@ -1110,7 +1110,7 @@ public static class SqlExtensions
             return null;
         return Path.Combine(contentDirectory.FullName, library.DirName, dirName);
     }
-    
+
     /// <summary>
     /// Gets the full directory name for files associated with a specific <see cref="Model.LocalVersion" />.
     /// </summary>
@@ -1128,7 +1128,7 @@ public static class SqlExtensions
             return null;
         return Path.Combine(contentDirectory.FullName, library.DirName, dirName);
     }
-    
+
     /// <summary>
     /// Gets the full directory name for files associated with a specific <see cref="Model.CdnVersion" />.
     /// </summary>
@@ -1148,7 +1148,7 @@ public static class SqlExtensions
             return null;
         return Path.Combine(dirName, cdn.DirName);
     }
-    
+
     /// <summary>
     /// Creates a <see cref="FileProperties" /> record from a <see cref="Model.LocalFile" />.
     /// </summary>
@@ -1167,7 +1167,7 @@ public static class SqlExtensions
         Model.LocalFile entity = entry.Entity;
         return new(Name: entity.Name, SRI: entity.SRI, ContentType: entity.ContentType, Encoding: entity.Encoding, DirName: dirName, FileName: fileName, Order: entity.Order);
     }
-    
+
     /// <summary>
     /// Creates a <see cref="FileProperties" /> record from a <see cref="Model.CdnFile" /> and its associated <see cref="Model.LocalFile" />.
     /// </summary>
