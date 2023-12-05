@@ -170,9 +170,46 @@ public class MainService : BackgroundService
         }
     }
 
-    private async Task UpdateLocalFromRemote(string packageId, Dictionary<string, HashSet<NuGetVersion>> packagesUpdated, LocalClientService localClientService, UpstreamClientService upstreamClientService, CancellationToken cancellationToken)
+    private async Task UpdateLocalFromRemote(IEnumerable<string> packageIds, LocalClientService localClientService, UpstreamClientService upstreamClientService, CancellationToken stoppingToken)
     {
-        throw new NotImplementedException();
+        var packagesToUpdate = await upstreamClientService.ExpandPackagesWithDependenciesAsync(packageIds, stoppingToken);
+        if (packagesToUpdate is null || !packagesToUpdate.Any())
+            return;
+        var tempFile = new FileInfo(Path.GetTempFileName());
+        try
+        {
+            foreach (var identity in packagesToUpdate)
+            {
+                if (await localClientService.DoesPackageExistAsync(identity.Id, identity.Version, stoppingToken))
+                    continue;
+                using FileStream stream = new(tempFile.FullName, FileMode.Create, FileAccess.Write);
+                try { await upstreamClientService.CopyNupkgToStreamAsync(identity.Id, identity.Version, stream, stoppingToken); }
+                catch (Exception error)
+                {
+                    _logger.LogUnexpectedPackageDownloadFailure(identity.Id, identity.Version, error);
+                    continue;
+                }
+                finally
+                {
+                    stream.Flush();
+                    stream.Close();
+                }
+                tempFile.Refresh();
+                if (tempFile.Length > 0)
+                {
+                    if (!await localClientService.AddPackageAsync(tempFile.FullName, false, stoppingToken))
+                        _logger.LogUnexpectedAddFailure(identity.Id, identity.Version);
+                }
+                else
+                    _logger.LogEmptyPackageDownload(identity.Id, identity.Version);
+            }
+        }
+        finally
+        {
+            tempFile.Refresh();
+            if (tempFile.Exists)
+                tempFile.Delete();
+        }
     }
 
     protected async override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -202,18 +239,10 @@ public class MainService : BackgroundService
                 if ((packageIds = (await localClientService.GetAllPackagesAsync(stoppingToken))?.Select(p => p.Identity.Id)) is null || !packageIds.Any())
                     _logger.LogNoLocalPackagesExist();
                 else
-                {
-                    Dictionary<string, HashSet<NuGetVersion>> packagesUpdated = new(NoCaseComparer);
-                    foreach (string id in packageIds)
-                        await UpdateLocalFromRemote(id, packagesUpdated, localClientService, upstreamClientService, stoppingToken);
-                }
+                    await UpdateLocalFromRemote(packageIds, localClientService, upstreamClientService, stoppingToken);
             }
             else if ((packageIds = appSettings.Update?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(NoCaseComparer)) is not null && packageIds.Any())
-            {
-                Dictionary<string, HashSet<NuGetVersion>> packagesUpdated = new(NoCaseComparer);
-                foreach (string id in packageIds)
-                    await UpdateLocalFromRemote(id, packagesUpdated, localClientService, upstreamClientService, stoppingToken);
-            }
+                await UpdateLocalFromRemote(packageIds, localClientService, upstreamClientService, stoppingToken);
         }
         catch (OperationCanceledException) { throw; }
         finally

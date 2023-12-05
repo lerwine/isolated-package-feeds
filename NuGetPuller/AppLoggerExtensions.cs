@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using NuGet.Frameworks;
+using NuGet.Packaging.Core;
 using NuGet.Versioning;
 
 namespace NuGetPuller;
@@ -945,16 +946,16 @@ public static class AppLoggerExtensions
 
     #region GetDownloadResource Scope
 
-    private static readonly Func<ILogger, string, IDisposable?> _getRemoteDownloadResourceScope = LoggerMessage.DefineScope<string>(
-        "Getting Download Resource from upstream NuGet repository at {RepositoryUrl}."
+    private static readonly Func<ILogger, string, NuGetVersion?, string, IDisposable?> _getRemoteDownloadResourceResultScope = LoggerMessage.DefineScope<string, NuGetVersion?, string>(
+        "Getting Download Resource for package {PackageId}, version {Version} from upstream NuGet repository at {RepositoryUrl}."
     );
 
-    private static readonly Func<ILogger, string, IDisposable?> _getUpstreamDirDownloadResourceScope = LoggerMessage.DefineScope<string>(
-        "Getting Download Resource from upstream NuGet repository at {Path}."
+    private static readonly Func<ILogger, string, NuGetVersion?, string, IDisposable?> _getUpstreamDirDownloadResourceResultScope = LoggerMessage.DefineScope<string, NuGetVersion?, string>(
+        "Getting Download Resource for package {PackageId}, version {Version} from upstream NuGet repository at {Path}."
     );
 
-    private static readonly Func<ILogger, string, IDisposable?> _getLocalDownloadResourceScope = LoggerMessage.DefineScope<string>(
-        "Getting Download Resource from local NuGet repository at {Path}."
+    private static readonly Func<ILogger, string, NuGetVersion?, string, IDisposable?> _getLocalDownloadResourceResultScope = LoggerMessage.DefineScope<string, NuGetVersion?, string>(
+        "Getting Download Resource for package {PackageId}, version {Version} from local NuGet repository at {Path}."
     );
 
     /// <summary>
@@ -964,20 +965,20 @@ public static class AppLoggerExtensions
     /// <param name="clientService">The client service.</param>
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetDownloadResourceScope(this ILogger logger, ClientService clientService, bool isUpstream)
+    public static IDisposable? BeginGetDownloadResourceResultScope(this ILogger logger, PackageIdentity identity, ClientService clientService, bool isUpstream)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
             if (isUpstream)
-                return _getUpstreamDirDownloadResourceScope(logger, clientService.PackageSourceLocation);
-            return _getLocalDownloadResourceScope(logger, clientService.PackageSourceLocation);
+                return _getUpstreamDirDownloadResourceResultScope(logger, identity.Id, identity.HasVersion ? identity.Version : null, clientService.PackageSourceLocation);
+            return _getLocalDownloadResourceResultScope(logger, identity.Id, identity.HasVersion ? identity.Version : null, clientService.PackageSourceLocation);
         }
-        return _getRemoteDownloadResourceScope(logger, clientService.PackageSourceLocation);
+        return _getRemoteDownloadResourceResultScope(logger, identity.Id, identity.HasVersion ? identity.Version : null, clientService.PackageSourceLocation);
     }
 
     #endregion
 
-    #region GetDownloadResourceResult Scope
+    #region DownloadNupkg Scope
 
     private static readonly Func<ILogger, string, NuGetVersion?, string?, IDisposable?> _downloadRemoteNupkgScope = LoggerMessage.DefineScope<string, NuGetVersion?, string?>(
        "Download NuGet package from upstream (PackageId={PackageId}; Version={Version}; URL={RepositoryUrl}).");
@@ -989,7 +990,7 @@ public static class AppLoggerExtensions
        "Download NuGet package from local (PackageId={PackageId}; Version={Version}; Path={RepositoryPath}).");
 
     /// <summary>
-    /// Formats the GetDownloadResourceResult message and creates a scope.
+    /// Formats the DownloadNupkg message and creates a scope.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The package ID.</param>
@@ -1295,6 +1296,18 @@ public static class AppLoggerExtensions
        "Get package dependencies from local (PackageId={PackageId}; Version={Version}; Framework={Framework}; Path={RepositoryPath})."
     );
 
+    private static readonly Func<ILogger, string, string, IDisposable?> _getAllRemotePackageDependenciesScope = LoggerMessage.DefineScope<string, string>(
+       "Get package dependencies from upstream (PackageId={PackageId}; URL={RepositoryUrl})."
+    );
+
+    private static readonly Func<ILogger, string, string, IDisposable?> _getAllUpstreamDirPackageDependenciesScope = LoggerMessage.DefineScope<string, string>(
+       "Get package dependencies from upstream (PackageId={PackageId}; Path={RepositoryPath})."
+    );
+
+    private static readonly Func<ILogger, string, string, IDisposable?> _getAllLocalPackageDependenciesScope = LoggerMessage.DefineScope<string, string>(
+       "Get package dependencies from local (PackageId={PackageId}; Path={RepositoryPath})."
+    );
+
     /// <summary>
     /// Formats the GetPackageDependencies message and creates a scope.
     /// </summary>
@@ -1314,6 +1327,25 @@ public static class AppLoggerExtensions
             return _getLocalPackageDependenciesScope(logger, packageId, version, framework, clientService.PackageSourceLocation);
         }
         return _getRemotePackageDependenciesScope(logger, packageId, version, framework, clientService.PackageSourceLocation);
+    }
+
+    /// <summary>
+    /// Formats the GetPackageDependencies message and creates a scope.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="packageId">The package identifier.</param>
+    /// <param name="clientService">The client service.</param>
+    /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
+    /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
+    public static IDisposable? BeginGetPackageDependenciesScope(this ILogger logger, string packageId, ClientService clientService, bool isUpstream)
+    {
+        if (clientService.PackageSourceUri.IsFile)
+        {
+            if (isUpstream)
+                return _getAllUpstreamDirPackageDependenciesScope(logger, packageId, clientService.PackageSourceLocation);
+            return _getAllLocalPackageDependenciesScope(logger, packageId, clientService.PackageSourceLocation);
+        }
+        return _getAllRemotePackageDependenciesScope(logger, packageId, clientService.PackageSourceLocation);
     }
 
     #endregion

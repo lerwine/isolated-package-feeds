@@ -4,6 +4,7 @@ using NuGet.Frameworks;
 using NuGet.Packaging.Core;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
+using static NuGetPuller.Constants;
 
 namespace NuGetPuller;
 
@@ -14,6 +15,7 @@ public abstract class ClientService : IDisposable
     private Task<PackageMetadataResource>? _getPackageMetadataResourceAsync;
     private Task<FindPackageByIdResource>? _getFindPackageByIdResourceAsync;
     private Task<DependencyInfoResource>? _getDependencyInfoResourceAsync;
+    // private Task<DownloadResource>? _getDownloadResourceAsync;
 
     protected string GlobalPackagesFolder { get; }
 
@@ -135,23 +137,6 @@ public abstract class ClientService : IDisposable
         new(await GetFindPackageByIdResourceAsync(cancellationToken), scopeFactory());
 
     /// <summary>
-    /// Asynchronously downloads and copies NuGet package to output stream.
-    /// </summary>
-    /// <param name="packageId">The package ID.</param>
-    /// <param name="version">The package version.</param>
-    /// <param name="destination">The output stream.</param>
-    /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
-    /// <seealso href="https://learn.microsoft.com/en-us/nuget/api/package-publish-resource#push-a-package"/>
-    /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.8.x/src/NuGet.Core/NuGet.Protocol/Resources/FindPackageByIdResource.cs#L88"/>
-    /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.8.x/src/NuGet.Core/NuGet.Protocol/LocalRepositories/LocalV3FindPackageByIdResource.cs#L167"/>
-    /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.8.x/src/NuGet.Core/NuGet.Protocol/RemoteRepositories/RemoteV3FindPackageByIdResource.cs#L222"/>
-    public async Task CopyNupkgToStreamAsync(string packageId, NuGetVersion version, Stream destination, CancellationToken cancellationToken)
-    {
-        using var scope = await GetFindPackageByIdResourceScopeAsync(() => Logger.BeginDownloadNupkgScope(packageId, version, this, IsUpstream), cancellationToken);
-        await scope.Context.CopyNupkgToStreamAsync(packageId, version, destination, CacheContext, NuGetLogger, cancellationToken);
-    }
-
-    /// <summary>
     /// Asynchronously gets all package versions for a package ID.
     /// </summary>
     /// <param name="packageId">The package ID.</param>
@@ -186,6 +171,23 @@ public abstract class ClientService : IDisposable
     {
         using var scope = await GetFindPackageByIdResourceScopeAsync(() => Logger.BeginGetDependencyInfoScope(packageId, version, this, IsUpstream), cancellationToken);
         return await scope.Context.GetDependencyInfoAsync(packageId.ToLower(), version, CacheContext, NuGetLogger, cancellationToken);
+    }
+
+    /// <summary>
+    /// Asynchronously downloads and copies NuGet package to output stream.
+    /// </summary>
+    /// <param name="packageId">The package ID.</param>
+    /// <param name="version">The package version.</param>
+    /// <param name="destination">The output stream.</param>
+    /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
+    /// <seealso href="https://learn.microsoft.com/en-us/nuget/api/package-publish-resource#push-a-package"/>
+    /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.8.x/src/NuGet.Core/NuGet.Protocol/Resources/FindPackageByIdResource.cs#L88"/>
+    /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.8.x/src/NuGet.Core/NuGet.Protocol/LocalRepositories/LocalV3FindPackageByIdResource.cs#L167"/>
+    /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.8.x/src/NuGet.Core/NuGet.Protocol/RemoteRepositories/RemoteV3FindPackageByIdResource.cs#L222"/>
+    public async Task CopyNupkgToStreamAsync(string packageId, NuGetVersion version, Stream destination, CancellationToken cancellationToken)
+    {
+        using var scope = await GetFindPackageByIdResourceScopeAsync(() => Logger.BeginDownloadNupkgScope(packageId, version, this, IsUpstream), cancellationToken);
+        await scope.Context.CopyNupkgToStreamAsync(packageId, version, destination, CacheContext, NuGetLogger, cancellationToken);
     }
 
     /// <summary>
@@ -294,7 +296,140 @@ public abstract class ClientService : IDisposable
         return await GetPackageDependenciesAsync(packageId, version, framework, scope.Context, cancellationToken);
     }
 
+    private static IEnumerable<PackageIdentity> ToPackageIdentities(Dictionary<string, IEnumerable<NuGetVersion>> packageDictionary)
+    {
+        foreach (var kvp in packageDictionary.OrderBy(k => k.Key, NoCaseComparer))
+        {
+            string id = kvp.Key;
+            if (kvp.Value.Any())
+                foreach (var version in kvp.Value)
+                    yield return new PackageIdentity(id, version);
+            else
+                yield return new PackageIdentity(id, null);
+        }
+    }
+
+    /// <summary>
+    /// Retrieve all dependencies for a single package.
+    /// </summary>
+    /// <param name="packageId">The package ID.</param>
+    /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
+    /// <returns><see cref="Task{TResult}.Result" /> returns the dependencies for the specified package.</returns>
+    public async Task<IEnumerable<PackageIdentity>> GetPackageDependenciesAsync(string packageId, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(packageId);
+        using var scope = await GetFindPackageByIdResourceScopeAsync(() => Logger.BeginGetPackageDependenciesScope(packageId, this, IsUpstream), cancellationToken);
+        var lc = packageId.ToLower();
+        var allVersions = await scope.Context.GetAllVersionsAsync(lc, CacheContext, NuGetLogger, cancellationToken);
+        if (allVersions is null || !allVersions.Any())
+            return Enumerable.Empty<PackageIdentity>();
+        var dependencyInfoResource = await GetDependencyInfoResourceAsync(cancellationToken);
+        var packageDictionary = new Dictionary<string, IEnumerable<NuGetVersion>>(NoCaseComparer)
+        {
+            { packageId, Enumerable.Empty<NuGetVersion>() }
+        };
+        foreach (var version in allVersions)
+        {
+            var frameworksForVersion = ((await GetDependencyInfoAsync(lc, version, cancellationToken))?.FrameworkReferenceGroups?.Select(g => g.TargetFramework) ?? Enumerable.Empty<NuGetFramework>())
+                .DefaultIfEmpty(NuGetFramework.AnyFramework);
+            PackageIdentity package = new(lc, version);
+            foreach (var framework in frameworksForVersion)
+            {
+                using var fScope = Logger.BeginGetPackageDependenciesScope(packageId, version, framework, this, IsUpstream);
+                var dependencyInfo = await dependencyInfoResource.ResolvePackage(package, framework, CacheContext, NuGetLogger, cancellationToken);
+                if (dependencyInfo is null) continue;
+                foreach (var dependency in dependencyInfo.Dependencies)
+                    await GetPackageDependenciesAsync(dependency.Id, scope.Context, dependencyInfoResource, packageDictionary, cancellationToken);
+            }
+        }
+        packageDictionary.Remove(packageId);
+        return ToPackageIdentities(packageDictionary);
+    }
+
+    public async Task<IEnumerable<PackageIdentity>> ExpandPackagesWithDependenciesAsync(IEnumerable<string> packageIds, CancellationToken cancellationToken)
+    {
+        if (packageIds is null || !(packageIds = packageIds.Select(id => id.ToTrimmedOrNullIfEmpty()!).Where(id => id is not null)).Any())
+            return Enumerable.Empty<PackageIdentity>();
+        var findPackageByIdResource = await GetFindPackageByIdResourceAsync(cancellationToken);
+        var dependencyInfoResource = await GetDependencyInfoResourceAsync(cancellationToken);
+        var packageDictionary = new Dictionary<string, IEnumerable<NuGetVersion>>(NoCaseComparer);
+        foreach (string packageId in packageIds.Distinct(NoCaseComparer))
+        {
+            if (packageDictionary.ContainsKey(packageId)) continue;
+            var allVersions = await findPackageByIdResource.GetAllVersionsAsync(packageId, CacheContext, NuGetLogger, cancellationToken);
+            if (allVersions is null || !allVersions.Any()) continue;
+            packageDictionary.Add(packageId, allVersions);
+            foreach (var version in allVersions)
+            {
+                var di = await GetDependencyInfoAsync(packageId, version, cancellationToken);
+                if (di is null)
+                    continue;
+                var frameworksForVersion = ((await GetDependencyInfoAsync(packageId, version, cancellationToken))?.FrameworkReferenceGroups?.Select(g => g.TargetFramework) ?? Enumerable.Empty<NuGetFramework>())
+                    .DefaultIfEmpty(NuGetFramework.AnyFramework);
+                PackageIdentity package = new(packageId, version);
+                foreach (var framework in frameworksForVersion)
+                {
+                    using var scope = Logger.BeginGetPackageDependenciesScope(packageId, version, framework, this, IsUpstream);
+                    var dependencyIds = (await dependencyInfoResource.ResolvePackage(package, framework, CacheContext, NuGetLogger, cancellationToken))?.Dependencies?.Select(d => d.Id);
+                    if (dependencyIds is null) continue;
+                    foreach (var id in dependencyIds)
+                        await GetPackageDependenciesAsync(id, findPackageByIdResource, dependencyInfoResource, packageDictionary, cancellationToken);
+                }
+            }
+        }
+        return ToPackageIdentities(packageDictionary);
+    }
+
+    private async Task GetPackageDependenciesAsync(string packageId, FindPackageByIdResource findPackageByIdResource, DependencyInfoResource dependencyInfoResource, Dictionary<string, IEnumerable<NuGetVersion>> packageDictionary, CancellationToken cancellationToken)
+    {
+        if (packageDictionary.ContainsKey(packageId)) return;
+        var allVersions = await findPackageByIdResource.GetAllVersionsAsync(packageId, CacheContext, NuGetLogger, cancellationToken);
+        if (allVersions is null)
+            packageDictionary.Add(packageId, Enumerable.Empty<NuGetVersion>());
+        else
+        {
+            packageDictionary.Add(packageId, allVersions);
+            foreach (var version in allVersions)
+            {
+                var di = await GetDependencyInfoAsync(packageId, version, cancellationToken);
+                if (di is null)
+                    continue;
+                var frameworksForVersion = ((await GetDependencyInfoAsync(packageId, version, cancellationToken))?.FrameworkReferenceGroups?.Select(g => g.TargetFramework) ?? Enumerable.Empty<NuGetFramework>())
+                    .DefaultIfEmpty(NuGetFramework.AnyFramework);
+                PackageIdentity package = new(packageId, version);
+                foreach (var framework in frameworksForVersion)
+                {
+                    using var scope = Logger.BeginGetPackageDependenciesScope(packageId, version, framework, this, IsUpstream);
+                    var dependencyIds = (await dependencyInfoResource.ResolvePackage(package, framework, CacheContext, NuGetLogger, cancellationToken))?.Dependencies?.Select(d => d.Id);
+                    if (dependencyIds is null) continue;
+                    foreach (var id in dependencyIds)
+                        await GetPackageDependenciesAsync(id, findPackageByIdResource, dependencyInfoResource, packageDictionary, cancellationToken);
+                }
+            }
+        }
+    }
+
     #endregion
+
+    // #region DownloadResource methods
+
+    // protected async Task<DownloadResource> GetDownloadResourceAsync(CancellationToken cancellationToken)
+    // {
+    //     lock (_syncRoot)
+    //         _getDownloadResourceAsync ??= SourceRepository.GetResourceAsync<DownloadResource>(cancellationToken);
+    //     return await _getDownloadResourceAsync;
+    // }
+
+    // protected async Task<ContextScope<DownloadResource>> GetDownloadResourceScopeAsync(Func<IDisposable?> scopeFactory, CancellationToken cancellationToken) =>
+    //     new(await GetDownloadResourceAsync(cancellationToken), scopeFactory());
+
+    // public async Task<DownloadResourceResult> GetDownloadResourceResultAsync(PackageIdentity identity, CancellationToken cancellationToken)
+    // {
+    //     using var scope = await GetDownloadResourceScopeAsync(() => Logger.BeginGetDownloadResourceResultScope(identity, this, IsUpstream), cancellationToken);
+    //     return await scope.Context.GetDownloadResourceResultAsync(identity, new PackageDownloadContext(CacheContext), GlobalPackagesFolder, NuGetLogger, cancellationToken);
+    // }
+
+    // #endregion
 
     protected virtual void Dispose(bool disposing)
     {

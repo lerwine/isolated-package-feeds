@@ -4,7 +4,7 @@ namespace NuGetPuller;
 
 public static partial class Constants
 {
-    public static readonly StringComparer NoCaseComparer = StringComparer.OrdinalIgnoreCase;
+    public static readonly StringComparer NoCaseComparer = StringComparer.CurrentCultureIgnoreCase;
 
     public static readonly Regex NonNormalizedWhiteSpaceRegex = CreateNonNormalizedWhiteSpaceRegex();
 
