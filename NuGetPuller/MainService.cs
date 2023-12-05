@@ -9,6 +9,7 @@ using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 using System.Linq;
+using static NuGetPuller.Constants;
 
 namespace NuGetPuller;
 
@@ -144,12 +145,25 @@ public class MainService : BackgroundService
             foreach (NuGetVersion v in upstreamVersions)
             {
                 using FileStream stream = new(tempFile.FullName, FileMode.Create, FileAccess.Write);
-                await upstreamClientService.CopyNupkgToStreamAsync(packageId, v, stream, cancellationToken);
-                stream.Flush();
-                stream.Close();
+                try { await upstreamClientService.CopyNupkgToStreamAsync(packageId, v, stream, cancellationToken); }
+                catch (Exception error)
+                {
+                    _logger.LogUnexpectedPackageDownloadFailure(packageId, v, error);
+                    continue;
+                }
+                finally
+                {
+                    stream.Flush();
+                    stream.Close();
+                }
                 tempFile.Refresh();
                 if (tempFile.Length > 0)
-                    await localClientService.AddPackageAsync(tempFile.FullName, false, cancellationToken);
+                {
+                    if (!await localClientService.AddPackageAsync(tempFile.FullName, false, cancellationToken))
+                        _logger.LogUnexpectedAddFailure(packageId, v);
+                }
+                else
+                    _logger.LogEmptyPackageDownload(packageId, v);
             }
         }
         finally
@@ -160,7 +174,7 @@ public class MainService : BackgroundService
         }
     }
 
-    private async Task UpdateLocalFromRemote(IEnumerable<NuGetVersion> upstreamVersions, LocalClientService localClientService, UpstreamClientService upstreamClientService, CancellationToken cancellationToken)
+    private async Task UpdateLocalFromRemote(string packageId, Dictionary<string, HashSet<NuGetVersion>> packagesUpdated, LocalClientService localClientService, UpstreamClientService upstreamClientService, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
@@ -173,32 +187,36 @@ public class MainService : BackgroundService
             var localClientService = scope.ServiceProvider.GetRequiredService<LocalClientService>();
             var upstreamClientService = scope.ServiceProvider.GetRequiredService<UpstreamClientService>();
             var appSettings = _settingsOptions.Value;
-            var packageIds = appSettings.Delete?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(StringComparer.CurrentCultureIgnoreCase);
-            HashSet<string> deletedPackages = (packageIds is not null && packageIds.Any()) ? new(await localClientService.DeleteAsync(packageIds, stoppingToken), StringComparer.CurrentCultureIgnoreCase) : new(StringComparer.CurrentCultureIgnoreCase);
-            if ((packageIds = appSettings.Add?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(StringComparer.CurrentCultureIgnoreCase)) is not null && packageIds.Any())
+            var packageIds = appSettings.Delete?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(NoCaseComparer);
+            HashSet<string> deletedPackages = (packageIds is not null && packageIds.Any()) ?
+                new(await localClientService.DeleteAsync(packageIds, stoppingToken), NoCaseComparer) :
+                new(NoCaseComparer);
+            if ((packageIds = appSettings.Add?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(NoCaseComparer)) is not null && packageIds.Any())
             {
-                Dictionary<string, HashSet<NuGetVersion>> packagesAdded = new(StringComparer.CurrentCultureIgnoreCase);
+                Dictionary<string, HashSet<NuGetVersion>> packagesAdded = new(NoCaseComparer);
                 foreach (string id in packageIds)
-                {
                     await AddToLocalFromRemote(id, packagesAdded, localClientService, upstreamClientService, stoppingToken);
-                }
             }
             if (appSettings.ListLocal)
-            {
-                var packages = await localClientService.GetAllPackagesAsync(stoppingToken);
-                await ListLocalPackagesAsync(packages, appSettings.Validated.ExportLocalMetaDataPath, stoppingToken);
-            }
+                await ListLocalPackagesAsync(await localClientService.GetAllPackagesAsync(stoppingToken), appSettings.Validated.ExportLocalMetaDataPath, stoppingToken);
             else if (appSettings.Validated.ExportLocalMetaDataPath is not null)
-            {
-                var packages = await localClientService.GetAllPackagesAsync(stoppingToken);
-                await ExportLocalPackageMetaDataAsync(packages, appSettings.Validated.ExportLocalMetaDataPath, stoppingToken);
-            }
+                await ExportLocalPackageMetaDataAsync(await localClientService.GetAllPackagesAsync(stoppingToken), appSettings.Validated.ExportLocalMetaDataPath, stoppingToken);
             else if (appSettings.UpdateAll)
             {
-                if ((packageIds = (await localClientService.GetAllPackagesAsync(stoppingToken))?.Select(p => p.Identity.Id)) is not null && packageIds.Any()) // TODO: else log nothing to update;
+                if ((packageIds = (await localClientService.GetAllPackagesAsync(stoppingToken))?.Select(p => p.Identity.Id)) is null || !packageIds.Any())
+                    _logger.LogNoLocalPackagesExist();
+                else
                 {
-                    throw new NotImplementedException();
+                    Dictionary<string, HashSet<NuGetVersion>> packagesUpdated = new(NoCaseComparer);
+                    foreach (string id in packageIds)
+                        await UpdateLocalFromRemote(id, packagesUpdated, localClientService, upstreamClientService, stoppingToken);
                 }
+            }
+            else if ((packageIds = appSettings.Update?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(NoCaseComparer)) is not null && packageIds.Any())
+            {
+                Dictionary<string, HashSet<NuGetVersion>> packagesUpdated = new(NoCaseComparer);
+                foreach (string id in packageIds)
+                    await UpdateLocalFromRemote(id, packagesUpdated, localClientService, upstreamClientService, stoppingToken);
             }
         }
         catch (OperationCanceledException) { throw; }
