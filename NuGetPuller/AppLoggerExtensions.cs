@@ -54,6 +54,7 @@ public static class AppLoggerExtensions
     #region Nuget Message (0x0002)
 
     public const int EVENT_ID_NugetMessage = 0x0002;
+
     public static readonly EventId NugetMessage = new(EVENT_ID_NugetMessage, nameof(NugetMessage));
 
     private static readonly Action<ILogger, string, Exception?> _nugetInformationMessage1 = LoggerMessage.Define<string>(LogLevel.Information, NugetMessage, "NuGet Message: {Message}");
@@ -788,14 +789,14 @@ public static class AppLoggerExtensions
     #endregion
 
     #region PackageFileNotFound event logger message (0x0012)
-    
+
     public const int EVENT_ID_PackageFileNotFound = 0x0012;
-    
+
     public static readonly EventId PackageFileNotFound = new(EVENT_ID_PackageFileNotFound, nameof(PackageFileNotFound));
-    
+
     private static readonly Action<ILogger, string, Exception?> _packageFileNotFound = LoggerMessage.Define<string>(LogLevel.Error, PackageFileNotFound,
         "Package file not found: {FileName}");
-    
+
     /// <summary>
     /// Logs a <see cref="LogLevel.Error"/> message for a <see cref="PackageFileNotFound"/> event with event code 0x0012.
     /// </summary>
@@ -803,21 +804,21 @@ public static class AppLoggerExtensions
     /// <param name="fileName">The path of the file that was not found.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     public static void LogPackageFileNotFound(this ILogger logger, string fileName, Exception? exception = null) => _packageFileNotFound(logger, fileName, exception);
-    
+
     #endregion
-    
+
     #region InvalidPackageFile event logger message (0x0013)
-    
+
     public const int EVENT_ID_InvalidPackageFile = 0x0013;
-    
+
     public static readonly EventId InvalidPackageFile = new(EVENT_ID_InvalidPackageFile, nameof(InvalidPackageFile));
-    
+
     private static readonly Action<ILogger, string, Exception?> _packageFileNotZipArchive = LoggerMessage.Define<string>(LogLevel.Error, InvalidPackageFile,
         "Package file is not a ZIP archive: {FileName}");
-    
+
     private static readonly Action<ILogger, string, Exception?> _packageFileInvalidContent = LoggerMessage.Define<string>(LogLevel.Error, InvalidPackageFile,
         "Package file has invalid content: {FileName}");
-    
+
     /// <summary>
     /// Logs a <see cref="LogLevel.Error"/> message for a <see cref="InvalidPackageFile"/> event with event code 0x0013.
     /// </summary>
@@ -825,7 +826,7 @@ public static class AppLoggerExtensions
     /// <param name="fileName">The path of the invalid package file.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     public static void LogPackageFileNotZipArchive(this ILogger logger, string fileName, Exception? exception = null) => _packageFileNotZipArchive(logger, fileName, exception);
-    
+
     /// <summary>
     /// Logs a <see cref="LogLevel.Error"/> message for a <see cref="InvalidPackageFile"/> event with event code 0x0013.
     /// </summary>
@@ -833,18 +834,18 @@ public static class AppLoggerExtensions
     /// <param name="fileName">The path of the invalid package file.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     public static void LogPackageFileInvalidContent(this ILogger logger, string fileName, Exception? exception = null) => _packageFileInvalidContent(logger, fileName, exception);
-    
+
     #endregion
-    
+
     #region PackageAlreadyAdded event logger message (0x0014)
-    
+
     public const int EVENT_ID_PackageAlreadyAdded = 0x0014;
-    
+
     public static readonly EventId PackageAlreadyAdded = new(EVENT_ID_PackageAlreadyAdded, nameof(PackageAlreadyAdded));
-    
+
     private static readonly Action<ILogger, string, Exception?> _packageAlreadyAdded = LoggerMessage.Define<string>(LogLevel.Warning, PackageAlreadyAdded,
         "Package {PackageId} has already been added.");
-    
+
     /// <summary>
     /// Logs a <see cref="LogLevel.Warning"/> message for a <see cref="PackageAlreadyAdded"/> event with event code 0x0014.
     /// </summary>
@@ -852,18 +853,18 @@ public static class AppLoggerExtensions
     /// <param name="packageId">The identifier of the existing package.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     public static void LogPackageAlreadyAdded(this ILogger logger, string packageId, Exception? exception = null) => _packageAlreadyAdded(logger, packageId, exception);
-    
+
     #endregion
 
     #region PackageVersionDeleteFailure event logger message (0x0015)
-    
+
     public const int EVENT_ID_PackageVersionDeleteFailure = 0x0015;
-    
+
     public static readonly EventId PackageVersionDeleteFailure = new(EVENT_ID_PackageVersionDeleteFailure, nameof(PackageVersionDeleteFailure));
-    
+
     private static readonly Action<ILogger, string, NuGetVersion, Exception?> _packageVersionDeleteFailure = LoggerMessage.Define<string, NuGetVersion>(LogLevel.Warning, PackageVersionDeleteFailure,
         "Unexpected error deleting Package {PackageId}, Version {Version}.");
-    
+
     /// <summary>
     /// Logs a <see cref="LogLevel.Warning"/> message for a <see cref="PackageVersionDeleteFailure"/> event with event code 0x0015.
     /// </summary>
@@ -872,21 +873,21 @@ public static class AppLoggerExtensions
     /// <param name="version">The package version.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     public static void LogPackageVersionDeleteFailure(this ILogger logger, string packageId, NuGetVersion version, Exception? exception = null) => _packageVersionDeleteFailure(logger, packageId, version, exception);
-    
+
     #endregion
-    
+
     #region UnexpectedPackageDownloadFailure event logger message (0x0016)
-    
+
     public const int EVENT_ID_UnexpectedPackageDownloadFailure = 0x0016;
-    
+
     public static readonly EventId UnexpectedPackageDownloadFailure = new(EVENT_ID_UnexpectedPackageDownloadFailure, nameof(UnexpectedPackageDownloadFailure));
-    
+
     private static readonly Action<ILogger, string, NuGetVersion, Exception?> _unexpectedPackageDownloadFailure = LoggerMessage.Define<string, NuGetVersion>(LogLevel.Error, UnexpectedPackageDownloadFailure,
         "Unexpected error while downloading package {PackageId}, Version {Version}.");
-    
+
     private static readonly Action<ILogger, string, NuGetVersion, Exception?> _emptyPackageDownload = LoggerMessage.Define<string, NuGetVersion>(LogLevel.Error, UnexpectedPackageDownloadFailure,
         "Package download of {PackageId}, Version {Version} was unexpectedly empty.");
-    
+
     /// <summary>
     /// Logs a <see cref="LogLevel.Error"/> message for a <see cref="UnexpectedPackageDownloadFailure"/> event with event code 0x0016.
     /// </summary>
@@ -895,7 +896,7 @@ public static class AppLoggerExtensions
     /// <param name="version">The package version.</param>
     /// <param name="exception">The exception that caused the event.</param>
     public static void LogUnexpectedPackageDownloadFailure(this ILogger logger, string packageId, NuGetVersion version, Exception exception) => _unexpectedPackageDownloadFailure(logger, packageId, version, exception);
-    
+
     /// <summary>
     /// Logs a <see cref="LogLevel.Error"/> message for a <see cref="UnexpectedPackageDownloadFailure"/> event with event code 0x0016.
     /// </summary>
@@ -903,18 +904,18 @@ public static class AppLoggerExtensions
     /// <param name="packageId">The package identifier.</param>
     /// <param name="version">The package version.</param>
     public static void LogEmptyPackageDownload(this ILogger logger, string packageId, NuGetVersion version) => _emptyPackageDownload(logger, packageId, version, null);
-    
+
     #endregion
 
     #region UnexpectedAddFailure event logger message (0x0017)
-    
+
     public const int EVENT_ID_UnexpectedAddFailure = 0x0017;
-    
+
     public static readonly EventId UnexpectedAddFailure = new(EVENT_ID_UnexpectedAddFailure, nameof(UnexpectedAddFailure));
-    
+
     private static readonly Action<ILogger, string, NuGetVersion, Exception?> _unexpectedAddFailure = LoggerMessage.Define<string, NuGetVersion>(LogLevel.Error, UnexpectedAddFailure,
         "Unexpected error while adding Package {PackageId}, Version {Version}.");
-    
+
     /// <summary>
     /// Logs a <see cref="LogLevel.Error"/> message for a <see cref="UnexpectedAddFailure"/> event with event code 0x0017.
     /// </summary>
@@ -923,25 +924,25 @@ public static class AppLoggerExtensions
     /// <param name="version">The package version.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     public static void LogUnexpectedAddFailure(this ILogger logger, string packageId, NuGetVersion version, Exception? exception = null) => _unexpectedAddFailure(logger, packageId, version, exception);
-    
+
     #endregion
 
     #region NoLocalPackagesExist event logger message (0x0018)
-    
+
     public const int EVENT_ID_NoLocalPackagesExist = 0x0018;
-    
+
     public static readonly EventId NoLocalPackagesExist = new(EVENT_ID_NoLocalPackagesExist, nameof(NoLocalPackagesExist));
-    
+
     private static readonly Action<ILogger, Exception?> _nolocalPackagesExist = LoggerMessage.Define(LogLevel.Warning, NoLocalPackagesExist,
         "Local repository has no packages.");
-    
+
     /// <summary>
     /// Logs a <see cref="LogLevel.Warning"/> message for a <see cref="NoLocalPackagesExist"/> event with code 0x0018.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     public static void LogNoLocalPackagesExist(this ILogger logger, Exception? exception = null) => _nolocalPackagesExist(logger, exception);
-    
+
     #endregion
 
     #region GetDownloadResource Scope
