@@ -11,8 +11,8 @@ The initial scope is to create NuGet and NPM Package Feed services as well as co
 - [CdnGetter](./CdnGetter/README.md) - Console application to manage local repository of libraries hosted by upstream content delivery networks.
 - [CdnGetter.UnitTests](./CdnGetter.UnitTests/README.md) - Unit tests for `CdnGetter` application.
 - [CdnServer](./CdnServer/README.md) - CDN website for hosting libraries downloaded by the `CdnGetter` application.
-- [NuGetAirGap](./NuGetAirGap/README.md) - Console application to manage local repository of packages hosted by an upstream NuGet repository.
-- [NuGetAirGap.UnitTests](./NuGetAirGap.UnitTests/README.md) - Unit tests for NuGetAirGap application.
+- [NuGetPuller](./NuGetPuller/README.md) - Console application to manage local repository of packages hosted by an upstream NuGet repository.
+- [NuGetPuller.UnitTests](./NuGetPuller.UnitTests/README.md) - Unit tests for NuGetPuller application.
 
 ## References
 
@@ -40,7 +40,7 @@ General development reference links
 Following is a list of package sources it would be desirable to mirror for offline use:
 
 - [Visual Studio Marketplace](https://marketplace.visualstudio.com/vscode)
-- [NuGet](./NuGetAirGap/README.md#nuget)
+- [NuGet](./NuGetPuller/README.md#nuget)
 - [NPM](https://www.npmjs.com)
   - [Verdaccio](https://www.npmjs.com/package/verdaccio) ([GitHub Repository](https://github.com/verdaccio/verdaccio))
     - [How to set up a free private npm registry… for Windows | by Andrew Anderson | Medium](https://medium.com/@Anderson7301/how-to-set-up-a-free-private-npm-registry-for-windows-f532c6a381ce): Uses Python.

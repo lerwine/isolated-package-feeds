@@ -1,6 +1,6 @@
-# NuGetAirGap Unit Tests
+# NuGetPuller Unit Tests
 
-Unit tests for the [NuGetAirGap](../NuGetAirGap/README.md) console application.
+Unit tests for the [NuGetPuller](../NuGetPuller/README.md) console application.
 
 ## Links
 

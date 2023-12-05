@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace NuGetAirGap;
+namespace NuGetPuller;
 
 public class NugetLogWrapper(ILogger logger) : NuGet.Common.ILogger
 {

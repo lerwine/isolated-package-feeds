@@ -3,7 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace NuGetAirGap;
+namespace NuGetPuller;
 
 public partial class AppSettingsValidatorService : IValidateOptions<AppSettings>
 {

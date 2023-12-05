@@ -1,4 +1,4 @@
-namespace NuGetAirGap;
+namespace NuGetPuller;
 
 /// <summary>
 /// Represents a Invalid filesystem URI exception.

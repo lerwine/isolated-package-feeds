@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 using NuGet.Configuration;
 using Serilog;
 
-namespace NuGetAirGap;
+namespace NuGetPuller;
 
 public static class AppHost
 {
@@ -45,7 +45,7 @@ public static class AppHost
         AppSettings.Configure(args, builder.Configuration);
         builder.Services
             .AddOptions<AppSettings>()
-            .Bind(builder.Configuration.GetSection(nameof(NuGetAirGap)))
+            .Bind(builder.Configuration.GetSection(nameof(NuGetPuller)))
             .ValidateDataAnnotations();
     }
 

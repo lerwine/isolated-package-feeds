@@ -2,12 +2,9 @@ using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using Microsoft.Extensions.Configuration;
 
-namespace NuGetAirGap;
+namespace NuGetPuller;
 
-/// <summary>
-/// Application settings bound to <c>appsettings.json</c> and command line switches.
-/// </summary>
-public partial class AppSettings
+public class AppSettings
 {
     #region UpdateAll
 
@@ -219,21 +216,21 @@ public partial class AppSettings
 
     private static readonly ReadOnlyDictionary<string, string> _booleanSwitchMappings = new(new Dictionary<string, string>()
     {
-        { COMMAND_LINE_SWITCH_update_2D_all, $"{nameof(NuGetAirGap)}:{nameof(UpdateAll)}" },
-        { COMMAND_LINE_SWITCH_l, $"{nameof(NuGetAirGap)}:{nameof(ListLocal)}" },
-        { COMMAND_LINE_SWITCH_h, $"{nameof(NuGetAirGap)}:{nameof(Help)}" },
-        { COMMAND_LINE_SWITCH__3F_, $"{nameof(NuGetAirGap)}:{nameof(Help)}" },
-        { COMMAND_LINE_SWITCH_help, $"{nameof(NuGetAirGap)}:{nameof(Help)}" }
+        { COMMAND_LINE_SWITCH_update_2D_all, $"{nameof(NuGetPuller)}:{nameof(UpdateAll)}" },
+        { COMMAND_LINE_SWITCH_l, $"{nameof(NuGetPuller)}:{nameof(ListLocal)}" },
+        { COMMAND_LINE_SWITCH_h, $"{nameof(NuGetPuller)}:{nameof(Help)}" },
+        { COMMAND_LINE_SWITCH__3F_, $"{nameof(NuGetPuller)}:{nameof(Help)}" },
+        { COMMAND_LINE_SWITCH_help, $"{nameof(NuGetPuller)}:{nameof(Help)}" }
     });
 
     private static readonly ReadOnlyDictionary<string, string> _valueSwitchMappings = new(new Dictionary<string, string>()
     {
-        { COMMAND_LINE_SWITCH_a, $"{nameof(NuGetAirGap)}:{nameof(Add)}" },
-        { COMMAND_LINE_SWITCH_d, $"{nameof(NuGetAirGap)}:{nameof(Delete)}" },
-        { COMMAND_LINE_SWITCH_export_2D_local_2D_metadata, $"{nameof(NuGetAirGap)}:{nameof(ExportLocalMetaData)}" },
-        { COMMAND_LINE_SWITCH_local_2D_repository, $"{nameof(NuGetAirGap)}:{nameof(OverrideLocalRepository)}" },
-        { COMMAND_LINE_SWITCH_upstream_2D_service_2D_index, $"{nameof(NuGetAirGap)}:{nameof(OverrideLocalRepository)}" },
-        { COMMAND_LINE_SWITCH_global_2D_packages_2D_folder, $"{nameof(NuGetAirGap)}:{nameof(OverrideGlobalPackagesFolder)}" }
+        { COMMAND_LINE_SWITCH_a, $"{nameof(NuGetPuller)}:{nameof(Add)}" },
+        { COMMAND_LINE_SWITCH_d, $"{nameof(NuGetPuller)}:{nameof(Delete)}" },
+        { COMMAND_LINE_SWITCH_export_2D_local_2D_metadata, $"{nameof(NuGetPuller)}:{nameof(ExportLocalMetaData)}" },
+        { COMMAND_LINE_SWITCH_local_2D_repository, $"{nameof(NuGetPuller)}:{nameof(OverrideLocalRepository)}" },
+        { COMMAND_LINE_SWITCH_upstream_2D_service_2D_index, $"{nameof(NuGetPuller)}:{nameof(OverrideLocalRepository)}" },
+        { COMMAND_LINE_SWITCH_global_2D_packages_2D_folder, $"{nameof(NuGetPuller)}:{nameof(OverrideGlobalPackagesFolder)}" }
     });
 
     internal static void Configure(string[] args, IConfigurationBuilder builder)
@@ -242,4 +239,37 @@ public partial class AppSettings
     }
 
     internal ValidatedAppSettings Validated { get; } = new();
+
+    internal class ValidatedAppSettings
+    {
+        /// <summary>
+        /// Gets the URI for the upstream service index or full local path to the upstream repository subdirectory.
+        /// </summary>
+        /// <value>The validated value of <see cref="OverrideUpstreamServiceIndex"/> or <see cref="UpstreamServiceIndex"/>.</value>
+        internal string UpstreamServiceLocation { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets the upstream service index or path for upstream repository subdirectory as an absolute URL.
+        /// </summary>
+        /// <value>The validated absolute URL of <see cref="OverrideUpstreamServiceIndex"/> or <see cref="UpstreamServiceIndex"/>.</value>
+        internal Uri UpstreamServiceUri { get; set; } = null!;
+
+        /// <summary>
+        /// Gets the full local path to the local repository subdirectory.
+        /// </summary>
+        /// <value>The validated value of <see cref="OverrideLocalRepository"/> or <see cref="LocalRepository"/>.</value>
+        internal string LocalRepositoryPath { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets the optional full local path of the local repository metadata export file.
+        /// </summary>
+        /// <value>The validated value of <see cref="ExportLocalMetaData"/>.</value>
+        internal string? ExportLocalMetaDataPath { get; set; }
+
+        /// <summary>
+        /// Gets the full local path to the NuGet global packages folder.
+        /// </summary>
+        /// <value>The validated value of <see cref="OverrideGlobalPackagesFolder"/> or <see cref="GlobalPackagesFolder"/>.</value>
+        internal string GlobalPackagesFolderPath { get; set; } = string.Empty;
+    }
 }
