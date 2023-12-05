@@ -2,8 +2,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NuGet.Frameworks;
+using NuGet.Packaging;
+using NuGet.Packaging.Core;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
+using NuGet.Versioning;
+using System.Linq;
 
 namespace NuGetPuller;
 
@@ -108,6 +113,58 @@ public class MainService : BackgroundService
         writer.Close();
     }
 
+    private async Task AddToLocalFromRemote(string packageId, Dictionary<string, HashSet<NuGetVersion>> packagesAdded, LocalClientService localClientService, UpstreamClientService upstreamClientService, CancellationToken cancellationToken)
+    {
+        var upstreamVersions = await localClientService.GetAllVersionsAsync(packageId, cancellationToken);
+        if (upstreamVersions is not null && upstreamVersions.Any())
+        {
+            _logger.LogPackageAlreadyAdded(packageId);
+            return;
+        }
+        if ((upstreamVersions = await upstreamClientService.GetAllVersionsAsync(packageId, cancellationToken)) is null || !upstreamVersions.Any())
+        {
+            _logger.LogPackageNotFound(packageId, upstreamClientService, true);
+            return;
+        }
+        if (packagesAdded.TryGetValue(packageId, out HashSet<NuGetVersion>? versionsAdded))
+        {
+            if (!(upstreamVersions = upstreamVersions.Where(v => !versionsAdded.Contains(v))).Any())
+                return;
+            foreach (NuGetVersion v in upstreamVersions)
+                versionsAdded.Add(v);
+        }
+        else
+        {
+            versionsAdded = new(upstreamVersions, VersionComparer.VersionReleaseMetadata);
+            packagesAdded.Add(packageId, versionsAdded);
+        }
+        var tempFile = new FileInfo(Path.GetTempFileName());
+        try
+        {
+            foreach (NuGetVersion v in upstreamVersions)
+            {
+                using FileStream stream = new(tempFile.FullName, FileMode.Create, FileAccess.Write);
+                await upstreamClientService.CopyNupkgToStreamAsync(packageId, v, stream, cancellationToken);
+                stream.Flush();
+                stream.Close();
+                tempFile.Refresh();
+                if (tempFile.Length > 0)
+                    await localClientService.AddPackageAsync(tempFile.FullName, false, cancellationToken);
+            }
+        }
+        finally
+        {
+            tempFile.Refresh();
+            if (tempFile.Exists)
+                tempFile.Delete();
+        }
+    }
+
+    private async Task UpdateLocalFromRemote(IEnumerable<NuGetVersion> upstreamVersions, LocalClientService localClientService, UpstreamClientService upstreamClientService, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+    
     protected async override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
@@ -119,7 +176,13 @@ public class MainService : BackgroundService
             var packageIds = appSettings.Delete?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(StringComparer.CurrentCultureIgnoreCase);
             HashSet<string> deletedPackages = (packageIds is not null && packageIds.Any()) ? new(await localClientService.DeleteAsync(packageIds, stoppingToken), StringComparer.CurrentCultureIgnoreCase) : new(StringComparer.CurrentCultureIgnoreCase);
             if ((packageIds = appSettings.Add?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(StringComparer.CurrentCultureIgnoreCase)) is not null && packageIds.Any())
-                await localClientService.AddAsync(packageIds, upstreamClientService, stoppingToken);
+            {
+                Dictionary<string, HashSet<NuGetVersion>> packagesAdded = new(StringComparer.CurrentCultureIgnoreCase);
+                foreach (string id in packageIds)
+                {
+                    await AddToLocalFromRemote(id, packagesAdded, localClientService, upstreamClientService, stoppingToken);
+                }
+            }
             if (appSettings.ListLocal)
             {
                 var packages = await localClientService.GetAllPackagesAsync(stoppingToken);
@@ -132,8 +195,10 @@ public class MainService : BackgroundService
             }
             else if (appSettings.UpdateAll)
             {
-                var packages = await localClientService.GetAllPackagesAsync(stoppingToken);
-                await localClientService.UpdateAsync(packages.Select(p => p.Identity.Id), upstreamClientService, deletedPackages, stoppingToken);
+                if ((packageIds = (await localClientService.GetAllPackagesAsync(stoppingToken))?.Select(p => p.Identity.Id)) is not null && packageIds.Any()) // TODO: else log nothing to update;
+                {
+                    throw new NotImplementedException();
+                }
             }
         }
         catch (OperationCanceledException) { throw; }

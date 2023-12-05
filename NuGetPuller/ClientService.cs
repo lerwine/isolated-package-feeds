@@ -13,6 +13,7 @@ public abstract class ClientService : IDisposable
     private bool _isDisposed;
     private readonly object _syncRoot = new();
     private Task<DownloadResource>? _getDownloadResourceAsync;
+    private Task<PackageUpdateResource>? _getPackageUpdateResourceAsync;
     private Task<PackageMetadataResource>? _getPackageMetadataResourceAsync;
     private Task<FindPackageByIdResource>? _getFindPackageByIdResourceAsync;
     private Task<DependencyInfoResource>? _getDependencyInfoResourceAsync;
@@ -52,36 +53,6 @@ public abstract class ClientService : IDisposable
         }
     }
 
-    #region DownloadResource methods
-
-    protected async Task<DownloadResource> GetDownloadResourceAsync(CancellationToken cancellationToken)
-    {
-        lock (_syncRoot)
-            _getDownloadResourceAsync ??= SourceRepository.GetResourceAsync<DownloadResource>(cancellationToken);
-        return await _getDownloadResourceAsync;
-    }
-
-    protected async Task<ContextScope<DownloadResource>> GetDownloadResourceScopeAsync(Func<IDisposable?> scopeFactory, CancellationToken cancellationToken) =>
-        new(await GetDownloadResourceAsync(cancellationToken), scopeFactory());
-
-    /// <summary>
-    /// Gets the downloaded resource result.
-    /// </summary>
-    /// <param name="identity">Identifies the package to be downloaded.</param>
-    /// <param name="downloadContext">Specifies how package is to be downloaded.</param>
-    /// <param name="globalPackagesFolder">Local folder containing global packages.</param>
-    /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
-    /// <returns>The downloaded resource result.</returns>
-    /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.7.x/src/NuGet.Core/NuGet.Protocol/Resources/DownloadResourceV3.cs#L126"/>
-    /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.7.x/src/NuGet.Core/NuGet.Protocol/LocalRepositories/LocalDownloadResource.cs#L38"/>
-    public async Task<DownloadResourceResult> GetDownloadResourceResultAsync(PackageIdentity identity, PackageDownloadContext downloadContext, string globalPackagesFolder, CancellationToken cancellationToken)
-    {
-        using var scope = await GetDownloadResourceScopeAsync(() => Logger.BeginGetDownloadResourceResultScope(identity, downloadContext, globalPackagesFolder, this, IsUpstream), cancellationToken);
-        return await scope.Context.GetDownloadResourceResultAsync(identity, downloadContext, globalPackagesFolder, NuGetLogger, cancellationToken);
-    }
-
-    #endregion
-
     #region Methods using the PackageUpdateResource API.
 
     protected async Task<PackageMetadataResource> GetPackageMetadataResourceAsync(CancellationToken cancellationToken)
@@ -91,7 +62,7 @@ public abstract class ClientService : IDisposable
         return await _getPackageMetadataResourceAsync;
     }
 
-    protected async Task<ContextScope<PackageMetadataResource>> GePackageMetadataResourceScopeAsync(Func<IDisposable?> scopeFactory, CancellationToken cancellationToken) =>
+    protected async Task<ContextScope<PackageMetadataResource>> GetPackageMetadataResourceScopeAsync(Func<IDisposable?> scopeFactory, CancellationToken cancellationToken) =>
         new(await GetPackageMetadataResourceAsync(cancellationToken), scopeFactory());
 
     /// <summary>
@@ -132,7 +103,7 @@ public abstract class ClientService : IDisposable
     /// <seealso href="https://learn.microsoft.com/en-us/nuget/api/registration-base-url-resource#registration-page"/>
     public async Task<IEnumerable<IPackageSearchMetadata>> GetMetadataAsync(string packageId, bool includePrerelease, bool includeUnlisted, CancellationToken cancellationToken)
     {
-        using var scope = await GePackageMetadataResourceScopeAsync(() => Logger.BeginGetMetadataScope(packageId, includePrerelease, includeUnlisted, this, IsUpstream), cancellationToken);
+        using var scope = await GetPackageMetadataResourceScopeAsync(() => Logger.BeginGetMetadataScope(packageId, includePrerelease, includeUnlisted, this, IsUpstream), cancellationToken);
         return await scope.Context.GetMetadataAsync(packageId.ToLower(), includePrerelease, includeUnlisted, CacheContext, NuGetLogger, cancellationToken);
     }
 
@@ -148,7 +119,7 @@ public abstract class ClientService : IDisposable
     /// <seealso href="https://learn.microsoft.com/en-us/nuget/api/registration-base-url-resource#registration-page"/>
     public async Task<IPackageSearchMetadata?> GetMetadataAsync(string packageId, NuGetVersion version, CancellationToken cancellationToken)
     {
-        using var scope = await GePackageMetadataResourceScopeAsync(() => Logger.BeginGetMetadataScope(packageId, version, this, IsUpstream), cancellationToken);
+        using var scope = await GetPackageMetadataResourceScopeAsync(() => Logger.BeginGetMetadataScope(packageId, version, this, IsUpstream), cancellationToken);
         return await scope.Context.GetMetadataAsync(new PackageIdentity(packageId.ToLower(), version), CacheContext, NuGetLogger, cancellationToken);
     }
 
@@ -165,6 +136,19 @@ public abstract class ClientService : IDisposable
 
     protected async Task<ContextScope<FindPackageByIdResource>> GetFindPackageByIdResourceScopeAsync(Func<IDisposable?> scopeFactory, CancellationToken cancellationToken) =>
         new(await GetFindPackageByIdResourceAsync(cancellationToken), scopeFactory());
+
+    /// <summary>
+    /// Asynchronously downloads and copies NuGet package to output stream.
+    /// </summary>
+    /// <param name="packageId">The package ID.</param>
+    /// <param name="version">The package version.</param>
+    /// <param name="destination">The output stream.</param>
+    /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
+    public async Task CopyNupkgToStreamAsync(string packageId, NuGetVersion version, Stream destination, CancellationToken cancellationToken)
+    {
+        using var scope = await GetFindPackageByIdResourceScopeAsync(() => Logger.BeginDownloadNupkgScope(packageId, version, this, IsUpstream), cancellationToken);
+        await scope.Context.CopyNupkgToStreamAsync(packageId, version, destination, CacheContext, NuGetLogger, cancellationToken);
+    }
 
     /// <summary>
     /// Asynchronously gets all package versions for a package ID.

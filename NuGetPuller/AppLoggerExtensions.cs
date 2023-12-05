@@ -787,6 +787,74 @@ public static class AppLoggerExtensions
 
     #endregion
 
+    #region PackageFileNotFound event logger message (0x0012)
+    
+    public const int EVENT_ID_PackageFileNotFound = 0x0012;
+    
+    public static readonly EventId PackageFileNotFound = new(EVENT_ID_PackageFileNotFound, nameof(PackageFileNotFound));
+    
+    private static readonly Action<ILogger, string, Exception?> _packageFileNotFound = LoggerMessage.Define<string>(LogLevel.Error, PackageFileNotFound,
+        "Package file not found: {FileName}");
+    
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Error"/> message for a <see cref="PackageFileNotFound"/> event with event code 0x0012.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="fileName">The path of the file that was not found.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    public static void LogPackageFileNotFound(this ILogger logger, string fileName, Exception? exception = null) => _packageFileNotFound(logger, fileName, exception);
+    
+    #endregion
+    
+    #region InvalidPackageFile event logger message (0x0013)
+    
+    public const int EVENT_ID_InvalidPackageFile = 0x0013;
+    
+    public static readonly EventId InvalidPackageFile = new(EVENT_ID_InvalidPackageFile, nameof(InvalidPackageFile));
+    
+    private static readonly Action<ILogger, string, Exception?> _packageFileNotZipArchive = LoggerMessage.Define<string>(LogLevel.Error, InvalidPackageFile,
+        "Package file is not a ZIP archive: {FileName}");
+    
+    private static readonly Action<ILogger, string, Exception?> _packageFileInvalidContent = LoggerMessage.Define<string>(LogLevel.Error, InvalidPackageFile,
+        "Package file has invalid content: {FileName}");
+    
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Error"/> message for a <see cref="InvalidPackageFile"/> event with event code 0x0013.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="fileName">The path of the invalid package file.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    public static void LogPackageFileNotZipArchive(this ILogger logger, string fileName, Exception? exception = null) => _packageFileNotZipArchive(logger, fileName, exception);
+    
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Error"/> message for a <see cref="InvalidPackageFile"/> event with event code 0x0013.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="fileName">The path of the invalid package file.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    public static void LogPackageFileInvalidContent(this ILogger logger, string fileName, Exception? exception = null) => _packageFileInvalidContent(logger, fileName, exception);
+    
+    #endregion
+    
+    #region PackageAlreadyAdded event logger message (0x0014)
+    
+    public const int EVENT_ID_PackageAlreadyAdded = 0x0014;
+    
+    public static readonly EventId PackageAlreadyAdded = new(EVENT_ID_PackageAlreadyAdded, nameof(PackageAlreadyAdded));
+    
+    private static readonly Action<ILogger, string, Exception?> _packageAlreadyAdded = LoggerMessage.Define<string>(LogLevel.Warning, PackageAlreadyAdded,
+        "Package {PackageId} has already been added.");
+    
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Warning"/> message for a <see cref="PackageAlreadyAdded"/> event with event code 0x0014.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="packageId">The identifier of the existing package.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    public static void LogPackageAlreadyAdded(this ILogger logger, string packageId, Exception? exception = null) => _packageAlreadyAdded(logger, packageId, exception);
+    
+    #endregion
+
     #region GetDownloadResource Scope
 
     private static readonly Func<ILogger, string, IDisposable?> _getRemoteDownloadResourceScope = LoggerMessage.DefineScope<string>(
@@ -823,35 +891,33 @@ public static class AppLoggerExtensions
 
     #region GetDownloadResourceResult Scope
 
-    private static readonly Func<ILogger, string, NuGetVersion?, string?, Guid?, string?, string, IDisposable?> _getRemoteDownloadResourceResultScope = LoggerMessage.DefineScope<string, NuGetVersion?, string?, Guid?, string?, string>(
-       "Get NuGet package download resource result from upstream (PackageId={PackageId}; Version={Version}; DownloadDirectory={DownloadDirectory}; ParentId={ParentId}; GlobalPackagesFolder={GlobalPackagesFolder}; URL={RepositoryUrl}).");
+    private static readonly Func<ILogger, string, NuGetVersion?, string?, IDisposable?> _downloadRemoteNupkgScope = LoggerMessage.DefineScope<string, NuGetVersion?, string?>(
+       "Download NuGet package from upstream (PackageId={PackageId}; Version={Version}; URL={RepositoryUrl}).");
 
-    private static readonly Func<ILogger, string, NuGetVersion?, string?, Guid?, string?, string, IDisposable?> _getUpstreamDirDownloadResourceResultScope = LoggerMessage.DefineScope<string, NuGetVersion?, string?, Guid?, string?, string>(
-       "Get NuGet package download resource result from upstream (PackageId={PackageId}; Version={Version}; DownloadDirectory={DownloadDirectory}; ParentId={ParentId}; GlobalPackagesFolder={GlobalPackagesFolder}; Path={RepositoryPath}).");
+    private static readonly Func<ILogger, string, NuGetVersion?, string, IDisposable?> _downloadUpstreamDirNupkgScope = LoggerMessage.DefineScope<string, NuGetVersion?, string>(
+       "Download NuGet package from upstream (PackageId={PackageId}; Version={Version}; Path={RepositoryPath}).");
 
-    private static readonly Func<ILogger, string, NuGetVersion?, string?, Guid?, string?, string, IDisposable?> _getLocalDownloadResourceResultScope = LoggerMessage.DefineScope<string, NuGetVersion?, string?, Guid?, string?, string>(
-       "Get NuGet package download resource result from local (PackageId={PackageId}; Version={Version}; DownloadDirectory={DownloadDirectory}; ParentId={ParentId}; GlobalPackagesFolder={GlobalPackagesFolder}; Path={RepositoryPath}).");
+    private static readonly Func<ILogger, string, NuGetVersion?, string, IDisposable?> _downloadLocalNupkgScope = LoggerMessage.DefineScope<string, NuGetVersion?, string>(
+       "Download NuGet package from local (PackageId={PackageId}; Version={Version}; Path={RepositoryPath}).");
 
     /// <summary>
     /// Formats the GetDownloadResourceResult message and creates a scope.
     /// </summary>
     /// <param name="logger">The current logger.</param>
-    /// <param name="identity">The NuGet Package identity.</param>
-    /// <param name="downloadContext">The package download context.</param>
-    /// <param name="globalPackagesFolder">The global packages folder.</param>
+    /// <param name="packageId">The package ID.</param>
+    /// <param name="version">The package version.</param>
     /// <param name="clientService">The client service.</param>
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetDownloadResourceResultScope(this ILogger logger, PackageIdentity identity, PackageDownloadContext downloadContext, string? globalPackagesFolder,
-        ClientService clientService, bool isUpstream)
+    public static IDisposable? BeginDownloadNupkgScope(this ILogger logger, string packageId, NuGetVersion version, ClientService clientService, bool isUpstream)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
             if (isUpstream)
-                return _getUpstreamDirDownloadResourceResultScope(logger, identity.Id, identity.Version, downloadContext.DirectDownload ? downloadContext.DirectDownloadDirectory : null, downloadContext.ParentId, globalPackagesFolder, clientService.PackageSourceLocation);
-            return _getLocalDownloadResourceResultScope(logger, identity.Id, identity.Version, downloadContext.DirectDownload ? downloadContext.DirectDownloadDirectory : null, downloadContext.ParentId, globalPackagesFolder, clientService.PackageSourceLocation);
+                return _downloadUpstreamDirNupkgScope(logger, packageId, version, clientService.PackageSourceLocation);
+            return _downloadLocalNupkgScope(logger, packageId, version, clientService.PackageSourceLocation);
         }
-        return _getRemoteDownloadResourceResultScope(logger, identity.Id, identity.Version, downloadContext.DirectDownload ? downloadContext.DirectDownloadDirectory : null, downloadContext.ParentId, globalPackagesFolder, clientService.PackageSourceLocation);
+        return _downloadRemoteNupkgScope(logger, packageId, version, clientService.PackageSourceLocation);
     }
 
     #endregion

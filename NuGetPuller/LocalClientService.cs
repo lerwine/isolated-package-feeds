@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NuGet.Packaging;
 using NuGet.Packaging.Core;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
@@ -52,7 +53,7 @@ public sealed class LocalClientService(IOptions<AppSettings> options, ILogger<Up
         return await _getPackageUpdateResourceAsync;
     }
 
-    private async Task<ContextScope<PackageUpdateResource>> GePackageUpdateResourceScopeAsync(Func<IDisposable?> scopeFactory, CancellationToken cancellationToken) =>
+    private async Task<ContextScope<PackageUpdateResource>> GetPackageUpdateResourceScopeAsync(Func<IDisposable?> scopeFactory, CancellationToken cancellationToken) =>
         new(await GetPackageUpdateResourceAsync(cancellationToken), scopeFactory());
 
     private async Task<IEnumerable<string>> DeleteAsync(IEnumerable<string> packageIds, FindPackageByIdResource findPackageById, PackageUpdateResource resource, CancellationToken cancellationToken)
@@ -84,114 +85,48 @@ public sealed class LocalClientService(IOptions<AppSettings> options, ILogger<Up
         return await DeleteAsync(packageIds, findPackageById, packageUpdate, cancellationToken);
     }
 
-    private async Task<IEnumerable<string>> AddAsync(IEnumerable<string> packageIds, FindPackageByIdResource findPackageById, PackageUpdateResource resource, UpstreamClientService upstreamClientService, CancellationToken cancellationToken)
+    public async Task<bool> DeleteAsync(string packageId, CancellationToken cancellationToken)
     {
-        HashSet<string> result = new(StringComparer.CurrentCultureIgnoreCase);
-        foreach (string id in packageIds.Distinct(StringComparer.CurrentCultureIgnoreCase))
-        {
-            using var scope = Logger.BeginAddLocalPackageScope(id, PackageSourceLocation);
-            var lc = id.ToLower();
-            var upstreamVersions = await upstreamClientService.GetAllVersionsAsync(lc, cancellationToken);
-            if (upstreamVersions is null || !upstreamVersions.Any())
-                continue;
-            HashSet<NuGetVersion> toAdd = new();
-            foreach (NuGetVersion v in upstreamVersions)
-            {
-                if (!await findPackageById.DoesPackageExistAsync(lc, v, CacheContext, NuGetLogger, cancellationToken))
-                    toAdd.Add(v);
-            }
-            if (toAdd.Count == 0)
-                continue;
-            result.Add(id);
-            // TODO: Download and add packages for frameworks
-            throw new NotImplementedException();
-        }
-        return result;
-    }
-
-    public async Task<IEnumerable<string>> AddAsync(IEnumerable<string> packageIds, UpstreamClientService upstreamClientService, CancellationToken cancellationToken)
-    {
-        if (packageIds is null || !(packageIds = packageIds.Select(i => i?.Trim()!).Where(i => !string.IsNullOrEmpty(i))).Any())
-            return Enumerable.Empty<string>();
+        if ((packageId = packageId.ToTrimmedOrNullIfEmpty()!) is null)
+            return false;
+        using var scope = Logger.BeginDeleteLocalPackageScope(packageId, PackageSourceLocation);
         var findPackageById = await GetFindPackageByIdResourceAsync(cancellationToken);
-        var resource = await GetPackageUpdateResourceAsync(cancellationToken);
-        return await AddAsync(packageIds, findPackageById, resource, upstreamClientService, cancellationToken);
+        var lc = packageId.ToLower();
+        var versions = await findPackageById.GetAllVersionsAsync(lc, CacheContext, NuGetLogger, cancellationToken);
+        if (versions is null || !versions.Any())
+            return false;
+        var packageUpdate = await GetPackageUpdateResourceAsync(cancellationToken);
+        foreach (var v in versions)
+        {
+            using var scope2 = Logger.BeginDeleteLocalPackageVersionScope(lc, v, PackageSourceLocation);
+            await packageUpdate.Delete(lc, v.ToString(), s => string.Empty, s => true, true, NuGetLogger);
+        }
+        return true;
     }
 
-    private async Task UpdateAsync(string packageId, NuGetVersion version, PackageDownloadContext downloadContext, UpstreamClientService upstreamClientService, Dictionary<string, HashSet<NuGetVersion>> updated, CancellationToken cancellationToken)
+    public async Task<bool> AddPackageAsync(string path, bool skipDuplicate, CancellationToken cancellationToken)
     {
-        var localPackage = await GetDependencyInfoAsync(packageId, version, cancellationToken);
-        if (localPackage is null)
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        if (File.Exists(path))
         {
-            Logger.LogPackageNotFound(packageId, version, this, false);
-            return;
-        }
-        if (updated.TryGetValue(packageId, out HashSet<NuGetVersion>? versionsUpdated))
-        {
-            if (versionsUpdated.Contains(version))
-                return;
+            var packageUpdateResource = await GetPackageUpdateResourceAsync(cancellationToken);
+            try
+            {
+                await packageUpdateResource.Push(packagePaths: new string[] { path }, symbolSource: null, timeoutInSecond: 60, disableBuffering: false, getApiKey: s => null, getSymbolApiKey: null, noServiceEndpoint: false, skipDuplicate: skipDuplicate, symbolPackageUpdateResource: null, log: NuGetLogger);
+                return true;
+            }
+            catch (InvalidDataException error)
+            {
+                Logger.LogPackageFileNotZipArchive(path, error);
+            }
+            catch (PackagingException error)
+            {
+                Logger.LogPackageFileInvalidContent(path, error);
+            }
         }
         else
-        {
-            versionsUpdated = new HashSet<NuGetVersion>(VersionComparer.VersionReleaseMetadata);
-            updated.Add(packageId, versionsUpdated);
-        }
-        versionsUpdated.Add(version);
-        var downloaded = await upstreamClientService.GetDownloadResourceResultAsync(new PackageIdentity(packageId, version), downloadContext, GlobalPackagesFolder, cancellationToken);
-        if (downloaded is null)
-        {
-            Logger.LogPackageNotFound(packageId, version, this, true);
-            return;
-        }
-    }
-
-    private async Task UpdateAsync(HashSet<string> toUpdate, FindPackageByIdResource findPackageById, PackageUpdateResource resource, UpstreamClientService upstreamClientService, HashSet<string> deletedIds, CancellationToken cancellationToken)
-    {
-        Dictionary<string, HashSet<NuGetVersion>> updated = new(StringComparer.CurrentCultureIgnoreCase);
-        while (toUpdate.Count > 0)
-        {
-            var id = toUpdate.First();
-            toUpdate.Remove(id);
-            if (updated.ContainsKey(id))
-                continue;
-            HashSet<NuGetVersion> versionsUpdated = new(VersionComparer.VersionReleaseMetadata);
-            updated.Add(id, versionsUpdated);
-            var lc = id.ToLower();
-            using var scope = Logger.BeginUpdateLocalPackageScope(id, PackageSourceLocation);
-            var localVersions = await findPackageById.GetAllVersionsAsync(lc, CacheContext, NuGetLogger, cancellationToken);
-            if (localVersions is null || !localVersions.Any())
-            {
-                if (deletedIds.Contains(lc, StringComparer.CurrentCultureIgnoreCase))
-                    Logger.LogPackageDeleted(id, PackageSourceLocation);
-                else
-                    Logger.LogPackageNotFound(id, this, false);
-                continue;
-            }
-            var upstreamVersions = await upstreamClientService.GetAllVersionsAsync(lc, cancellationToken);
-            if (upstreamVersions is null || !upstreamVersions.Any())
-            {
-                Logger.LogPackageNotFound(id, this, true);
-                continue;
-            }
-            if (!(upstreamVersions = upstreamVersions.Where(v => !localVersions.Contains(v, VersionComparer.VersionReleaseMetadata))).Any())
-                continue;
-            PackageDownloadContext downloadContext = new(CacheContext);
-
-            foreach (NuGetVersion version in upstreamVersions)
-            {
-
-            }
-        }
-    }
-
-    public async Task UpdateAsync(IEnumerable<string> packageIds, UpstreamClientService upstreamClientService, HashSet<string> deletedIds, CancellationToken cancellationToken)
-    {
-        if (packageIds is null || !(packageIds = packageIds.Select(i => i?.Trim()!).Where(i => !string.IsNullOrEmpty(i))).Any())
-            return;
-        HashSet<string> toUpdate = new(packageIds.Distinct(StringComparer.CurrentCultureIgnoreCase), StringComparer.CurrentCultureIgnoreCase);
-        var findPackageById = await GetFindPackageByIdResourceAsync(cancellationToken);
-        var resource = await GetPackageUpdateResourceAsync(cancellationToken);
-        await UpdateAsync(toUpdate, findPackageById, resource, upstreamClientService, deletedIds, cancellationToken);
+            Logger.LogPackageFileNotFound(path);
+        return false;
     }
 
     #endregion
