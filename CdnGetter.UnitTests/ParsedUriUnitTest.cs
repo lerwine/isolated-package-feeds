@@ -2,14 +2,9 @@ using Xunit.Abstractions;
 
 namespace CdnGetter.UnitTests;
 
-public class ParsedUriUnitTest
+public class ParsedUriUnitTest(ITestOutputHelper output)
 {
-    private readonly ITestOutputHelper _output;
-
-    public ParsedUriUnitTest(ITestOutputHelper output)
-    {
-        _output = output;
-    }
+    private readonly ITestOutputHelper _output = output;
 
     /// <summary>
     /// Generates test data for <see cref="ValidIpV6RegexTest(string, bool, bool, bool, string)" />.

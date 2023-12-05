@@ -2,11 +2,9 @@ using System.Collections;
 
 namespace CdnGetter.UnitTests;
 
-public sealed class RotatingEnumerable<T> : IEnumerable<T>
+public sealed class RotatingEnumerable<T>(params T[] values) : IEnumerable<T>
 {
-    private readonly T[] _values;
-
-    public RotatingEnumerable(params T[] values) => _values = values ?? [];
+    private readonly T[] _values = values ?? [];
 
     public IEnumerator<T> GetEnumerator() => new Enumerator(this);
 

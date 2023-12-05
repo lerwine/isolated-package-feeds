@@ -2,11 +2,9 @@ using Xunit.Abstractions;
 
 namespace CdnGetter.UnitTests
 {
-    public class RomanNumeralUnitTest
+    public class RomanNumeralUnitTest(ITestOutputHelper output)
     {
-        private readonly ITestOutputHelper _output;
-
-        public RomanNumeralUnitTest(ITestOutputHelper output) => _output = output;
+        private readonly ITestOutputHelper _output = output;
 
         private static IEnumerable<(ushort Value, string Text)> GetRomanNumeralTestValues(bool includeEmpty = false)
         {

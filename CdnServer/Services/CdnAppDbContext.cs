@@ -3,15 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CdnServer.Services;
 
-public class CdnAppDbContext : DbContext
+public class CdnAppDbContext(DbContextOptions<CdnAppDbContext> options, ILogger<CdnAppDbContext> logger) : DbContext(options)
 {
-    private readonly ILogger<CdnAppDbContext> _logger;
-
-    public CdnAppDbContext(DbContextOptions<CdnAppDbContext> options, ILogger<CdnAppDbContext> logger)
-        : base(options)
-    {
-        _logger = logger;
-    }
+    private readonly ILogger<CdnAppDbContext> _logger = logger;
 
     public DbSet<LibAuthor> Authors { get; set; } = null!;
 
