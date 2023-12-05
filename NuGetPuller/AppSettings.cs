@@ -126,7 +126,7 @@ public class AppSettings
 
     internal static void Configure(string[] args, IConfigurationBuilder builder)
     {
-        builder.Add(new FlagSwitchCommandLineConfigSource(args?.ToImmutableArray() ?? ImmutableArray<string>.Empty, _booleanSwitchMappings, _valueSwitchMappings));
+        builder.Add(new FlagSwitchCommandLineConfigSource(args?.ToImmutableArray() ?? [], _booleanSwitchMappings, _valueSwitchMappings));
     }
 
     internal ValidatedAppSettings Validated { get; } = new();

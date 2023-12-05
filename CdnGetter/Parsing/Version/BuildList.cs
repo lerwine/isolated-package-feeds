@@ -6,11 +6,11 @@ public class BuildList : IDelimitedTokenList, IReadOnlyList<IDelimitedToken>
 {
     private readonly IDelimitedToken[] _tokens;
 
-    public BuildList() => _tokens = Array.Empty<IDelimitedToken>();
+    public BuildList() => _tokens = [];
 
     public BuildList(IEnumerable<IDelimitedToken> tokens)
     {
-        _tokens = tokens?.Where(t => t is not null).ToArray() ?? Array.Empty<IDelimitedToken>();
+        _tokens = tokens?.Where(t => t is not null).ToArray() ?? [];
     }
 
     public IDelimitedToken this[int index] => _tokens[index];

@@ -25,13 +25,13 @@ public class NumericalTokenList : IDelimitedTokenList, IReadOnlyList<DelimitedNu
     /// Intializes a new <c>NumericalTokenList</c>.
     /// </summary>
     /// <param name="items">The numerical tokens that will make up this compound token.</param>
-    public NumericalTokenList(params DelimitedNumericalToken[] items) => _items = items ?? Array.Empty<DelimitedNumericalToken>();
+    public NumericalTokenList(params DelimitedNumericalToken[] items) => _items = items ?? [];
     
     /// <summary>
     /// Intializes a new <c>NumericalTokenList</c>.
     /// </summary>
     /// <param name="items">The numerical tokens that will make up this compound token.</param>
-    public NumericalTokenList(IEnumerable<DelimitedNumericalToken> items) => _items = items?.ToArray() ?? Array.Empty<DelimitedNumericalToken>();
+    public NumericalTokenList(IEnumerable<DelimitedNumericalToken> items) => _items = items?.ToArray() ?? [];
     
     /// <summary>
     /// Gets the numerical token at the specified index.

@@ -6,7 +6,7 @@ public sealed class RotatingEnumerable<T> : IEnumerable<T>
 {
     private readonly T[] _values;
 
-    public RotatingEnumerable(params T[] values) => _values = values ?? Array.Empty<T>();
+    public RotatingEnumerable(params T[] values) => _values = values ?? [];
 
     public IEnumerator<T> GetEnumerator() => new Enumerator(this);
 

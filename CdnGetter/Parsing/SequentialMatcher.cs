@@ -25,7 +25,7 @@ public class SequentialMatcher : IMatcher
     /// </summary>
     /// <param name="elementMatchers">The ordered matchers that will make up the new compound matcher.</param>
     public SequentialMatcher(params IMatcher[] elementMatchers) =>
-        (ElementMatchers, Aggregator) = (new(elementMatchers?.Where(p => p is not null).ToArray() ?? Array.Empty<IMatcher>()), new Func<IList<IToken>, ITokenList>(t => new TokenList(t)));
+        (ElementMatchers, Aggregator) = (new(elementMatchers?.Where(p => p is not null).ToArray() ?? []), new Func<IList<IToken>, ITokenList>(t => new TokenList(t)));
     
     /// <summary>
     /// Intializes a new <c>SequentialMatcher</c>.
@@ -33,7 +33,7 @@ public class SequentialMatcher : IMatcher
     /// <param name="elementMatchers">The ordered matchers that will make up the new compound matcher.</param>
     /// <param name="aggregator">The delegate that creates a <see cref="ITokenList" /> from the matched tokens or <see langword="null" /> to parse as a <see cref="TokenList" />.</param>
     public SequentialMatcher(IEnumerable<IMatcher> elementMatchers, Func<IList<IToken>, ITokenList>? aggregator = null) =>
-        (ElementMatchers, Aggregator) = (new(elementMatchers?.Where(p => p is not null).ToArray() ?? Array.Empty<IMatcher>()), aggregator ?? new Func<IList<IToken>, ITokenList>(t => new TokenList(t)));
+        (ElementMatchers, Aggregator) = (new(elementMatchers?.Where(p => p is not null).ToArray() ?? []), aggregator ?? new Func<IList<IToken>, ITokenList>(t => new TokenList(t)));
     
     /// <summary>
     /// Intializes a new <c>SequentialMatcher</c>.
@@ -41,7 +41,7 @@ public class SequentialMatcher : IMatcher
     /// <param name="aggregator">The delegate that creates a <see cref="ITokenList" /> from the matched tokens.</param>
     /// <param name="elementMatchers">The ordered matchers that will make up the new compound matcher.</param>
     public SequentialMatcher(Func<IList<IToken>, ITokenList> aggregator, params IMatcher[] elementMatchers) =>
-        (ElementMatchers, Aggregator) = (new(elementMatchers?.Where(p => p is not null).ToArray() ?? Array.Empty<IMatcher>()), aggregator ?? throw new ArgumentNullException(nameof(aggregator)));
+        (ElementMatchers, Aggregator) = (new(elementMatchers?.Where(p => p is not null).ToArray() ?? []), aggregator ?? throw new ArgumentNullException(nameof(aggregator)));
     
     /// <summary>
     /// Tests whether all matchers can sequentially produce tokens, with the first one starting from the specified index.
@@ -142,14 +142,14 @@ public class SequentialMatcher<TAggregate> : IMatcher where TAggregate : IToken
     /// </summary>
     /// <param name="aggregator">The delegate that creates a <typeparamref name="TAggregate" /> from the matched tokens.</param>
     /// <param name="elementMatchers">The ordered matchers will make up the new compound matcher.</param>
-    public SequentialMatcher(Func<IList<IToken>, TAggregate> aggregator, params IMatcher[] elementMatchers) => (Aggregator, ElementMatchers) = (aggregator, new(elementMatchers?.Where(p => p is not null).ToArray() ?? Array.Empty<IMatcher>()));
+    public SequentialMatcher(Func<IList<IToken>, TAggregate> aggregator, params IMatcher[] elementMatchers) => (Aggregator, ElementMatchers) = (aggregator, new(elementMatchers?.Where(p => p is not null).ToArray() ?? []));
     
     /// <summary>
     /// Initializes a new <c>SequentialMatcher</c>.
     /// </summary>
     /// <param name="elementMatchers">The ordered matchers will make up the new compound matcher.</param>
     /// <param name="aggregator">The delegate that creates a <typeparamref name="TAggregate" /> from the matched tokens.</param>
-    public SequentialMatcher(IEnumerable<IMatcher> elementMatchers, Func<IList<IToken>, TAggregate> aggregator) => (ElementMatchers, Aggregator) = (new(elementMatchers?.Where(p => p is not null).ToArray() ?? Array.Empty<IMatcher>()), aggregator);
+    public SequentialMatcher(IEnumerable<IMatcher> elementMatchers, Func<IList<IToken>, TAggregate> aggregator) => (ElementMatchers, Aggregator) = (new(elementMatchers?.Where(p => p is not null).ToArray() ?? []), aggregator);
 
     /// <summary>
     /// Tests whether all matchers can sequentially produce tokens, with the first one starting from the specified index.

@@ -186,8 +186,8 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
             SchemeSeparator = schemeSeparator;
         }
         Authority = authority ?? UriAuthority.Empty;
-        PathSegments = new((pathSegments is null) ? Array.Empty<PathSegment>() : pathSegments.Where(s => s is not null).ToArray());
-        Query = new((query is null) ? Array.Empty<QuerySubComponent>() : query.Where(q => q is not null).ToArray());
+        PathSegments = new((pathSegments is null) ? [] : pathSegments.Where(s => s is not null).ToArray());
+        Query = new((query is null) ? [] : query.Where(q => q is not null).ToArray());
         Fragment = fragment;
     }
     
@@ -209,7 +209,7 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
     public ParsedUri(PathSegment rootSegment, IEnumerable<QuerySubComponent>? query = null, string? fragment = null)
     {
         PathSegments = new(new PathSegment[] { rootSegment ?? PathSegment.EmptyRoot });
-        Query = new((query is null) ? Array.Empty<QuerySubComponent>() : query.Where(q => q is not null).ToArray());
+        Query = new((query is null) ? [] : query.Where(q => q is not null).ToArray());
         Fragment = fragment;
     }
     
@@ -221,8 +221,8 @@ public partial class ParsedUri : IEquatable<ParsedUri>, IComparable<ParsedUri>
     /// <param name="fragment">The optional fragment component of the URI or <see langword="null" /> if there is no fragment component.</param>
     public ParsedUri(IEnumerable<PathSegment>? pathSegments, IEnumerable<QuerySubComponent>? query = null, string? fragment = null)
     {
-        PathSegments = new((pathSegments is null) ? Array.Empty<PathSegment>() : pathSegments.Where(s => s is not null).ToArray());
-        Query = new((query is null) ? Array.Empty<QuerySubComponent>() : query.Where(q => q is not null).ToArray());
+        PathSegments = new((pathSegments is null) ? [] : pathSegments.Where(s => s is not null).ToArray());
+        Query = new((query is null) ? [] : query.Where(q => q is not null).ToArray());
         Fragment = fragment;
     }
     

@@ -6,11 +6,11 @@ public class PreReleaseList : IDelimitedTokenList
 {
     private readonly IDelimitedToken[] _tokens;
 
-    public PreReleaseList() => _tokens = Array.Empty<IDelimitedToken>();
+    public PreReleaseList() => _tokens = [];
 
     public PreReleaseList(IEnumerable<IDelimitedToken> tokens)
     {
-        _tokens = tokens?.Where(t => t is not null).ToArray() ?? Array.Empty<IDelimitedToken>();
+        _tokens = tokens?.Where(t => t is not null).ToArray() ?? [];
     }
 
     public IDelimitedToken this[int index] => _tokens[index];

@@ -539,9 +539,9 @@ public partial class MainService : BackgroundService
                                 WriteShowCDNsHelpToConsole();
                             else
                                 _operation = OperationType.ShowCDNs;
-                            _libraryNames = ImmutableArray<string>.Empty;
-                            _versions = ImmutableArray<string>.Empty;
-                            _cdnNames = ImmutableArray<string>.Empty;
+                            _libraryNames = [];
+                            _versions = [];
+                            _cdnNames = [];
                             return;
                         }
                         break;
@@ -554,8 +554,8 @@ public partial class MainService : BackgroundService
                         {
                             _operation = OperationType.ShowCDNs;
                             _cdnNames = appSettings.Upstream.FromCsv().Distinct().ToImmutableArray();
-                            _libraryNames = ImmutableArray<string>.Empty;
-                            _versions = ImmutableArray<string>.Empty;
+                            _libraryNames = [];
+                            _versions = [];
                             return;
                         }
                         WriteShowLibrariesHelpToConsole();
@@ -568,7 +568,7 @@ public partial class MainService : BackgroundService
                             if ((_libraryNames = appSettings.Library.FromCsv().Distinct().ToImmutableArray()).Length > 0)
                             {
                                 _cdnNames = appSettings.Upstream.FromCsv().Distinct().ToImmutableArray();
-                                _versions = ImmutableArray<string>.Empty;
+                                _versions = [];
                                 return;
                             }
                             else
@@ -682,7 +682,7 @@ public partial class MainService : BackgroundService
                 {
                     _libraryNames = libraries;
                     _cdnNames = appSettings.Upstream.FromCsv().ToImmutableArray();
-                    _versions = ImmutableArray<string>.Empty;
+                    _versions = [];
                     _operation = OperationType.ReloadLibraries;
                     return;
                 }
@@ -708,7 +708,7 @@ public partial class MainService : BackgroundService
                     _logger.LogMutuallyExclusiveSwitchWarning(GetSwitchNameForLog(nameof(Config.AppSettings.Library)), GetSwitchNameForLog(nameof(Config.AppSettings.Upstream)));
                 else if (!appSettings.ShowHelp)
                 {
-                    _libraryNames = ImmutableArray<string>.Empty;
+                    _libraryNames = [];
                     _cdnNames = libraries;
                     _versions = appSettings.Version.FromCsv().ToImmutableArray();
                     _operation = OperationType.GetNewVersions;
@@ -729,17 +729,17 @@ public partial class MainService : BackgroundService
                     else
                     {
                         _operation = OperationType.ShowCDNs;
-                        _libraryNames = ImmutableArray<string>.Empty;
-                        _versions = ImmutableArray<string>.Empty;
-                        _cdnNames = ImmutableArray<string>.Empty;
+                        _libraryNames = [];
+                        _versions = [];
+                        _cdnNames = [];
                         return;
                     }
                 }
                 WriteHelpToConsole();
             }
         }
-        _libraryNames = ImmutableArray<string>.Empty;
-        _versions = ImmutableArray<string>.Empty;
-        _cdnNames = ImmutableArray<string>.Empty;
+        _libraryNames = [];
+        _versions = [];
+        _cdnNames = [];
     }
 }

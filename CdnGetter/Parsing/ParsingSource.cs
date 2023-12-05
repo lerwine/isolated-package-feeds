@@ -331,7 +331,7 @@ public class ParsingSource : IReadOnlyList<char>
             throw new ArgumentOutOfRangeException(nameof(startIndex), "Index was out of range. Must be non-negative and less than the size of the source string.");
         if (count < 0 || count + startIndex > Count)
             throw new ArgumentOutOfRangeException(nameof(Count), "Count must be positive and count must refer to a location within the source string.");
-        return (count > 0) ? ((startIndex > 0 && count == Count) ? _source.AsSpan() : _source.AsSpan(startIndex, count)) : ReadOnlySpan<char>.Empty; 
+        return (count > 0) ? ((startIndex > 0 && count == Count) ? _source.AsSpan() : _source.AsSpan(startIndex, count)) : []; 
     }
 
     public IEnumerable<char> GetCharacters(int startIndex, int count)

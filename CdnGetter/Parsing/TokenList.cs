@@ -14,13 +14,13 @@ public class TokenList : ITokenList
     /// Intializes a new <c>TokenList</c>.
     /// </summary>
     /// <param name="items">The tokens that will make up this compound token.</param>
-    public TokenList(params IToken[] items) => _items = items ?? Array.Empty<IToken>();
+    public TokenList(params IToken[] items) => _items = items ?? [];
     
     /// <summary>
     /// Intializes a new <c>TokenList</c>.
     /// </summary>
     /// <param name="items">The tokens that will make up this compound token.</param>
-    public TokenList(IEnumerable<IToken> items) => _items = items?.ToArray() ?? Array.Empty<IToken>();
+    public TokenList(IEnumerable<IToken> items) => _items = items?.ToArray() ?? [];
     
     /// <summary>
     /// Gets the token at the specified index.

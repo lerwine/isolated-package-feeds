@@ -26,20 +26,20 @@ public class AlternateMatcher : IMatcher
     /// </summary>
     /// <param name="options">The matchers that will make up the new compound matcher.</param>
     /// <param name="noMatchFactory">The optional delegate that creates a token when none of the matchers can produce a token.</param>
-    public AlternateMatcher(IEnumerable<IMatcher> options, Func<IToken>? noMatchFactory = null) => (Options, NoMatchFactory) = (new(options?.Where(p => p is not null).ToArray() ?? Array.Empty<IMatcher>()), noMatchFactory);
+    public AlternateMatcher(IEnumerable<IMatcher> options, Func<IToken>? noMatchFactory = null) => (Options, NoMatchFactory) = (new(options?.Where(p => p is not null).ToArray() ?? []), noMatchFactory);
     
     /// <summary>
     /// Initializes a new <c>AlternateMatcher</c>.
     /// </summary>
     /// <param name="noMatchFactory">The delegate that creates a token when none of the matchers can produce a token.</param>
     /// <param name="options">The matchers that will make up the new compound matcher.</param>
-    public AlternateMatcher(Func<IToken> noMatchFactory, params IMatcher[] options) => (NoMatchFactory, Options) = (noMatchFactory ?? throw new ArgumentNullException(nameof(noMatchFactory)), new(options?.Where(p => p is not null).ToArray() ?? Array.Empty<IMatcher>()));
+    public AlternateMatcher(Func<IToken> noMatchFactory, params IMatcher[] options) => (NoMatchFactory, Options) = (noMatchFactory ?? throw new ArgumentNullException(nameof(noMatchFactory)), new(options?.Where(p => p is not null).ToArray() ?? []));
     
     /// <summary>
     /// Initializes a new <c>AlternateMatcher</c>.
     /// </summary>
     /// <param name="options">The matchers that will make up the new compound matcher.</param>
-    public AlternateMatcher(params IMatcher[] options) => (NoMatchFactory, Options) = (null, new(options?.Where(p => p is not null).ToArray() ?? Array.Empty<IMatcher>()));
+    public AlternateMatcher(params IMatcher[] options) => (NoMatchFactory, Options) = (null, new(options?.Where(p => p is not null).ToArray() ?? []));
     
     /// <summary>
     /// Tests whether any matcher can produce a token starting from the specified index.

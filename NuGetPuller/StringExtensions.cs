@@ -8,7 +8,7 @@ public static class StringExtensions
     public static string[] SplitLines(this string? value)
     {
         if (value is null)
-            return Array.Empty<string>();
+            return [];
         return LineBreakRegex.Split(value);
     }
 

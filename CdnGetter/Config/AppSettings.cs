@@ -267,7 +267,7 @@ public class AppSettings
     private static readonly Dictionary<string, string> _booleanSwitchMappings = (new string[] { nameof(ShowHelp) }).SelectMany(n => GetSwitchNames(n).Select(s => new { Name = n, Switch = s }))
         .ToDictionary(a => a.Switch, a => $"{nameof(CdnGetter)}:{a.Name}");
 
-    internal static void Configure(string[] args, IConfigurationBuilder configuration) => configuration.Add(new FlagSwitchCommandLineConfigSource(args?.ToImmutableArray() ?? ImmutableArray<string>.Empty, _booleanSwitchMappings, _valueSwitchMappings));
+    internal static void Configure(string[] args, IConfigurationBuilder configuration) => configuration.Add(new FlagSwitchCommandLineConfigSource(args?.ToImmutableArray() ?? [], _booleanSwitchMappings, _valueSwitchMappings));
 
     public static string GetLocalStoragePath(AppSettings? settings) { return (settings?.LocalStoragePath).ToTrimmedOrDefaultIfEmpty(DEFAULT_LocalStoragePath); }
 }

@@ -159,7 +159,7 @@ public static class ExtensionMethods
         return (element is null) ? source : source.Append(element);
     }
 
-    public static T[] EmptyIfNull<T>(this T[]? source) => (source is null) ? Array.Empty<T>() : source;
+    public static T[] EmptyIfNull<T>(this T[]? source) => (source is null) ? [] : source;
 
     public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T>? source) => (source is null) ? Enumerable.Empty<T>() : source;
 
@@ -205,7 +205,7 @@ public static class ExtensionMethods
     public static string[] SplitLines(this string? value)
     {
         if (value is null)
-            return Array.Empty<string>();
+            return [];
         return LineBreakRegex.Split(value);
     }
 

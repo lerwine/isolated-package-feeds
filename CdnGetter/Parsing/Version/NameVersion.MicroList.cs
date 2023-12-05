@@ -16,9 +16,9 @@ public readonly partial struct NameVersion
 
         public int Count => _tokens.Length;
 
-        public MicroList() => _tokens = Array.Empty<DelimitedToken>();
+        public MicroList() => _tokens = [];
 
-        public MicroList(IEnumerable<DelimitedToken> tokens) => _tokens = tokens?.ToArray() ?? Array.Empty<DelimitedToken>();
+        public MicroList(IEnumerable<DelimitedToken> tokens) => _tokens = tokens?.ToArray() ?? [];
 
         public int CompareTo(IToken? other)
         {

@@ -14,7 +14,7 @@ namespace CdnGetter.Config
 
         public CommandLineShorthandAttribute(params string[] switches)
         {
-            Switches = switches?.Where(s => !string.IsNullOrWhiteSpace(s)).Distinct().ToImmutableArray() ?? ImmutableArray<string>.Empty;
+            Switches = switches?.Where(s => !string.IsNullOrWhiteSpace(s)).Distinct().ToImmutableArray() ?? [];
         }
     }
 }
