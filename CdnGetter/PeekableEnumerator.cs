@@ -2,9 +2,9 @@ using System.Collections;
 
 namespace CdnGetter;
 
-public sealed class PeekableEnumerator<T> : IEnumerator<T>
+public sealed class PeekableEnumerator<T>(IEnumerable<T>? source) : IEnumerator<T>
 {
-    private readonly IEnumerator<T> _backingEnumerator;
+    private readonly IEnumerator<T> _backingEnumerator = (source ?? Enumerable.Empty<T>()).GetEnumerator();
 
     private bool? _hasPeekedValue;
 
@@ -20,11 +20,6 @@ public sealed class PeekableEnumerator<T> : IEnumerator<T>
     }
 
     object IEnumerator.Current => ((IEnumerator)_backingEnumerator).Current;
-
-    public PeekableEnumerator(IEnumerable<T>? source)
-    {
-        _backingEnumerator = (source ?? Enumerable.Empty<T>()).GetEnumerator();
-    }
 
     public bool MoveNext()
     {

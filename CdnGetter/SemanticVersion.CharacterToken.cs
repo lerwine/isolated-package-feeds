@@ -5,11 +5,9 @@ namespace CdnGetter;
 
 public partial class SemanticVersion
 {
-    public readonly struct CharacterToken : IToken<char>, ICharacterSpanToken, IComparable<CharacterToken>, IEquatable<CharacterToken>
+    public readonly struct CharacterToken(char value) : IToken<char>, ICharacterSpanToken, IComparable<CharacterToken>, IEquatable<CharacterToken>
     {
-        public CharacterToken(char value) => Value = value;
-        
-        public char Value { get; }
+        public char Value { get; } = value;
 
         int ICharacterSpanToken.Length => 1;
 

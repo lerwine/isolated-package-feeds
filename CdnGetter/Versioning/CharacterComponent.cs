@@ -3,11 +3,9 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace CdnGetter.Versioning
 {
-    public readonly struct CharacterComponent : ITextComponent
+    public readonly struct CharacterComponent(char value) : ITextComponent
     {
-        public CharacterComponent(char value) => Value = value;
-
-        public char Value { get; }
+        public char Value { get; } = value;
 
         int ITextComponent.Length => 1;
 

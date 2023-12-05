@@ -14,15 +14,9 @@ using Microsoft.Extensions.DependencyInjection;
 namespace CdnGetter.Services;
 [ContentGetter(JsDelivrSettings.PROVIDER_ID, JsDelivrSettings.PROVIDER_NAME, Description = "data.jsdelivr.com")]
 [Obsolete("Storage and retrieval should exist as separate services")]
-public class JsDelivrGetterService : ContentGetterService
+public class JsDelivrGetterService(ContentDb dbContext, IOptions<AppSettings> options, ILogger<JsDelivrGetterService> logger, IHostEnvironment hostEnvironment) : ContentGetterService(dbContext, options, hostEnvironment)
 {
-    private readonly ILogger<JsDelivrGetterService> _logger;
-
-    public JsDelivrGetterService(ContentDb dbContext, IOptions<AppSettings> options, ILogger<JsDelivrGetterService> logger, IHostEnvironment hostEnvironment)
-        : base(dbContext, options, hostEnvironment)
-    {
-        _logger = logger;
-    }
+    private readonly ILogger<JsDelivrGetterService> _logger = logger;
 
 #pragma warning disable CS1998
     public override async Task AddAsync(UpstreamCdn upstreamCdn, IEnumerable<string> libraryNames, CancellationToken cancellationToken)

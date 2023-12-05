@@ -70,10 +70,8 @@ public readonly struct DelimitedToken : IDelimitedToken, IStringToken
         throw new NotImplementedException();
     }
 
-    class Asdf
+    class Asdf(IEnumerable<IToken> items)
     {
-        public Asdf(IEnumerable<IToken> items) { }
-
         static Asdf Get(IEnumerable<IStringToken> tokens) => new(tokens);
     }
 }

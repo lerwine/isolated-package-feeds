@@ -15,16 +15,9 @@ namespace CdnGetter.Services;
 
 [ContentGetter(CdnJsSettings.PROVIDER_ID, CdnJsSettings.PROVIDER_NAME, Description = "api.cdnjs.com")]
 [Obsolete("Storage and retrieval should exist as separate services")]
-public class CdnJsGetterService : ContentGetterService
+public class CdnJsGetterService(ContentDb dbContext, IOptions<AppSettings> options, ILogger<CdnJsGetterService> logger, IHostEnvironment hostEnvironment) : ContentGetterService(dbContext, options, hostEnvironment)
 {
-    private readonly ILogger<CdnJsGetterService> _logger;
-
-    // public CdnJsUpstreamCdn(ContentDb dbContext, IOptions<AppSettings> options, ILogger<CdnJsUpstreamCdn> logger)
-    public CdnJsGetterService(ContentDb dbContext, IOptions<AppSettings> options, ILogger<CdnJsGetterService> logger, IHostEnvironment hostEnvironment)
-        : base(dbContext, options, hostEnvironment)
-    {
-        _logger = logger;
-    }
+    private readonly ILogger<CdnJsGetterService> _logger = logger;
 
 #pragma warning disable CS1998
     public override async Task AddAsync(UpstreamCdn upstreamCdn, IEnumerable<string> libraryNames, CancellationToken cancellationToken)

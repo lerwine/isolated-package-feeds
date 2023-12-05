@@ -6,10 +6,10 @@ namespace CdnGetter.Parsing;
 /// Represents a parsed token containing a single character.
 /// </summary>
 #pragma warning disable CA2231
-public readonly struct CharacterToken : IStringToken
+public readonly struct CharacterToken(char value) : IStringToken
 #pragma warning restore CA2231
 {
-    public readonly char Value { get; }
+    public readonly char Value { get; } = value;
 
     int IReadOnlyCollection<char>.Count => 1;
 
@@ -23,8 +23,6 @@ public readonly struct CharacterToken : IStringToken
         }
     }
 
-    public CharacterToken(char value) => Value = value;
-    
     public int CompareTo(IToken? other) => (other is null) ? 1 : Parsing.NoCaseComparer.Compare(ToString(), other.GetValue());
 
     public bool Equals(IToken? other) => other is not null && Parsing.NoCaseComparer.Equals(ToString(), other.GetValue());
