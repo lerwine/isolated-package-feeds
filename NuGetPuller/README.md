@@ -1,4 +1,4 @@
-# CdnGetter Project
+# NuGetPuller Project
 
 ## Command Line Arguments
 
