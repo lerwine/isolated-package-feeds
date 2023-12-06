@@ -56,9 +56,9 @@ public class LocalLibrary : ModificationTrackingModelBase
     /// <summary>
     /// Library versions for this content library.
     /// </summary>
-    public Collection<LocalVersion> Versions { get; set; } = new();
+    public Collection<LocalVersion> Versions { get; set; } = [];
     
-    public Collection<CdnLibrary> Upstream { get; set; } = new();
+    public Collection<CdnLibrary> Upstream { get; set; } = [];
     
     protected override void Validate(ValidationContext validationContext, EntityState state, List<ValidationResult> results)
     {

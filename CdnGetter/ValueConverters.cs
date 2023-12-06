@@ -144,7 +144,7 @@ public static partial class ValueConverters
     {
         if (source is null)
             return null;
-        JsonObject result = new();
+        JsonObject result = [];
         foreach (KeyValuePair<string, JsonElement> kvp in source)
             switch (kvp.Value.ValueKind)
             {

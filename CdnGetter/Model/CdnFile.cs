@@ -124,7 +124,7 @@ public class CdnFile : ModificationTrackingModelBase
     /// <summary>
     /// CDN acess logs for this content library file.
     /// </summary>
-    public Collection<FileLog> Logs { get; set; } = new();
+    public Collection<FileLog> Logs { get; set; } = [];
 
     protected override void Validate(ValidationContext validationContext, EntityState state, List<ValidationResult> results)
     {

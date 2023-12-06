@@ -102,7 +102,7 @@ public class LocalFile : ModificationTrackingModelBase
         set => value.SetNavigation(_syncRoot, p => p.Id, ref _versionId, ref _version);
     }
     
-    public Collection<CdnFile> Upstream { get; set; } = new();
+    public Collection<CdnFile> Upstream { get; set; } = [];
     
     protected override void Validate(ValidationContext validationContext, EntityState state, List<ValidationResult> results)
     {

@@ -39,7 +39,7 @@ public static class TestExtensionMethods
 
     public static JsonObject AddIntArrayProperty(this JsonObject target, string propertyName, params int[] values)
     {
-        JsonArray arr = new();
+        JsonArray arr = [];
         foreach (int i in values)
             arr.Add(JsonValue.Create(i));
         target.Add(propertyName, arr);
@@ -48,7 +48,7 @@ public static class TestExtensionMethods
 
     public static JsonObject AddStringArrayProperty(this JsonObject target, string propertyName, params string[] values)
     {
-        JsonArray arr = new();
+        JsonArray arr = [];
         foreach (string s in values)
             arr.Add(JsonValue.Create(s));
         target.Add(propertyName, arr);
@@ -57,9 +57,7 @@ public static class TestExtensionMethods
 
     public static JsonObject AddObjectArrayProperty(this JsonObject target, string propertyName, params JsonObject[] items)
     {
-        JsonArray arr = new();
-        foreach (JsonObject s in items)
-            arr.Add(s);
+        JsonArray arr = [.. items];
         target.Add(propertyName, arr);
         return target;
     }

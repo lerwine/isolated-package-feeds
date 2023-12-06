@@ -63,12 +63,12 @@ public class UpstreamCdn : ModificationTrackingModelBase
     /// <summary>
     /// Gets or sets the content libraries that have been retrieved from the upstream content delivery service.
     /// </summary>
-    public Collection<CdnLibrary> Libraries { get; set; } = new();
+    public Collection<CdnLibrary> Libraries { get; set; } = [];
 
     /// <summary>
     /// CDN acess logs for this content library.
     /// </summary>
-    public Collection<CdnLog> Logs { get; set; } = new();
+    public Collection<CdnLog> Logs { get; set; } = [];
 
     protected override void Validate(ValidationContext validationContext, EntityState state, List<ValidationResult> results)
     {

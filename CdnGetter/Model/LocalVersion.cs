@@ -68,9 +68,9 @@ public class LocalVersion : ModificationTrackingModelBase
     /// <summary>
     /// Gets or sets the files that belong to the current version of the content library.
     /// </summary>
-    public Collection<LocalFile> Files { get; set; } = new();
+    public Collection<LocalFile> Files { get; set; } = [];
     
-    public Collection<CdnVersion> Upstream { get; set; } = new();
+    public Collection<CdnVersion> Upstream { get; set; } = [];
 
     protected override void Validate(ValidationContext validationContext, EntityState state, List<ValidationResult> results)
     {

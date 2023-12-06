@@ -78,12 +78,12 @@ public class CdnVersion : ModificationTrackingModelBase
     /// <summary>
     /// Gets or sets the files that belong to the current version of the content library.
     /// </summary>
-    public Collection<CdnFile> Files { get; set; } = new();
+    public Collection<CdnFile> Files { get; set; } = [];
 
     /// <summary>
     /// CDN acess logs for this content library version.
     /// </summary>
-    public Collection<VersionLog> Logs { get; set; } = new();
+    public Collection<VersionLog> Logs { get; set; } = [];
 
     /// <summary>
     /// Performs configuration of the <see cref="CdnVersion" /> entity type in the model for the <see cref="Services.ContentDb" />.

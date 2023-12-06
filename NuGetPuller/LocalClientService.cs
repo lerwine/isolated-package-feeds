@@ -30,7 +30,7 @@ public sealed class LocalClientService(IOptions<AppSettings> options, ILogger<Up
     {
         using var scope = await GePackageSearchResourceScopeAsync(() => Logger.BeginGetAllLocalPackagesScope(SourceRepository.PackageSource.Source), cancellationToken);
         var resource = scope.Context;
-        List<IPackageSearchMetadata> result = new();
+        List<IPackageSearchMetadata> result = [];
         var skip = 0;
         IPackageSearchMetadata[] items;
         while ((items = (await resource.SearchAsync(null, null, skip, 50, NuGetLogger, cancellationToken)).ToArray()).Length > 0)

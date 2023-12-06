@@ -90,7 +90,7 @@ public class SequentialMatcher : IMatcher
             return false;
         }
         int endIndex = startIndex + count;
-        Collection<IToken> items = new();
+        Collection<IToken> items = [];
         nextIndex = startIndex;
         foreach (IMatcher matcher in ElementMatchers)
         {
@@ -191,7 +191,7 @@ public class SequentialMatcher<TAggregate> : IMatcher where TAggregate : IToken
         int endIndex = startIndex + count;
         if (endIndex > source.Count)
             endIndex = source.Count;
-        Collection<IToken> items = new();
+        Collection<IToken> items = [];
         nextIndex = startIndex;
         foreach (IMatcher matcher in ElementMatchers)
         {

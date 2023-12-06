@@ -75,12 +75,12 @@ public class CdnLibrary : ModificationTrackingModelBase
     /// <summary>
     /// Library versions for this content library.
     /// </summary>
-    public Collection<CdnVersion> Versions { get; set; } = new();
+    public Collection<CdnVersion> Versions { get; set; } = [];
 
     /// <summary>
     /// CDN acess logs for this content library.
     /// </summary>
-    public Collection<LibraryLog> Logs { get; set; } = new();
+    public Collection<LibraryLog> Logs { get; set; } = [];
 
     /// <summary>
     /// Performs configuration of the <see cref="CdnLibrary" /> entity type in the model for the <see cref="Services.ContentDb" />.
