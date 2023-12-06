@@ -6,7 +6,6 @@ using NuGet.Packaging.Core;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
-using System.Linq;
 using static NuGetPuller.Constants;
 
 namespace NuGetPuller;
