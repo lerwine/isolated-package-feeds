@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NuGet.Frameworks;
@@ -7,7 +8,6 @@ using NuGet.Versioning;
 using static NuGetPuller.Constants;
 
 namespace NuGetPuller;
-
 public abstract class ClientService : IDisposable
 {
     private bool _isDisposed;
@@ -309,101 +309,37 @@ public abstract class ClientService : IDisposable
         }
     }
 
-    /// <summary>
-    /// Retrieve all dependencies for a single package.
-    /// </summary>
-    /// <param name="packageId">The package ID.</param>
-    /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
-    /// <returns><see cref="Task{TResult}.Result" /> returns the dependencies for the specified package.</returns>
-    public async Task<IEnumerable<PackageIdentity>> GetPackageDependenciesAsync(string packageId, CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrEmpty(packageId);
-        using var scope = await GetFindPackageByIdResourceScopeAsync(() => Logger.BeginGetPackageDependenciesScope(packageId, this, IsUpstream), cancellationToken);
-        var lc = packageId.ToLower();
-        var allVersions = await scope.Context.GetAllVersionsAsync(lc, CacheContext, NuGetLogger, cancellationToken);
-        if (allVersions is null || !allVersions.Any())
-            return Enumerable.Empty<PackageIdentity>();
-        var dependencyInfoResource = await GetDependencyInfoResourceAsync(cancellationToken);
-        var packageDictionary = new Dictionary<string, IEnumerable<NuGetVersion>>(NoCaseComparer)
-        {
-            { packageId, Enumerable.Empty<NuGetVersion>() }
-        };
-        foreach (var version in allVersions)
-        {
-            var frameworksForVersion = ((await GetDependencyInfoAsync(lc, version, cancellationToken))?.FrameworkReferenceGroups?.Select(g => g.TargetFramework) ?? Enumerable.Empty<NuGetFramework>())
-                .DefaultIfEmpty(NuGetFramework.AnyFramework);
-            PackageIdentity package = new(lc, version);
-            foreach (var framework in frameworksForVersion)
-            {
-                using var fScope = Logger.BeginGetPackageDependenciesScope(packageId, version, framework, this, IsUpstream);
-                var dependencyInfo = await dependencyInfoResource.ResolvePackage(package, framework, CacheContext, NuGetLogger, cancellationToken);
-                if (dependencyInfo is null) continue;
-                foreach (var dependency in dependencyInfo.Dependencies)
-                    await GetPackageDependenciesAsync(dependency.Id, scope.Context, dependencyInfoResource, packageDictionary, cancellationToken);
-            }
-        }
-        packageDictionary.Remove(packageId);
-        return ToPackageIdentities(packageDictionary);
-    }
-
-    public async Task<IEnumerable<PackageIdentity>> ExpandPackagesWithDependenciesAsync(IEnumerable<string> packageIds, CancellationToken cancellationToken)
+    public async IAsyncEnumerable<PackageIdentity> ExpandPackagesWithDependenciesAsync(IEnumerable<string> packageIds, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         if (packageIds is null || !(packageIds = packageIds.Select(id => id.ToTrimmedOrNullIfEmpty()!).Where(id => id is not null)).Any())
-            return Enumerable.Empty<PackageIdentity>();
+            yield break;
         var findPackageByIdResource = await GetFindPackageByIdResourceAsync(cancellationToken);
         var dependencyInfoResource = await GetDependencyInfoResourceAsync(cancellationToken);
-        var packageDictionary = new Dictionary<string, IEnumerable<NuGetVersion>>(NoCaseComparer);
-        foreach (string packageId in packageIds.Distinct(NoCaseComparer))
+        HashSet<string> expanded = new(NoCaseComparer);
+        HashQueue<string> toExpand = new(packageIds, NoCaseComparer);
+        while (toExpand.TryDequeue(out string? id))
         {
-            if (packageDictionary.ContainsKey(packageId)) continue;
-            var allVersions = await findPackageByIdResource.GetAllVersionsAsync(packageId, CacheContext, NuGetLogger, cancellationToken);
-            if (allVersions is null || !allVersions.Any()) continue;
-            packageDictionary.Add(packageId, allVersions);
-            foreach (var version in allVersions)
+            expanded.Add(id);
+            var allVersions = await findPackageByIdResource.GetAllVersionsAsync(id, CacheContext, NuGetLogger, cancellationToken);
+            if (allVersions is null || !allVersions.Any())
             {
-                var di = await GetDependencyInfoAsync(packageId, version, cancellationToken);
-                if (di is null)
-                    continue;
-                var frameworksForVersion = ((await GetDependencyInfoAsync(packageId, version, cancellationToken))?.FrameworkReferenceGroups?.Select(g => g.TargetFramework) ?? Enumerable.Empty<NuGetFramework>())
-                    .DefaultIfEmpty(NuGetFramework.AnyFramework);
-                PackageIdentity package = new(packageId, version);
-                foreach (var framework in frameworksForVersion)
-                {
-                    using var scope = Logger.BeginGetPackageDependenciesScope(packageId, version, framework, this, IsUpstream);
-                    var dependencyIds = (await dependencyInfoResource.ResolvePackage(package, framework, CacheContext, NuGetLogger, cancellationToken))?.Dependencies?.Select(d => d.Id);
-                    if (dependencyIds is null) continue;
-                    foreach (var id in dependencyIds)
-                        await GetPackageDependenciesAsync(id, findPackageByIdResource, dependencyInfoResource, packageDictionary, cancellationToken);
-                }
+                Logger.LogPackageNotFound(id, this, IsUpstream);
+                continue;
             }
-        }
-        return ToPackageIdentities(packageDictionary);
-    }
-
-    private async Task GetPackageDependenciesAsync(string packageId, FindPackageByIdResource findPackageByIdResource, DependencyInfoResource dependencyInfoResource, Dictionary<string, IEnumerable<NuGetVersion>> packageDictionary, CancellationToken cancellationToken)
-    {
-        if (packageDictionary.ContainsKey(packageId)) return;
-        var allVersions = await findPackageByIdResource.GetAllVersionsAsync(packageId, CacheContext, NuGetLogger, cancellationToken);
-        if (allVersions is null)
-            packageDictionary.Add(packageId, Enumerable.Empty<NuGetVersion>());
-        else
-        {
-            packageDictionary.Add(packageId, allVersions);
             foreach (var version in allVersions)
             {
-                var di = await GetDependencyInfoAsync(packageId, version, cancellationToken);
-                if (di is null)
-                    continue;
-                var frameworksForVersion = ((await GetDependencyInfoAsync(packageId, version, cancellationToken))?.FrameworkReferenceGroups?.Select(g => g.TargetFramework) ?? Enumerable.Empty<NuGetFramework>())
+                PackageIdentity package = new(id, version);
+                yield return package;
+                var frameworksForVersion = ((await GetDependencyInfoAsync(id, version, cancellationToken))?.FrameworkReferenceGroups?.Select(g => g.TargetFramework) ?? Enumerable.Empty<NuGetFramework>())
                     .DefaultIfEmpty(NuGetFramework.AnyFramework);
-                PackageIdentity package = new(packageId, version);
                 foreach (var framework in frameworksForVersion)
                 {
-                    using var scope = Logger.BeginGetPackageDependenciesScope(packageId, version, framework, this, IsUpstream);
+                    using var scope = Logger.BeginGetPackageDependenciesScope(id, version, framework, this, IsUpstream);
                     var dependencyIds = (await dependencyInfoResource.ResolvePackage(package, framework, CacheContext, NuGetLogger, cancellationToken))?.Dependencies?.Select(d => d.Id);
-                    if (dependencyIds is null) continue;
-                    foreach (var id in dependencyIds)
-                        await GetPackageDependenciesAsync(id, findPackageByIdResource, dependencyInfoResource, packageDictionary, cancellationToken);
+                    if (dependencyIds is not null)
+                        foreach (var pkgId in dependencyIds)
+                            if (!expanded.Contains(pkgId))
+                                toExpand.TryEnqueue(pkgId);
                 }
             }
         }

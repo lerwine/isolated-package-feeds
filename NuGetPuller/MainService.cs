@@ -2,9 +2,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NuGet.Packaging.Core;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
+using System.Linq;
 using static NuGetPuller.Constants;
 
 namespace NuGetPuller;
@@ -51,9 +53,10 @@ public class MainService : BackgroundService
         }
     }
 
-    private async Task ListLocalPackagesAsync(List<IPackageSearchMetadata> packages, string? exportPath, CancellationToken cancellationToken)
+    private async Task ListLocalPackagesAsync(IEnumerable<IPackageSearchMetadata> packages, string? exportPath, CancellationToken cancellationToken)
     {
-        switch (packages.Count)
+        var pkgArr = packages.ToArray();
+        switch (pkgArr.Length)
         {
             case 0:
                 Console.WriteLine("0 packages in local NuGet source.");
@@ -69,39 +72,40 @@ public class MainService : BackgroundService
                 Console.WriteLine("1 package in local NuGet source:");
                 break;
             default:
-                Console.WriteLine("{0} packages in local NuGet source:", packages.Count);
+                Console.WriteLine("{0} packages in local NuGet source:", pkgArr.Length);
                 break;
         }
         if (exportPath is null)
         {
-            foreach (var p in packages)
+            foreach (var p in pkgArr)
                 Console.WriteLine("{0}: {1}", p.Identity.Id, p.Title);
         }
         else
         {
             using var writer = OpenPackageMetaDataWriterAsync(exportPath);
             await writer.WriteLineAsync('[');
-            foreach (var p in packages.SkipLast(1))
+            foreach (var p in pkgArr.SkipLast(1))
             {
                 await writer.WriteLineAsync($"{p.ToJson()},");
                 Console.WriteLine("{0}: {1}", p.Identity.Id, p.Title);
             }
-            await writer.WriteLineAsync(packages.Last().ToJson());
+            await writer.WriteLineAsync(pkgArr.Last().ToJson());
             await writer.WriteLineAsync(']');
             await writer.FlushAsync();
             writer.Close();
         }
     }
 
-    private async Task ExportLocalPackageMetaDataAsync(List<IPackageSearchMetadata> packages, string exportPath, CancellationToken cancellationToken)
+    private async Task ExportLocalPackageMetaDataAsync(IEnumerable<IPackageSearchMetadata> packages, string exportPath, CancellationToken cancellationToken)
     {
+        var pkgArr = packages.ToArray();
         using var writer = OpenPackageMetaDataWriterAsync(exportPath);
-        if (packages.Count > 0)
+        if (pkgArr.Length > 0)
         {
             await writer.WriteLineAsync('[');
-            foreach (var p in packages.SkipLast(1))
+            foreach (var p in pkgArr.SkipLast(1))
                 await writer.WriteLineAsync($"{p.ToJson()},");
-            await writer.WriteLineAsync(packages.Last().ToJson());
+            await writer.WriteLineAsync(pkgArr.Last().ToJson());
             await writer.WriteLineAsync(']');
         }
         else
@@ -172,14 +176,15 @@ public class MainService : BackgroundService
 
     private async Task UpdateLocalFromRemote(IEnumerable<string> packageIds, LocalClientService localClientService, UpstreamClientService upstreamClientService, CancellationToken stoppingToken)
     {
-        var packagesToUpdate = await upstreamClientService.ExpandPackagesWithDependenciesAsync(packageIds, stoppingToken);
-        if (packagesToUpdate is null || !packagesToUpdate.Any())
+        var asyncEn = upstreamClientService.ExpandPackagesWithDependenciesAsync(packageIds, stoppingToken).GetAsyncEnumerator(stoppingToken);
+        if (!await asyncEn.MoveNextAsync())
             return;
         var tempFile = new FileInfo(Path.GetTempFileName());
         try
         {
-            foreach (var identity in packagesToUpdate)
+            do
             {
+                var identity = asyncEn.Current;
                 if (await localClientService.DoesPackageExistAsync(identity.Id, identity.Version, stoppingToken))
                     continue;
                 using FileStream stream = new(tempFile.FullName, FileMode.Create, FileAccess.Write);
@@ -203,6 +208,7 @@ public class MainService : BackgroundService
                 else
                     _logger.LogEmptyPackageDownload(identity.Id, identity.Version);
             }
+            while (!await asyncEn.MoveNextAsync());
         }
         finally
         {
@@ -221,9 +227,11 @@ public class MainService : BackgroundService
             var upstreamClientService = scope.ServiceProvider.GetRequiredService<UpstreamClientService>();
             var appSettings = _settingsOptions.Value;
             var packageIds = appSettings.Delete?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(NoCaseComparer);
-            HashSet<string> deletedPackages = (packageIds is not null && packageIds.Any()) ?
-                new(await localClientService.DeleteAsync(packageIds, stoppingToken), NoCaseComparer) :
-                new(NoCaseComparer);
+            HashSet<PackageIdentity> deletedPackages = new(PackageIdentityComparer.Default);
+            if (packageIds is not null && packageIds.Any())
+                await foreach (var (package, success) in localClientService.DeleteAsync(packageIds, stoppingToken))
+                    if (success)
+                        deletedPackages.Add(package);
             if ((packageIds = appSettings.Add?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(NoCaseComparer)) is not null && packageIds.Any())
             {
                 Dictionary<string, HashSet<NuGetVersion>> packagesAdded = new(NoCaseComparer);
@@ -231,12 +239,13 @@ public class MainService : BackgroundService
                     await AddToLocalFromRemote(id, packagesAdded, localClientService, upstreamClientService, stoppingToken);
             }
             if (appSettings.ListLocal)
-                await ListLocalPackagesAsync(await localClientService.GetAllPackagesAsync(stoppingToken), appSettings.Validated.ExportLocalMetaDataPath, stoppingToken);
+                await ListLocalPackagesAsync(localClientService.GetAllPackagesAsync(stoppingToken).ToBlockingEnumerable(stoppingToken), appSettings.Validated.ExportLocalMetaDataPath, stoppingToken);
             else if (appSettings.Validated.ExportLocalMetaDataPath is not null)
-                await ExportLocalPackageMetaDataAsync(await localClientService.GetAllPackagesAsync(stoppingToken), appSettings.Validated.ExportLocalMetaDataPath, stoppingToken);
+                await ExportLocalPackageMetaDataAsync(localClientService.GetAllPackagesAsync(stoppingToken).ToBlockingEnumerable(stoppingToken), appSettings.Validated.ExportLocalMetaDataPath, stoppingToken);
             else if (appSettings.UpdateAll)
             {
-                if ((packageIds = (await localClientService.GetAllPackagesAsync(stoppingToken))?.Select(p => p.Identity.Id)) is null || !packageIds.Any())
+                var asyncEn = localClientService.GetAllPackagesAsync(stoppingToken);
+                if ((packageIds = asyncEn.ToBlockingEnumerable(stoppingToken).Select(p => p.Identity.Id)) is null || !packageIds.Any())
                     _logger.LogNoLocalPackagesExist();
                 else
                     await UpdateLocalFromRemote(packageIds, localClientService, upstreamClientService, stoppingToken);
