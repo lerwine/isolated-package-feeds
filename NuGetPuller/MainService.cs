@@ -185,7 +185,7 @@ public class MainService : BackgroundService
 
     private async Task UpdateLocalFromRemote(IEnumerable<string> packageIds, LocalClientService localClientService, UpstreamClientService upstreamClientService, CancellationToken stoppingToken)
     {
-        var asyncEn = upstreamClientService.ExpandPackagesWithDependenciesAsync(packageIds, stoppingToken).GetAsyncEnumerator(stoppingToken);
+        var asyncEn = upstreamClientService.GetAllVersionsWithDependenciesAsync(packageIds, stoppingToken).GetAsyncEnumerator(stoppingToken);
         if (!await asyncEn.MoveNextAsync())
             return;
         var tempFile = new FileInfo(Path.GetTempFileName());
