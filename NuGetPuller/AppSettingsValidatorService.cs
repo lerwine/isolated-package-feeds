@@ -87,7 +87,7 @@ public partial class AppSettingsValidatorService : IValidateOptions<AppSettings>
         }
     }
 
-    private ValidationResult? ValidateExportLocalMetaData(AppSettings options)
+    private ValidationResult? ValidateExportLocalManifest(AppSettings options)
     {
         options.Validated.ExportLocalMetaDataPath = options.ExportLocalManifest;
         if (string.IsNullOrWhiteSpace(options.Validated.ExportLocalMetaDataPath))
@@ -121,6 +121,151 @@ public partial class AppSettingsValidatorService : IValidateOptions<AppSettings>
         catch (ArgumentException error) // Path contains invalid characters or system could not retrieve the absolute path
         {
             return new ValidationResult(_logger.LogInvalidExportLocalMetaData(options.Validated.ExportLocalMetaDataPath, error), Enumerable.Repeat(nameof(AppSettings.ExportLocalManifest), 1));
+        }
+        return null;
+    }
+
+    private ValidationResult? ValidateExportBundle(AppSettings options)
+    {
+        options.Validated.ExportBundlePath = options.ExportBundle;
+        if (string.IsNullOrWhiteSpace(options.Validated.ExportBundlePath))
+        {
+            options.Validated.ExportBundlePath = null;
+            options.Validated.TargetManifestFilePath = string.Empty;
+            return null;
+        }
+        FileInfo fileInfo;
+        try
+        {
+            fileInfo = ResourceLocatorUtil.GetFileInfo(Directory.GetCurrentDirectory(), options.Validated.ExportBundlePath);
+            options.Validated.ExportBundlePath = fileInfo.FullName;
+            if (!fileInfo.Exists && (fileInfo.Directory is null || !fileInfo.Directory.Exists))
+                return new ValidationResult(_logger.LogExportBundleDirectoryNotFound(options.Validated.ExportBundlePath), Enumerable.Repeat(nameof(AppSettings.ExportBundle), 1));
+        }
+        catch (System.Security.SecurityException error) // The caller does not have the required permissions to the path
+        {
+            return new ValidationResult(_logger.LogExportBundlePathAccessDenied(options.Validated.ExportBundlePath, error), Enumerable.Repeat(nameof(AppSettings.ExportBundle), 1));
+        }
+        catch (UriSchemeNotSupportedException error) // Path is a URI, but not an https, http or file.
+        {
+            return new ValidationResult(_logger.LogInvalidExportBundle(options.Validated.ExportBundlePath, error), Enumerable.Repeat(nameof(AppSettings.ExportBundle), 1));
+        }
+        catch (DirectoryNotFoundException error) // Path is a URI, but not an https, http or file.
+        {
+            return new ValidationResult(_logger.LogExportBundleDirectoryNotFound(options.Validated.ExportBundlePath, error), Enumerable.Repeat(nameof(AppSettings.ExportBundle), 1));
+        }
+        catch (PathTooLongException error) // Path, file name, or both exceed the system-defined maximum length
+        {
+            return new ValidationResult(_logger.LogInvalidExportBundle(options.Validated.ExportBundlePath, error), Enumerable.Repeat(nameof(AppSettings.ExportBundle), 1));
+        }
+        catch (ArgumentException error) // Path contains invalid characters or system could not retrieve the absolute path
+        {
+            return new ValidationResult(_logger.LogInvalidExportBundle(options.Validated.ExportBundlePath, error), Enumerable.Repeat(nameof(AppSettings.ExportBundle), 1));
+        }
+        try
+        {
+            if (string.IsNullOrWhiteSpace(options.TargetManifestFile))
+            {
+                options.Validated.TargetManifestFilePath = $"{Path.GetFileNameWithoutExtension(fileInfo.Name)}.json";
+                if (fileInfo.Directory is not null)
+                    options.Validated.TargetManifestFilePath = Path.Combine(fileInfo.DirectoryName!, options.Validated.TargetManifestFilePath);
+                options.Validated.TargetManifestFilePath = new FileInfo(options.Validated.TargetManifestFilePath).FullName;
+            }
+            else
+            {
+                FileInfo f = ResourceLocatorUtil.GetFileInfo(Directory.GetCurrentDirectory(), options.Validated.TargetManifestFilePath);
+                options.Validated.TargetManifestFilePath = f.FullName;
+                if (!f.Exists && (f.Directory is null || !f.Directory.Exists))
+                    return new ValidationResult(_logger.LogTargetManifestFileDirectoryNotFound(options.Validated.TargetManifestFilePath), Enumerable.Repeat(nameof(AppSettings.TargetManifestFile), 1));
+            }
+        }
+        catch (System.Security.SecurityException error) // The caller does not have the required permissions to the path
+        {
+            return new ValidationResult(_logger.LogTargetManifestFilePathAccessDenied(options.Validated.TargetManifestFilePath, error), Enumerable.Repeat(nameof(AppSettings.TargetManifestFile), 1));
+        }
+        catch (UriSchemeNotSupportedException error) // Path is a URI, but not an https, http or file.
+        {
+            return new ValidationResult(_logger.LogInvalidTargetManifestFile(options.Validated.TargetManifestFilePath, error), Enumerable.Repeat(nameof(AppSettings.TargetManifestFile), 1));
+        }
+        catch (DirectoryNotFoundException error) // Path is a URI, but not an https, http or file.
+        {
+            return new ValidationResult(_logger.LogTargetManifestFileDirectoryNotFound(options.Validated.TargetManifestFilePath, error), Enumerable.Repeat(nameof(AppSettings.TargetManifestFile), 1));
+        }
+        catch (PathTooLongException error) // Path, file name, or both exceed the system-defined maximum length
+        {
+            return new ValidationResult(_logger.LogInvalidTargetManifestFile(options.Validated.TargetManifestFilePath, error), Enumerable.Repeat(nameof(AppSettings.TargetManifestFile), 1));
+        }
+        catch (ArgumentException error) // Path contains invalid characters or system could not retrieve the absolute path
+        {
+            return new ValidationResult(_logger.LogInvalidTargetManifestFile(options.Validated.TargetManifestFilePath, error), Enumerable.Repeat(nameof(AppSettings.TargetManifestFile), 1));
+        }
+        if (string.IsNullOrWhiteSpace(options.SaveTargetManifestAs))
+            options.Validated.TargetManifestSaveAsPath = options.Validated.TargetManifestFilePath;
+        else
+            try
+            {
+                FileInfo f = ResourceLocatorUtil.GetFileInfo(Directory.GetCurrentDirectory(), options.Validated.TargetManifestSaveAsPath);
+                options.Validated.TargetManifestSaveAsPath = f.FullName;
+                if (!f.Exists && (f.Directory is null || !f.Directory.Exists))
+                    return new ValidationResult(_logger.LogSaveTargetManifestAsDirectoryNotFound(options.Validated.TargetManifestSaveAsPath), Enumerable.Repeat(nameof(AppSettings.SaveTargetManifestAs), 1));
+            }
+            catch (System.Security.SecurityException error) // The caller does not have the required permissions to the path
+            {
+                return new ValidationResult(_logger.LogSaveTargetManifestAsPathAccessDenied(options.Validated.TargetManifestSaveAsPath, error), Enumerable.Repeat(nameof(AppSettings.SaveTargetManifestAs), 1));
+            }
+            catch (UriSchemeNotSupportedException error) // Path is a URI, but not an https, http or file.
+            {
+                return new ValidationResult(_logger.LogInvalidSaveTargetManifestAs(options.Validated.TargetManifestSaveAsPath, error), Enumerable.Repeat(nameof(AppSettings.SaveTargetManifestAs), 1));
+            }
+            catch (DirectoryNotFoundException error) // Path is a URI, but not an https, http or file.
+            {
+                return new ValidationResult(_logger.LogSaveTargetManifestAsDirectoryNotFound(options.Validated.TargetManifestSaveAsPath, error), Enumerable.Repeat(nameof(AppSettings.SaveTargetManifestAs), 1));
+            }
+            catch (PathTooLongException error) // Path, file name, or both exceed the system-defined maximum length
+            {
+                return new ValidationResult(_logger.LogInvalidSaveTargetManifestAs(options.Validated.TargetManifestSaveAsPath, error), Enumerable.Repeat(nameof(AppSettings.SaveTargetManifestAs), 1));
+            }
+            catch (ArgumentException error) // Path contains invalid characters or system could not retrieve the absolute path
+            {
+                return new ValidationResult(_logger.LogInvalidSaveTargetManifestAs(options.Validated.TargetManifestSaveAsPath, error), Enumerable.Repeat(nameof(AppSettings.SaveTargetManifestAs), 1));
+            }
+        return null;
+    }
+
+    private ValidationResult? ValidateImport(AppSettings options)
+    {
+        options.Validated.ImportPath = options.Import;
+        if (string.IsNullOrWhiteSpace(options.Validated.ImportPath))
+        {
+            options.Validated.ImportPath = null;
+            return null;
+        }
+        try
+        {
+            FileSystemInfo fileSystemInfo = ResourceLocatorUtil.GetFileOrDirectory(Directory.GetCurrentDirectory(), options.Validated.ImportPath);
+            options.Validated.ImportPath = fileSystemInfo.FullName;
+            if (!fileSystemInfo.Exists)
+                return new ValidationResult(_logger.LogImportFileOrDirectoryNotFound(options.Validated.ImportPath), Enumerable.Repeat(nameof(AppSettings.Import), 1));
+        }
+        catch (System.Security.SecurityException error) // The caller does not have the required permissions to the path
+        {
+            return new ValidationResult(_logger.LogImportPathAccessDenied(options.Validated.ImportPath, error), Enumerable.Repeat(nameof(AppSettings.Import), 1));
+        }
+        catch (UriSchemeNotSupportedException error) // Path is a URI, but not an https, http or file.
+        {
+            return new ValidationResult(_logger.LogInvalidImportPath(options.Validated.ImportPath, error), Enumerable.Repeat(nameof(AppSettings.Import), 1));
+        }
+        catch (DirectoryNotFoundException error) // Path is a URI, but not an https, http or file.
+        {
+            return new ValidationResult(_logger.LogImportFileOrDirectoryNotFound(options.Validated.ImportPath, error), Enumerable.Repeat(nameof(AppSettings.Import), 1));
+        }
+        catch (PathTooLongException error) // Path, file name, or both exceed the system-defined maximum length
+        {
+            return new ValidationResult(_logger.LogInvalidImportPath(options.Validated.ImportPath, error), Enumerable.Repeat(nameof(AppSettings.Import), 1));
+        }
+        catch (ArgumentException error) // Path contains invalid characters or system could not retrieve the absolute path
+        {
+            return new ValidationResult(_logger.LogInvalidImportPath(options.Validated.ImportPath, error), Enumerable.Repeat(nameof(AppSettings.Import), 1));
         }
         return null;
     }
@@ -162,7 +307,11 @@ public partial class AppSettingsValidatorService : IValidateOptions<AppSettings>
             validationResults.Add(validationResult);
         if ((validationResult = ValidateLocalRepository(options)) is not null)
             validationResults.Add(validationResult);
-        if ((validationResult = ValidateExportLocalMetaData(options)) is not null)
+        if ((validationResult = ValidateExportLocalManifest(options)) is not null)
+            validationResults.Add(validationResult);
+        if ((validationResult = ValidateExportBundle(options)) is not null)
+            validationResults.Add(validationResult);
+        if ((validationResult = ValidateImport(options)) is not null)
             validationResults.Add(validationResult);
         if ((validationResult = ValidateGlobalPackagesFolder(options)) is not null)
             validationResults.Add(validationResult);

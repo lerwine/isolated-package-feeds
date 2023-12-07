@@ -392,7 +392,7 @@ public static class AppLoggerExtensions
 
     #region InvalidExportLocalMetaData event logger message (0x000a)
 
-    public const int EVENT_ID_InvalidExportLocalMetaData = 0x0010;
+    public const int EVENT_ID_InvalidExportLocalMetaData = 0x000a;
 
     public static readonly EventId InvalidExportLocalMetaData = new(EVENT_ID_InvalidExportLocalMetaData, nameof(InvalidExportLocalMetaData));
 
@@ -407,7 +407,6 @@ public static class AppLoggerExtensions
 
     private static readonly Action<ILogger, string, Exception?> _exportLocalMetaDataDirectoryNotFound = LoggerMessage.Define<string>(LogLevel.Critical, InvalidExportLocalMetaData,
         $"{MESSAGE_ExportLocalMetaDataDirectoryNotFound} ({{Path}}).");
-
 
     private static readonly Action<ILogger, string, Exception?> _exportLocalMetaDataPathTooLong = LoggerMessage.Define<string>(LogLevel.Critical, InvalidExportLocalMetaData,
         $"{MESSAGE_ExportLocalMetaDataPathTooLong} ({{Path}}).");
@@ -941,6 +940,306 @@ public static class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     public static void LogNoLocalPackagesExist(this ILogger logger, Exception? exception = null) => _nolocalPackagesExist(logger, exception);
+
+    #endregion
+
+    #region InvalidExportBundle event logger message (0x0019)
+
+    public const int EVENT_ID_InvalidExportBundle = 0x0019;
+
+    public static readonly EventId InvalidExportBundle = new(EVENT_ID_InvalidExportBundle, nameof(InvalidExportBundle));
+
+    private const string MESSAGE_InvalidExportBundle = "Package metadata export path is invalid";
+
+    private const string MESSAGE_ExportBundleDirectoryNotFound = "Parent subdirectory of package metadata export path not found";
+
+    private const string MESSAGE_ExportBundlePathTooLong = "Package metadata export path is too long";
+
+    private static readonly Action<ILogger, string, Exception?> _invalidExportBundle = LoggerMessage.Define<string>(LogLevel.Critical, InvalidExportBundle,
+        $"{MESSAGE_InvalidExportBundle} ({{Path}}).");
+
+    private static readonly Action<ILogger, string, Exception?> _exportBundleDirectoryNotFound = LoggerMessage.Define<string>(LogLevel.Critical, InvalidExportBundle,
+        $"{MESSAGE_ExportBundleDirectoryNotFound} ({{Path}}).");
+
+    private static readonly Action<ILogger, string, Exception?> _exportBundlePathTooLong = LoggerMessage.Define<string>(LogLevel.Critical, InvalidExportBundle,
+        $"{MESSAGE_ExportBundlePathTooLong} ({{Path}}).");
+
+    /// <summary>
+    /// </summary>
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidExportBundle"/> event with event code 0x0019.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="url">The invalid NuGet repository URL.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    /// <returns>The validation message.</returns>
+    public static string LogInvalidExportBundle(this ILogger logger, string url, Exception? exception = null)
+    {
+        if (exception is PathTooLongException)
+        {
+            _exportBundlePathTooLong(logger, url, exception);
+            return MESSAGE_ExportBundlePathTooLong;
+        }
+        _invalidExportBundle(logger, url, exception);
+        return $"{MESSAGE_InvalidExportBundle}.";
+    }
+
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidExportBundle"/> event with code 0x0019.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="path">The NuGet repository path.</param>
+    /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    /// <returns>The validation message.</returns>
+    public static string LogExportBundleDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
+    {
+        _exportBundleDirectoryNotFound(logger, path, exception);
+        return MESSAGE_ExportBundleDirectoryNotFound;
+    }
+
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="MetaDataExportPathAccessDenied"/> event with code 0x000b.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="path">The NuGet repository path.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    /// <returns>The validation message.</returns>
+    public static string LogExportBundlePathAccessDenied(this ILogger logger, string path, Exception? exception = null)
+    {
+        if (exception is System.Security.SecurityException)
+        {
+            _metaDataExportPathAccessDenied2(logger, path, exception);
+            return MESSAGE_MetaDataExportPathAccessDenied2;
+        }
+        _metaDataExportPathAccessDenied1(logger, path, exception);
+        return MESSAGE_MetaDataExportPathAccessDenied1;
+    }
+
+    #endregion
+
+    #region InvalidTargetManifestFile event logger message (0x001a)
+
+    public const int EVENT_ID_InvalidTargetManifestFile = 0x001a;
+
+    public static readonly EventId InvalidTargetManifestFile = new(EVENT_ID_InvalidTargetManifestFile, nameof(InvalidTargetManifestFile));
+
+    private const string MESSAGE_InvalidTargetManifestFile = "Package metadata export path is invalid";
+
+    private const string MESSAGE_TargetManifestFileDirectoryNotFound = "Parent subdirectory of package metadata export path not found";
+
+    private const string MESSAGE_TargetManifestFilePathTooLong = "Package metadata export path is too long";
+
+    private static readonly Action<ILogger, string, Exception?> _invalidTargetManifestFile = LoggerMessage.Define<string>(LogLevel.Critical, InvalidTargetManifestFile,
+        $"{MESSAGE_InvalidTargetManifestFile} ({{Path}}).");
+
+    private static readonly Action<ILogger, string, Exception?> _targetManifestFileDirectoryNotFound = LoggerMessage.Define<string>(LogLevel.Critical, InvalidTargetManifestFile,
+        $"{MESSAGE_TargetManifestFileDirectoryNotFound} ({{Path}}).");
+
+    private static readonly Action<ILogger, string, Exception?> _targetManifestFilePathTooLong = LoggerMessage.Define<string>(LogLevel.Critical, InvalidTargetManifestFile,
+        $"{MESSAGE_TargetManifestFilePathTooLong} ({{Path}}).");
+
+    /// <summary>
+    /// </summary>
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidTargetManifestFile"/> event with event code 0x001a.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="url">The invalid NuGet repository URL.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    /// <returns>The validation message.</returns>
+    public static string LogInvalidTargetManifestFile(this ILogger logger, string url, Exception? exception = null)
+    {
+        if (exception is PathTooLongException)
+        {
+            _targetManifestFilePathTooLong(logger, url, exception);
+            return MESSAGE_TargetManifestFilePathTooLong;
+        }
+        _invalidTargetManifestFile(logger, url, exception);
+        return $"{MESSAGE_InvalidTargetManifestFile}.";
+    }
+
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidTargetManifestFile"/> event with code 0x001a.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="path">The NuGet repository path.</param>
+    /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    /// <returns>The validation message.</returns>
+    public static string LogTargetManifestFileDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
+    {
+        _targetManifestFileDirectoryNotFound(logger, path, exception);
+        return MESSAGE_TargetManifestFileDirectoryNotFound;
+    }
+
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="MetaDataExportPathAccessDenied"/> event with code 0x000b.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="path">The NuGet repository path.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    /// <returns>The validation message.</returns>
+    public static string LogTargetManifestFilePathAccessDenied(this ILogger logger, string path, Exception? exception = null)
+    {
+        if (exception is System.Security.SecurityException)
+        {
+            _metaDataExportPathAccessDenied2(logger, path, exception);
+            return MESSAGE_MetaDataExportPathAccessDenied2;
+        }
+        _metaDataExportPathAccessDenied1(logger, path, exception);
+        return MESSAGE_MetaDataExportPathAccessDenied1;
+    }
+
+    #endregion
+
+    #region InvalidSaveTargetManifestAs event logger message (0x001a)
+
+    public const int EVENT_ID_InvalidSaveTargetManifestAs = 0x001a;
+
+    public static readonly EventId InvalidSaveTargetManifestAs = new(EVENT_ID_InvalidSaveTargetManifestAs, nameof(InvalidSaveTargetManifestAs));
+
+    private const string MESSAGE_InvalidSaveTargetManifestAs = "Package metadata export path is invalid";
+
+    private const string MESSAGE_SaveTargetManifestAsDirectoryNotFound = "Parent subdirectory of package metadata export path not found";
+
+    private const string MESSAGE_SaveTargetManifestAsPathTooLong = "Package metadata export path is too long";
+
+    private static readonly Action<ILogger, string, Exception?> _invalidSaveTargetManifestAs = LoggerMessage.Define<string>(LogLevel.Critical, InvalidSaveTargetManifestAs,
+        $"{MESSAGE_InvalidSaveTargetManifestAs} ({{Path}}).");
+
+    private static readonly Action<ILogger, string, Exception?> _saveTargetManifestAsDirectoryNotFound = LoggerMessage.Define<string>(LogLevel.Critical, InvalidSaveTargetManifestAs,
+        $"{MESSAGE_SaveTargetManifestAsDirectoryNotFound} ({{Path}}).");
+
+    private static readonly Action<ILogger, string, Exception?> _saveTargetManifestAsPathTooLong = LoggerMessage.Define<string>(LogLevel.Critical, InvalidSaveTargetManifestAs,
+        $"{MESSAGE_SaveTargetManifestAsPathTooLong} ({{Path}}).");
+
+    /// <summary>
+    /// </summary>
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidSaveTargetManifestAs"/> event with event code 0x001a.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="url">The invalid NuGet repository URL.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    /// <returns>The validation message.</returns>
+    public static string LogInvalidSaveTargetManifestAs(this ILogger logger, string url, Exception? exception = null)
+    {
+        if (exception is PathTooLongException)
+        {
+            _saveTargetManifestAsPathTooLong(logger, url, exception);
+            return MESSAGE_SaveTargetManifestAsPathTooLong;
+        }
+        _invalidSaveTargetManifestAs(logger, url, exception);
+        return $"{MESSAGE_InvalidSaveTargetManifestAs}.";
+    }
+
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidSaveTargetManifestAs"/> event with code 0x001a.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="path">The NuGet repository path.</param>
+    /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    /// <returns>The validation message.</returns>
+    public static string LogSaveTargetManifestAsDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
+    {
+        _saveTargetManifestAsDirectoryNotFound(logger, path, exception);
+        return MESSAGE_SaveTargetManifestAsDirectoryNotFound;
+    }
+
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="MetaDataExportPathAccessDenied"/> event with code 0x000b.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="path">The NuGet repository path.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    /// <returns>The validation message.</returns>
+    public static string LogSaveTargetManifestAsPathAccessDenied(this ILogger logger, string path, Exception? exception = null)
+    {
+        if (exception is System.Security.SecurityException)
+        {
+            _metaDataExportPathAccessDenied2(logger, path, exception);
+            return MESSAGE_MetaDataExportPathAccessDenied2;
+        }
+        _metaDataExportPathAccessDenied1(logger, path, exception);
+        return MESSAGE_MetaDataExportPathAccessDenied1;
+    }
+
+    #endregion
+
+    #region InvalidImport event logger message (0x001a)
+
+    public const int EVENT_ID_InvalidImport = 0x001a;
+
+    public static readonly EventId InvalidImport = new(EVENT_ID_InvalidImport, nameof(InvalidImport));
+
+    private const string MESSAGE_InvalidImport = "Package metadata export path is invalid";
+
+    private const string MESSAGE_ImportDirectoryNotFound = "Parent subdirectory of package metadata export path not found";
+
+    private const string MESSAGE_ImportPathTooLong = "Package metadata export path is too long";
+
+    private static readonly Action<ILogger, string, Exception?> _invalidImport = LoggerMessage.Define<string>(LogLevel.Critical, InvalidImport,
+        $"{MESSAGE_InvalidImport} ({{Path}}).");
+
+    private static readonly Action<ILogger, string, Exception?> _importDirectoryNotFound = LoggerMessage.Define<string>(LogLevel.Critical, InvalidImport,
+        $"{MESSAGE_ImportDirectoryNotFound} ({{Path}}).");
+
+    private static readonly Action<ILogger, string, Exception?> _importPathTooLong = LoggerMessage.Define<string>(LogLevel.Critical, InvalidImport,
+        $"{MESSAGE_ImportPathTooLong} ({{Path}}).");
+
+    /// <summary>
+    /// </summary>
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidImport"/> event with event code 0x001a.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="url">The invalid NuGet repository URL.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    /// <returns>The validation message.</returns>
+    public static string LogInvalidImportPath(this ILogger logger, string url, Exception? exception = null)
+    {
+        if (exception is PathTooLongException)
+        {
+            _importPathTooLong(logger, url, exception);
+            return MESSAGE_ImportPathTooLong;
+        }
+        _invalidImport(logger, url, exception);
+        return $"{MESSAGE_InvalidImport}.";
+    }
+
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidImport"/> event with code 0x001a.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="path">The NuGet repository path.</param>
+    /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    /// <returns>The validation message.</returns>
+    public static string LogImportFileOrDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
+    {
+        _importDirectoryNotFound(logger, path, exception);
+        return MESSAGE_ImportDirectoryNotFound;
+    }
+
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="MetaDataExportPathAccessDenied"/> event with code 0x000b.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="path">The NuGet repository path.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    /// <returns>The validation message.</returns>
+    public static string LogImportPathAccessDenied(this ILogger logger, string path, Exception? exception = null)
+    {
+        if (exception is System.Security.SecurityException)
+        {
+            _metaDataExportPathAccessDenied2(logger, path, exception);
+            return MESSAGE_MetaDataExportPathAccessDenied2;
+        }
+        _metaDataExportPathAccessDenied1(logger, path, exception);
+        return MESSAGE_MetaDataExportPathAccessDenied1;
+    }
 
     #endregion
 
