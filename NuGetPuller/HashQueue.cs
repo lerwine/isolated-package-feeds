@@ -115,7 +115,7 @@ public class HashQueue<T> : IEnumerable<T>, System.Collections.IEnumerable, IRea
             if (item is null)
                 while (count-- > 0)
                 {
-                    if (_backingArray[index] == null)
+                    if (_backingArray[index] is null)
                         return false;
                     index = (index + 1) % _backingArray.Length;
                 }
@@ -271,7 +271,7 @@ public class HashQueue<T> : IEnumerable<T>, System.Collections.IEnumerable, IRea
             if (item is null)
                 while (count-- > 0)
                 {
-                    if (_backingArray[index] == null)
+                    if (_backingArray[index] is null)
                         return true;
                     index = (index + 1) % _backingArray.Length;
                 }
