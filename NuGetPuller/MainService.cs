@@ -64,7 +64,7 @@ public class MainService : BackgroundService
                 {
                     using var writer = OpenPackageMetaDataWriterAsync(exportPath);
                     await writer.WriteLineAsync("[]");
-                    await writer.FlushAsync();
+                    await writer.FlushAsync(cancellationToken);
                     writer.Close();
                 }
                 return;
@@ -91,7 +91,7 @@ public class MainService : BackgroundService
             }
             await writer.WriteLineAsync(pkgArr.Last().ToJson());
             await writer.WriteLineAsync(']');
-            await writer.FlushAsync();
+            await writer.FlushAsync(cancellationToken);
             writer.Close();
         }
     }

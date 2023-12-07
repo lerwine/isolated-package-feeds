@@ -98,7 +98,7 @@ public sealed class TempStagingFolder : IDisposable
             if (writeContentAsync is not null)
             {
                 await writeContentAsync(stream, cancellationToken);
-                await stream.FlushAsync();
+                await stream.FlushAsync(cancellationToken);
             }
         }
         result.Refresh();
