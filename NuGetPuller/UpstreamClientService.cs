@@ -17,6 +17,7 @@ public sealed class UpstreamClientService(IOptions<AppSettings> options, ILogger
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.7.x/src/NuGet.Core/NuGet.Protocol/Resources/DependencyInfoResourceV3.cs#L142"/>
     public async Task<IEnumerable<RemoteSourceDependencyInfo>> ResolvePackages(string packageId, CancellationToken cancellationToken)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
         using var scope = await GeDependencyInfoResourceScopeAsync(() => Logger.BeginResolvePackagesScope(packageId, this, IsUpstream), cancellationToken);
         return await scope.Context.ResolvePackages(packageId, CacheContext, NuGetLogger, cancellationToken);
     }

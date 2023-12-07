@@ -76,7 +76,8 @@ public sealed class LocalClientService(IOptions<AppSettings> options, ILogger<Up
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.8.x/src/NuGet.Core/NuGet.Protocol/Resources/PackageUpdateResource.cs#L157"/>
     public async IAsyncEnumerable<(PackageIdentity Package, bool Success)> DeleteAsync(IEnumerable<string> packageIds, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        if (packageIds is null || !(packageIds = packageIds.Select(i => i?.Trim()!).Where(i => !string.IsNullOrEmpty(i))).Any())
+        ArgumentNullException.ThrowIfNull(packageIds);
+        if (!(packageIds = packageIds.Select(i => i?.Trim()!).Where(i => !string.IsNullOrEmpty(i))).Any())
             yield break;
         var findPackageById = await GetFindPackageByIdResourceAsync(cancellationToken);
         var packageUpdate = await GetPackageUpdateResourceAsync(cancellationToken);
