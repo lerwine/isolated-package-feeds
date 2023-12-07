@@ -2,7 +2,6 @@ namespace NuGetPuller;
 
 public sealed class TempStagingFolder : IDisposable
 {
-    
     private DirectoryInfo _directory;
 
     public DirectoryInfo Directory => _directory ?? throw new ObjectDisposedException(nameof(TempStagingFolder));
