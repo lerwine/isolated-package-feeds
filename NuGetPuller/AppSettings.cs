@@ -5,7 +5,7 @@ using static NuGetPuller.Constants;
 
 namespace NuGetPuller;
 
-public class AppSettings
+public partial class AppSettings
 {
     /// <summary>
     /// If true, then all existing packages in the local NuGet repository should be checked and updated to their latest versions.
@@ -14,18 +14,24 @@ public class AppSettings
     public bool UpdateAll { get; set; }
 
     /// <summary>
-    /// Gets an optional comma-separated list of package IDs for packages in the local repository that should be checked and updated to their latest versions.
+    /// Gets a comma-separated list of package IDs for packages in the local repository that should be checked and updated to their latest versions.
     /// </summary>
     /// <remarks>If a package is referenced in this option as well as the <c>-d</c> (<see cref="COMMAND_LINE_SWITCH_d"/>) command line switch, it will result in a warning stating that the package was not found in the local repository.
     /// <para>This is mapped from the <c>-u</c> (<see cref="COMMAND_LINE_SWITCH_u"/>) command line switch.</para></remarks>
     public string? Update { get; set; }
 
     /// <summary>
-    /// Gets an optional comma-separated list of package IDs for packages that should be downloaded from the upstream repository and added to the local repository.
+    /// Gets a comma-separated list of package IDs for packages that should be downloaded from the upstream repository and added to the local repository.
     /// </summary>
     /// <remarks>Packages that are referenced in this option as well as the <c>-d</c> (<see cref="COMMAND_LINE_SWITCH_d"/>) command line switch, will effectively be deleted and then re-added.
     /// <para>This is mapped from the <c>-a</c> (<see cref="COMMAND_LINE_SWITCH_a"/>) command line switch.</para></remarks>
     public string? Add { get; set; }
+
+    /// <summary>
+    /// Gets the path to a <c>.nupkg</c> file to import or the path to a subdirectory containing <c>.nupkg</c> files to import.
+    /// </summary>
+    /// <para>This is mapped from the <c>-i</c> (<see cref="COMMAND_LINE_SWITCH_i"/>) command line switch.</para></remarks>
+    public string? Import { get; set; }
 
     /// <summary>
     /// Comma-separated list of package IDs for packages to be deleted from the local reository.
@@ -41,12 +47,33 @@ public class AppSettings
     public bool ListLocal { get; set; }
 
     /// <summary>
-    /// Gets the value of the command line switch for exporting the metadata for all packages in the local repository. This refers to a relative or absolute file path.
+    /// Gets the path of the package transfer bundle to create.
+    /// </summary>
+    /// <remarks>This is mapped from the <c>-b</c> (<see cref="COMMAND_LINE_SWITCH_b"/>) command line switch.</remarks>
+    public string? ExportBundle { get; set; }
+
+    /// <summary>
+    /// Gets the path of the manifest file for the target NuGet feed that <see cref="ExportBundle"/> is intended for.
+    /// </summary>
+    /// <remarks>If this refers to a file that doesn't exist, then a new file will be created.
+    /// <para>If this is not specified, then this will default to a file at the same location and base name as <see cref="ExportBundle"/>, but with a <c>.json</c> extension.</para>
+    /// <para>This is mapped from the <c>-t</c> (<see cref="COMMAND_LINE_SWITCH_t"/>) command line switch.</para></remarks>
+    public string? TargetManifestFile { get; set; }
+
+    /// <summary>
+    /// Gets the path of the new manifest file for the target NuGet feed that includes the packages bundled in <see cref="TargetManifestFile"/>.
+    /// </summary>
+    /// <remarks>If this option is not specified, then <see cref="TargetManifestFile"/> will be overwritten to include the bundled package information.
+    /// <para>This is mapped from the <c>--save-target-manifest-as</c> (<see cref="COMMAND_LINE_SWITCH_save_2D_target_2D_manifest_2D_as"/>) command line switch.</para></remarks>
+    public string? SaveTargetManifestAs { get; set; }
+
+    /// <summary>
+    /// Gets the path to export the metadata for all packages in the local repository. This refers to a relative or absolute file path.
     /// </summary>
     /// <remarks>The package listing is exported as a JSON array. If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Directory.GetCurrentDirectory"/>).
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
-    /// <para>This is mapped from the <c>--export-local-metadata</c> (<see cref="COMMAND_LINE_SWITCH_export_2D_local_2D_metadata"/>) command line switch.</para></remarks>
-    public string? ExportLocalMetaData { get; set; }
+    /// <para>This is mapped from the <c>--export-local-manifest</c> (<see cref="COMMAND_LINE_SWITCH_export_2D_local_2D_manifest"/>) command line switch.</para></remarks>
+    public string? ExportLocalManifest { get; set; }
 
     /// <summary>
     /// Specifies the remote endpoint URL for the V3 NGet API or a subdirectory path that contains the upstream NuGet repository.
@@ -118,7 +145,11 @@ public class AppSettings
     {
         { COMMAND_LINE_SWITCH_a, $"{nameof(NuGetPuller)}:{nameof(Add)}" },
         { COMMAND_LINE_SWITCH_d, $"{nameof(NuGetPuller)}:{nameof(Delete)}" },
-        { COMMAND_LINE_SWITCH_export_2D_local_2D_metadata, $"{nameof(NuGetPuller)}:{nameof(ExportLocalMetaData)}" },
+        { COMMAND_LINE_SWITCH_i, $"{nameof(NuGetPuller)}:{nameof(Import)}" },
+        { COMMAND_LINE_SWITCH_b, $"{nameof(NuGetPuller)}:{nameof(ExportBundle)}" },
+        { COMMAND_LINE_SWITCH_t, $"{nameof(NuGetPuller)}:{nameof(TargetManifestFile)}" },
+        { COMMAND_LINE_SWITCH_save_2D_target_2D_manifest_2D_as, $"{nameof(NuGetPuller)}:{nameof(SaveTargetManifestAs)}" },
+        { COMMAND_LINE_SWITCH_export_2D_local_2D_manifest, $"{nameof(NuGetPuller)}:{nameof(ExportLocalManifest)}" },
         { COMMAND_LINE_SWITCH_local_2D_repository, $"{nameof(NuGetPuller)}:{nameof(OverrideLocalRepository)}" },
         { COMMAND_LINE_SWITCH_upstream_2D_service_2D_index, $"{nameof(NuGetPuller)}:{nameof(OverrideLocalRepository)}" },
         { COMMAND_LINE_SWITCH_global_2D_packages_2D_folder, $"{nameof(NuGetPuller)}:{nameof(OverrideGlobalPackagesFolder)}" }
@@ -130,37 +161,4 @@ public class AppSettings
     }
 
     internal ValidatedAppSettings Validated { get; } = new();
-
-    internal class ValidatedAppSettings
-    {
-        /// <summary>
-        /// Gets the URI for the upstream service index or full local path to the upstream repository subdirectory.
-        /// </summary>
-        /// <value>The validated value of <see cref="OverrideUpstreamServiceIndex"/> or <see cref="UpstreamServiceIndex"/>.</value>
-        internal string UpstreamServiceLocation { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Gets the upstream service index or path for upstream repository subdirectory as an absolute URL.
-        /// </summary>
-        /// <value>The validated absolute URL of <see cref="OverrideUpstreamServiceIndex"/> or <see cref="UpstreamServiceIndex"/>.</value>
-        internal Uri UpstreamServiceUri { get; set; } = null!;
-
-        /// <summary>
-        /// Gets the full local path to the local repository subdirectory.
-        /// </summary>
-        /// <value>The validated value of <see cref="OverrideLocalRepository"/> or <see cref="LocalRepository"/>.</value>
-        internal string LocalRepositoryPath { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Gets the optional full local path of the local repository metadata export file.
-        /// </summary>
-        /// <value>The validated value of <see cref="ExportLocalMetaData"/>.</value>
-        internal string? ExportLocalMetaDataPath { get; set; }
-
-        /// <summary>
-        /// Gets the full local path to the NuGet global packages folder.
-        /// </summary>
-        /// <value>The validated value of <see cref="OverrideGlobalPackagesFolder"/> or <see cref="GlobalPackagesFolder"/>.</value>
-        internal string GlobalPackagesFolderPath { get; set; } = string.Empty;
-    }
 }

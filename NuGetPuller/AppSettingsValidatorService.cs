@@ -89,7 +89,7 @@ public partial class AppSettingsValidatorService : IValidateOptions<AppSettings>
 
     private ValidationResult? ValidateExportLocalMetaData(AppSettings options)
     {
-        options.Validated.ExportLocalMetaDataPath = options.ExportLocalMetaData;
+        options.Validated.ExportLocalMetaDataPath = options.ExportLocalManifest;
         if (string.IsNullOrWhiteSpace(options.Validated.ExportLocalMetaDataPath))
         {
             options.Validated.ExportLocalMetaDataPath = null;
@@ -100,27 +100,27 @@ public partial class AppSettingsValidatorService : IValidateOptions<AppSettings>
             FileInfo fileInfo = ResourceLocatorUtil.GetFileInfo(Directory.GetCurrentDirectory(), options.Validated.ExportLocalMetaDataPath);
             options.Validated.ExportLocalMetaDataPath = fileInfo.FullName;
             if (!fileInfo.Exists && (fileInfo.Directory is null || !fileInfo.Directory.Exists))
-                return new ValidationResult(_logger.LogExportLocalMetaDataDirectoryNotFound(options.Validated.ExportLocalMetaDataPath), Enumerable.Repeat(nameof(AppSettings.ExportLocalMetaData), 1));
+                return new ValidationResult(_logger.LogExportLocalMetaDataDirectoryNotFound(options.Validated.ExportLocalMetaDataPath), Enumerable.Repeat(nameof(AppSettings.ExportLocalManifest), 1));
         }
         catch (System.Security.SecurityException error) // The caller does not have the required permissions to the path
         {
-            return new ValidationResult(_logger.LogMetaDataExportPathAccessDenied(options.Validated.ExportLocalMetaDataPath, error), Enumerable.Repeat(nameof(AppSettings.ExportLocalMetaData), 1));
+            return new ValidationResult(_logger.LogMetaDataExportPathAccessDenied(options.Validated.ExportLocalMetaDataPath, error), Enumerable.Repeat(nameof(AppSettings.ExportLocalManifest), 1));
         }
         catch (UriSchemeNotSupportedException error) // Path is a URI, but not an https, http or file.
         {
-            return new ValidationResult(_logger.LogInvalidExportLocalMetaData(options.Validated.ExportLocalMetaDataPath, error), Enumerable.Repeat(nameof(AppSettings.ExportLocalMetaData), 1));
+            return new ValidationResult(_logger.LogInvalidExportLocalMetaData(options.Validated.ExportLocalMetaDataPath, error), Enumerable.Repeat(nameof(AppSettings.ExportLocalManifest), 1));
         }
         catch (DirectoryNotFoundException error) // Path is a URI, but not an https, http or file.
         {
-            return new ValidationResult(_logger.LogExportLocalMetaDataDirectoryNotFound(options.Validated.ExportLocalMetaDataPath, error), Enumerable.Repeat(nameof(AppSettings.ExportLocalMetaData), 1));
+            return new ValidationResult(_logger.LogExportLocalMetaDataDirectoryNotFound(options.Validated.ExportLocalMetaDataPath, error), Enumerable.Repeat(nameof(AppSettings.ExportLocalManifest), 1));
         }
         catch (PathTooLongException error) // Path, file name, or both exceed the system-defined maximum length
         {
-            return new ValidationResult(_logger.LogInvalidExportLocalMetaData(options.Validated.ExportLocalMetaDataPath, error), Enumerable.Repeat(nameof(AppSettings.ExportLocalMetaData), 1));
+            return new ValidationResult(_logger.LogInvalidExportLocalMetaData(options.Validated.ExportLocalMetaDataPath, error), Enumerable.Repeat(nameof(AppSettings.ExportLocalManifest), 1));
         }
         catch (ArgumentException error) // Path contains invalid characters or system could not retrieve the absolute path
         {
-            return new ValidationResult(_logger.LogInvalidExportLocalMetaData(options.Validated.ExportLocalMetaDataPath, error), Enumerable.Repeat(nameof(AppSettings.ExportLocalMetaData), 1));
+            return new ValidationResult(_logger.LogInvalidExportLocalMetaData(options.Validated.ExportLocalMetaDataPath, error), Enumerable.Repeat(nameof(AppSettings.ExportLocalManifest), 1));
         }
         return null;
     }

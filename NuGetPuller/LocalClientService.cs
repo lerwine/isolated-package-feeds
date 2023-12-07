@@ -9,7 +9,8 @@ using static NuGetPuller.Constants;
 
 namespace NuGetPuller;
 
-public sealed class LocalClientService(IOptions<AppSettings> options, ILogger<UpstreamClientService> logger) : ClientService(Repository.Factory.GetCoreV3(options.Value.Validated.LocalRepositoryPath), options, logger, false)
+public sealed class LocalClientService(IOptions<AppSettings> options, ILogger<UpstreamClientService> logger) :
+    ClientService(Repository.Factory.GetCoreV3(options.Value.Validated.LocalRepositoryPath), options, logger, false)
 {
     private readonly object _syncRoot = new();
     private Task<PackageUpdateResource>? _getPackageUpdateResourceAsync;

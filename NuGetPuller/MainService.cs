@@ -95,6 +95,16 @@ public class MainService : BackgroundService
         }
     }
 
+    private async Task ImportAsync(string path, LocalClientService localClientService, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+    
+    private async Task ExportBundleAsync(string bundlePath, string targetManifestInput, string targetManifestOutput, LocalClientService localClientService, CancellationToken cancellationToken)
+    {
+
+    }
+
     private async Task ExportLocalPackageMetaDataAsync(IEnumerable<IPackageSearchMetadata> packages, string exportPath, CancellationToken cancellationToken)
     {
         var pkgArr = packages.ToArray();
@@ -103,13 +113,13 @@ public class MainService : BackgroundService
         {
             await writer.WriteLineAsync('[');
             foreach (var p in pkgArr.SkipLast(1))
-                await writer.WriteLineAsync($"{p.ToJson()},");
-            await writer.WriteLineAsync(pkgArr.Last().ToJson());
+                await writer.WriteLineAsync($"  {p.ToJson()},");
+            await writer.WriteLineAsync($"  {pkgArr.Last().ToJson()}");
             await writer.WriteLineAsync(']');
         }
         else
             await writer.WriteLineAsync("[]");
-        await writer.FlushAsync();
+        await writer.FlushAsync(cancellationToken);
         writer.Close();
     }
 
@@ -237,11 +247,9 @@ public class MainService : BackgroundService
                 foreach (string id in packageIds)
                     await AddToLocalFromRemote(id, packagesAdded, localClientService, upstreamClientService, stoppingToken);
             }
-            if (appSettings.ListLocal)
-                await ListLocalPackagesAsync(localClientService.GetAllPackagesAsync(stoppingToken).ToBlockingEnumerable(stoppingToken), appSettings.Validated.ExportLocalMetaDataPath, stoppingToken);
-            else if (appSettings.Validated.ExportLocalMetaDataPath is not null)
-                await ExportLocalPackageMetaDataAsync(localClientService.GetAllPackagesAsync(stoppingToken).ToBlockingEnumerable(stoppingToken), appSettings.Validated.ExportLocalMetaDataPath, stoppingToken);
-            else if (appSettings.UpdateAll)
+            if (appSettings.Validated.ImportPath is not null)
+                await ImportAsync(appSettings.Validated.ImportPath, localClientService, stoppingToken);
+            if (appSettings.UpdateAll)
             {
                 var asyncEn = localClientService.GetAllPackagesAsync(stoppingToken);
                 if ((packageIds = asyncEn.ToBlockingEnumerable(stoppingToken).Select(p => p.Identity.Id)) is null || !packageIds.Any())
@@ -251,6 +259,12 @@ public class MainService : BackgroundService
             }
             else if ((packageIds = appSettings.Update?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(NoCaseComparer)) is not null && packageIds.Any())
                 await UpdateLocalFromRemote(packageIds, localClientService, upstreamClientService, stoppingToken);
+            if (appSettings.ListLocal)
+                await ListLocalPackagesAsync(localClientService.GetAllPackagesAsync(stoppingToken).ToBlockingEnumerable(stoppingToken), appSettings.Validated.ExportLocalMetaDataPath, stoppingToken);
+            if (appSettings.Validated.ExportLocalMetaDataPath is not null)
+                await ExportLocalPackageMetaDataAsync(localClientService.GetAllPackagesAsync(stoppingToken).ToBlockingEnumerable(stoppingToken), appSettings.Validated.ExportLocalMetaDataPath, stoppingToken);
+            if (appSettings.Validated.ExportBundlePath is not null)
+                await ExportBundleAsync(appSettings.Validated.ExportBundlePath, appSettings.Validated.TargetManifestFilePath, appSettings.Validated.TargetManifestSaveAsPath, localClientService, stoppingToken);
         }
         catch (OperationCanceledException) { throw; }
         finally
