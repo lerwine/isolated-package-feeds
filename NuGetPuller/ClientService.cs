@@ -103,7 +103,7 @@ public abstract class ClientService : IDisposable
     public async Task<IEnumerable<IPackageSearchMetadata>> GetMetadataAsync(string packageId, bool includePrerelease, bool includeUnlisted, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
-        using var scope = await GetPackageMetadataResourceScopeAsync(() => Logger.BeginGetMetadataScope(packageId, includePrerelease, includeUnlisted, this, IsUpstream), cancellationToken);
+        using var scope = await GetPackageMetadataResourceScopeAsync(() => Logger.BeginGetMetadataScope(packageId, includePrerelease, includeUnlisted, this), cancellationToken);
         return await scope.Context.GetMetadataAsync(packageId.ToLower(), includePrerelease, includeUnlisted, CacheContext, NuGetLogger, cancellationToken);
     }
 
@@ -121,7 +121,7 @@ public abstract class ClientService : IDisposable
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
         ArgumentNullException.ThrowIfNull(version);
-        using var scope = await GetPackageMetadataResourceScopeAsync(() => Logger.BeginGetMetadataScope(packageId, version, this, IsUpstream), cancellationToken);
+        using var scope = await GetPackageMetadataResourceScopeAsync(() => Logger.BeginGetMetadataScope(packageId, version, this), cancellationToken);
         return await scope.Context.GetMetadataAsync(new PackageIdentity(packageId.ToLower(), version), CacheContext, NuGetLogger, cancellationToken);
     }
 
@@ -155,7 +155,7 @@ public abstract class ClientService : IDisposable
     public async Task<IEnumerable<NuGetVersion>> GetAllVersionsAsync(string packageId, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
-        using var scope = await GetFindPackageByIdResourceScopeAsync(() => Logger.BeginGetAllVersionsScope(packageId, this, IsUpstream), cancellationToken);
+        using var scope = await GetFindPackageByIdResourceScopeAsync(() => Logger.BeginGetAllVersionsScope(packageId, this), cancellationToken);
         return await scope.Context.GetAllVersionsAsync(packageId.ToLower(), CacheContext, NuGetLogger, cancellationToken);
     }
 
@@ -175,7 +175,7 @@ public abstract class ClientService : IDisposable
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
         ArgumentNullException.ThrowIfNull(version);
-        using var scope = await GetFindPackageByIdResourceScopeAsync(() => Logger.BeginGetDependencyInfoScope(packageId, version, this, IsUpstream), cancellationToken);
+        using var scope = await GetFindPackageByIdResourceScopeAsync(() => Logger.BeginGetDependencyInfoScope(packageId, version, this), cancellationToken);
         return await scope.Context.GetDependencyInfoAsync(packageId.ToLower(), version, CacheContext, NuGetLogger, cancellationToken);
     }
 
@@ -195,7 +195,7 @@ public abstract class ClientService : IDisposable
         ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
         ArgumentNullException.ThrowIfNull(version);
         ArgumentNullException.ThrowIfNull(destination);
-        using var scope = await GetFindPackageByIdResourceScopeAsync(() => Logger.BeginDownloadNupkgScope(packageId, version, this, IsUpstream), cancellationToken);
+        using var scope = await GetFindPackageByIdResourceScopeAsync(() => Logger.BeginDownloadNupkgScope(packageId, version, this), cancellationToken);
         await scope.Context.CopyNupkgToStreamAsync(packageId, version, destination, CacheContext, NuGetLogger, cancellationToken);
     }
 
@@ -216,7 +216,7 @@ public abstract class ClientService : IDisposable
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
         ArgumentNullException.ThrowIfNull(version);
-        using var scope = await GetFindPackageByIdResourceScopeAsync(() => Logger.BeginDoesPackageExistScope(packageId, version, this, IsUpstream), cancellationToken);
+        using var scope = await GetFindPackageByIdResourceScopeAsync(() => Logger.BeginDoesPackageExistScope(packageId, version, this), cancellationToken);
         return await scope.Context.DoesPackageExistAsync(packageId.ToLower(), version, CacheContext, NuGetLogger, cancellationToken);
     }
 
@@ -249,7 +249,7 @@ public abstract class ClientService : IDisposable
         ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
         ArgumentNullException.ThrowIfNull(version);
         ArgumentNullException.ThrowIfNull(framework);
-        using var scope = await GeDependencyInfoResourceScopeAsync(() => Logger.BeginResolvePackageScope(packageId, version, framework, this, IsUpstream), cancellationToken);
+        using var scope = await GeDependencyInfoResourceScopeAsync(() => Logger.BeginResolvePackageScope(packageId, version, framework, this), cancellationToken);
         return await scope.Context.ResolvePackage(new(packageId, version), framework, CacheContext, NuGetLogger, cancellationToken);
     }
 
@@ -266,7 +266,7 @@ public abstract class ClientService : IDisposable
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
         ArgumentNullException.ThrowIfNull(framework);
-        using var scope = await GeDependencyInfoResourceScopeAsync(() => Logger.BeginResolvePackagesScope(packageId, framework, this, IsUpstream), cancellationToken);
+        using var scope = await GeDependencyInfoResourceScopeAsync(() => Logger.BeginResolvePackagesScope(packageId, framework, this), cancellationToken);
         return await scope.Context.ResolvePackages(packageId, framework, CacheContext, NuGetLogger, cancellationToken);
     }
 
@@ -291,7 +291,7 @@ public abstract class ClientService : IDisposable
         var dependencyInfo = await dependencyInfoResource.ResolvePackage(package, framework, CacheContext, NuGetLogger, cancellationToken);
         if (dependencyInfo is null)
         {
-            Logger.LogPackageNotFound(packageId, this, IsUpstream);
+            Logger.LogPackageNotFound(packageId, this);
             yield break;
         }
         if (dependencyInfo.Dependencies is null)
@@ -326,7 +326,7 @@ public abstract class ClientService : IDisposable
             var allVersions = await findPackageByIdResource.GetAllVersionsAsync(id, CacheContext, NuGetLogger, cancellationToken);
             if (allVersions is null || !allVersions.Any())
             {
-                Logger.LogPackageNotFound(id, this, IsUpstream);
+                Logger.LogPackageNotFound(id, this);
                 continue;
             }
             foreach (var version in allVersions)
@@ -337,7 +337,7 @@ public abstract class ClientService : IDisposable
                     .DefaultIfEmpty(NuGetFramework.AnyFramework);
                 foreach (var framework in frameworksForVersion)
                 {
-                    using var scope = Logger.BeginGetPackageDependenciesScope(id, version, framework, this, IsUpstream);
+                    using var scope = Logger.BeginGetPackageDependenciesScope(id, version, framework, this);
                     var dependencyIds = (await dependencyInfoResource.ResolvePackage(package, framework, CacheContext, NuGetLogger, cancellationToken))?.Dependencies?.Select(d => d.Id);
                     if (dependencyIds is not null)
                         foreach (var pkgId in dependencyIds)

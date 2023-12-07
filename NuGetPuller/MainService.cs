@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NuGet.Packaging;
 using NuGet.Packaging.Core;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
@@ -95,15 +96,15 @@ public class MainService : BackgroundService
         }
     }
 
-    private async Task ImportAsync(string path, LocalClientService localClientService, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-    
-    private async Task ExportBundleAsync(string bundlePath, string targetManifestInput, string targetManifestOutput, LocalClientService localClientService, CancellationToken cancellationToken)
-    {
+    // private async Task ImportAsync(string path, LocalClientService localClientService, CancellationToken cancellationToken)
+    // {
+    //     throw new NotImplementedException();
+    // }
 
-    }
+    // private async Task ExportBundleAsync(string bundlePath, string targetManifestInput, string targetManifestOutput, LocalClientService localClientService, CancellationToken cancellationToken)
+    // {
+    //     throw new NotImplementedException();
+    // }
 
     private async Task ExportLocalPackageMetaDataAsync(IEnumerable<IPackageSearchMetadata> packages, string exportPath, CancellationToken cancellationToken)
     {
@@ -133,7 +134,7 @@ public class MainService : BackgroundService
         }
         if ((upstreamVersions = await upstreamClientService.GetAllVersionsAsync(packageId, cancellationToken)) is null || !upstreamVersions.Any())
         {
-            _logger.LogPackageNotFound(packageId, upstreamClientService, true);
+            _logger.LogPackageNotFound(packageId, upstreamClientService);
             return;
         }
         if (packagesAdded.TryGetValue(packageId, out HashSet<NuGetVersion>? versionsAdded))
@@ -148,83 +149,60 @@ public class MainService : BackgroundService
             versionsAdded = new(upstreamVersions, VersionComparer.VersionReleaseMetadata);
             packagesAdded.Add(packageId, versionsAdded);
         }
-        var tempFile = new FileInfo(Path.GetTempFileName());
-        try
+        using TempStagingFolder tempStagingFolder = new();
+        var pathResolver = new VersionFolderPathResolver(tempStagingFolder.Directory.FullName);
+        foreach (NuGetVersion v in upstreamVersions)
         {
-            foreach (NuGetVersion v in upstreamVersions)
+            FileInfo packageFile;
+            try
             {
-                using FileStream stream = new(tempFile.FullName, FileMode.Create, FileAccess.Write);
-                try { await upstreamClientService.CopyNupkgToStreamAsync(packageId, v, stream, cancellationToken); }
-                catch (Exception error)
+                packageFile = await tempStagingFolder.NewFileInfoAsync(pathResolver.GetPackageFileName(packageId, v), async (stream, token) =>
                 {
-                    _logger.LogUnexpectedPackageDownloadFailure(packageId, v, error);
-                    continue;
-                }
-                finally
-                {
-                    stream.Flush();
-                    stream.Close();
-                }
-                tempFile.Refresh();
-                if (tempFile.Length > 0)
-                {
-                    if (!await localClientService.AddPackageAsync(tempFile.FullName, false, cancellationToken))
-                        _logger.LogUnexpectedAddFailure(packageId, v);
-                }
-                else
-                    _logger.LogEmptyPackageDownload(packageId, v);
+                    await upstreamClientService.CopyNupkgToStreamAsync(packageId, v, stream, token);
+                }, cancellationToken);
             }
-        }
-        finally
-        {
-            tempFile.Refresh();
-            if (tempFile.Exists)
-                tempFile.Delete();
+            catch (Exception error)
+            {
+                _logger.LogUnexpectedPackageDownloadFailure(packageId, v, error);
+                continue;
+            }
+            if (packageFile.Length > 0)
+                await localClientService.AddPackageAsync(packageFile.FullName, false, cancellationToken);
+            else
+                _logger.LogEmptyPackageDownload(packageId, v);
         }
     }
 
-    private async Task UpdateLocalFromRemote(IEnumerable<string> packageIds, LocalClientService localClientService, UpstreamClientService upstreamClientService, CancellationToken stoppingToken)
+    private async Task UpdateLocalFromRemote(IEnumerable<string> packageIds, LocalClientService localClientService, UpstreamClientService upstreamClientService, CancellationToken cancellationToken)
     {
-        var asyncEn = upstreamClientService.GetAllVersionsWithDependenciesAsync(packageIds, stoppingToken).GetAsyncEnumerator(stoppingToken);
+        var asyncEn = upstreamClientService.GetAllVersionsWithDependenciesAsync(packageIds, cancellationToken).GetAsyncEnumerator(cancellationToken);
         if (!await asyncEn.MoveNextAsync())
             return;
-        var tempFile = new FileInfo(Path.GetTempFileName());
-        try
+        using TempStagingFolder tempStagingFolder = new();
+        var pathResolver = new VersionFolderPathResolver(tempStagingFolder.Directory.FullName);
+        do
         {
-            do
-            {
-                var identity = asyncEn.Current;
-                if (await localClientService.DoesPackageExistAsync(identity.Id, identity.Version, stoppingToken))
-                    continue;
-                using FileStream stream = new(tempFile.FullName, FileMode.Create, FileAccess.Write);
-                try { await upstreamClientService.CopyNupkgToStreamAsync(identity.Id, identity.Version, stream, stoppingToken); }
+            var identity = asyncEn.Current;
+            if (await localClientService.DoesPackageExistAsync(identity.Id, identity.Version, cancellationToken))
+                continue;
+            FileInfo packageFile;
+            using (var scope = _logger.BeginGetDownloadResourceResultScope(identity, upstreamClientService))
+                try
+                {
+                    _logger.LogDownloadingNuGetPackage(identity, upstreamClientService);
+                    packageFile = await tempStagingFolder.NewFileInfoAsync(pathResolver.GetPackageFileName(identity.Id, identity.Version), async (stream, token) =>
+                    {
+                        await upstreamClientService.CopyNupkgToStreamAsync(identity.Id, identity.Version, stream, cancellationToken);
+                    }, cancellationToken);
+                }
                 catch (Exception error)
                 {
                     _logger.LogUnexpectedPackageDownloadFailure(identity.Id, identity.Version, error);
                     continue;
                 }
-                finally
-                {
-                    stream.Flush();
-                    stream.Close();
-                }
-                tempFile.Refresh();
-                if (tempFile.Length > 0)
-                {
-                    if (!await localClientService.AddPackageAsync(tempFile.FullName, false, stoppingToken))
-                        _logger.LogUnexpectedAddFailure(identity.Id, identity.Version);
-                }
-                else
-                    _logger.LogEmptyPackageDownload(identity.Id, identity.Version);
-            }
-            while (!await asyncEn.MoveNextAsync());
+            await localClientService.AddPackageAsync(packageFile.FullName, false, cancellationToken);
         }
-        finally
-        {
-            tempFile.Refresh();
-            if (tempFile.Exists)
-                tempFile.Delete();
-        }
+        while (!await asyncEn.MoveNextAsync());
     }
 
     protected async override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -248,11 +226,12 @@ public class MainService : BackgroundService
                     await AddToLocalFromRemote(id, packagesAdded, localClientService, upstreamClientService, stoppingToken);
             }
             if (appSettings.Validated.ImportPath is not null)
-                await ImportAsync(appSettings.Validated.ImportPath, localClientService, stoppingToken);
+                throw new NotImplementedException();
+            // await ImportAsync(appSettings.Validated.ImportPath, localClientService, stoppingToken);
             if (appSettings.UpdateAll)
             {
                 var asyncEn = localClientService.GetAllPackagesAsync(stoppingToken);
-                if ((packageIds = asyncEn.ToBlockingEnumerable(stoppingToken).Select(p => p.Identity.Id)) is null || !packageIds.Any())
+                if (!(packageIds = asyncEn.ToBlockingEnumerable(stoppingToken).Select(p => p.Identity.Id)).Any())
                     _logger.LogNoLocalPackagesExist();
                 else
                     await UpdateLocalFromRemote(packageIds, localClientService, upstreamClientService, stoppingToken);
@@ -264,7 +243,8 @@ public class MainService : BackgroundService
             if (appSettings.Validated.ExportLocalMetaDataPath is not null)
                 await ExportLocalPackageMetaDataAsync(localClientService.GetAllPackagesAsync(stoppingToken).ToBlockingEnumerable(stoppingToken), appSettings.Validated.ExportLocalMetaDataPath, stoppingToken);
             if (appSettings.Validated.ExportBundlePath is not null)
-                await ExportBundleAsync(appSettings.Validated.ExportBundlePath, appSettings.Validated.TargetManifestFilePath, appSettings.Validated.TargetManifestSaveAsPath, localClientService, stoppingToken);
+                throw new NotImplementedException();
+            // await ExportBundleAsync(appSettings.Validated.ExportBundlePath, appSettings.Validated.TargetManifestFilePath, appSettings.Validated.TargetManifestSaveAsPath, localClientService, stoppingToken);
         }
         catch (OperationCanceledException) { throw; }
         finally

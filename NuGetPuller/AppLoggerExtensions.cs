@@ -581,13 +581,12 @@ public static class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The ID of the package that was not found.</param>
     /// <param name="clientService">The client service.</param>
-    /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogPackageNotFound(this ILogger logger, string packageId, ClientService clientService, bool isUpstream, Exception? exception = null)
+    public static void LogPackageNotFound(this ILogger logger, string packageId, ClientService clientService, Exception? exception = null)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
-            if (isUpstream)
+            if (clientService.IsUpstream)
                 _upstreamDirPackageNotFound1(logger, packageId, clientService.PackageSourceLocation, exception);
             else
                 _localPackageNotFound1(logger, packageId, clientService.PackageSourceLocation, exception);
@@ -603,13 +602,12 @@ public static class AppLoggerExtensions
     /// <param name="packageId">The ID of the package that was not found.</param>
     /// <param name="version">The version of the package that was not found.</param>
     /// <param name="clientService">The client service.</param>
-    /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogPackageNotFound(this ILogger logger, string packageId, NuGetVersion version, ClientService clientService, bool isUpstream, Exception? exception = null)
+    public static void LogPackageNotFound(this ILogger logger, string packageId, NuGetVersion version, ClientService clientService, Exception? exception = null)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
-            if (isUpstream)
+            if (clientService.IsUpstream)
                 _upstreamDirPackageNotFound2(logger, packageId, version, clientService.PackageSourceLocation, exception);
             else
                 _localPackageNotFound2(logger, packageId, version, clientService.PackageSourceLocation, exception);
@@ -1093,9 +1091,9 @@ public static class AppLoggerExtensions
 
     #endregion
 
-    #region InvalidSaveTargetManifestAs event logger message (0x001a)
+    #region InvalidSaveTargetManifestAs event logger message (0x001b)
 
-    public const int EVENT_ID_InvalidSaveTargetManifestAs = 0x001a;
+    public const int EVENT_ID_InvalidSaveTargetManifestAs = 0x001b;
 
     public static readonly EventId InvalidSaveTargetManifestAs = new(EVENT_ID_InvalidSaveTargetManifestAs, nameof(InvalidSaveTargetManifestAs));
 
@@ -1117,7 +1115,7 @@ public static class AppLoggerExtensions
     /// <summary>
     /// </summary>
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidSaveTargetManifestAs"/> event with event code 0x001a.
+    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidSaveTargetManifestAs"/> event with event code 0x001b.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="url">The invalid NuGet repository URL.</param>
@@ -1135,7 +1133,7 @@ public static class AppLoggerExtensions
     }
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidSaveTargetManifestAs"/> event with code 0x001a.
+    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidSaveTargetManifestAs"/> event with code 0x001b.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
@@ -1168,9 +1166,9 @@ public static class AppLoggerExtensions
 
     #endregion
 
-    #region InvalidImport event logger message (0x001a)
+    #region InvalidImport event logger message (0x001c)
 
-    public const int EVENT_ID_InvalidImport = 0x001a;
+    public const int EVENT_ID_InvalidImport = 0x001c;
 
     public static readonly EventId InvalidImport = new(EVENT_ID_InvalidImport, nameof(InvalidImport));
 
@@ -1192,7 +1190,7 @@ public static class AppLoggerExtensions
     /// <summary>
     /// </summary>
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidImport"/> event with event code 0x001a.
+    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidImport"/> event with event code 0x001c.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="url">The invalid NuGet repository URL.</param>
@@ -1210,7 +1208,7 @@ public static class AppLoggerExtensions
     }
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidImport"/> event with code 0x001a.
+    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidImport"/> event with code 0x001c.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
@@ -1243,6 +1241,48 @@ public static class AppLoggerExtensions
 
     #endregion
 
+    #region DownloadingNuGetPackage event logger message (0x001d)
+
+    public const int EVENT_ID_DownloadingNuGetPackage = 0x001d;
+
+    public static readonly EventId DownloadingNuGetPackage = new(EVENT_ID_DownloadingNuGetPackage, nameof(DownloadingNuGetPackage));
+
+    private static readonly Action<ILogger, string, Uri, Exception?> _downloadingRemoteNuGetPackage1 = LoggerMessage.Define<string, Uri>(LogLevel.Information, DownloadingNuGetPackage,
+        "Downloading package {PackageId} from {URL}.");
+
+    private static readonly Action<ILogger, string, NuGetVersion, Uri, Exception?> _downloadingRemoteNuGetPackage2 = LoggerMessage.Define<string, NuGetVersion, Uri>(LogLevel.Information, DownloadingNuGetPackage,
+        "Downloading package {PackageId}, version {Version} from {URL}.");
+
+    private static readonly Action<ILogger, string, string, Exception?> _downloadingLocalNuGetPackage1 = LoggerMessage.Define<string, string>(LogLevel.Information, DownloadingNuGetPackage,
+        "Downloading package {PackageId} from {Path}.");
+
+    private static readonly Action<ILogger, string, NuGetVersion, string, Exception?> _downloadingLocalNuGetPackage2 = LoggerMessage.Define<string, NuGetVersion, string>(LogLevel.Information, DownloadingNuGetPackage,
+        "Downloading package {PackageId}, version {Version} from {Path}.");
+
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Information"/> message for a <see cref="DownloadingNuGetPackage"/> event with event code 0x001d.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="identity">The package identifier and version.</param>
+    /// <param name="clientService">The source repository.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    public static void LogDownloadingNuGetPackage(this ILogger logger, PackageIdentity identity, ClientService clientService, Exception? exception = null)
+    {
+        if (clientService.PackageSourceUri.IsFile)
+        {
+            if (identity.HasVersion)
+                _downloadingLocalNuGetPackage2(logger, identity.Id, identity.Version, clientService.PackageSourceLocation, exception);
+            else
+                _downloadingLocalNuGetPackage1(logger, identity.Id, clientService.PackageSourceLocation, exception);
+        }
+        else if (identity.HasVersion)
+            _downloadingRemoteNuGetPackage2(logger, identity.Id, identity.Version, clientService.PackageSourceUri, exception);
+        else
+            _downloadingRemoteNuGetPackage1(logger, identity.Id, clientService.PackageSourceUri, exception);
+    }
+
+    #endregion
+
     #region GetDownloadResource Scope
 
     private static readonly Func<ILogger, string, NuGetVersion?, string, IDisposable?> _getRemoteDownloadResourceResultScope = LoggerMessage.DefineScope<string, NuGetVersion?, string>(
@@ -1262,13 +1302,12 @@ public static class AppLoggerExtensions
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="clientService">The client service.</param>
-    /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetDownloadResourceResultScope(this ILogger logger, PackageIdentity identity, ClientService clientService, bool isUpstream)
+    public static IDisposable? BeginGetDownloadResourceResultScope(this ILogger logger, PackageIdentity identity, ClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
-            if (isUpstream)
+            if (clientService.IsUpstream)
                 return _getUpstreamDirDownloadResourceResultScope(logger, identity.Id, identity.HasVersion ? identity.Version : null, clientService.PackageSourceLocation);
             return _getLocalDownloadResourceResultScope(logger, identity.Id, identity.HasVersion ? identity.Version : null, clientService.PackageSourceLocation);
         }
@@ -1295,13 +1334,12 @@ public static class AppLoggerExtensions
     /// <param name="packageId">The package ID.</param>
     /// <param name="version">The package version.</param>
     /// <param name="clientService">The client service.</param>
-    /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginDownloadNupkgScope(this ILogger logger, string packageId, NuGetVersion version, ClientService clientService, bool isUpstream)
+    public static IDisposable? BeginDownloadNupkgScope(this ILogger logger, string packageId, NuGetVersion version, ClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
-            if (isUpstream)
+            if (clientService.IsUpstream)
                 return _downloadUpstreamDirNupkgScope(logger, packageId, version, clientService.PackageSourceLocation);
             return _downloadLocalNupkgScope(logger, packageId, version, clientService.PackageSourceLocation);
         }
@@ -1344,24 +1382,23 @@ public static class AppLoggerExtensions
     /// <param name="includePreRelease">Whether to include pre-release packages.</param>
     /// <param name="includeUnlisted">Whether to include unlisted packages.</param>
     /// <param name="clientService">The client service.</param>
-    /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetMetadataScope(this ILogger logger, string packageId, bool includePreRelease, bool includeUnlisted, ClientService clientService, bool isUpstream)
+    public static IDisposable? BeginGetMetadataScope(this ILogger logger, string packageId, bool includePreRelease, bool includeUnlisted, ClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
-            if (isUpstream)
+            if (clientService.IsUpstream)
                 return _getUpstreamDirMetadataScope1(logger, packageId, includePreRelease, includeUnlisted, clientService.PackageSourceLocation);
             return _getLocalMetadataScope1(logger, packageId, includePreRelease, includeUnlisted, clientService.PackageSourceLocation);
         }
         return _getRemoteMetadataScope1(logger, packageId, includePreRelease, includeUnlisted, clientService.PackageSourceLocation);
     }
 
-    public static IDisposable? BeginGetMetadataScope(this ILogger logger, string packageId, NuGetVersion version, ClientService clientService, bool isUpstream)
+    public static IDisposable? BeginGetMetadataScope(this ILogger logger, string packageId, NuGetVersion version, ClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
-            if (isUpstream)
+            if (clientService.IsUpstream)
                 return _getUpstreamDirMetadataScope2(logger, packageId, version, clientService.PackageSourceLocation);
             return _getLocalMetadataScope2(logger, packageId, version, clientService.PackageSourceLocation);
         }
@@ -1390,13 +1427,12 @@ public static class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The package identifier.</param>
     /// <param name="clientService">The client service.</param>
-    /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetAllVersionsScope(this ILogger logger, string packageId, ClientService clientService, bool isUpstream)
+    public static IDisposable? BeginGetAllVersionsScope(this ILogger logger, string packageId, ClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
-            if (isUpstream)
+            if (clientService.IsUpstream)
                 return _getAllUpstreamDirVersionsScope(logger, packageId, clientService.PackageSourceLocation);
             return _getAllLocalVersionsScope(logger, packageId, clientService.PackageSourceLocation);
         }
@@ -1427,13 +1463,12 @@ public static class AppLoggerExtensions
     /// <param name="version">The package version.</param>
     /// <param name="framework">The package target framework.</param>
     /// <param name="clientService">The client service.</param>
-    /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginResolvePackageScope(this ILogger logger, string packageId, NuGetVersion version, NuGetFramework framework, ClientService clientService, bool isUpstream)
+    public static IDisposable? BeginResolvePackageScope(this ILogger logger, string packageId, NuGetVersion version, NuGetFramework framework, ClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
-            if (isUpstream)
+            if (clientService.IsUpstream)
                 return _resolveUpstreamDirPackageScope(logger, packageId, version, framework, clientService.PackageSourceLocation);
             return _resolveLocalPackageScope(logger, packageId, version, framework, clientService.PackageSourceLocation);
         }
@@ -1474,13 +1509,12 @@ public static class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The package ID.</param>
     /// <param name="clientService">The client service.</param>
-    /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginResolvePackagesScope(this ILogger logger, string packageId, ClientService clientService, bool isUpstream)
+    public static IDisposable? BeginResolvePackagesScope(this ILogger logger, string packageId, ClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
-            if (isUpstream)
+            if (clientService.IsUpstream)
                 return _resolveUpstreamDirPackagesScope1(logger, packageId, clientService.PackageSourceLocation);
             return _resolveLocalPackagesScope1(logger, packageId, clientService.PackageSourceLocation);
         }
@@ -1494,13 +1528,12 @@ public static class AppLoggerExtensions
     /// <param name="packageId">The package ID.</param>
     /// <param name="framework">The package target framework.</param>
     /// <param name="clientService">The client service.</param>
-    /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginResolvePackagesScope(this ILogger logger, string packageId, NuGetFramework framework, ClientService clientService, bool isUpstream)
+    public static IDisposable? BeginResolvePackagesScope(this ILogger logger, string packageId, NuGetFramework framework, ClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
-            if (isUpstream)
+            if (clientService.IsUpstream)
                 return _resolveUpstreamDirPackagesScope2(logger, packageId, framework, clientService.PackageSourceLocation);
             return _resolveLocalPackagesScope2(logger, packageId, framework, clientService.PackageSourceLocation);
         }
@@ -1530,13 +1563,12 @@ public static class AppLoggerExtensions
     /// <param name="packageId">The package identifier.</param>
     /// <param name="version">The package version.</param>
     /// <param name="clientService">The client service.</param>
-    /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetDependencyInfoScope(this ILogger logger, string packageId, NuGetVersion version, ClientService clientService, bool isUpstream)
+    public static IDisposable? BeginGetDependencyInfoScope(this ILogger logger, string packageId, NuGetVersion version, ClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
-            if (isUpstream)
+            if (clientService.IsUpstream)
                 return _getUpstreamDirDependencyInfoScope(logger, packageId, version, clientService.PackageSourceLocation);
             return _getLocalDependencyInfoScope(logger, packageId, version, clientService.PackageSourceLocation);
         }
@@ -1566,13 +1598,12 @@ public static class AppLoggerExtensions
     /// <param name="packageId">The package identifier.</param>
     /// <param name="version">The package version.</param>
     /// <param name="clientService">The client service.</param>
-    /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginDoesPackageExistScope(this ILogger logger, string packageId, NuGetVersion version, ClientService clientService, bool isUpstream)
+    public static IDisposable? BeginDoesPackageExistScope(this ILogger logger, string packageId, NuGetVersion version, ClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
-            if (isUpstream)
+            if (clientService.IsUpstream)
                 return _doesUpstreamDirPackageExistScope(logger, packageId, version, clientService.PackageSourceLocation);
             return _doesLocalPackageExistScope(logger, packageId, version, clientService.PackageSourceLocation);
         }
@@ -1615,13 +1646,12 @@ public static class AppLoggerExtensions
     /// <param name="version">The package version.</param>
     /// <param name="framework">The package framework.</param>
     /// <param name="clientService">The client service.</param>
-    /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetPackageDependenciesScope(this ILogger logger, string packageId, NuGetVersion version, NuGetFramework framework, ClientService clientService, bool isUpstream)
+    public static IDisposable? BeginGetPackageDependenciesScope(this ILogger logger, string packageId, NuGetVersion version, NuGetFramework framework, ClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
-            if (isUpstream)
+            if (clientService.IsUpstream)
                 return _getUpstreamDirPackageDependenciesScope(logger, packageId, version, framework, clientService.PackageSourceLocation);
             return _getLocalPackageDependenciesScope(logger, packageId, version, framework, clientService.PackageSourceLocation);
         }
@@ -1634,13 +1664,12 @@ public static class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The package identifier.</param>
     /// <param name="clientService">The client service.</param>
-    /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetPackageDependenciesScope(this ILogger logger, string packageId, ClientService clientService, bool isUpstream)
+    public static IDisposable? BeginGetPackageDependenciesScope(this ILogger logger, string packageId, ClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
-            if (isUpstream)
+            if (clientService.IsUpstream)
                 return _getAllUpstreamDirPackageDependenciesScope(logger, packageId, clientService.PackageSourceLocation);
             return _getAllLocalPackageDependenciesScope(logger, packageId, clientService.PackageSourceLocation);
         }

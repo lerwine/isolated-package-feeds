@@ -1,12 +1,109 @@
+using System.Collections.Immutable;
 using System.Text;
 
 namespace NuGetPuller;
 
 public sealed class TempStagingFolder : IDisposable
 {
+    private static readonly ImmutableArray<char> _invalidFileNameChars = [.. Path.GetInvalidFileNameChars()];
+
     private DirectoryInfo _directory;
 
     public DirectoryInfo Directory => _directory ?? throw new ObjectDisposedException(nameof(TempStagingFolder));
+
+    public FileInfo WriteNewFileInfo(string fileName, Action<StreamWriter> writeContent, Encoding? encoding = null)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
+        if (fileName.Any(c => _invalidFileNameChars.Contains(c)))
+            throw new ArgumentException("Invalid file name", nameof(fileName));
+        FileInfo result = new(Path.Combine(_directory.FullName, fileName));
+        if (result.Exists)
+            throw new InvalidOperationException($"File already exists: {result.FullName}");
+        if (encoding is null)
+            using (var writer = result.CreateText())
+            {
+                writeContent(writer);
+                writer.Flush();
+            }
+        else
+            using (var stream = result.Create())
+            {
+                using var writer = new StreamWriter(stream, encoding);
+                writeContent(writer);
+                writer.Flush();
+            }
+        result.Refresh();
+        return result;
+    }
+
+    public Task<FileInfo> WriteNewFileInfoAsync(string fileName, Func<StreamWriter, CancellationToken, Task> writeContentAsync, CancellationToken cancellationToken) => WriteNewFileInfoAsync(fileName, writeContentAsync, null, cancellationToken);
+
+    public async Task<FileInfo> WriteNewFileInfoAsync(string fileName, Func<StreamWriter, CancellationToken, Task> writeContentAsync, Encoding? encoding, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
+        if (fileName.Any(c => _invalidFileNameChars.Contains(c)))
+            throw new ArgumentException("Invalid file name", nameof(fileName));
+        FileInfo result = new(Path.Combine(_directory.FullName, fileName));
+        if (result.Exists)
+            throw new InvalidOperationException($"File already exists: {result.FullName}");
+        if (encoding is null)
+            using (var writer = result.CreateText())
+            {
+                await writeContentAsync(writer, cancellationToken);
+                await writer.FlushAsync(cancellationToken);
+            }
+        else
+            using (var stream = result.Create())
+            {
+                using var writer = new StreamWriter(stream, encoding);
+                await writeContentAsync(writer, cancellationToken);
+                await writer.FlushAsync(cancellationToken);
+            }
+        result.Refresh();
+        return result;
+    }
+
+    public FileInfo NewFileInfo(string fileName, Action<FileStream>? writeContent = null)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
+        if (fileName.Any(c => _invalidFileNameChars.Contains(c)))
+            throw new ArgumentException("Invalid file name", nameof(fileName));
+        FileInfo result = new(Path.Combine(_directory.FullName, fileName));
+        if (result.Exists)
+            throw new InvalidOperationException($"File already exists: {result.FullName}");
+        using (var stream = result.Create())
+        {
+            if (writeContent is not null)
+            {
+                writeContent(stream);
+                stream.Flush();
+            }
+        }
+        result.Refresh();
+        return result;
+    }
+
+    public Task<FileInfo> NewFileInfoAsync(string fileName, CancellationToken cancellationToken) => NewFileInfoAsync(fileName, null, cancellationToken);
+
+    public async Task<FileInfo> NewFileInfoAsync(string fileName, Func<FileStream, CancellationToken, Task>? writeContentAsync, CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
+        if (fileName.Any(c => _invalidFileNameChars.Contains(c)))
+            throw new ArgumentException("Invalid file name", nameof(fileName));
+        FileInfo result = new(Path.Combine(_directory.FullName, fileName));
+        if (result.Exists)
+            throw new InvalidOperationException($"File already exists: {result.FullName}");
+        using (var stream = result.Create())
+        {
+            if (writeContentAsync is not null)
+            {
+                await writeContentAsync(stream, cancellationToken);
+                await stream.FlushAsync();
+            }
+        }
+        result.Refresh();
+        return result;
+    }
 
     public FileInfo WriteNewRandomFileInfo(Action<StreamWriter> writeContent, Encoding? encoding) => WriteNewRandomFileInfo(writeContent, null, encoding);
 
