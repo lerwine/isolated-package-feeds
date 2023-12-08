@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace NuGetPuller.CLI;
 
-public partial class AppSettingsValidatorService : SharedAppSettingsValidatorService<AppSettings>
+public partial class AppSettingsValidatorService : SharedAppSettingsValidatorService<AppSettings, AppSettings.ValidatedAppSettings>
 {
     public AppSettingsValidatorService(ILogger<AppSettingsValidatorService> logger, IHostEnvironment hostEnvironment) : base(logger, hostEnvironment) { }
 
@@ -19,8 +19,8 @@ public partial class AppSettingsValidatorService : SharedAppSettingsValidatorSer
         }
         try
         {
-            path = (options.Validated.ExportLocalManifest = ResourceLocatorUtil.GetFileInfo(Directory.GetCurrentDirectory(), path)).FullName;
-            if (options.Validated.ExportLocalManifest.Exists || (options.Validated.ExportLocalManifest.Directory is not null && options.Validated.ExportLocalManifest.Directory.Exists))
+            path = (Validated.ExportLocalManifest = ResourceLocatorUtil.GetFileInfo(Directory.GetCurrentDirectory(), path)).FullName;
+            if (Validated.ExportLocalManifest.Exists || (Validated.ExportLocalManifest.Directory is not null && Validated.ExportLocalManifest.Directory.Exists))
             {
                 validationResult = null;
                 return false;
@@ -60,8 +60,8 @@ public partial class AppSettingsValidatorService : SharedAppSettingsValidatorSer
         }
         try
         {
-            path = (options.Validated.ExportBundle = ResourceLocatorUtil.GetFileInfo(Directory.GetCurrentDirectory(), path)).FullName;
-            if (!options.Validated.ExportBundle.Exists && (options.Validated.ExportBundle.Directory is null || !options.Validated.ExportBundle.Directory.Exists))
+            path = (Validated.ExportBundle = ResourceLocatorUtil.GetFileInfo(Directory.GetCurrentDirectory(), path)).FullName;
+            if (!Validated.ExportBundle.Exists && (Validated.ExportBundle.Directory is null || !Validated.ExportBundle.Directory.Exists))
             {
                 validationResult = new ValidationResult(Logger.LogExportBundleDirectoryNotFound(path), Enumerable.Repeat(nameof(AppSettings.ExportBundle), 1));
                 return true;
@@ -97,9 +97,9 @@ public partial class AppSettingsValidatorService : SharedAppSettingsValidatorSer
         {
             if (string.IsNullOrWhiteSpace(path))
             {
-                path = $"{Path.GetFileNameWithoutExtension(options.Validated.ExportBundle.Name)}.json";
-                if (options.Validated.ExportBundle.Directory is not null)
-                    path = Path.Combine(options.Validated.ExportBundle.DirectoryName!, path);
+                path = $"{Path.GetFileNameWithoutExtension(Validated.ExportBundle.Name)}.json";
+                if (Validated.ExportBundle.Directory is not null)
+                    path = Path.Combine(Validated.ExportBundle.DirectoryName!, path);
             }
             else
             {
@@ -140,13 +140,13 @@ public partial class AppSettingsValidatorService : SharedAppSettingsValidatorSer
         path = options.SaveTargetManifestAs;
         if (string.IsNullOrWhiteSpace(path))
         {
-            options.Validated.SaveTargetManifestAs = options.Validated.TargetManifestFile;
+            Validated.SaveTargetManifestAs = Validated.TargetManifestFile;
             validationResult = null;
             return false;
         }
         try
         {
-            
+
             FileInfo f = ResourceLocatorUtil.GetFileInfo(Directory.GetCurrentDirectory(), path);
             path = f.FullName;
             if (f.Exists || (f.Directory is not null && f.Directory.Exists))
@@ -189,8 +189,8 @@ public partial class AppSettingsValidatorService : SharedAppSettingsValidatorSer
         }
         try
         {
-            path = (options.Validated.Import = ResourceLocatorUtil.GetFileOrDirectory(Directory.GetCurrentDirectory(), path)).FullName;
-            if (options.Validated.Import.Exists)
+            path = (Validated.Import = ResourceLocatorUtil.GetFileOrDirectory(Directory.GetCurrentDirectory(), path)).FullName;
+            if (Validated.Import.Exists)
             {
                 validationResult = null;
                 return false;

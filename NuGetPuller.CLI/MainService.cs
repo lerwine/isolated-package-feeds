@@ -26,6 +26,7 @@ public class MainService : BackgroundService
             using var scope = _serviceProvider.CreateScope();
             var localClientService = scope.ServiceProvider.GetRequiredService<LocalClientService>();
             var upstreamClientService = scope.ServiceProvider.GetRequiredService<UpstreamClientService>();
+            var validatorService = scope.ServiceProvider.GetRequiredService<AppSettingsValidatorService>();
             var appSettings = _settingsOptions.Value;
             var packageIds = appSettings.Delete?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(NoCaseComparer);
             HashSet<PackageIdentity> deletedPackages = new(PackageIdentityComparer.Default);
@@ -39,9 +40,9 @@ public class MainService : BackgroundService
                 foreach (string id in packageIds)
                     await AddToLocalFromRemote(id, packagesAdded, localClientService, upstreamClientService, _logger, stoppingToken);
             }
-            if (appSettings.Validated.Import is not null)
+            if (validatorService.Validated.Import is not null)
                 throw new NotImplementedException();
-            // await ImportAsync(appSettings.Validated.ImportPath, localClientService, _logger, stoppingToken);
+            // await ImportAsync(validatorService.Validated.ImportPath, localClientService, _logger, stoppingToken);
             if (appSettings.UpdateAll)
             {
                 var asyncEn = localClientService.GetAllPackagesAsync(stoppingToken);
@@ -53,12 +54,12 @@ public class MainService : BackgroundService
             else if ((packageIds = appSettings.Update?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(NoCaseComparer)) is not null && packageIds.Any())
                 await UpdateLocalFromRemote(packageIds, localClientService, upstreamClientService, _logger, stoppingToken);
             if (appSettings.ListLocal)
-                await ListLocalPackagesAsync(localClientService.GetAllPackagesAsync(stoppingToken).ToBlockingEnumerable(stoppingToken), appSettings.Validated.ExportLocalManifest?.FullName, _logger, stoppingToken);
-            if (appSettings.Validated.ExportLocalManifest is not null)
-                await ExportLocalManifestAsync(localClientService.GetAllPackagesAsync(stoppingToken).ToBlockingEnumerable(stoppingToken), appSettings.Validated.ExportLocalManifest.FullName, _logger, stoppingToken);
-            if (appSettings.Validated.ExportBundle is not null)
+                await ListLocalPackagesAsync(localClientService.GetAllPackagesAsync(stoppingToken).ToBlockingEnumerable(stoppingToken), validatorService.Validated.ExportLocalManifest?.FullName, _logger, stoppingToken);
+            if (validatorService.Validated.ExportLocalManifest is not null)
+                await ExportLocalManifestAsync(localClientService.GetAllPackagesAsync(stoppingToken).ToBlockingEnumerable(stoppingToken), validatorService.Validated.ExportLocalManifest.FullName, _logger, stoppingToken);
+            if (validatorService.Validated.ExportBundle is not null)
                 throw new NotImplementedException();
-            // await ExportBundleAsync(appSettings.Validated.ExportBundlePath, appSettings.Validated.TargetManifestFilePath, appSettings.Validated.TargetManifestSaveAsPath, localClientService, _logger, stoppingToken);
+            // await ExportBundleAsync(validatorService.Validated.ExportBundlePath, validatorService.Validated.TargetManifestFilePath, validatorService.Validated.TargetManifestSaveAsPath, localClientService, _logger, stoppingToken);
         }
         catch (OperationCanceledException) { throw; }
         finally

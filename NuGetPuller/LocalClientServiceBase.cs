@@ -1,6 +1,5 @@
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using NuGet.Packaging.Core;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
@@ -9,9 +8,8 @@ using static NuGetPuller.CommonStatic;
 
 namespace NuGetPuller;
 
-public class LocalClientService<TSettings>(IOptions<TSettings> options, ILogger logger) :
-    ClientService<TSettings>(Repository.Factory.GetCoreV3(options.Value.Validated.LocalRepository?.FullName ?? options.Value.LocalRepository), options, logger, false), ILocalClientService
-    where TSettings : class, ISharedAppSettings
+public abstract class LocalClientServiceBase(ISharedAppSettings settings, IValidatedSharedAppSettings validated, ILogger logger) :
+    ClientService(Repository.Factory.GetCoreV3(validated.LocalRepository?.FullName ?? settings.LocalRepository), settings, validated, logger, false)
 {
     private readonly object _syncRoot = new();
 
@@ -187,3 +185,4 @@ public class LocalClientService<TSettings>(IOptions<TSettings> options, ILogger 
 
     #endregion
 }
+

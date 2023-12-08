@@ -33,6 +33,4 @@ public interface ISharedAppSettings
     string GlobalPackagesFolder { get; set; }
 
     string? OverrideGlobalPackagesFolder { get; }
-
-    IValidatedSharedAppSettings Validated { get; }
 }

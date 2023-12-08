@@ -34,7 +34,12 @@ public static class ResourceLocatorUtil
 
     private static T GetFileSystemInfo<T>(string? basePath, string path, Func<string, T> factory) where T : FileSystemInfo
     {
-        try { return factory(CombinePath(basePath, path)); }
+        try
+        {
+            var combined = CombinePath(basePath, path);
+            var result = factory(combined);
+            return result;
+        }
         catch (NotSupportedException exception) { throw new ArgumentException(exception.Message, nameof(path)); }
     }
 
@@ -305,7 +310,15 @@ public static class ResourceLocatorUtil
     /// <exception cref="PathTooLongException">The combined path, file name, or both exceed the system-defined maximum length.</exception>
     /// <exception cref="System.Security.SecurityException">The caller does not have the required permissions.</exception>
     /// <exception cref="UriSchemeNotSupportedException"><paramref name="path"/> is an absolute URI, but the scheme is not <see cref="Uri.UriSchemeFile"/>.</exception>
-    public static DirectoryInfo GetDirectoryInfo(string? basePath, string path) => GetFileSystemInfo(basePath, path, p => new DirectoryInfo(p));
+    public static DirectoryInfo GetDirectoryInfo(string? basePath, string path)
+    {
+        var di = GetFileSystemInfo(basePath, path, p =>
+        {
+            var result = new DirectoryInfo(p);
+            return result;
+        });
+        return di;
+    }
 
     /// <summary>
     /// Parses or builds an absolute URI and tries extract a <see cref="DirectoryInfo"/>.

@@ -1,12 +1,10 @@
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 
 namespace NuGetPuller;
 
-public class UpstreamClientService<TSettings>(IOptions<TSettings> options, ILogger logger) : ClientService<TSettings>(Repository.Factory.GetCoreV3(options.Value.Validated.UpstreamServiceIndex?.AbsoluteUri ?? options.Value.UpstreamServiceIndex), options, logger, true), IUpstreamClientService
-    where TSettings : class, ISharedAppSettings
+public abstract class UpstreamClientServiceBase(ISharedAppSettings settings, IValidatedSharedAppSettings validated, ILogger logger) : ClientService(Repository.Factory.GetCoreV3(validated.UpstreamServiceIndex?.AbsoluteUri ?? settings.UpstreamServiceIndex), settings, validated, logger, true)
 {
     /// <summary>
     /// Retrieve dependency info for all versions of a single package.

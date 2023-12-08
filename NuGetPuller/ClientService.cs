@@ -9,8 +9,7 @@ using static NuGetPuller.CommonStatic;
 
 namespace NuGetPuller;
 
-public abstract class ClientService<TSettings> : IClientService
-    where TSettings : class, ISharedAppSettings
+public abstract class ClientService
 {
     #region Fields and Properties
 
@@ -39,9 +38,9 @@ public abstract class ClientService<TSettings> : IClientService
 
     #endregion
 
-    protected ClientService(SourceRepository sourceRepository, IOptions<TSettings> options, ILogger logger, bool isUpstream)
+    protected ClientService(SourceRepository sourceRepository, ISharedAppSettings settings, IValidatedSharedAppSettings validated, ILogger logger, bool isUpstream)
     {
-        GlobalPackagesFolder = options.Value.Validated.GlobalPackagesFolder?.FullName ?? options.Value.GlobalPackagesFolder;
+        GlobalPackagesFolder = validated.GlobalPackagesFolder?.FullName ?? settings.GlobalPackagesFolder;
         NuGetLogger = new(Logger = logger);
         SourceRepository = sourceRepository;
         IsUpstream = isUpstream;

@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace NuGetPuller.UnitTests.Helpers;
 
-public class TestAppSettingsValidatorService(ILogger<TestAppSettingsValidatorService> logger, IHostEnvironment hostEnvironment) : SharedAppSettingsValidatorService<TestAppSettings>(logger, hostEnvironment)
+public class TestAppSettingsValidatorService(ILogger<TestAppSettingsValidatorService> logger, IHostEnvironment hostEnvironment) : SharedAppSettingsValidatorService<TestAppSettings, ValidatedTestAppSettings>(logger, hostEnvironment)
 {
     protected override void Validate(TestAppSettings options, List<ValidationResult> validationResults) { }
 }

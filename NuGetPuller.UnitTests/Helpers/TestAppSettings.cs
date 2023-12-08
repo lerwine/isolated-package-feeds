@@ -13,8 +13,4 @@ public class TestAppSettings : ISharedAppSettings
     public string GlobalPackagesFolder { get; set; } = string.Empty;
 
     public string? OverrideGlobalPackagesFolder { get; set; }
-
-    public ValidatedTestAppSettings Validated => new();
-
-    IValidatedSharedAppSettings ISharedAppSettings.Validated => Validated;
 }

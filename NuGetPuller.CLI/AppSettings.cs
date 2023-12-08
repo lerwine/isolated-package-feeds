@@ -132,10 +132,6 @@ public partial class AppSettings : ISharedAppSettings
     /// <para>This is mapped from the <c>-?</c> (<see cref="COMMAND_LINE_SWITCH__3F_"/>), <c>-h</c> (<see cref="COMMAND_LINE_SWITCH_h"/>), and <c>--help</c> (<see cref="COMMAND_LINE_SWITCH_help"/>) command line switches.</para></remarks>
     public bool Help { get; set; }
 
-    internal ValidatedAppSettings Validated = new();
-
-    IValidatedSharedAppSettings ISharedAppSettings.Validated => Validated;
-
     private static readonly ReadOnlyDictionary<string, string> _booleanSwitchMappings = new(new Dictionary<string, string>()
     {
         { COMMAND_LINE_SWITCH_update_2D_all, $"{nameof(NuGetPuller)}:{nameof(UpdateAll)}" },

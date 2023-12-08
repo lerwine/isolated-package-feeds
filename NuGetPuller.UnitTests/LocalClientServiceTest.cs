@@ -18,8 +18,8 @@ public class LocalClientServiceTest
     public async Task AddPackageAsyncTest()
     {
         using TempStagingFolder tempStagingFolder = new();
-        var upstreamService = _hosting.Host.Services.GetRequiredService<UpstreamClientService>();
-        var target = _hosting.Host.Services.GetRequiredService<LocalClientService>();
+        var upstreamService = _hosting.Host.Services.GetRequiredService<UpstreamClientServiceBase>();
+        var target = _hosting.Host.Services.GetRequiredService<LocalClientServiceBase>();
         string packageId = "Microsoft.Extensions.Logging.Abstractions";
         var version = NuGetVersion.Parse("7.0.0");
         var fileInfo = await tempStagingFolder.NewRandomFileInfoAsync(async (stream, token) =>

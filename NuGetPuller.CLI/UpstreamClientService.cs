@@ -3,6 +3,6 @@ using Microsoft.Extensions.Options;
 
 namespace NuGetPuller.CLI;
 
-public sealed class UpstreamClientService(IOptions<AppSettings> options, ILogger<UpstreamClientService> logger) : UpstreamClientService<AppSettings>(options, logger)
+public sealed class UpstreamClientService(IOptions<AppSettings> options, AppSettingsValidatorService validatorService, ILogger<UpstreamClientService> logger) : UpstreamClientServiceBase(options.Value, validatorService.Validated, logger)
 {
 }

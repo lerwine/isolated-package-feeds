@@ -108,7 +108,7 @@ public static class MainServiceStatic
         writer.Close();
     }
 
-    public static async Task AddToLocalFromRemote(string packageId, Dictionary<string, HashSet<NuGetVersion>> packagesAdded, ILocalClientService localClientService, IUpstreamClientService upstreamClientService, ILogger logger, CancellationToken cancellationToken)
+    public static async Task AddToLocalFromRemote(string packageId, Dictionary<string, HashSet<NuGetVersion>> packagesAdded, LocalClientServiceBase localClientService, UpstreamClientServiceBase upstreamClientService, ILogger logger, CancellationToken cancellationToken)
     {
         var upstreamVersions = await localClientService.GetAllVersionsAsync(packageId, cancellationToken);
         if (upstreamVersions is not null && upstreamVersions.Any())
@@ -157,7 +157,7 @@ public static class MainServiceStatic
         }
     }
 
-    public static async Task UpdateLocalFromRemote(IEnumerable<string> packageIds, ILocalClientService localClientService, IUpstreamClientService upstreamClientService, ILogger logger, CancellationToken cancellationToken)
+    public static async Task UpdateLocalFromRemote(IEnumerable<string> packageIds, LocalClientServiceBase localClientService, UpstreamClientServiceBase upstreamClientService, ILogger logger, CancellationToken cancellationToken)
     {
         var asyncEn = upstreamClientService.GetAllVersionsWithDependenciesAsync(packageIds, cancellationToken).GetAsyncEnumerator(cancellationToken);
         if (!await asyncEn.MoveNextAsync())

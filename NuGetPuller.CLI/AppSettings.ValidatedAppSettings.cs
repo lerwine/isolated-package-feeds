@@ -2,7 +2,7 @@ namespace NuGetPuller.CLI;
 
 public partial class AppSettings
 {
-    internal class ValidatedAppSettings : IValidatedSharedAppSettings
+    public class ValidatedAppSettings : IValidatedSharedAppSettings
     {
         public Uri UpstreamServiceIndex { get; set; } = CommonStatic.EmptyURI;
 
