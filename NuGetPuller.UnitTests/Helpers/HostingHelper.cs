@@ -1,5 +1,8 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Serilog;
 
 namespace NuGetPuller.UnitTests.Helpers;
 
@@ -20,11 +23,34 @@ record HostingFake(IHost Host, string PreviousCwd, DirectoryInfo BaseDirectory, 
             cwd.Create();
         var previousCwd = Directory.GetCurrentDirectory();
         Directory.SetCurrentDirectory(cwd.FullName);
-        HostApplicationBuilder builder = AppHost.CreateBuilder(testContext.TestDirectory);
-        AppHost.ConfigureSettings<TestAppSettings>(builder);
-        AppHost.ConfigureLogging(builder);
-        builder.Logging.AddDebug();
-        AppHost.ConfigureServices<TestAppSettings, TestAppSettingsValidatorService, LocalClientService, UpstreamClientService>(builder, settings => AppHost.DefaultPostConfigure(settings, builder));
+        
+        HostApplicationBuilder builder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(new HostApplicationBuilderSettings()
+        {
+            ContentRootPath = testContext.TestDirectory,
+            Args = []
+        });
+        builder.Logging.ClearProviders();
+        Log.Logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(builder.Configuration)
+            .CreateLogger();
+        builder.Logging.AddSerilog();
+        builder.Services
+            .AddOptions<TestAppSettings>()
+            .Bind(builder.Configuration.GetSection(nameof(NuGetPuller)))
+            .ValidateDataAnnotations();
+        builder.Services
+            .AddSingleton<IValidateOptions<TestAppSettings>, TestAppSettingsValidatorService>()
+            .AddSingleton<LocalClientService>()
+            .AddSingleton<UpstreamClientService>()
+            .PostConfigure<TestAppSettings>(settings =>
+            {
+                if (string.IsNullOrWhiteSpace(settings.GlobalPackagesFolder))
+                    settings.GlobalPackagesFolder = NuGet.Configuration.SettingsUtility.GetGlobalPackagesFolder(NuGet.Configuration.Settings.LoadDefaultSettings(root: null));
+                if (string.IsNullOrWhiteSpace(settings.UpstreamServiceIndex))
+                    settings.UpstreamServiceIndex = CommonStatic.DEFAULT_UPSTREAM_SERVICE_INDEX;
+                if (string.IsNullOrWhiteSpace(settings.LocalRepository))
+                    settings.LocalRepository = Path.Combine(builder.Environment.ContentRootPath, CommonStatic.DEFAULT_LOCAL_REPOSITORY);
+            });
         var host = builder.Build();
         host.Start();
         return new(host, previousCwd, baseDirectory, cwd);
