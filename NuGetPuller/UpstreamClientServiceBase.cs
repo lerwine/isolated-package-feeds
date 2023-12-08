@@ -1,11 +1,10 @@
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 
 namespace NuGetPuller;
 
-public sealed class UpstreamClientService(IOptions<AppSettings> options, ILogger<UpstreamClientService> logger) : ClientService(Repository.Factory.GetCoreV3(options.Value.Validated.UpstreamServiceLocation), options, logger, true)
+public abstract class UpstreamClientServiceBase(IValidatedSharedAppSettings settings, ILogger logger) : ClientService(Repository.Factory.GetCoreV3(settings.GetUpstreamServiceIndex()), settings, logger, true)
 {
     /// <summary>
     /// Retrieve dependency info for all versions of a single package.
@@ -17,7 +16,8 @@ public sealed class UpstreamClientService(IOptions<AppSettings> options, ILogger
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.7.x/src/NuGet.Core/NuGet.Protocol/Resources/DependencyInfoResourceV3.cs#L142"/>
     public async Task<IEnumerable<RemoteSourceDependencyInfo>> ResolvePackages(string packageId, CancellationToken cancellationToken)
     {
-        using var scope = await GeDependencyInfoResourceScopeAsync(() => Logger.BeginResolvePackagesScope(packageId, this, IsUpstream), cancellationToken);
+        ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
+        using var scope = await GeDependencyInfoResourceScopeAsync(() => Logger.BeginResolvePackagesScope(packageId, this), cancellationToken);
         return await scope.Context.ResolvePackages(packageId, CacheContext, NuGetLogger, cancellationToken);
     }
 }

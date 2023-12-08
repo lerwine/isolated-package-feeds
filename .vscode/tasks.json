@@ -25,10 +25,38 @@
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile",
+            "group": "build"
+        },
+        {
+            "label": "Build NuGetPuller CLI",
+            "command": "dotnet",
+            "type": "process",
+            "dependsOn":[ "Build NuGetPuller" ],
+            "args": [
+                "build",
+                "${workspaceFolder}/NuGetPuller.CLI/NuGetPuller.CLI.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile",
             "group": {
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "Build NuGetPuller UnitTests",
+            "command": "dotnet",
+            "type": "process",
+            "dependsOn":[ "Build NuGetPuller" ],
+            "args": [
+                "build",
+                "${workspaceFolder}/NuGetPuller.UnitTests/NuGetPuller.UnitTests.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": "build"
         },
         {
             "label": "Build CdnServer",
@@ -50,6 +78,19 @@
             "args": [
                 "build",
                 "${workspaceFolder}/CdnGetter/CdnGetter.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": "build"
+        },
+        {
+            "label": "Build CdnGetter Unit Tests",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/CdnGetter.UnitTests/CdnGetter.UnitTests.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],

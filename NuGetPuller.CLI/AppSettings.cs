@@ -1,11 +1,11 @@
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using Microsoft.Extensions.Configuration;
-using static NuGetPuller.Constants;
+using static NuGetPuller.CLI.CommandLineSwitches;
 
-namespace NuGetPuller;
+namespace NuGetPuller.CLI;
 
-public partial class AppSettings
+public partial class AppSettings : ISharedAppSettings
 {
     /// <summary>
     /// If true, then all existing packages in the local NuGet repository should be checked and updated to their latest versions.
@@ -76,30 +76,12 @@ public partial class AppSettings
     public string? ExportLocalManifest { get; set; }
 
     /// <summary>
-    /// Specifies the remote endpoint URL for the V3 NGet API or a subdirectory path that contains the upstream NuGet repository.
-    /// </summary>
-    /// <remarks>The default value of this setting is defined in the <see cref="DEFAULT_UPSTREAM_SERVICE_INDEX" /> constant.
-    /// If this refers to a subdirectory and is not absolute, it will be resolved relative to the application assembly directory (<see cref="Microsoft.Extensions.Hosting.IHostEnvironment.ContentRootPath" />).
-    /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
-    /// <para>This can be overridden using the <c>--upstream-service-index</c> (<see cref="COMMAND_LINE_SWITCH_upstream_2D_service_2D_index"/>) command line switch.</para></remarks>
-    /// <seealso href="https://learn.microsoft.com/en-us/nuget/api/overview#service-index"/>
-    public string UpstreamServiceIndex { get; set; } = null!;
-
-    /// <summary>
     /// Gets the override value for the <see cref="UpstreamServiceIndex" /> setting.
     /// </summary>
     /// <remarks>If this refers to a subdirectory and is not absolute, it will be resolved relative to the current working directory (<see cref="Directory.GetCurrentDirectory"/>).
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
     /// <para>This is mapped from the <c>--upstream-service-index</c> (<see cref="COMMAND_LINE_SWITCH_upstream_2D_service_2D_index"/>) command line switch.</para></remarks>
     public string? OverrideUpstreamServiceIndex { get; set; }
-
-    /// <summary>
-    /// Specifies the relative or absolute path of a subdirectory for a local Nuget repository.
-    /// </summary>
-    /// <remarks>If this path is not absolute, it will be resolved relative to the application assembly directory (<see cref="Microsoft.Extensions.Hosting.IHostEnvironment.ContentRootPath" />). The default value of this setting is defined in the <see cref="DEFAULT_LOCAL_REPOSITORY" /> constant.
-    /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
-    /// <para>This can be overridden using the <c>--local-repository</c> (<see cref="COMMAND_LINE_SWITCH_local_2D_repository"/>) command line switch.</para></remarks>
-    public string LocalRepository { get; set; } = null!;
 
     /// <summary>
     /// Gets the override value for the <see cref="LocalRepository" /> setting.
@@ -110,20 +92,38 @@ public partial class AppSettings
     public string? OverrideLocalRepository { get; set; }
 
     /// <summary>
-    /// Specifies the relative or absolute path of the NuGet global packages folder.
-    /// </summary>
-    /// <remarks>If this path is not absolute, it will be resolved relative to the application assembly directory (<see cref="Microsoft.Extensions.Hosting.IHostEnvironment.ContentRootPath" />).
-    /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
-    /// <para>This can be overridden using the <c>--global-packages-folder</c> (<see cref="COMMAND_LINE_SWITCH_global_2D_packages_2D_folder"/>) command line switch.</para></remarks>
-    public string GlobalPackagesFolder { get; set; } = null!;
-
-    /// <summary>
     /// Gets the override value for the <see cref="GlobalPackagesFolder" /> setting.
     /// </summary>
     /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Directory.GetCurrentDirectory"/>).
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
     /// <para>This is mapped from the <c>--global-packages-folder</c> (<see cref="COMMAND_LINE_SWITCH_global_2D_packages_2D_folder"/>) command line switch.</para></remarks>
     public string? OverrideGlobalPackagesFolder { get; set; }
+
+    /// <summary>
+    /// Specifies the remote endpoint URL for the V3 NGet API or a subdirectory path that contains the upstream NuGet repository.
+    /// </summary>
+    /// <remarks>The default value of this setting is defined in the <see cref="DEFAULT_UPSTREAM_SERVICE_INDEX" /> constant.
+    /// If this refers to a subdirectory and is not absolute, it will be resolved relative to the application assembly directory (<see cref="Microsoft.Extensions.Hosting.IHostEnvironment.ContentRootPath" />).
+    /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
+    /// <para>This can be overridden using the <c>--upstream-service-index</c> (<see cref="COMMAND_LINE_SWITCH_upstream_2D_service_2D_index"/>) command line switch.</para></remarks>
+    /// <seealso href="https://learn.microsoft.com/en-us/nuget/api/overview#service-index"/>
+    public string UpstreamServiceIndex { get; set; } = null!;
+
+    /// <summary>
+    /// Specifies the relative or absolute path of a subdirectory for a local Nuget repository.
+    /// </summary>
+    /// <remarks>If this path is not absolute, it will be resolved relative to the application assembly directory (<see cref="Microsoft.Extensions.Hosting.IHostEnvironment.ContentRootPath" />). The default value of this setting is defined in the <see cref="DEFAULT_LOCAL_REPOSITORY" /> constant.
+    /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
+    /// <para>This can be overridden using the <c>--local-repository</c> (<see cref="COMMAND_LINE_SWITCH_local_2D_repository"/>) command line switch.</para></remarks>
+    public string LocalRepository { get; set; } = null!;
+
+    /// <summary>
+    /// Specifies the relative or absolute path of the NuGet global packages folder.
+    /// </summary>
+    /// <remarks>If this path is not absolute, it will be resolved relative to the application assembly directory (<see cref="Microsoft.Extensions.Hosting.IHostEnvironment.ContentRootPath" />).
+    /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
+    /// <para>This can be overridden using the <c>--global-packages-folder</c> (<see cref="COMMAND_LINE_SWITCH_global_2D_packages_2D_folder"/>) command line switch.</para></remarks>
+    public string GlobalPackagesFolder { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the value indicating whether to write help information to the console.
@@ -159,6 +159,4 @@ public partial class AppSettings
     {
         builder.Add(new FlagSwitchCommandLineConfigSource(args?.ToImmutableArray() ?? [], _booleanSwitchMappings, _valueSwitchMappings));
     }
-
-    internal ValidatedAppSettings Validated { get; } = new();
 }

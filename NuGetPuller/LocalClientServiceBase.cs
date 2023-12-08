@@ -1,19 +1,16 @@
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using NuGet.Packaging.Core;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
-using static NuGetPuller.Constants;
+using static NuGetPuller.CommonStatic;
 
 namespace NuGetPuller;
 
-public sealed class LocalClientService(IOptions<AppSettings> options, ILogger<UpstreamClientService> logger) :
-    ClientService(Repository.Factory.GetCoreV3(options.Value.Validated.LocalRepositoryPath), options, logger, false)
+public abstract class LocalClientServiceBase(IValidatedSharedAppSettings settings, ILogger logger) : ClientService(Repository.Factory.GetCoreV3(settings.GetLocalRepository()), settings, logger, false)
 {
     private readonly object _syncRoot = new();
-    private Task<PackageUpdateResource>? _getPackageUpdateResourceAsync;
 
     #region Methods using the Search Query API
 
@@ -57,6 +54,8 @@ public sealed class LocalClientService(IOptions<AppSettings> options, ILogger<Up
 
     #region Methods using the NuGet V3 Push and Delete API
 
+    private Task<PackageUpdateResource>? _getPackageUpdateResourceAsync;
+
     private async Task<PackageUpdateResource> GetPackageUpdateResourceAsync(CancellationToken cancellationToken)
     {
         lock (_syncRoot)
@@ -76,7 +75,8 @@ public sealed class LocalClientService(IOptions<AppSettings> options, ILogger<Up
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.8.x/src/NuGet.Core/NuGet.Protocol/Resources/PackageUpdateResource.cs#L157"/>
     public async IAsyncEnumerable<(PackageIdentity Package, bool Success)> DeleteAsync(IEnumerable<string> packageIds, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        if (packageIds is null || !(packageIds = packageIds.Select(i => i?.Trim()!).Where(i => !string.IsNullOrEmpty(i))).Any())
+        ArgumentNullException.ThrowIfNull(packageIds);
+        if (!(packageIds = packageIds.Select(i => i?.Trim()!).Where(i => !string.IsNullOrEmpty(i))).Any())
             yield break;
         var findPackageById = await GetFindPackageByIdResourceAsync(cancellationToken);
         var packageUpdate = await GetPackageUpdateResourceAsync(cancellationToken);
@@ -152,40 +152,34 @@ public sealed class LocalClientService(IOptions<AppSettings> options, ILogger<Up
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
     /// <returns><see langword="true"/> if the package was added; otherwise, <see langword="false"/>.</returns>
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.8.x/src/NuGet.Core/NuGet.Protocol/Resources/PackageUpdateResource.cs#L55"/>
-    public async Task<bool> AddPackageAsync(string fileName, bool skipDuplicate, CancellationToken cancellationToken)
+    public async Task AddPackageAsync(string fileName, bool skipDuplicate, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
-        if (File.Exists(fileName))
+
+        var packageUpdateResource = await GetPackageUpdateResourceAsync(cancellationToken);
+        try
         {
-            var packageUpdateResource = await GetPackageUpdateResourceAsync(cancellationToken);
-            try
-            {
-                await packageUpdateResource.Push(
-                    packagePaths: new[] { fileName },
-                    symbolSource: null,
-                    timeoutInSecond: 60,
-                    disableBuffering: false,
-                    getApiKey: s => null,
-                    getSymbolApiKey: null,
-                    noServiceEndpoint: false,
-                    skipDuplicate: skipDuplicate,
-                    symbolPackageUpdateResource: null,
-                    log: NuGetLogger
-                );
-                return true;
-            }
-            catch (InvalidDataException error)
-            {
-                Logger.LogPackageFileNotZipArchive(fileName, error);
-            }
-            catch (PackagingException error)
-            {
-                Logger.LogPackageFileInvalidContent(fileName, error);
-            }
+            await packageUpdateResource.Push(
+                packagePaths: new[] { fileName },
+                symbolSource: null,
+                timeoutInSecond: 60,
+                disableBuffering: false,
+                getApiKey: s => null,
+                getSymbolApiKey: null,
+                noServiceEndpoint: false,
+                skipDuplicate: skipDuplicate,
+                symbolPackageUpdateResource: null,
+                log: NuGetLogger
+            );
         }
-        else
-            Logger.LogPackageFileNotFound(fileName);
-        return false;
+        catch (InvalidDataException error)
+        {
+            Logger.LogPackageFileNotZipArchive(fileName, error);
+        }
+        catch (PackagingException error)
+        {
+            Logger.LogPackageFileInvalidContent(fileName, error);
+        }
     }
 
     #endregion
