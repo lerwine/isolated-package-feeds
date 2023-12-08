@@ -9,7 +9,7 @@ public class LocalClientServiceTest
     private HostingFake _hosting;
 
     [SetUp]
-    public void Setup() => _hosting = HostingFake.Setup<UpstreamClientServiceTest>();
+    public void Setup() => _hosting = HostingFake.Setup<LocalClientServiceTest>();
 
     [TearDown]
     public async Task TearDown() => await _hosting.TearDownAsync();
