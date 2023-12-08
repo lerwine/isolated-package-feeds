@@ -28,6 +28,7 @@ internal class Program
             .Bind(builder.Configuration.GetSection(nameof(NuGetPuller)))
             .ValidateDataAnnotations();
         builder.Services
+            .AddSingleton<ValidatedAppSettings>()
             .AddSingleton<IValidateOptions<AppSettings>, AppSettingsValidatorService>()
             .AddSingleton<LocalClientService>()
             .AddSingleton<UpstreamClientService>()

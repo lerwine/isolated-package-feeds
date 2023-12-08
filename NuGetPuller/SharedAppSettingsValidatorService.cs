@@ -9,15 +9,15 @@ namespace NuGetPuller;
 
 public abstract class SharedAppSettingsValidatorService<TSettings, TValidated> : IValidateOptions<TSettings>
     where TSettings : class, ISharedAppSettings
-    where TValidated : class, IValidatedSharedAppSettings, new()
+    where TValidated : class, IValidatedSharedAppSettings
 {
-    public TValidated Validated { get; } = new();
+    private readonly TValidated _validatedSettings;
 
     protected ILogger<SharedAppSettingsValidatorService<TSettings, TValidated>> Logger { get; }
 
     protected IHostEnvironment HostEnvironment { get; }
 
-    protected SharedAppSettingsValidatorService(ILogger<SharedAppSettingsValidatorService<TSettings, TValidated>> logger, IHostEnvironment hostEnvironment) => (Logger, HostEnvironment) = (logger, hostEnvironment);
+    protected SharedAppSettingsValidatorService(ILogger<SharedAppSettingsValidatorService<TSettings, TValidated>> logger, TValidated validatedSettings, IHostEnvironment hostEnvironment) => (Logger, HostEnvironment, _validatedSettings) = (logger, hostEnvironment, validatedSettings);
 
     private bool CheckUpstreamServiceIndex(TSettings options, [NotNullWhen(true)] out ValidationResult? validationResult)
     {
@@ -28,30 +28,30 @@ public abstract class SharedAppSettingsValidatorService<TSettings, TValidated> :
             {
                 if (directory is not null && !directory.Exists)
                 {
-                    Validated.UpstreamServiceIndex = absoluteUri;
-                    validationResult = new ValidationResult(Logger.LogRepositoryPathNotFound(Validated.UpstreamServiceIndex.AbsoluteUri, true));
+                    _validatedSettings.UpstreamServiceIndex = absoluteUri;
+                    validationResult = new ValidationResult(Logger.LogRepositoryPathNotFound(_validatedSettings.UpstreamServiceIndex.AbsoluteUri, true));
                     return true;
                 }
             }
-            Validated.UpstreamServiceIndex = absoluteUri;
+            _validatedSettings.UpstreamServiceIndex = absoluteUri;
             validationResult = null;
             return false;
         }
         catch (System.Security.SecurityException error) // The caller does not have the required permissions to the path
         {
-            validationResult = new ValidationResult(Logger.LogRepositorySecurityException(Validated.UpstreamServiceIndex.AbsoluteUri, true, error), Enumerable.Repeat(opt.SettingName, 1));
+            validationResult = new ValidationResult(Logger.LogRepositorySecurityException(_validatedSettings.UpstreamServiceIndex.AbsoluteUri, true, error), Enumerable.Repeat(opt.SettingName, 1));
         }
         catch (UriSchemeNotSupportedException error) // Path is a URI, but not an https, http or file.
         {
-            validationResult = new ValidationResult(Logger.LogInvalidRepositoryUrl(Validated.UpstreamServiceIndex.AbsoluteUri, true, error), Enumerable.Repeat(opt.SettingName, 1));
+            validationResult = new ValidationResult(Logger.LogInvalidRepositoryUrl(_validatedSettings.UpstreamServiceIndex.AbsoluteUri, true, error), Enumerable.Repeat(opt.SettingName, 1));
         }
         catch (PathTooLongException error) // Path, file name, or both exceed the system-defined maximum length
         {
-            validationResult = new ValidationResult(Logger.LogInvalidRepositoryUrl(Validated.UpstreamServiceIndex.AbsoluteUri, true, error), Enumerable.Repeat(opt.SettingName, 1));
+            validationResult = new ValidationResult(Logger.LogInvalidRepositoryUrl(_validatedSettings.UpstreamServiceIndex.AbsoluteUri, true, error), Enumerable.Repeat(opt.SettingName, 1));
         }
         catch (ArgumentException error) // Path contains invalid characters or system could not retrieve the absolute path
         {
-            validationResult = new ValidationResult(Logger.LogInvalidRepositoryUrl(Validated.UpstreamServiceIndex.AbsoluteUri, true, error), Enumerable.Repeat(opt.SettingName, 1));
+            validationResult = new ValidationResult(Logger.LogInvalidRepositoryUrl(_validatedSettings.UpstreamServiceIndex.AbsoluteUri, true, error), Enumerable.Repeat(opt.SettingName, 1));
         }
         return true;
 
@@ -63,17 +63,17 @@ public abstract class SharedAppSettingsValidatorService<TSettings, TValidated> :
         try
         {
             var directoryInfo = ResourceLocatorUtil.GetDirectoryInfo(opt.BasePath, path);
-            path = (Validated.LocalRepository = directoryInfo).FullName;
-            if (Validated.LocalRepository.Exists)
+            path = (_validatedSettings.LocalRepository = directoryInfo).FullName;
+            if (_validatedSettings.LocalRepository.Exists)
             {
-                if (Validated.LocalRepository.Parent is null || File.Exists(path) || !Validated.LocalRepository.Parent.Exists)
+                if (_validatedSettings.LocalRepository.Parent is null || File.Exists(path) || !_validatedSettings.LocalRepository.Parent.Exists)
                 {
                     validationResult = new ValidationResult(Logger.LogRepositoryPathNotFound(path, false), Enumerable.Repeat(opt.SettingName, 1));
                     return true;
                 }
             }
             else
-                Validated.LocalRepository.Create();
+                _validatedSettings.LocalRepository.Create();
             validationResult = null;
             return false;
         }
@@ -109,8 +109,8 @@ public abstract class SharedAppSettingsValidatorService<TSettings, TValidated> :
         var path = options.OverrideGlobalPackagesFolder.DefaultIfWhiteSpace<(string SettingName, string BasePath)>(() => (nameof(ISharedAppSettings.OverrideGlobalPackagesFolder), Directory.GetCurrentDirectory()), options.GlobalPackagesFolder, () => (nameof(ISharedAppSettings.GlobalPackagesFolder), HostEnvironment.ContentRootPath), out var opt);
         try
         {
-            path = (Validated.GlobalPackagesFolder = ResourceLocatorUtil.GetDirectoryInfo(opt.BasePath, path)).FullName;
-            if (Validated.GlobalPackagesFolder.Exists)
+            path = (_validatedSettings.GlobalPackagesFolder = ResourceLocatorUtil.GetDirectoryInfo(opt.BasePath, path)).FullName;
+            if (_validatedSettings.GlobalPackagesFolder.Exists)
             {
                 validationResult = null;
                 return false;
@@ -136,7 +136,7 @@ public abstract class SharedAppSettingsValidatorService<TSettings, TValidated> :
         return true;
     }
 
-    protected abstract void Validate(TSettings settings, List<ValidationResult> validationResults);
+    protected abstract void Validate(TSettings settings, TValidated validatedSettings, List<ValidationResult> validationResults);
 
     public ValidateOptionsResult Validate(string? name, TSettings settings)
     {
@@ -149,14 +149,14 @@ public abstract class SharedAppSettingsValidatorService<TSettings, TValidated> :
             validationResults.Add(validationResult);
         if (validationResults.Count == 0)
         {
-            if (Validated.UpstreamServiceIndex.IsFile && NoCaseComparer.Equals(Validated.LocalRepository.FullName, Validated.UpstreamServiceIndex.LocalPath))
-                validationResults.Add(new ValidationResult(Logger.LogLocalSameAsUpstreamNugetRepository(Validated.LocalRepository.FullName), new string[] { nameof(ISharedAppSettings.LocalRepository), nameof(ISharedAppSettings.UpstreamServiceIndex) }));
-            else if (NoCaseComparer.Equals(Validated.LocalRepository.FullName, Validated.GlobalPackagesFolder.FullName))
-                validationResults.Add(new ValidationResult(Logger.LogLocalRepositorySameAsGlobalPackagesFolder(Validated.LocalRepository.FullName), new string[] { nameof(ISharedAppSettings.LocalRepository), nameof(ISharedAppSettings.GlobalPackagesFolder) }));
-            else if (Validated.UpstreamServiceIndex.IsFile && NoCaseComparer.Equals(Validated.UpstreamServiceIndex.LocalPath, Validated.GlobalPackagesFolder))
-                validationResults.Add(new ValidationResult(Logger.LogUpstreamRepositorySameAsGlobalPackagesFolder(Validated.GlobalPackagesFolder.FullName), new string[] { nameof(ISharedAppSettings.UpstreamServiceIndex), nameof(ISharedAppSettings.GlobalPackagesFolder) }));
+            if (_validatedSettings.UpstreamServiceIndex.IsFile && NoCaseComparer.Equals(_validatedSettings.LocalRepository.FullName, _validatedSettings.UpstreamServiceIndex.LocalPath))
+                validationResults.Add(new ValidationResult(Logger.LogLocalSameAsUpstreamNugetRepository(_validatedSettings.LocalRepository.FullName), new string[] { nameof(ISharedAppSettings.LocalRepository), nameof(ISharedAppSettings.UpstreamServiceIndex) }));
+            else if (NoCaseComparer.Equals(_validatedSettings.LocalRepository.FullName, _validatedSettings.GlobalPackagesFolder.FullName))
+                validationResults.Add(new ValidationResult(Logger.LogLocalRepositorySameAsGlobalPackagesFolder(_validatedSettings.LocalRepository.FullName), new string[] { nameof(ISharedAppSettings.LocalRepository), nameof(ISharedAppSettings.GlobalPackagesFolder) }));
+            else if (_validatedSettings.UpstreamServiceIndex.IsFile && NoCaseComparer.Equals(_validatedSettings.UpstreamServiceIndex.LocalPath, _validatedSettings.GlobalPackagesFolder))
+                validationResults.Add(new ValidationResult(Logger.LogUpstreamRepositorySameAsGlobalPackagesFolder(_validatedSettings.GlobalPackagesFolder.FullName), new string[] { nameof(ISharedAppSettings.UpstreamServiceIndex), nameof(ISharedAppSettings.GlobalPackagesFolder) }));
         }
-        Validate(settings, validationResults);
+        Validate(settings, _validatedSettings, validationResults);
         return (validationResults.Count == 0) ? ValidateOptionsResult.Success : ValidateOptionsResult.Fail(validationResults.Select(r => r.ToString()));
     }
 }

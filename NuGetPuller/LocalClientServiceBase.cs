@@ -8,8 +8,7 @@ using static NuGetPuller.CommonStatic;
 
 namespace NuGetPuller;
 
-public abstract class LocalClientServiceBase(ISharedAppSettings settings, IValidatedSharedAppSettings validated, ILogger logger) :
-    ClientService(Repository.Factory.GetCoreV3(validated.LocalRepository?.FullName ?? settings.LocalRepository), settings, validated, logger, false)
+public abstract class LocalClientServiceBase(IValidatedSharedAppSettings settings, ILogger logger) : ClientService(Repository.Factory.GetCoreV3(settings.GetLocalRepository()), settings, logger, false)
 {
     private readonly object _syncRoot = new();
 

@@ -1,8 +1,7 @@
+using Microsoft.Extensions.Options;
+
 namespace NuGetPuller.UnitTests.Helpers;
 
-public class ValidatedTestAppSettings : IValidatedSharedAppSettings
+public class ValidatedTestAppSettings(IOptions<TestAppSettings> options) : ValidatedSharedAppSettings<TestAppSettings>(options.Value)
 {
-    public Uri UpstreamServiceIndex { get; set; } = null!;
-    public DirectoryInfo LocalRepository { get; set; } = null!;
-    public DirectoryInfo GlobalPackagesFolder { get; set; } = null!;
 }

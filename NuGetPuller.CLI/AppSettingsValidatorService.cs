@@ -5,11 +5,9 @@ using Microsoft.Extensions.Logging;
 
 namespace NuGetPuller.CLI;
 
-public partial class AppSettingsValidatorService : SharedAppSettingsValidatorService<AppSettings, AppSettings.ValidatedAppSettings>
+public partial class AppSettingsValidatorService(ILogger<AppSettingsValidatorService> logger, ValidatedAppSettings validatedAppSettings, IHostEnvironment hostEnvironment) : SharedAppSettingsValidatorService<AppSettings, ValidatedAppSettings>(logger, validatedAppSettings, hostEnvironment)
 {
-    public AppSettingsValidatorService(ILogger<AppSettingsValidatorService> logger, IHostEnvironment hostEnvironment) : base(logger, hostEnvironment) { }
-
-    private bool CheckExportLocalManifest(AppSettings options, [NotNullWhen(true)] out ValidationResult? validationResult)
+    private bool CheckExportLocalManifest(AppSettings options, ValidatedAppSettings validatedAppSettings, [NotNullWhen(true)] out ValidationResult? validationResult)
     {
         string? path = options.ExportLocalManifest;
         if (string.IsNullOrWhiteSpace(path))
@@ -19,8 +17,8 @@ public partial class AppSettingsValidatorService : SharedAppSettingsValidatorSer
         }
         try
         {
-            path = (Validated.ExportLocalManifest = ResourceLocatorUtil.GetFileInfo(Directory.GetCurrentDirectory(), path)).FullName;
-            if (Validated.ExportLocalManifest.Exists || (Validated.ExportLocalManifest.Directory is not null && Validated.ExportLocalManifest.Directory.Exists))
+            path = (validatedAppSettings.ExportLocalManifest = ResourceLocatorUtil.GetFileInfo(Directory.GetCurrentDirectory(), path)).FullName;
+            if (validatedAppSettings.ExportLocalManifest.Exists || (validatedAppSettings.ExportLocalManifest.Directory is not null && validatedAppSettings.ExportLocalManifest.Directory.Exists))
             {
                 validationResult = null;
                 return false;
@@ -50,7 +48,7 @@ public partial class AppSettingsValidatorService : SharedAppSettingsValidatorSer
         return true;
     }
 
-    private bool CheckExportBundle(AppSettings options, [NotNullWhen(true)] out ValidationResult? validationResult)
+    private bool CheckExportBundle(AppSettings options, ValidatedAppSettings validatedAppSettings, [NotNullWhen(true)] out ValidationResult? validationResult)
     {
         string? path = options.ExportBundle;
         if (string.IsNullOrWhiteSpace(path))
@@ -60,8 +58,8 @@ public partial class AppSettingsValidatorService : SharedAppSettingsValidatorSer
         }
         try
         {
-            path = (Validated.ExportBundle = ResourceLocatorUtil.GetFileInfo(Directory.GetCurrentDirectory(), path)).FullName;
-            if (!Validated.ExportBundle.Exists && (Validated.ExportBundle.Directory is null || !Validated.ExportBundle.Directory.Exists))
+            path = (validatedAppSettings.ExportBundle = ResourceLocatorUtil.GetFileInfo(Directory.GetCurrentDirectory(), path)).FullName;
+            if (!validatedAppSettings.ExportBundle.Exists && (validatedAppSettings.ExportBundle.Directory is null || !validatedAppSettings.ExportBundle.Directory.Exists))
             {
                 validationResult = new ValidationResult(Logger.LogExportBundleDirectoryNotFound(path), Enumerable.Repeat(nameof(AppSettings.ExportBundle), 1));
                 return true;
@@ -97,9 +95,9 @@ public partial class AppSettingsValidatorService : SharedAppSettingsValidatorSer
         {
             if (string.IsNullOrWhiteSpace(path))
             {
-                path = $"{Path.GetFileNameWithoutExtension(Validated.ExportBundle.Name)}.json";
-                if (Validated.ExportBundle.Directory is not null)
-                    path = Path.Combine(Validated.ExportBundle.DirectoryName!, path);
+                path = $"{Path.GetFileNameWithoutExtension(validatedAppSettings.ExportBundle.Name)}.json";
+                if (validatedAppSettings.ExportBundle.Directory is not null)
+                    path = Path.Combine(validatedAppSettings.ExportBundle.DirectoryName!, path);
             }
             else
             {
@@ -140,7 +138,7 @@ public partial class AppSettingsValidatorService : SharedAppSettingsValidatorSer
         path = options.SaveTargetManifestAs;
         if (string.IsNullOrWhiteSpace(path))
         {
-            Validated.SaveTargetManifestAs = Validated.TargetManifestFile;
+            validatedAppSettings.SaveTargetManifestAs = validatedAppSettings.TargetManifestFile;
             validationResult = null;
             return false;
         }
@@ -179,7 +177,7 @@ public partial class AppSettingsValidatorService : SharedAppSettingsValidatorSer
         return true;
     }
 
-    private bool CheckImport(AppSettings options, [NotNullWhen(true)] out ValidationResult? validationResult)
+    private bool CheckImport(AppSettings options, ValidatedAppSettings validatedAppSettings, [NotNullWhen(true)] out ValidationResult? validationResult)
     {
         string? path = options.Import;
         if (string.IsNullOrWhiteSpace(path))
@@ -189,8 +187,8 @@ public partial class AppSettingsValidatorService : SharedAppSettingsValidatorSer
         }
         try
         {
-            path = (Validated.Import = ResourceLocatorUtil.GetFileOrDirectory(Directory.GetCurrentDirectory(), path)).FullName;
-            if (Validated.Import.Exists)
+            path = (validatedAppSettings.Import = ResourceLocatorUtil.GetFileOrDirectory(Directory.GetCurrentDirectory(), path)).FullName;
+            if (validatedAppSettings.Import.Exists)
             {
                 validationResult = null;
                 return false;
@@ -220,13 +218,13 @@ public partial class AppSettingsValidatorService : SharedAppSettingsValidatorSer
         return true;
     }
 
-    protected override void Validate(AppSettings options, List<ValidationResult> validationResults)
+    protected override void Validate(AppSettings options, ValidatedAppSettings validatedAppSettings, List<ValidationResult> validationResults)
     {
-        if (CheckExportLocalManifest(options, out ValidationResult? validationResult))
+        if (CheckExportLocalManifest(options, validatedAppSettings, out ValidationResult? validationResult))
             validationResults.Add(validationResult);
-        if (CheckExportBundle(options, out validationResult))
+        if (CheckExportBundle(options, validatedAppSettings, out validationResult))
             validationResults.Add(validationResult);
-        if (CheckImport(options, out validationResult))
+        if (CheckImport(options, validatedAppSettings, out validationResult))
             validationResults.Add(validationResult);
     }
 }

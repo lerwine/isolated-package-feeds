@@ -38,9 +38,9 @@ public abstract class ClientService
 
     #endregion
 
-    protected ClientService(SourceRepository sourceRepository, ISharedAppSettings settings, IValidatedSharedAppSettings validated, ILogger logger, bool isUpstream)
+    protected ClientService(SourceRepository sourceRepository, IValidatedSharedAppSettings settings, ILogger logger, bool isUpstream)
     {
-        GlobalPackagesFolder = validated.GlobalPackagesFolder?.FullName ?? settings.GlobalPackagesFolder;
+        GlobalPackagesFolder = settings.GetGlobalPackagesFolder();
         NuGetLogger = new(Logger = logger);
         SourceRepository = sourceRepository;
         IsUpstream = isUpstream;

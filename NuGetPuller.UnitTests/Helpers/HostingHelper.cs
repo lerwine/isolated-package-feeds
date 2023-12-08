@@ -39,6 +39,7 @@ record HostingFake(IHost Host, string PreviousCwd, DirectoryInfo BaseDirectory, 
             .Bind(builder.Configuration.GetSection(nameof(NuGetPuller)))
             .ValidateDataAnnotations();
         builder.Services
+            .AddSingleton<ValidatedTestAppSettings>()
             .AddSingleton<IValidateOptions<TestAppSettings>, TestAppSettingsValidatorService>()
             .AddSingleton<LocalClientService>()
             .AddSingleton<UpstreamClientService>()
