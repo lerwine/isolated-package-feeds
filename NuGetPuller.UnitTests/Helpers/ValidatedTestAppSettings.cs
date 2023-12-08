@@ -1,4 +1,4 @@
-namespace NuGetPuller.UnitTests;
+namespace NuGetPuller.UnitTests.Helpers;
 
 public class ValidatedTestAppSettings : IValidatedSharedAppSettings
 {
