@@ -1,15 +1,7 @@
-using System.Text.RegularExpressions;
+namespace NuGetPuller.CLI;
 
-namespace NuGetPuller;
-
-public static partial class Constants
+public static class CommandLineSwitches
 {
-    public static readonly StringComparer NoCaseComparer = StringComparer.CurrentCultureIgnoreCase;
-
-    public static readonly Regex NonNormalizedWhiteSpaceRegex = CreateNonNormalizedWhiteSpaceRegex();
-
-    public static readonly Regex LineBreakRegex = CreateLineBreakRegex();
-
     /// <summary>
     /// Gets the command line switch that sets <see cref="AppSettings.UpdateAll" /> to <see langword="true"/>.
     /// </summary>
@@ -61,19 +53,9 @@ public static partial class Constants
     public const string COMMAND_LINE_SWITCH_export_2D_local_2D_manifest = "--export-local-manifest";
 
     /// <summary>
-    /// Gets the default value for <see cref="AppSettings.UpstreamServiceIndex"/>.
-    /// </summary>
-    public const string DEFAULT_UPSTREAM_SERVICE_INDEX = "https://api.nuget.org/v3/index.json";
-
-    /// <summary>
     /// Gets the command line switch that sets the <see cref="AppSettings.OverrideUpstreamServiceIndex" /> value.
     /// </summary>
     public const string COMMAND_LINE_SWITCH_upstream_2D_service_2D_index = "--upstream-service-index";
-
-    /// <summary>
-    /// The default path of the local repository, relative to the <see cref="Microsoft.Extensions.Hosting.IHostEnvironment.ContentRootPath" />.
-    /// </summary>
-    public const string DEFAULT_LOCAL_REPOSITORY = "LocalSource";
 
     /// <summary>
     /// Gets the command line switch that sets the <see cref="AppSettings.OverrideLocalRepository" /> value.
@@ -100,9 +82,4 @@ public static partial class Constants
     /// </summary>
     public const string COMMAND_LINE_SWITCH__3F_ = "-?";
 
-    [GeneratedRegex(@"( |(?! ))[\r\n\s]+", RegexOptions.Compiled)]
-    private static partial Regex CreateNonNormalizedWhiteSpaceRegex();
-
-    [GeneratedRegex(@"\r?\n|\n", RegexOptions.Compiled)]
-    private static partial Regex CreateLineBreakRegex();
 }

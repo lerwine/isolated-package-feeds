@@ -1,19 +1,19 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NuGetPuller;
+using NuGetPuller.CLI;
 
-namespace NuGetPuller;
-
-class Program
+internal class Program
 {
     internal static IHost Host { get; private set; } = null!;
 
-    static void Main(string[] args)
+    private static void Main(string[] args)
     {
         HostApplicationBuilder builder = AppHost.CreateBuilder(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)!, args);
         AppHost.ConfigureLogging(builder);
-        AppHost.ConfigureSettings(builder, args);
+        AppHost.ConfigureSettings<AppSettings>(builder, configuration => AppSettings.Configure(args, configuration));
         builder.Services.AddHostedService<MainService>();
-        AppHost.ConfigureServices(builder, settings => AppHost.DefaultPostConfigure(settings, builder));
+        AppHost.ConfigureServices<AppSettings, AppSettingsValidatorService, LocalClientService, UpstreamClientService>(builder, settings => AppHost.DefaultPostConfigure(settings, builder));
         (Host = builder.Build()).Run();
     }
 }

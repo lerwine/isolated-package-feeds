@@ -26,10 +26,10 @@ public class LocalClientServiceTest
         _previousCwd = Directory.GetCurrentDirectory();
         Directory.SetCurrentDirectory(_cwd.FullName);
         HostApplicationBuilder builder = AppHost.CreateBuilder(testContext.TestDirectory);
-        AppHost.ConfigureSettings(builder);
+        AppHost.ConfigureSettings<TestAppSettings>(builder);
         AppHost.ConfigureLogging(builder);
         builder.Logging.AddDebug();
-        AppHost.ConfigureServices(builder, settings => AppHost.DefaultPostConfigure(settings, builder));
+        AppHost.ConfigureServices<TestAppSettings, TestAppSettingsValidatorService, LocalClientService, UpstreamClientService>(builder, settings => AppHost.DefaultPostConfigure(settings, builder));
         _host = builder.Build();
         _host.Start();
     }
@@ -57,7 +57,7 @@ public class LocalClientServiceTest
         {
             await target.CopyNupkgToStreamAsync(packageId, version, stream, token);
         }, ".nupkg", CancellationToken.None);
-        var result = await target.AddPackageAsync(fileInfo.FullName, false, CancellationToken.None);
-        Assert.That(result, Is.True);
+        await target.AddPackageAsync(fileInfo.FullName, false, CancellationToken.None);
+        Assert.That(await target.DoesPackageExistAsync(packageId, version, CancellationToken.None), Is.True);
     }
 }

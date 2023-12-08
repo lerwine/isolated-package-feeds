@@ -2,11 +2,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch NuGetPuller",
+            "name": "Launch NuGetPuller CLI",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "Build NuGetPuller",
-            "program": "${workspaceFolder}/NuGetPuller/bin/Debug/net8.0/NuGetPuller.dll",
+            "preLaunchTask": "Build NuGetPuller CLI",
+            "program": "${workspaceFolder}/NuGetPuller.CLI/bin/Debug/net8.0/NuGetPuller.CLI.dll",
             "args": [
                 "-l",
                 "-a", "Microsoft.CodeAnalysis.CSharp"
@@ -15,7 +15,7 @@
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "DOTNET_ENVIRONMENT": "Development"
             },
-            "cwd": "${workspaceFolder}/NuGetPuller",
+            "cwd": "${workspaceFolder}/NuGetPuller.CLI",
             "stopAtEntry": false,
             "console": "internalConsole"
         },

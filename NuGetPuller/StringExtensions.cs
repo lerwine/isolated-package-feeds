@@ -1,5 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using static NuGetPuller.Constants;
+using static NuGetPuller.CommonStatic;
 
 namespace NuGetPuller;
 

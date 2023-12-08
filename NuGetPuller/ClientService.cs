@@ -5,11 +5,15 @@ using NuGet.Frameworks;
 using NuGet.Packaging.Core;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
-using static NuGetPuller.Constants;
+using static NuGetPuller.CommonStatic;
 
 namespace NuGetPuller;
-public abstract class ClientService : IDisposable
+
+public abstract class ClientService<TSettings> : IClientService
+    where TSettings : class, ISharedAppSettings
 {
+    #region Fields and Properties
+
     private bool _isDisposed;
     private readonly object _syncRoot = new();
     private Task<PackageMetadataResource>? _getPackageMetadataResourceAsync;
@@ -33,9 +37,11 @@ public abstract class ClientService : IDisposable
 
     public string PackageSourceLocation => SourceRepository.PackageSource.Source;
 
-    protected ClientService(SourceRepository sourceRepository, IOptions<AppSettings> options, ILogger logger, bool isUpstream)
+    #endregion
+
+    protected ClientService(SourceRepository sourceRepository, IOptions<TSettings> options, ILogger logger, bool isUpstream)
     {
-        GlobalPackagesFolder = options.Value.Validated.GlobalPackagesFolderPath;
+        GlobalPackagesFolder = options.Value.Validated.GlobalPackagesFolder?.FullName ?? options.Value.GlobalPackagesFolder;
         NuGetLogger = new(Logger = logger);
         SourceRepository = sourceRepository;
         IsUpstream = isUpstream;
@@ -311,6 +317,12 @@ public abstract class ClientService : IDisposable
         }
     }
 
+    /// <summary>
+    /// Retrieve all versions of packages, including all versions of all dependencies.
+    /// </summary>
+    /// <param name="packageIds">The IDs of the packages to retrieve versions and dependencies for.</param>
+    /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
+    /// <returns>All versions of packages, including all versions of all dependencies</returns>
     public async IAsyncEnumerable<PackageIdentity> GetAllVersionsWithDependenciesAsync(IEnumerable<string> packageIds, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(packageIds);

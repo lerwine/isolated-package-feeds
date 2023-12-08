@@ -5,7 +5,8 @@ using NuGet.Protocol.Core.Types;
 
 namespace NuGetPuller;
 
-public sealed class UpstreamClientService(IOptions<AppSettings> options, ILogger<UpstreamClientService> logger) : ClientService(Repository.Factory.GetCoreV3(options.Value.Validated.UpstreamServiceLocation), options, logger, true)
+public class UpstreamClientService<TSettings>(IOptions<TSettings> options, ILogger logger) : ClientService<TSettings>(Repository.Factory.GetCoreV3(options.Value.Validated.UpstreamServiceIndex?.AbsoluteUri ?? options.Value.UpstreamServiceIndex), options, logger, true), IUpstreamClientService
+    where TSettings : class, ISharedAppSettings
 {
     /// <summary>
     /// Retrieve dependency info for all versions of a single package.

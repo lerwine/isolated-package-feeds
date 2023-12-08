@@ -29,10 +29,10 @@ public class UpstreamClientServiceTest
         _previousCwd = Directory.GetCurrentDirectory();
         Directory.SetCurrentDirectory(_cwd.FullName);
         HostApplicationBuilder builder = AppHost.CreateBuilder(testContext.TestDirectory);
-        AppHost.ConfigureSettings(builder);
+        AppHost.ConfigureSettings<TestAppSettings>(builder);
         AppHost.ConfigureLogging(builder);
         builder.Logging.AddDebug();
-        AppHost.ConfigureServices(builder, settings => AppHost.DefaultPostConfigure(settings, builder));
+        AppHost.ConfigureServices<TestAppSettings, TestAppSettingsValidatorService, LocalClientService, UpstreamClientService>(builder, settings => AppHost.DefaultPostConfigure(settings, builder));
         _host = builder.Build();
         _host.Start();
     }

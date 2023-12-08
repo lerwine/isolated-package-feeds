@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGetPuller", "NuGetPuller\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGetPuller.UnitTests", "NuGetPuller.UnitTests\NuGetPuller.UnitTests.csproj", "{9E205434-8D93-4771-A1D6-3D596270474E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGetPuller.CLI", "NuGetPuller.CLI\NuGetPuller.CLI.csproj", "{567B6DDD-2D8B-44B8-9647-CB576098FD06}"
+EndProject
 Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -98,5 +100,17 @@ Global
 		{9E205434-8D93-4771-A1D6-3D596270474E}.Release|x64.Build.0 = Release|Any CPU
 		{9E205434-8D93-4771-A1D6-3D596270474E}.Release|x86.ActiveCfg = Release|Any CPU
 		{9E205434-8D93-4771-A1D6-3D596270474E}.Release|x86.Build.0 = Release|Any CPU
+		{567B6DDD-2D8B-44B8-9647-CB576098FD06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{567B6DDD-2D8B-44B8-9647-CB576098FD06}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{567B6DDD-2D8B-44B8-9647-CB576098FD06}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{567B6DDD-2D8B-44B8-9647-CB576098FD06}.Debug|x64.Build.0 = Debug|Any CPU
+		{567B6DDD-2D8B-44B8-9647-CB576098FD06}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{567B6DDD-2D8B-44B8-9647-CB576098FD06}.Debug|x86.Build.0 = Debug|Any CPU
+		{567B6DDD-2D8B-44B8-9647-CB576098FD06}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{567B6DDD-2D8B-44B8-9647-CB576098FD06}.Release|Any CPU.Build.0 = Release|Any CPU
+		{567B6DDD-2D8B-44B8-9647-CB576098FD06}.Release|x64.ActiveCfg = Release|Any CPU
+		{567B6DDD-2D8B-44B8-9647-CB576098FD06}.Release|x64.Build.0 = Release|Any CPU
+		{567B6DDD-2D8B-44B8-9647-CB576098FD06}.Release|x86.ActiveCfg = Release|Any CPU
+		{567B6DDD-2D8B-44B8-9647-CB576098FD06}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

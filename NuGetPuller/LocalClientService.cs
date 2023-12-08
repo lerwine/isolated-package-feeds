@@ -5,12 +5,13 @@ using NuGet.Packaging.Core;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
-using static NuGetPuller.Constants;
+using static NuGetPuller.CommonStatic;
 
 namespace NuGetPuller;
 
-public sealed class LocalClientService(IOptions<AppSettings> options, ILogger<UpstreamClientService> logger) :
-    ClientService(Repository.Factory.GetCoreV3(options.Value.Validated.LocalRepositoryPath), options, logger, false)
+public class LocalClientService<TSettings>(IOptions<TSettings> options, ILogger logger) :
+    ClientService<TSettings>(Repository.Factory.GetCoreV3(options.Value.Validated.LocalRepository?.FullName ?? options.Value.LocalRepository), options, logger, false), ILocalClientService
+    where TSettings : class, ISharedAppSettings
 {
     private readonly object _syncRoot = new();
 
@@ -186,4 +187,3 @@ public sealed class LocalClientService(IOptions<AppSettings> options, ILogger<Up
 
     #endregion
 }
-

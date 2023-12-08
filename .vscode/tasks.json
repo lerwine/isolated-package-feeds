@@ -25,6 +25,20 @@
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile",
+            "group": "build"
+        },
+        {
+            "label": "Build NuGetPuller CLI",
+            "command": "dotnet",
+            "type": "process",
+            "dependsOn":[ "Build NuGetPuller" ],
+            "args": [
+                "build",
+                "${workspaceFolder}/NuGetPuller.CLI/NuGetPuller.CLI.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile",
             "group": {
                 "kind": "build",
                 "isDefault": true

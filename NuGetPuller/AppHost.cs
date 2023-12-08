@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NuGet.Configuration;
 using Serilog;
-using static NuGetPuller.Constants;
+using static NuGetPuller.CommonStatic;
 
 namespace NuGetPuller;
 
@@ -40,27 +40,32 @@ public static class AppHost
         builder.Logging.AddSerilog();
     }
 
-    public static void ConfigureSettings(HostApplicationBuilder builder, params string[] args)
+    public static void ConfigureSettings<T>(HostApplicationBuilder builder, Action<ConfigurationManager>? configure = null)
+        where T : class, ISharedAppSettings
     {
         ArgumentNullException.ThrowIfNull(builder);
-        AppSettings.Configure(args, builder.Configuration);
+        configure?.Invoke(builder.Configuration);
         builder.Services
-            .AddOptions<AppSettings>()
+            .AddOptions<T>()
             .Bind(builder.Configuration.GetSection(nameof(NuGetPuller)))
             .ValidateDataAnnotations();
     }
 
-    public static void ConfigureServices(HostApplicationBuilder builder, Action<AppSettings> onPostConfigure)
+    public static void ConfigureServices<TSettings, TValidator, TLocalClientSvc, TUpstreamClientSvc>(HostApplicationBuilder builder, Action<TSettings> onPostConfigure)
+        where TSettings : class, ISharedAppSettings
+        where TValidator : SharedAppSettingsValidatorService<TSettings>
+        where TLocalClientSvc : LocalClientService<TSettings>
+        where TUpstreamClientSvc : UpstreamClientService<TSettings>
     {
         ArgumentNullException.ThrowIfNull(builder);
         builder.Services
-        .AddSingleton<IValidateOptions<AppSettings>, AppSettingsValidatorService>()
-        .AddSingleton<LocalClientService>()
-        .AddSingleton<UpstreamClientService>()
+        .AddSingleton<IValidateOptions<TSettings>, TValidator>()
+        .AddSingleton<TLocalClientSvc>()
+        .AddSingleton<TUpstreamClientSvc>()
         .PostConfigure(onPostConfigure);
     }
 
-    public static void DefaultPostConfigure(AppSettings settings, HostApplicationBuilder builder)
+    public static void DefaultPostConfigure(ISharedAppSettings settings, HostApplicationBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(builder);
