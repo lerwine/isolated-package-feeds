@@ -19,11 +19,6 @@ public static class AppHost
             ContentRootPath = contentRootPath,
             Args = args
         });
-        // var fp = builder.Configuration.GetFileProvider();
-        // builder.Configuration.SetBasePath(contentRootPath);
-        // if (builder.Environment.IsDevelopment())
-        //     builder.Configuration.AddUserSecrets(System.Reflection.Assembly.GetExecutingAssembly(), true);
-        // fp = builder.Configuration.GetFileProvider();
         return builder;
     }
 
@@ -31,9 +26,6 @@ public static class AppHost
     {
         ArgumentNullException.ThrowIfNull(builder);
         builder.Logging.ClearProviders();
-        // var section = builder.Configuration.GetSection("Serilog:MinimumLevel:Default");
-        // section = builder.Configuration.GetSection("Logging:LogLevel:Default");
-        // section = builder.Configuration.GetRequiredSection("Serilog");
         Log.Logger = new LoggerConfiguration()
             .ReadFrom.Configuration(builder.Configuration)
             .CreateLogger();

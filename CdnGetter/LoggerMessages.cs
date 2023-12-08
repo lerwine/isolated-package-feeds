@@ -13,7 +13,9 @@ internal static class LoggerMessages
     #region UnexpectedService Error (0x0001)
 
     public const int EVENT_ID_UnexpectedServiceError = 0x0001;
+
     public static readonly EventId UnexpectedServiceError = new(EVENT_ID_UnexpectedServiceError, nameof(UnexpectedServiceError));
+
     private static readonly Action<ILogger, string, Exception?> _unexpectedServiceError = LoggerMessage.Define<string>(LogLevel.Error,
         UnexpectedServiceError, "Error executing {TypeFullName}.");
     /// <summary>
@@ -23,6 +25,7 @@ internal static class LoggerMessages
     /// <param name="type">The type of service that threw the exception.</param>
     /// <param name="error">The exception that caused the event.</param>
     public static void LogUnexpectedServiceError(this ILogger logger, Type type, Exception error) => _unexpectedServiceError(logger, type.FullName ?? type.Name, error);
+
     /// <summary>
     /// Logs an UnexpectedService event with event code 0x0001.
     /// </summary>
@@ -36,7 +39,9 @@ internal static class LoggerMessages
     #region InvalidContentRoot Error (0x0002)
 
     public const int EVENT_ID_InvalidContentRootError = 0x0002;
+
     public static readonly EventId InvalidContentRootError = new(EVENT_ID_InvalidContentRootError, nameof(InvalidContentRootError));
+
     private static readonly Action<ILogger, string, Exception?> _invalidContentRootError = LoggerMessage.Define<string>(LogLevel.Error, InvalidContentRootError,
         "Invalid path for CDN Content root: {Path}.");
     /// <summary>
@@ -52,7 +57,9 @@ internal static class LoggerMessages
     #region EVENT_ID_CannotCreateCdnContentRoot Error (0x0003)
 
     public const int EVENT_ID_CannotCreateCdnContentRootError = 0x0003;
+
     public static readonly EventId CannotCreateCdnContentRootError = new(EVENT_ID_CannotCreateCdnContentRootError, nameof(CannotCreateCdnContentRootError));
+
     private static readonly Action<ILogger, string, Exception?> _cannotCreateCdnContentRootError = LoggerMessage.Define<string>(LogLevel.Error, CannotCreateCdnContentRootError,
         "Canont create CDN content root folder: {Path}");
     /// <summary>
@@ -68,7 +75,9 @@ internal static class LoggerMessages
     #region UpstreamCdnNotFound Error (0x0004)
 
     public const int EVENT_ID_UpstreamCdnNotFoundError = 0x0004;
+
     public static readonly EventId UpstreamCdnNotFoundError = new(EVENT_ID_UpstreamCdnNotFoundError, nameof(UpstreamCdnNotFoundError));
+
     private static readonly Action<ILogger, string, Exception?> _upstreamCdnNotFoundError = LoggerMessage.Define<string>(LogLevel.Error, UpstreamCdnNotFoundError,
         "Upstream CDN Service with the name \"{UpstreamCdnName}\" was not found.");
     /// <summary>
@@ -84,7 +93,9 @@ internal static class LoggerMessages
     #region UpstreamCdnNotSupported Error (0x0005)
 
     public const int EVENT_ID_UpstreamCdnNotSupportedError = 0x0005;
+
     public static readonly EventId UpstreamCdnNotSupportedError = new(EVENT_ID_UpstreamCdnNotSupportedError, nameof(UpstreamCdnNotSupportedError));
+
     private static readonly Action<ILogger, string, Exception?> _upstreamCdnNotSupportedError = LoggerMessage.Define<string>(LogLevel.Error, UpstreamCdnNotSupportedError,
         "Upstream CDN Service with the name \"{UpstreamCdnName}\" is not supported.");
     /// <summary>
@@ -100,7 +111,9 @@ internal static class LoggerMessages
     #region ServiceTypeNotFound Error (0x0006)
 
     public const int EVENT_ID_ServiceTypeNotFoundError = 0x0006;
+
     public static readonly EventId ServiceTypeNotFoundError = new(EVENT_ID_ServiceTypeNotFoundError, nameof(ServiceTypeNotFoundError));
+
     private static readonly Action<ILogger, string, Exception?> _serviceTypeNotFoundError = LoggerMessage.Define<string>(LogLevel.Error, ServiceTypeNotFoundError,
         "Could not find service for {TypeFullName}.");
     /// <summary>
@@ -116,7 +129,9 @@ internal static class LoggerMessages
     #region NoUpstreamCdnsFound Warning (0x0007)
 
     public const int EVENT_ID_NoUpstreamCdnsFoundWarning = 0x0007;
+
     public static readonly EventId NoUpstreamCdnsFoundWarning = new(EVENT_ID_NoUpstreamCdnsFoundWarning, nameof(NoUpstreamCdnsFoundWarning));
+
     private static readonly Action<ILogger, Exception?> _noUpstreamCdnsFoundWarning = LoggerMessage.Define(LogLevel.Warning, NoUpstreamCdnsFoundWarning,
         "No CDNs found.");
     /// <summary>
@@ -130,7 +145,9 @@ internal static class LoggerMessages
     #region UpstreamCdnNoActions Warning (0x0008)
 
     public const int EVENT_ID_UpstreamCdnNoActionsWarning = 0x0008;
+
     public static readonly EventId UpstreamCdnNoActionsWarning = new(EVENT_ID_UpstreamCdnNoActionsWarning, nameof(UpstreamCdnNoActionsWarning));
+
     private static readonly Action<ILogger, string, Exception?> _upstreamCdnNoActionsWarning = LoggerMessage.Define<string>(LogLevel.Warning, UpstreamCdnNoActionsWarning,
         "Nothing to do with upstream CDN service \"{UpstreamCdnName}\".");
     /// <summary>
@@ -145,7 +162,9 @@ internal static class LoggerMessages
     #region NothingToDo Warning (0x0009)
 
     public const int EVENT_ID_NothingToDoWarning = 0x0009;
+
     public static readonly EventId NothingToDoWarning = new(EVENT_ID_NothingToDoWarning, nameof(NothingToDoWarning));
+
     private static readonly Action<ILogger, Exception?> _nothingToDoWarning = LoggerMessage.Define(LogLevel.Warning, NothingToDoWarning,
         "Nothing to do.");
     /// <summary>
@@ -159,7 +178,9 @@ internal static class LoggerMessages
     #region InvalidBaseUrl Error (0x000a)
 
     public const int EVENT_ID_InvalidBaseUrlError = 0x000a;
+
     public static readonly EventId InvalidBaseUrlError = new(EVENT_ID_InvalidBaseUrlError, nameof(InvalidBaseUrlError));
+
     private static readonly Action<ILogger, string, string, string, Exception?> _invalidBaseUrlError = LoggerMessage.Define<string, string, string>(LogLevel.Error, InvalidBaseUrlError,
         "Invalid base URL for {UpstreamCdnType} ({UpstreamCdnName}): \"{URIstring}\" is not an absolute http or https URL.");
     /// <summary>
@@ -171,6 +192,7 @@ internal static class LoggerMessages
     /// <param name="uriString">The invalid URI string.</param>
     /// <param name="error">The optional exception that caused the event.</param>
     public static void LogInvalidBaseUrlError(this ILogger logger, Type upstreamCdnType, string upstreamCdnName, string uriString, Exception? error = null) => _invalidBaseUrlError(logger, upstreamCdnType.FullName ?? upstreamCdnType.Name, upstreamCdnName, uriString, error);
+
     /// <summary>
     /// Logs an InvalidBaseUrl event with event code 0x000a.
     /// </summary>
@@ -181,18 +203,14 @@ internal static class LoggerMessages
     /// <typeparam name="T">The type of the upstream CDN.</typeparam>
     public static void LogInvalidBaseUrlError<T>(this ILogger logger, string upstreamCdnName, string uriString, Exception? error = null) => LogInvalidBaseUrlError(logger, typeof(T), upstreamCdnName, uriString, error);
 
-    [Obsolete("Use LogInvalidBaseUrlError<T>(ILogger, string, string, Exception?)")]
-    public static void LogInvalidBaseUrlError<T>(this ILogger logger, string upstreamCdnName, Exception? error = null) => throw new NotImplementedException();
-
-    [Obsolete("Use LogInvalidBaseUrlError(ILogger, Type, string, string, Exception?)")]
-    public static void LogInvalidBaseUrlError(this ILogger logger, Type upstreamCdnType, string upstreamCdnName, Exception? error = null) => throw new NotImplementedException();
-
     #endregion
 
     #region LocalLibraryNotFound Warning (0x000b)
 
     public const int EVENT_ID_LocalLibraryNotFoundWarning = 0x000b;
+
     public static readonly EventId LocalLibraryNotFoundWarning = new(EVENT_ID_LocalLibraryNotFoundWarning, nameof(LocalLibraryNotFoundWarning));
+
     private static readonly Action<ILogger, string, Exception?> _localLibraryNotFoundWarning = LoggerMessage.Define<string>(LogLevel.Warning, LocalLibraryNotFoundWarning,
         "Local library named \"{LibraryName}\" not found.");
     /// <summary>
@@ -207,7 +225,9 @@ internal static class LoggerMessages
     #region CdnLibraryNotFound Warning (0x000c)
 
     public const int EVENT_ID_CdnLibraryNotFoundWarning = 0x000c;
+
     public static readonly EventId CdnLibraryNotFoundWarning = new(EVENT_ID_CdnLibraryNotFoundWarning, nameof(CdnLibraryNotFoundWarning));
+
     private static readonly Action<ILogger, string, string, Exception?> _cdnLibraryNotFoundWarning = LoggerMessage.Define<string, string>(LogLevel.Warning, CdnLibraryNotFoundWarning,
         "No local library named \"{LibraryName}\" exists from upstream CDN service \"{UpstreamCdnName}\".");
     /// <summary>
@@ -223,7 +243,9 @@ internal static class LoggerMessages
     #region LocalLibraryAlreadyExists Warning (0x000d)
 
     public const int EVENT_ID_LocalLibraryAlreadyExistsWarning = 0x000d;
+
     public static readonly EventId LocalLibraryAlreadyExistsWarning = new(EVENT_ID_LocalLibraryAlreadyExistsWarning, nameof(LocalLibraryAlreadyExistsWarning));
+
     private static readonly Action<ILogger, string, Exception?> _localLibraryAlreadyExistsWarning = LoggerMessage.Define<string>(LogLevel.Warning, LocalLibraryAlreadyExistsWarning,
         "Local Library \"{LibraryName}\" has already been retreived.");
     /// <summary>
@@ -238,7 +260,9 @@ internal static class LoggerMessages
     #region CdnLibraryAlreadyExists Warning (0x000e)
 
     public const int EVENT_ID_CdnLibraryAlreadyExistsWarning = 0x000e;
+
     public static readonly EventId CdnLibraryAlreadyExistsWarning = new(EVENT_ID_CdnLibraryAlreadyExistsWarning, nameof(CdnLibraryAlreadyExistsWarning));
+
     private static readonly Action<ILogger, string, string, Exception?> _cdnLibraryAlreadyExistsWarning = LoggerMessage.Define<string, string>(LogLevel.Warning, CdnLibraryAlreadyExistsWarning,
         "Library \"{LibraryName}\" has already been retreived from \"{UpstreamCdnName}\".");
     /// <summary>
@@ -254,7 +278,9 @@ internal static class LoggerMessages
     #region UnsupportedSwitch Warning (0x000f)
 
     public const int EVENT_ID_UnsupportedSwitchWarning = 0x000f;
+
     public static readonly EventId UnsupportedSwitchWarning = new(EVENT_ID_UnsupportedSwitchWarning, nameof(UnsupportedSwitchWarning));
+
     private static readonly Action<ILogger, string, string, Exception?> _mutuallyExclusiveSwitchWarning1 = LoggerMessage.Define<string, string>(LogLevel.Warning, UnsupportedSwitchWarning,
         "The {SwitchName} switch cannot be used with the {MutuallyExclusive} switch.");
     private static readonly Action<ILogger, string, string, string, Exception?> _mutuallyExclusiveSwitchWarning2 = LoggerMessage.Define<string, string, string>(LogLevel.Warning, UnsupportedSwitchWarning,
@@ -274,7 +300,9 @@ internal static class LoggerMessages
     #region RequiredDependentParameter Warning (0x0010)
 
     public const int EVENT_ID_RequiredDependentParameterWarning = 0x0010;
+
     public static readonly EventId RequiredDependentParameterWarning = new(EVENT_ID_RequiredDependentParameterWarning, nameof(RequiredDependentParameterWarning));
+
     private static readonly Action<ILogger, string, string, Exception?> _requiredDependentParameterWarning1 = LoggerMessage.Define<string, string>(LogLevel.Warning, RequiredDependentParameterWarning,
         "The {DependentSwitch} switch is required when the {SwitchName} switch is present.");
     private static readonly Action<ILogger, string, string, string, Exception?> _requiredDependentParameterWarning2 = LoggerMessage.Define<string, string, string>(LogLevel.Warning, RequiredDependentParameterWarning,
@@ -294,13 +322,18 @@ internal static class LoggerMessages
     #region RequiredAltDependentParameter Warning (0x0011)
 
     public const int EVENT_ID_RequiredAltDependentParameterWarning = 0x0011;
+
     public static readonly EventId RequiredAltDependentParameterWarning = new(EVENT_ID_RequiredAltDependentParameterWarning, nameof(RequiredAltDependentParameterWarning));
+
     private static readonly Action<ILogger, string, string, string, Exception?> _requiredAltDependentParameterWarning1 = LoggerMessage.Define<string, string, string>(LogLevel.Warning, RequiredAltDependentParameterWarning,
         "The {DependentSwitch1} or {DependentSwitch2} switch is required when the {SwitchName} switch is present.");
+
     private static readonly Action<ILogger, string, string, string, string, Exception?> _requiredAltDependentParameterWarning2 = LoggerMessage.Define<string, string, string, string>(LogLevel.Warning, RequiredAltDependentParameterWarning,
         "The {DependentSwitch} is required with the value {Value1} or {Value2} switch is required when the {SwitchName} switch is present.");
+
     private static readonly Action<ILogger, string, string, string, string, Exception?> _requiredAltDependentParameterWarning3 = LoggerMessage.Define<string, string, string, string>(LogLevel.Warning, RequiredAltDependentParameterWarning,
         "The {SwitchValues} switch or the {LastDependendSwitch} with the value {DependendValue} required when the {SwitchName} switch is present.");
+
     /// <summary>
     /// Logs an RequiredAltDependentParameter event with event code 0x0011.
     /// </summary>
@@ -321,9 +354,12 @@ internal static class LoggerMessages
     #region InvalidParameterValue Warning (0x0012)
 
     public const int EVENT_ID_InvalidParameterValueWarning = 0x0012;
+
     public static readonly EventId InvalidParameterValueWarning = new(EVENT_ID_InvalidParameterValueWarning, nameof(InvalidParameterValueWarning));
+
     private static readonly Action<ILogger, string, string, Exception?> _invalidParameterValueWarning = LoggerMessage.Define<string, string>(LogLevel.Warning, InvalidParameterValueWarning,
         "Invalid value for the {SwitchName} switch ({ParameterValue}).");
+
     /// <summary>
     /// Logs an InvalidParameterValue event with event code 0x0012.
     /// </summary>
@@ -337,9 +373,12 @@ internal static class LoggerMessages
     #region ValidatingEntity Trace (0x0013)
 
     public const int EVENT_ID_ValidatingEntityTrace = 0x0013;
+
     public static readonly EventId ValidatingEntityTrace = new(EVENT_ID_ValidatingEntityTrace, nameof(ValidatingEntityTrace));
+
     private static readonly Action<ILogger, EntityState, string, object, Exception?> _validatingEntityTrace = LoggerMessage.Define<EntityState, string, object>(LogLevel.Trace, ValidatingEntityTrace,
         "Validating {State} {Name}: {Entity}");
+
     /// <summary>
     /// Logs an ValidatingEntity event with event code 0x0013.
     /// </summary>
@@ -355,11 +394,15 @@ internal static class LoggerMessages
     #region EntityValidation Error (0x0014)
 
     public const int EVENT_ID_EntityValidationFailure = 0x0014;
+
     public static readonly EventId EntityValidationFailure = new(EVENT_ID_EntityValidationFailure, nameof(EntityValidationFailure));
+
     private static readonly Action<ILogger, string, string, object, Exception?> _entityValidationFailure1 = LoggerMessage.Define<string, string, object>(LogLevel.Error, EntityValidationFailure,
         "Error Validating {Name} ({ValidationMessage}) {Entity}");
+
     private static readonly Action<ILogger, string, string, string, object, Exception?> _entityValidationFailure2 = LoggerMessage.Define<string, string, string, object>(LogLevel.Error, EntityValidationFailure,
         "Error Validating {Name} [{Properties}] ({ValidationMessage}) {Entity}");
+
     /// <summary>
     /// Logs an EntityValidation event with event code 0x0014.
     /// </summary>
@@ -385,9 +428,12 @@ internal static class LoggerMessages
     #region ValidationSucceeded Trace (0x0015)
 
     public const int EVENT_ID_ValidationSucceededTrace = 0x0015;
+
     public static readonly EventId ValidationSucceededTrace = new(EVENT_ID_ValidationSucceededTrace, nameof(ValidationSucceededTrace));
+
     private static readonly Action<ILogger, EntityState, string, object, Exception?> _validationSucceededTrace = LoggerMessage.Define<EntityState, string, object>(LogLevel.Trace, ValidationSucceededTrace,
         "Validation for {State} {Name} succeeded: {Entity}");
+
     /// <summary>
     /// Logs an ValidationSucceeded event with event code 0x0015.
     /// </summary>
@@ -403,9 +449,12 @@ internal static class LoggerMessages
     #region DbSaveChangeCompleted Trace (0x0016)
 
     public const int EVENT_ID_DbSaveChangeCompletedTrace = 0x0016;
+
     public static readonly EventId DbSaveChangeCompletedTrace = new(EVENT_ID_DbSaveChangeCompletedTrace, nameof(DbSaveChangeCompletedTrace));
+
     private static readonly Action<ILogger, string, int, Exception?> _dbSaveChangeCompletedTrace = LoggerMessage.Define<string, int>(LogLevel.Trace, DbSaveChangeCompletedTrace,
         "{MethodSignature} completed. Returning {ReturnValue}.");
+
     /// <summary>
     /// Logs an DbSaveChangeCompleted event with event code 0x0016.
     /// </summary>
@@ -422,9 +471,12 @@ internal static class LoggerMessages
     #region UsingConnectionString Trace (0x0017)
 
     public const int EVENT_ID_UsingConnectionStringTrace = 0x0017;
+
     public static readonly EventId UsingConnectionStringTrace = new(EVENT_ID_UsingConnectionStringTrace, nameof(UsingConnectionStringTrace));
+
     private static readonly Action<ILogger, string, Exception?> _usingConnectionStringTrace = LoggerMessage.Define<string>(LogLevel.Trace, UsingConnectionStringTrace,
         "Using connection string \"{ConnectionString}\".");
+
     /// <summary>
     /// Logs an UsingConnectionString event with event code 0x0017.
     /// </summary>
@@ -437,9 +489,12 @@ internal static class LoggerMessages
     #region InitializingNewDatabase Information (0x0018)
 
     public const int EVENT_ID_InitializingNewDatabase = 0x0018;
+
     public static readonly EventId InitializingNewDatabase = new(EVENT_ID_InitializingNewDatabase, nameof(InitializingNewDatabase));
+
     private static readonly Action<ILogger, string, Exception?> _initializingNewDatabase = LoggerMessage.Define<string>(LogLevel.Information, InitializingNewDatabase,
         "Initializing new database \"{DataSource}\".");
+
     /// <summary>
     /// Logs an InitializingNewDatabase event with event code 0x0018.
     /// </summary>
@@ -452,9 +507,12 @@ internal static class LoggerMessages
     #region CriticalQueryExecution Error (0x0019)
 
     public const int EVENT_ID_CriticalQueryExecutionError = 0x0019;
+
     public static readonly EventId CriticalQueryExecutionError = new(EVENT_ID_CriticalQueryExecutionError, nameof(CriticalQueryExecutionError));
+
     private static readonly Action<ILogger, string, string, Exception?> _criticalQueryExecutionError = LoggerMessage.Define<string, string>(LogLevel.Critical, CriticalQueryExecutionError,
         "Error executing query '{SqlQuery}': {ErrorMessage}");
+
     /// <summary>
     /// Logs an QueryExecution event with event code 0x0019.
     /// </summary>
@@ -474,9 +532,12 @@ internal static class LoggerMessages
     #region NoLibraryNameSpecified Warning (0x001a)
 
     public const int EVENT_ID_NoLibraryNameSpecifiedWarning = 0x001a;
+
     public static readonly EventId NoLibraryNameSpecifiedWarning = new(EVENT_ID_NoLibraryNameSpecifiedWarning, nameof(NoLibraryNameSpecifiedWarning));
+
     private static readonly Action<ILogger, string, string, string, Exception?> _noLibraryNameSpecifiedWarning = LoggerMessage.Define<string, string, string>(LogLevel.Warning, NoLibraryNameSpecifiedWarning,
         "At least one library name must be specified with the --{LibrarySwitchName} switch when --{ShowSwitchName}={ShowSwitchValue} is used.");
+
     /// <summary>
     /// Logs an NoLibraryNameSpecified event with event code 0x001a.
     /// </summary>
@@ -490,6 +551,7 @@ internal static class LoggerMessages
     #region Nuget Debug (0x001b)
 
     public const int EVENT_ID_NugetDebug = 0x001b;
+
     public static readonly EventId NugetDebug = new(EVENT_ID_NugetDebug, nameof(NugetDebug));
 
     private static readonly Action<ILogger, string, Exception?> _nugetDebugMessage1 = LoggerMessage.Define<string>(LogLevel.Debug, NugetDebug, "NuGet Message: {Message}");
@@ -533,6 +595,7 @@ internal static class LoggerMessages
     #region Nuget Message (0x001c)
 
     public const int EVENT_ID_NugetMessage = 0x001c;
+
     public static readonly EventId NugetMessage = new(EVENT_ID_NugetMessage, nameof(NugetMessage));
 
     private static readonly Action<ILogger, string, Exception?> _nugetInformationMessage1 = LoggerMessage.Define<string>(LogLevel.Information, NugetMessage, "NuGet Message: {Message}");
@@ -630,6 +693,7 @@ internal static class LoggerMessages
     #region Critical Nuget Error (0x001f)
 
     public const int EVENT_ID_CriticalNugetError = 0x001f;
+
     public static readonly EventId CriticalNugetError = new(EVENT_ID_CriticalNugetError, nameof(CriticalNugetError));
 
     private static readonly Action<ILogger, string, Exception?> _criticalNugetError1 = LoggerMessage.Define<string>(LogLevel.Critical, CriticalNugetError, "NuGet Message: {Message}");
@@ -763,9 +827,12 @@ internal static class LoggerMessages
     #region GetNugetResourceFailure Error (0x0024)
 
     public const int EVENT_ID_GetNugetResourceFailure = 0x0024;
+
     public static readonly EventId GetNugetResourceFailure = new(EVENT_ID_GetNugetResourceFailure, nameof(GetNugetResourceFailure));
+
     private static readonly Action<ILogger, Type, Exception?> _getNugetResourceFailure = LoggerMessage.Define<Type>(LogLevel.Error, GetNugetResourceFailure,
         "Failed to get NuGet resource type {Type}");
+
     /// <summary>
     /// Logs an GetNugetResourceFailure event with event code 0x0024.
     /// </summary>
@@ -944,6 +1011,7 @@ internal static class LoggerMessages
     #region ExecuteMethod
 
     private static readonly Func<ILogger, string, IDisposable?> _executeMethodScope = LoggerMessage.DefineScope<string>("Execute method {MethodName}()");
+
     /// <summary>
     /// Formats the ExecuteMethod message and creates a scope.
     /// </summary>
@@ -953,6 +1021,7 @@ internal static class LoggerMessages
     public static IDisposable? BeginExecuteMethodScope(this ILogger logger, string methodName) => _executeMethodScope(logger, methodName);
 
     private static readonly Func<ILogger, string, string, object?, IDisposable?> _executeMethodScope1 = LoggerMessage.DefineScope<string, string, object?>("Execute method {MethodName}({ParamName}: {ParamValue})");
+
     /// <summary>
     /// Formats the ExecuteMethod message and creates a scope.
     /// </summary>
