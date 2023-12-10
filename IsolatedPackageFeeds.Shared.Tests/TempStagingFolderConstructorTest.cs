@@ -1,4 +1,4 @@
-namespace NuGetPuller.UnitTests;
+namespace IsolatedPackageFeeds.Shared.Tests;
 
 public class TempStagingFolderTest
 {

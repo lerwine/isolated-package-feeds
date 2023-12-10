@@ -89,10 +89,7 @@
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
+            "group": "build"
         },
         {
             "label": "Build CdnGetter Unit Tests",
@@ -106,6 +103,25 @@
             ],
             "problemMatcher": "$msCompile",
             "group": "build"
+        },
+        {
+            "label": "Build IsolatedPackageFeeds Shared Tests",
+            "command": "dotnet",
+            "type": "process",
+            "dependsOn": [
+                "Build IsolatedPackageFeeds Shared"
+            ],
+            "args": [
+                "build",
+                "${workspaceFolder}/IsolatedPackageFeeds.Shared.Tests/IsolatedPackageFeeds.Shared.Tests.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         },
         {
             "label": "Build IsolatedPackageFeeds Shared",
