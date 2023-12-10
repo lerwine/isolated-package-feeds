@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace CdnGetter;
+namespace IsolatedPackageFeeds.Shared;
 
 /// <summary>
 /// Represents an optional value.

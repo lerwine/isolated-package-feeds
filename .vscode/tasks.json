@@ -79,6 +79,9 @@
             "label": "Build CdnGetter",
             "command": "dotnet",
             "type": "process",
+            "dependsOn": [
+                "Build IsolatedPackageFeeds Shared"
+            ],
             "args": [
                 "build",
                 "${workspaceFolder}/CdnGetter/CdnGetter.csproj",

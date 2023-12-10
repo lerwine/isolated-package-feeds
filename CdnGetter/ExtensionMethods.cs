@@ -172,32 +172,6 @@ public static class ExtensionMethods
         return source.Where(t => t is not null)!;
     }
 
-    // [Obsolete("Use IsolatedPackageFeeds.Shared.StringExtensions.SplitLines")]
-    // public static string[] SplitLines(this string? value)
-    // {
-    //     if (value is null)
-    //         return [];
-    //     return LineBreakRegex.Split(value);
-    // }
-
-    // [Obsolete("Use IsolatedPackageFeeds.Shared.StringExtensions.IsTrimmedNotEmpty")]
-    // public static bool IsTrimmedNotEmpty(this string? value, [NotNullWhen(true)] out string? wsNormalized) => (wsNormalized = value.ToTrimmedOrNullIfEmpty()) is not null;
-
-    // [Obsolete("Use IsolatedPackageFeeds.Shared.StringExtensions.ToWsNormalizedOrEmptyIfNull")]
-    // public static string ToWsNormalizedOrEmptyIfNull(this string? value) => (value is not null && (value = value.Trim()).Length > 0) ? NonNormalizedWhiteSpaceRegex.Replace(value, " ") : "";
-
-    // [Obsolete("Use IsolatedPackageFeeds.Shared.StringExtensions.ToTrimmedOrEmptyIfNull")]
-    // public static string ToTrimmedOrEmptyIfNull(this string? value) => (value is null) ? "" : value.Trim();
-
-    // [Obsolete("Use IsolatedPackageFeeds.Shared.StringExtensions.ToTrimmedOrNullIfEmpty")]
-    // public static string? ToTrimmedOrNullIfEmpty(this string? value) => (value is not null && (value = value.Trim()).Length > 0) ? value : null;
-
-    // [Obsolete("Use IsolatedPackageFeeds.Shared.StringExtensions.ToTrimmedOrDefaultIfEmpty")]
-    // public static string ToTrimmedOrDefaultIfEmpty(this string? value, Func<string> getDefault) => (value is not null && (value = value.Trim()).Length > 0) ? value : getDefault();
-
-    // [Obsolete("Use IsolatedPackageFeeds.Shared.StringExtensions.ToTrimmedOrDefaultIfEmpty")]
-    // public static string ToTrimmedOrDefaultIfEmpty(this string? value, string defaultValue) => (value is not null && (value = value.Trim()).Length > 0) ? value : defaultValue;
-
     public static void SetNavigation<T>(this Guid newValue, object syncRoot, Func<T, Guid> keyAcessor, ref Guid foreignKey, ref T? target)
         where T : class
     {

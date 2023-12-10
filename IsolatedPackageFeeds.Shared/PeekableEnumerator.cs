@@ -1,6 +1,6 @@
 using System.Collections;
 
-namespace CdnGetter;
+namespace IsolatedPackageFeeds.Shared;
 
 public sealed class PeekableEnumerator<T>(IEnumerable<T>? source) : IEnumerator<T>
 {
