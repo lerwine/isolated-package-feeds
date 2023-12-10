@@ -171,7 +171,7 @@ public class ContentDb : DbContext
         }
         _logger.LogValidationSucceededTrace(e.State, e.Metadata, entity);
     }
-
+ 
     public override int SaveChanges()
     {
         using IDisposable? scope = _logger.BeginExecuteMethodScope(nameof(SaveChanges));
