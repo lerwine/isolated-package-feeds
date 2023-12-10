@@ -184,7 +184,7 @@ public class ContentDb : DbContext
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
         using IDisposable? scope = _logger.BeginExecuteMethodScope(nameof(SaveChanges), nameof(acceptAllChangesOnSuccess), acceptAllChangesOnSuccess);
-        OnBeforeSaveAsync().Wait(); ;
+        OnBeforeSaveAsync().Wait();
         int returnValue = base.SaveChanges(acceptAllChangesOnSuccess);
         _logger.LogDbSaveChangeCompletedTrace(false, acceptAllChangesOnSuccess, returnValue);
         return returnValue;
