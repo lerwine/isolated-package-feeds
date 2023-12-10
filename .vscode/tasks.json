@@ -18,6 +18,7 @@
             "label": "Build NuGetPuller",
             "command": "dotnet",
             "type": "process",
+            "dependsOn":[ "Build IsolatedPackageFeeds Shared" ],
             "args": [
                 "build",
                 "${workspaceFolder}/NuGetPuller/NuGetPuller.csproj",
@@ -91,6 +92,19 @@
             "args": [
                 "build",
                 "${workspaceFolder}/CdnGetter.UnitTests/CdnGetter.UnitTests.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": "build"
+        },
+        {
+            "label": "Build IsolatedPackageFeeds Shared",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/IsolatedPackageFeeds.Shared/IsolatedPackageFeeds.Shared.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],

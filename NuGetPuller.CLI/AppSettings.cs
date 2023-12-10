@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using IsolatedPackageFeeds.Shared;
 using Microsoft.Extensions.Configuration;
 using static NuGetPuller.CLI.CommandLineSwitches;
 

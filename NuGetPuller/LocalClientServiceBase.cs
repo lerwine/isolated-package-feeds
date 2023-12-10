@@ -4,11 +4,11 @@ using NuGet.Packaging.Core;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
-using static NuGetPuller.CommonStatic;
+using static IsolatedPackageFeeds.Shared.CommonStatic;
 
 namespace NuGetPuller;
 
-public abstract class LocalClientServiceBase(IValidatedSharedAppSettings settings, ILogger logger) : ClientService(Repository.Factory.GetCoreV3(settings.GetLocalRepository()), settings, logger, false)
+public abstract class LocalClientServiceBase(IValidatedRepositoryPathsService settings, ILogger logger) : ClientService(Repository.Factory.GetCoreV3(settings.LocalRepository.GetResult().FullName), settings, logger, false)
 {
     private readonly object _syncRoot = new();
 

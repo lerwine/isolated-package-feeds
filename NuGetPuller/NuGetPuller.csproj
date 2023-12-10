@@ -25,4 +25,8 @@
     <PackageReference Include="System.Text.Json" Version="8.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\IsolatedPackageFeeds.Shared\IsolatedPackageFeeds.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

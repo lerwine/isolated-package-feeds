@@ -3,7 +3,7 @@ namespace NuGetPuller;
 /// <summary>
 /// Represents a Invalid filesystem URI exception.
 /// </summary>
-public class UriSchemeNotSupportedException : Exception
+public class UriSchemeNotSupportedException : LoggedException
 {
     /// <summary>
     /// Gets the invalid filesystem URI string.

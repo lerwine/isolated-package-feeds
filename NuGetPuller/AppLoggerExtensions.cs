@@ -221,8 +221,6 @@ public static class AppLoggerExtensions
         $"{MESSAGE_UnsupportedLocalRepositoryUrlScheme} ({{URL}}).");
 
     /// <summary>
-    /// </summary>
-    /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidRepositoryUrl"/> event with event code 0x0006.
     /// </summary>
     /// <param name="logger">The current logger.</param>
@@ -251,6 +249,28 @@ public static class AppLoggerExtensions
         return $"{MESSAGE_InvalidLocalRepositoryUrl}.";
     }
 
+    public static T LogInvalidRepositoryUrl<T>(this ILogger logger, string url, bool isUpstream, Func<string, T> factory, Exception? exception = null)
+        where T : LoggedException
+    {
+        if (exception is PathTooLongException)
+        {
+            if (isUpstream)
+            {
+                _upstreamRepositoryPathTooLong(logger, url, exception);
+                return factory(MESSAGE_UpstreamRepositoryPathTooLong);
+            }
+            _localRepositoryPathTooLong(logger, url, exception);
+            return factory(MESSAGE_LocalRepositoryPathTooLong);
+        }
+        if (isUpstream)
+        {
+            _invalidUpstreamRepositoryUrl(logger, url, exception);
+            return factory(MESSAGE_InvalidUpstreamRepositoryUrl);
+        }
+        _invalidLocalRepositoryUrl(logger, url, exception);
+        return factory(MESSAGE_InvalidLocalRepositoryUrl);
+    }
+
     public static string LogInvalidRepositoryUrl(this ILogger logger, Uri url, bool isUpstream, Exception? exception = null)
     {
         if (url.IsAbsoluteUri)
@@ -276,6 +296,21 @@ public static class AppLoggerExtensions
         return $"{MESSAGE_InvalidLocalRepositoryUrl}.";
     }
 
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="UrlSchemeNotSupported"/> event with code 0x0006.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="uriString">The invalid URI.</param>
+    /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    /// <typeparam name="T">The type of exception to be created.</typeparam>
+    /// <returns>The exception that was created by the <paramref name="factory"/> function.</returns>
+    public static T LogUnsupportedRepositoryUrlScheme<T>(this ILogger logger, string uriString, Func<string, T> factory, Exception? exception = null) where T : LoggedException
+    {
+        _unsupportedUpstreamRepositoryUrlScheme(logger, uriString, exception);
+        return factory(MESSAGE_UnsupportedUpstreamRepositoryUrlScheme);
+    }
+    
     public static string LogUnsupportedRepositoryUrlScheme(this ILogger logger, string uriString, bool isUpstream, Exception? exception = null)
     {
         if (isUpstream)
@@ -388,6 +423,18 @@ public static class AppLoggerExtensions
         return MESSAGE_LocalRepositoryPathNotFound;
     }
 
+    public static T LogRepositoryPathNotFound<T>(this ILogger logger, string path, bool isUpstream, Func<string, T> factory, Exception? exception = null)
+        where T : LoggedException
+    {
+        if (isUpstream)
+        {
+            _upstreamRepositoryPathNotFound(logger, path, exception);
+            return factory(MESSAGE_UpstreamRepositoryPathNotFound);
+        }
+        _localRepositoryPathNotFound(logger, path, exception);
+        return factory(MESSAGE_LocalRepositoryPathNotFound);
+    }
+
     #endregion
 
     #region InvalidExportLocalMetaData event logger message (0x000a)
@@ -420,7 +467,7 @@ public static class AppLoggerExtensions
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <typeparam name="T">The type of exception to be created.</typeparam>
     /// <returns>The exception that was created by the <paramref name="factory"/> function.</returns>
-    public static T LogInvalidExportLocalMetaData<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : Exception
+    public static T LogInvalidExportLocalMetaData<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : LoggedException
     {
         if (exception is not null)
         {
@@ -473,6 +520,12 @@ public static class AppLoggerExtensions
         return MESSAGE_ExportLocalMetaDataDirectoryNotFound;
     }
 
+    public static T LogExportLocalMetaDataDirectoryNotFound<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : LoggedException
+    {
+        _exportLocalMetaDataDirectoryNotFound(logger, path, exception);
+        return factory(MESSAGE_ExportLocalMetaDataDirectoryNotFound);
+    }
+
     #endregion
 
     #region MetaDataExportPathAccessDenied event logger message (0x000b)
@@ -500,7 +553,7 @@ public static class AppLoggerExtensions
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <typeparam name="T">The type of exception to be created.</typeparam>
     /// <returns>The exception that was created by the <paramref name="factory"/> function.</returns>
-    public static T LogMetaDataExportPathAccessDenied<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : Exception
+    public static T LogMetaDataExportPathAccessDenied<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : LoggedException
     {
         if (exception is System.Security.SecurityException)
         {
@@ -643,6 +696,12 @@ public static class AppLoggerExtensions
         return MESSAGE_GlobalPackagesFolderNotFound;
     }
 
+    public static T LogGlobalPackagesFolderNotFound<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : LoggedException
+    {
+        _globalPackagesFolderNotFound(logger, path, exception);
+        return factory(MESSAGE_GlobalPackagesFolderNotFound);
+    }
+
     #endregion
 
     #region GlobalPackagesFolderSecurityException event logger message (0x000f)
@@ -708,6 +767,17 @@ public static class AppLoggerExtensions
         }
         _invalidGlobalPackagesFolder(logger, path, exception);
         return $"{MESSAGE_InvalidGlobalPackagesFolder}.";
+    }
+
+    public static T LogInvalidGlobalPackagesFolder<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : LoggedException
+    {
+        if (exception is PathTooLongException)
+        {
+            _globalPackagesFolderPathTooLong(logger, path, exception);
+            return factory(MESSAGE_GlobalPackagesFolderPathTooLong);
+        }
+        _invalidGlobalPackagesFolder(logger, path, exception);
+        return factory(MESSAGE_InvalidGlobalPackagesFolder);
     }
 
     /// <summary>

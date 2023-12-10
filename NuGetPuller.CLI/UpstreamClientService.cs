@@ -2,6 +2,6 @@ using Microsoft.Extensions.Logging;
 
 namespace NuGetPuller.CLI;
 
-public sealed class UpstreamClientService(ValidatedAppSettings validatedSettings, ILogger<UpstreamClientService> logger) : UpstreamClientServiceBase(validatedSettings, logger)
+public sealed class UpstreamClientService(ValidatedPathsService validatedSettings, ILogger<UpstreamClientService> logger) : UpstreamClientServiceBase(validatedSettings, logger)
 {
 }

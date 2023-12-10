@@ -1,10 +1,10 @@
 using System.Collections.Immutable;
 using Microsoft.Extensions.Configuration;
 
-namespace NuGetPuller;
+namespace IsolatedPackageFeeds.Shared;
 
 /// <summary>
-/// Based upon the <see cref="Microsoft.Extensions.Configuration.CommandLine.CommandLineConfigurationSource"/>, adding support for stand-alone command line switches are not followed by a value. 
+/// Based upon the <c>Microsoft.Extensions.Configuration.CommandLine.CommandLineConfigurationSource</c>, adding support for stand-alone command line switches are not followed by a value. 
 /// </summary>
 public class FlagSwitchCommandLineConfigSource : IConfigurationSource
 {

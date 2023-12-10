@@ -1,17 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using static NuGetPuller.CommonStatic;
+using static IsolatedPackageFeeds.Shared.CommonStatic;
 
-namespace NuGetPuller;
-
-public static class ExtensionMethods
-{
-    public static string GetUpstreamServiceIndex(this ISharedAppSettings settings) => settings.OverrideUpstreamServiceIndex.DefaultIfWhiteSpace(settings.UpstreamServiceIndex);
-    
-    public static string GetLocalRepository(this ISharedAppSettings settings) => settings.OverrideLocalRepository.DefaultIfWhiteSpace(settings.LocalRepository);
-    
-    public static string GetGlobalPackagesFolder(this ISharedAppSettings settings) => settings.OverrideGlobalPackagesFolder.DefaultIfWhiteSpace(settings.GlobalPackagesFolder);
-}
+namespace IsolatedPackageFeeds.Shared;
 public static class StringExtensions
 {
     public static string[] SplitLines(this string? value)
@@ -242,5 +232,32 @@ public static class StringExtensions
         return value;
     }
 
+    public static bool TryGetNonWhitesSpace(this string? value, out string result)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            result = string.Empty;
+            return false;
+        }
+        result = value;
+        return true;
+    }
+    
+    public static bool TryGetNonWhitesSpace(this string? value, string? fallback, out string result)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            if (string.IsNullOrWhiteSpace(fallback))
+            {
+                result = string.Empty;
+                return false;
+            }
+            result = fallback;
+        }
+        else
+            result = value;
+        return true;
+    }
+    
     public static string ToTrimmedOrDefaultIfEmpty(this string? value, string defaultValue) => (value is not null && (value = value.Trim()).Length > 0) ? value : defaultValue;
 }

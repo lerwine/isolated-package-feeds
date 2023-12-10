@@ -28,8 +28,7 @@ internal class Program
             .Bind(builder.Configuration.GetSection(nameof(NuGetPuller)))
             .ValidateDataAnnotations();
         builder.Services
-            .AddSingleton<ValidatedAppSettings>()
-            .AddSingleton<IValidateOptions<AppSettings>, AppSettingsValidatorService>()
+            .AddSingleton<ValidatedPathsService>()
             .AddSingleton<LocalClientService>()
             .AddSingleton<UpstreamClientService>()
             .PostConfigure<AppSettings>(settings =>
@@ -37,9 +36,9 @@ internal class Program
                 if (string.IsNullOrWhiteSpace(settings.GlobalPackagesFolder))
                     settings.GlobalPackagesFolder = NuGet.Configuration.SettingsUtility.GetGlobalPackagesFolder(NuGet.Configuration.Settings.LoadDefaultSettings(root: null));
                 if (string.IsNullOrWhiteSpace(settings.UpstreamServiceIndex))
-                    settings.UpstreamServiceIndex = CommonStatic.DEFAULT_UPSTREAM_SERVICE_INDEX;
+                    settings.UpstreamServiceIndex = ServiceDefaults.DEFAULT_UPSTREAM_SERVICE_INDEX;
                 if (string.IsNullOrWhiteSpace(settings.LocalRepository))
-                    settings.LocalRepository = Path.Combine(builder.Environment.ContentRootPath, CommonStatic.DEFAULT_LOCAL_REPOSITORY);
+                    settings.LocalRepository = Path.Combine(builder.Environment.ContentRootPath, ServiceDefaults.DEFAULT_LOCAL_REPOSITORY);
             });
         builder.Services.AddHostedService<MainService>();
         (Host = builder.Build()).Run();

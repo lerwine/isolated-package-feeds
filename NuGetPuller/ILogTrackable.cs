@@ -6,5 +6,5 @@ public interface ILogTrackable
 {
     bool WasLogged { get; }
 
-    public void Log(ILogger logger, bool force = false);
+    public void Log(ILogger logger);
 }

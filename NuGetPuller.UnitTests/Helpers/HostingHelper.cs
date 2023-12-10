@@ -39,8 +39,7 @@ record HostingFake(IHost Host, string PreviousCwd, DirectoryInfo BaseDirectory, 
             .Bind(builder.Configuration.GetSection(nameof(NuGetPuller)))
             .ValidateDataAnnotations();
         builder.Services
-            .AddSingleton<ValidatedTestAppSettings>()
-            .AddSingleton<IValidateOptions<TestAppSettings>, TestAppSettingsValidatorService>()
+            .AddSingleton<ValidatedRepositoryPathsService>()
             .AddSingleton<LocalClientService>()
             .AddSingleton<UpstreamClientService>()
             .PostConfigure<TestAppSettings>(settings =>
@@ -48,9 +47,9 @@ record HostingFake(IHost Host, string PreviousCwd, DirectoryInfo BaseDirectory, 
                 if (string.IsNullOrWhiteSpace(settings.GlobalPackagesFolder))
                     settings.GlobalPackagesFolder = NuGet.Configuration.SettingsUtility.GetGlobalPackagesFolder(NuGet.Configuration.Settings.LoadDefaultSettings(root: null));
                 if (string.IsNullOrWhiteSpace(settings.UpstreamServiceIndex))
-                    settings.UpstreamServiceIndex = CommonStatic.DEFAULT_UPSTREAM_SERVICE_INDEX;
+                    settings.UpstreamServiceIndex = ServiceDefaults.DEFAULT_UPSTREAM_SERVICE_INDEX;
                 if (string.IsNullOrWhiteSpace(settings.LocalRepository))
-                    settings.LocalRepository = Path.Combine(builder.Environment.ContentRootPath, CommonStatic.DEFAULT_LOCAL_REPOSITORY);
+                    settings.LocalRepository = Path.Combine(builder.Environment.ContentRootPath, ServiceDefaults.DEFAULT_LOCAL_REPOSITORY);
             });
         var host = builder.Build();
         host.Start();

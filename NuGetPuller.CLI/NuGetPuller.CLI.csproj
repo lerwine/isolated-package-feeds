@@ -40,6 +40,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NuGetPuller\NuGetPuller.csproj" />
+    <ProjectReference Include="..\IsolatedPackageFeeds.Shared\IsolatedPackageFeeds.Shared.csproj" />
   </ItemGroup>
 
 </Project>

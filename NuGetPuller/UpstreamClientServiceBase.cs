@@ -4,7 +4,7 @@ using NuGet.Protocol.Core.Types;
 
 namespace NuGetPuller;
 
-public abstract class UpstreamClientServiceBase(IValidatedSharedAppSettings settings, ILogger logger) : ClientService(Repository.Factory.GetCoreV3(settings.GetUpstreamServiceIndex()), settings, logger, true)
+public abstract class UpstreamClientServiceBase(IValidatedRepositoryPathsService settings, ILogger logger) : ClientService(Repository.Factory.GetCoreV3(settings.UpstreamServiceIndex.GetResult().AbsoluteUri), settings, logger, true)
 {
     /// <summary>
     /// Retrieve dependency info for all versions of a single package.

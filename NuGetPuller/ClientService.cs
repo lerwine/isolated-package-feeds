@@ -1,11 +1,11 @@
 using System.Runtime.CompilerServices;
+using IsolatedPackageFeeds.Shared;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using NuGet.Frameworks;
 using NuGet.Packaging.Core;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
-using static NuGetPuller.CommonStatic;
+using static IsolatedPackageFeeds.Shared.CommonStatic;
 
 namespace NuGetPuller;
 
@@ -38,9 +38,9 @@ public abstract class ClientService
 
     #endregion
 
-    protected ClientService(SourceRepository sourceRepository, IValidatedSharedAppSettings settings, ILogger logger, bool isUpstream)
+    protected ClientService(SourceRepository sourceRepository, IValidatedRepositoryPathsService settings, ILogger logger, bool isUpstream)
     {
-        GlobalPackagesFolder = settings.GetGlobalPackagesFolder();
+        GlobalPackagesFolder = settings.GlobalPackagesFolder.GetResult().FullName;
         NuGetLogger = new(Logger = logger);
         SourceRepository = sourceRepository;
         IsUpstream = isUpstream;
