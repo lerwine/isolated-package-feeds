@@ -5,7 +5,7 @@ namespace IsolatedPackageFeeds.Shared.LazyInit;
 /// </summary>
 /// <typeparam name="TInput">The type of the input value.</typeparam>
 /// <typeparam name="TResult">The type of result value.</typeparam>
-public interface ILazyConversion<TInput, TResult> : ILazyInitializer<TResult>
+public interface ILazyConversion<TInput, TResult> : ILazyProducer<TResult>
 {
     /// <summary>
     /// The input value.

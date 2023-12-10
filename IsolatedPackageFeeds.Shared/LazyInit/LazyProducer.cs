@@ -7,7 +7,8 @@ namespace IsolatedPackageFeeds.Shared.LazyInit;
 /// </summary>
 /// <typeparam name="TResult">The result value type.</typeparam>
 /// <typeparam name="TState">The result value creation status type.</typeparam>
-public abstract class LazyInitializer<TResult, TState>(TState notInvoked)
+// TODO: Rename to LazyProducer
+public abstract class LazyProducer<TResult, TState>(TState notInvoked)
     where TState : struct, Enum
 {
     private const string CreationInProgressErrorMessage = "Cannot invoke value accessor method while value creation process is being executed";
@@ -219,9 +220,9 @@ public abstract class LazyInitializer<TResult, TState>(TState notInvoked)
 /// Deferred value creation where the <typeparamref name="TResult"/> value is not created until it is actually retrieved.
 /// </summary>
 /// <typeparam name="TResult">The result value type.</typeparam>
-public abstract class LazyInitializer<TResult> : LazyInitializer<TResult, LazyInitState>, ILazyInitializer<TResult>
+public abstract class LazyProducer<TResult> : LazyProducer<TResult, LazyInitState>, ILazyProducer<TResult>
 {
-    protected LazyInitializer() : base(LazyInitState.NotInvoked) { }
+    protected LazyProducer() : base(LazyInitState.NotInvoked) { }
 
     /// <summary>
     /// This gets called when the result value needs to be created.

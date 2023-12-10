@@ -6,7 +6,7 @@ namespace IsolatedPackageFeeds.Shared.LazyInit;
 /// Represents a deferred optional value creation process that does not create the value until the result value accessor is invoked.
 /// </summary>
 /// <typeparam name="TResult">The type of result value.</typeparam>
-public interface ILazyOptionalInitializer<TResult> : ILazyInitializer<TResult?>
+public interface ILazyOptionalProducer<TResult> : ILazyProducer<TResult?>
 {
     /// <summary>
     /// Gets a value indicating the status of the result value creation.

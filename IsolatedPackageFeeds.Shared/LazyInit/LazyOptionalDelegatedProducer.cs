@@ -7,7 +7,7 @@ namespace IsolatedPackageFeeds.Shared.LazyInit;
 /// </summary>
 /// <typeparam name="TResult">The result value type.</typeparam>
 /// <seealso cref="TryFunc{TResult}"/>
-public class LazyOptionalDelegatedInitializer<TResult>(TryFunc<TResult?> tryFunc) : LazyOptionalInitializer<TResult>
+public class LazyOptionalDelegatedProducer<TResult>(TryFunc<TResult?> tryFunc) : LazyOptionalProducer<TResult>
 {
     private readonly TryFunc<TResult?> _tryFunc = tryFunc;
 

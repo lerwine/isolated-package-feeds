@@ -9,7 +9,7 @@ namespace IsolatedPackageFeeds.Shared.Tests
         {
             Helpers.InvocationCounter<string> counter = new("Value1", "Value2", "Value3");
             var expectedResult = counter.Current;
-            LazyInitializer<string> target = new LazyDelegatedInitializer<string>(counter.Invoke);
+            LazyProducer<string> target = new LazyDelegatedProducer<string>(counter.Invoke);
             Assert.Multiple(() =>
             {
                 Assert.That(target.WasInvoked, Is.False);
@@ -38,7 +38,7 @@ namespace IsolatedPackageFeeds.Shared.Tests
                 Assert.That(counter.Count, Is.EqualTo(1));
             });
             string expectedMessage = "Testing!!!";
-            target = new LazyDelegatedInitializer<string>(() => throw new Exception(expectedMessage));
+            target = new LazyDelegatedProducer<string>(() => throw new Exception(expectedMessage));
             Assert.Throws<Exception>(() => target.GetResult(), expectedMessage);
             actualFault = target.GetFault()!;
             Assert.Multiple(() =>
@@ -61,7 +61,7 @@ namespace IsolatedPackageFeeds.Shared.Tests
         public void LazyOptionalInitializerTest()
         {
             Helpers.InvocationCounter<string?> counter = new("Value1", null, "Value3");
-            LazyOptionalInitializer<string> target = new LazyOptionalDelegatedInitializer<string>((out string? value) => (value = counter.Invoke()) is not null);
+            LazyOptionalProducer<string> target = new LazyOptionalDelegatedProducer<string>((out string? value) => (value = counter.Invoke()) is not null);
             Assert.Multiple(() =>
             {
                 Assert.That(target.WasInvoked, Is.False);
@@ -99,7 +99,7 @@ namespace IsolatedPackageFeeds.Shared.Tests
                 Assert.That(target.WasInvoked, Is.True);
                 Assert.That(counter.Count, Is.EqualTo(1));
             });
-            target = new LazyOptionalDelegatedInitializer<string>((out string? value) => (value = counter.Invoke()) is not null);
+            target = new LazyOptionalDelegatedProducer<string>((out string? value) => (value = counter.Invoke()) is not null);
             returnValue = target.TryGetResult(out actualResult);
             Assert.Multiple(() =>
             {

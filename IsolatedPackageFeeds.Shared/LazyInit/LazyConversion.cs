@@ -7,7 +7,7 @@ namespace IsolatedPackageFeeds.Shared.LazyInit;
 /// </summary>
 /// <typeparam name="TInput">The input value type.</typeparam>
 /// <typeparam name="TResult">The type of converted value.</typeparam>
-public abstract class LazyConversion<TInput, TResult>(TInput input) : LazyInitializer<TResult, LazyInitState>(LazyInitState.NotInvoked), ILazyConversion<TInput, TResult>
+public abstract class LazyConversion<TInput, TResult>(TInput input) : LazyProducer<TResult, LazyInitState>(LazyInitState.NotInvoked), ILazyConversion<TInput, TResult>
 {
     /// <summary>
     /// The input value.

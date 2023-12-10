@@ -8,7 +8,7 @@ namespace IsolatedPackageFeeds.Shared.LazyInit;
 /// <typeparam name="TInput">The input value type.</typeparam>
 /// <typeparam name="TResult">The type of result value.</typeparam>
 /// <seealso cref="Func{T, TResult}"/>
-public abstract class LazyOptionalConversion<TInput, TResult>(TInput input) : LazyInitializer<TResult?, LazyOptionalInitState>(LazyOptionalInitState.NotInvoked), ILazyOptionalConversion<TInput, TResult>
+public abstract class LazyOptionalConversion<TInput, TResult>(TInput input) : LazyProducer<TResult?, LazyOptionalInitState>(LazyOptionalInitState.NotInvoked), ILazyOptionalConversion<TInput, TResult>
 {
     /// <summary>
     /// The input value.
@@ -17,7 +17,7 @@ public abstract class LazyOptionalConversion<TInput, TResult>(TInput input) : La
     
     private bool _hasValue;
 
-    LazyInitState ILazyInitializer<TResult?>.State => State.ToLazyInitState();
+    LazyInitState ILazyProducer<TResult?>.State => State.ToLazyInitState();
 
     protected override LazyOptionalInitState GetFaultedState() => LazyOptionalInitState.Faulted;
 
@@ -40,7 +40,7 @@ public abstract class LazyOptionalConversion<TInput, TResult>(TInput input) : La
             whenFaulted(Fault);
     }
 
-    void ILazyInitializer<TResult?>.GetResult(Action<TResult?> onSuccess, Action<Exception> whenFaulted)
+    void ILazyProducer<TResult?>.GetResult(Action<TResult?> onSuccess, Action<Exception> whenFaulted)
     {
         Exec();
         if (Fault is null)
@@ -76,7 +76,7 @@ public abstract class LazyOptionalConversion<TInput, TResult>(TInput input) : La
         return wasInvoked;
     }
 
-    bool ILazyInitializer<TResult?>.Invoke(Action<TResult?> onSuccess, Action<Exception> whenFaulted)
+    bool ILazyProducer<TResult?>.Invoke(Action<TResult?> onSuccess, Action<Exception> whenFaulted)
     {
         bool wasInvoked = Invoke();
         if (Fault is null)

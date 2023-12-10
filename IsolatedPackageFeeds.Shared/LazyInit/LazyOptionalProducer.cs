@@ -6,13 +6,13 @@ namespace IsolatedPackageFeeds.Shared.LazyInit;
 /// Deferred optional value creation where the <typeparamref name="TResult"/> value is not created until it is actually retrieved.
 /// </summary>
 /// <typeparam name="TResult">The result value type.</typeparam>
-public abstract class LazyOptionalInitializer<TResult> : LazyInitializer<TResult?, LazyOptionalInitState>, ILazyOptionalInitializer<TResult>
+public abstract class LazyOptionalProducer<TResult> : LazyProducer<TResult?, LazyOptionalInitState>, ILazyOptionalProducer<TResult>
 {
-    protected LazyOptionalInitializer() : base(LazyOptionalInitState.NotInvoked) { }
+    protected LazyOptionalProducer() : base(LazyOptionalInitState.NotInvoked) { }
 
     private bool _hasValue;
      
-    LazyInitState ILazyInitializer<TResult?>.State => State.ToLazyInitState();
+    LazyInitState ILazyProducer<TResult?>.State => State.ToLazyInitState();
 
     protected override LazyOptionalInitState GetFaultedState() => LazyOptionalInitState.Faulted;
 
@@ -35,7 +35,7 @@ public abstract class LazyOptionalInitializer<TResult> : LazyInitializer<TResult
             whenFaulted(Fault);
     }
 
-    void ILazyInitializer<TResult?>.GetResult(Action<TResult?> onSuccess, Action<Exception> whenFaulted)
+    void ILazyProducer<TResult?>.GetResult(Action<TResult?> onSuccess, Action<Exception> whenFaulted)
     {
         Exec();
         if (Fault is null)
@@ -50,7 +50,7 @@ public abstract class LazyOptionalInitializer<TResult> : LazyInitializer<TResult
         return _hasValue ? LazyOptionalInitState.ValueProduced : LazyOptionalInitState.NoValue;
     }
 
-    bool ILazyInitializer<TResult?>.Invoke(Action<TResult?> onSuccess, Action<Exception> whenFaulted)
+    bool ILazyProducer<TResult?>.Invoke(Action<TResult?> onSuccess, Action<Exception> whenFaulted)
     {
         bool wasInvoked = Invoke();
         if (Fault is null)
