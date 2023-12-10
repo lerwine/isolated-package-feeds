@@ -2,10 +2,10 @@ namespace IsolatedPackageFeeds.Shared.Tests.Helpers
 {
     public class InvocationCounter<T>
     {
-        public int Count { get; }
+        public int Count { get; private set; }
 
         public T Current => _values.Current;
-        
+
         private readonly IEnumerator<T> _values;
 
         public InvocationCounter(IEnumerable<T> values)
@@ -18,6 +18,7 @@ namespace IsolatedPackageFeeds.Shared.Tests.Helpers
 
         public T Invoke()
         {
+            Count++;
             T result = _values.Current;
             if (!_values.MoveNext())
                 _values.Reset();

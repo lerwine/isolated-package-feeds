@@ -15,20 +15,6 @@ public class LazyOptionalDelegatedConversion<TInput, TResult>(TInput input, TryF
     protected override bool TryConvert([NotNullWhen(true)] out TResult? result) => _tryFunc(Input, out result);
 }
 
-public class LazyOptionalReDelegatedInitializer<TSource, TResult>(TryFunc<TSource?> tryGetSource, TryFunc<TSource, TResult?> tryConvert) :
-    LazyOptionalConversion<LazyOptionalDelegatedInitializer<TSource>, TResult>(new LazyOptionalDelegatedInitializer<TSource>(tryGetSource))
-{
-    private readonly TryFunc<TSource, TResult?> _tryConvert = tryConvert;
-
-    protected override bool TryConvert([NotNullWhen(true)] out TResult? result)
-    {
-        if (Input.TryGetResult(out TSource? source))
-            return _tryConvert(source, out result);
-        result = default;
-        return false;
-    }
-}
-
 /// <summary>
 /// Represents a deferred invocation of a delegate that optionally converts a <typeparamref name="TInput"/> value an additional conversion argument to the <typeparamref name="TResult"/> type.
 /// </summary>
