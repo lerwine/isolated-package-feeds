@@ -1,16 +1,18 @@
+using IsolatedPackageFeeds.Shared;
+
 namespace CdnGetter.Services;
 
 sealed class AsyncLookupEnumerator<TInput, TResult> : IDisposable
     where TResult : class
 {
     private readonly IEnumerator<TInput> _backingEnumerator;
-    private readonly Func<TInput, CancellationToken, Task<TResult?>> _getResult;
+    private readonly AsyncFunc<TInput, TResult?> _getResult;
 
     internal int IterationCount { get; private set; }
 
     internal TResult Current { get; private set; } = null!;
 
-    internal AsyncLookupEnumerator(IEnumerable<TInput> source, Func<TInput, CancellationToken, Task<TResult?>> getResult)
+    internal AsyncLookupEnumerator(IEnumerable<TInput> source, AsyncFunc<TInput, TResult?> getResult)
     {
         _backingEnumerator = source.GetEnumerator();
         _getResult = getResult;

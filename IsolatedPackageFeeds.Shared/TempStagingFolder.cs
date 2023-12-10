@@ -36,9 +36,9 @@ public sealed class TempStagingFolder : IDisposable
         return result;
     }
 
-    public Task<FileInfo> WriteNewFileInfoAsync(string fileName, Func<StreamWriter, CancellationToken, Task> writeContentAsync, CancellationToken cancellationToken) => WriteNewFileInfoAsync(fileName, writeContentAsync, null, cancellationToken);
+    public Task<FileInfo> WriteNewFileInfoAsync(string fileName, AsyncAction<StreamWriter> writeContentAsync, CancellationToken cancellationToken) => WriteNewFileInfoAsync(fileName, writeContentAsync, null, cancellationToken);
 
-    public async Task<FileInfo> WriteNewFileInfoAsync(string fileName, Func<StreamWriter, CancellationToken, Task> writeContentAsync, Encoding? encoding, CancellationToken cancellationToken)
+    public async Task<FileInfo> WriteNewFileInfoAsync(string fileName, AsyncAction<StreamWriter> writeContentAsync, Encoding? encoding, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
         if (fileName.Any(c => _invalidFileNameChars.Contains(c)))
@@ -85,7 +85,7 @@ public sealed class TempStagingFolder : IDisposable
 
     public Task<FileInfo> NewFileInfoAsync(string fileName, CancellationToken cancellationToken) => NewFileInfoAsync(fileName, null, cancellationToken);
 
-    public async Task<FileInfo> NewFileInfoAsync(string fileName, Func<FileStream, CancellationToken, Task>? writeContentAsync, CancellationToken cancellationToken)
+    public async Task<FileInfo> NewFileInfoAsync(string fileName, AsyncAction<FileStream>? writeContentAsync, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
         if (fileName.Any(c => _invalidFileNameChars.Contains(c)))
@@ -170,13 +170,13 @@ public sealed class TempStagingFolder : IDisposable
         return result;
     }
 
-    public Task<FileInfo> WriteNewRandomFileInfoAsync(Func<StreamWriter, CancellationToken, Task> writeContentAsync, CancellationToken cancellationToken) => WriteNewRandomFileInfoAsync(writeContentAsync, null, null, cancellationToken);
+    public Task<FileInfo> WriteNewRandomFileInfoAsync(AsyncAction<StreamWriter> writeContentAsync, CancellationToken cancellationToken) => WriteNewRandomFileInfoAsync(writeContentAsync, null, null, cancellationToken);
 
-    public Task<FileInfo> WriteNewRandomFileInfoAsync(Func<StreamWriter, CancellationToken, Task> writeContentAsync, string? extension, CancellationToken cancellationToken) => WriteNewRandomFileInfoAsync(writeContentAsync, extension, null, cancellationToken);
+    public Task<FileInfo> WriteNewRandomFileInfoAsync(AsyncAction<StreamWriter> writeContentAsync, string? extension, CancellationToken cancellationToken) => WriteNewRandomFileInfoAsync(writeContentAsync, extension, null, cancellationToken);
 
-    public Task<FileInfo> WriteNewRandomFileInfoAsync(Func<StreamWriter, CancellationToken, Task> writeContentAsync, Encoding? encoding, CancellationToken cancellationToken) => WriteNewRandomFileInfoAsync(writeContentAsync, null, encoding, cancellationToken);
+    public Task<FileInfo> WriteNewRandomFileInfoAsync(AsyncAction<StreamWriter> writeContentAsync, Encoding? encoding, CancellationToken cancellationToken) => WriteNewRandomFileInfoAsync(writeContentAsync, null, encoding, cancellationToken);
 
-    public async Task<FileInfo> WriteNewRandomFileInfoAsync(Func<StreamWriter, CancellationToken, Task> writeContentAsync, string? extension, Encoding? encoding, CancellationToken cancellationToken)
+    public async Task<FileInfo> WriteNewRandomFileInfoAsync(AsyncAction<StreamWriter> writeContentAsync, string? extension, Encoding? encoding, CancellationToken cancellationToken)
     {
         FileInfo result;
         if (string.IsNullOrWhiteSpace(extension))
@@ -210,9 +210,9 @@ public sealed class TempStagingFolder : IDisposable
         return result;
     }
 
-    public Task<FileInfo> NewRandomFileInfoAsync(Func<FileStream, CancellationToken, Task> writeContentAsync, CancellationToken cancellationToken) => NewRandomFileInfoAsync(writeContentAsync, null, cancellationToken);
+    public Task<FileInfo> NewRandomFileInfoAsync(AsyncAction<FileStream> writeContentAsync, CancellationToken cancellationToken) => NewRandomFileInfoAsync(writeContentAsync, null, cancellationToken);
 
-    public async Task<FileInfo> NewRandomFileInfoAsync(Func<FileStream, CancellationToken, Task> writeContentAsync, string? extension, CancellationToken cancellationToken)
+    public async Task<FileInfo> NewRandomFileInfoAsync(AsyncAction<FileStream> writeContentAsync, string? extension, CancellationToken cancellationToken)
     {
         FileInfo result;
         if (string.IsNullOrWhiteSpace(extension))
