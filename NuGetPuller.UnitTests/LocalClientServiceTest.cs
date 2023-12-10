@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using IsolatedPackageFeeds.Shared;
 using NuGet.Versioning;
 using NuGetPuller.UnitTests.Helpers;
 

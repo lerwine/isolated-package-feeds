@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using IsolatedPackageFeeds.Shared;
 
 namespace CdnGetter.Config;
 

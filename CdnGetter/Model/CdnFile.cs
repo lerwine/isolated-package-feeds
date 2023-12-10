@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.Extensions.Logging;
 using static CdnGetter.SqlExtensions;
+using IsolatedPackageFeeds.Shared;
 
 namespace CdnGetter.Model;
 

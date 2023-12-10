@@ -18,7 +18,9 @@
             "label": "Build NuGetPuller",
             "command": "dotnet",
             "type": "process",
-            "dependsOn":[ "Build IsolatedPackageFeeds Shared" ],
+            "dependsOn": [
+                "Build IsolatedPackageFeeds Shared"
+            ],
             "args": [
                 "build",
                 "${workspaceFolder}/NuGetPuller/NuGetPuller.csproj",
@@ -32,7 +34,9 @@
             "label": "Build NuGetPuller CLI",
             "command": "dotnet",
             "type": "process",
-            "dependsOn":[ "Build NuGetPuller" ],
+            "dependsOn": [
+                "Build NuGetPuller"
+            ],
             "args": [
                 "build",
                 "${workspaceFolder}/NuGetPuller.CLI/NuGetPuller.CLI.csproj",
@@ -40,16 +44,15 @@
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
+            "group": "build"
         },
         {
             "label": "Build NuGetPuller UnitTests",
             "command": "dotnet",
             "type": "process",
-            "dependsOn":[ "Build NuGetPuller" ],
+            "dependsOn": [
+                "Build NuGetPuller"
+            ],
             "args": [
                 "build",
                 "${workspaceFolder}/NuGetPuller.UnitTests/NuGetPuller.UnitTests.csproj",
@@ -83,7 +86,10 @@
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile",
-            "group": "build"
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         },
         {
             "label": "Build CdnGetter Unit Tests",

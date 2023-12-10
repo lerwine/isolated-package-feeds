@@ -1,3 +1,5 @@
+using IsolatedPackageFeeds.Shared;
+
 namespace NuGetPuller;
 
 /// <summary>

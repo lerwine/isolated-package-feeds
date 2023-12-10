@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using IsolatedPackageFeeds.Shared;
 using NuGet.Frameworks;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;

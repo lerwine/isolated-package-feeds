@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace NuGetPuller;
+namespace IsolatedPackageFeeds.Shared;
 
 /// <summary>
 /// First-in, first-out queue of unique items.

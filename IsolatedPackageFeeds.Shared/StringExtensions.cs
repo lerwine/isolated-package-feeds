@@ -2,8 +2,43 @@ using System.Diagnostics.CodeAnalysis;
 using static IsolatedPackageFeeds.Shared.CommonStatic;
 
 namespace IsolatedPackageFeeds.Shared;
+
 public static class StringExtensions
 {
+    #region From CdnGetter
+        
+    public static string? NullIfEmpty(this string? source) => (source is null || source.Length > 0) ? source : null;
+
+    public static string? NullIfWhiteSpace(this string? source) => string.IsNullOrWhiteSpace(source) ? null : source;
+
+    public static string? AsNonEmptyStringOrNull(this ReadOnlySpan<char> source) => (source.Length > 0) ? new(source) : null;
+
+    public static string? AsNonEmptyStringOrNull(this ReadOnlySpan<char> source, int startIndex, int endIndex) =>
+        (startIndex >= source.Length || endIndex <= startIndex) ? null : new string((endIndex < source.Length) ? source[startIndex..endIndex] : (startIndex > 0) ? source[startIndex..] : source);
+
+    public static string AsString(this ReadOnlySpan<char> source, int startIndex, int endIndex)
+    {
+        if (startIndex >= source.Length || endIndex <= startIndex)
+            return string.Empty;
+        return new((endIndex < source.Length) ? source[startIndex..endIndex] : (startIndex > 0) ? source[startIndex..] : source);
+    }
+
+    public static string? AsNonWhiteSpaceStringOrNull(this ReadOnlySpan<char> source) => (source.Length > 0) ? new string(source).NullIfWhiteSpace() : null;
+
+    public static string? AsNonWhiteSpaceStringOrNull(this ReadOnlySpan<char> source, int startIndex, int endIndex) =>
+        (startIndex >= source.Length || endIndex <= startIndex) ? null : new string((endIndex < source.Length) ? source[startIndex..endIndex] : (startIndex > 0) ? source[startIndex..] : source).NullIfWhiteSpace();
+
+    public static IEnumerable<string> TrimmedNotEmptyValues(this IEnumerable<string?>? source)
+    {
+        if (source is null)
+            return Enumerable.Empty<string>();
+        return source.Select(ToTrimmedOrNullIfEmpty).Where(t => t is not null)!;
+    }
+
+    public static IEnumerable<string> FromCsv(this string? source) => string.IsNullOrWhiteSpace(source) ? Enumerable.Empty<string>() : source.Split(',').TrimmedNotEmptyValues();
+
+    #endregion
+    
     public static string[] SplitLines(this string? value)
     {
         if (value is null)

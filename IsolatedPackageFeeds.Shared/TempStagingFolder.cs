@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.Text;
 
-namespace NuGetPuller;
+namespace IsolatedPackageFeeds.Shared;
 
 public sealed class TempStagingFolder : IDisposable
 {

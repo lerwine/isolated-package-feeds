@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using static CdnGetter.SqlExtensions;
+using IsolatedPackageFeeds.Shared;
 
 namespace CdnGetter.Model;
 

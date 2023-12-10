@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Microsoft.Extensions.Configuration;
 using static CdnGetter.Constants;
+using IsolatedPackageFeeds.Shared;
 
 namespace CdnGetter.Config;
 

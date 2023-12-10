@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using IsolatedPackageFeeds.Shared;
 using NuGet.Packaging;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;

@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+using IsolatedPackageFeeds.Shared;
 
 namespace NuGetPuller;
 

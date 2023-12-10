@@ -163,27 +163,6 @@ public static class ExtensionMethods
 
     public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T>? source) => (source is null) ? Enumerable.Empty<T>() : source;
 
-    public static string? NullIfEmpty(this string? source) => (source is null || source.Length > 0) ? source : null;
-
-    public static string? NullIfWhiteSpace(this string? source) => string.IsNullOrWhiteSpace(source) ? null : source;
-
-    public static string? AsNonEmptyStringOrNull(this ReadOnlySpan<char> source) => (source.Length > 0) ? new(source) : null;
-
-    public static string? AsNonEmptyStringOrNull(this ReadOnlySpan<char> source, int startIndex, int endIndex) =>
-        (startIndex >= source.Length || endIndex <= startIndex) ? null : new string((endIndex < source.Length) ? source[startIndex..endIndex] : (startIndex > 0) ? source[startIndex..] : source);
-
-    public static string AsString(this ReadOnlySpan<char> source, int startIndex, int endIndex)
-    {
-        if (startIndex >= source.Length || endIndex <= startIndex)
-            return string.Empty;
-        return new((endIndex < source.Length) ? source[startIndex..endIndex] : (startIndex > 0) ? source[startIndex..] : source);
-    }
-
-    public static string? AsNonWhiteSpaceStringOrNull(this ReadOnlySpan<char> source) => (source.Length > 0) ? new string(source).NullIfWhiteSpace() : null;
-
-    public static string? AsNonWhiteSpaceStringOrNull(this ReadOnlySpan<char> source, int startIndex, int endIndex) =>
-        (startIndex >= source.Length || endIndex <= startIndex) ? null : new string((endIndex < source.Length) ? source[startIndex..endIndex] : (startIndex > 0) ? source[startIndex..] : source).NullIfWhiteSpace();
-
     public static T[]? NullIfEmpty<T>(this T[]? source) => (source is null || source.Length == 0) ? null : source;
 
     public static IEnumerable<T> NonNullValues<T>(this IEnumerable<T?>? source) where T : class
@@ -193,45 +172,31 @@ public static class ExtensionMethods
         return source.Where(t => t is not null)!;
     }
 
-    public static IEnumerable<string> TrimmedNotEmptyValues(this IEnumerable<string?>? source)
-    {
-        if (source is null)
-            return Enumerable.Empty<string>();
-        return source.Select(ToTrimmedOrNullIfEmpty).Where(t => t is not null)!;
-    }
+    // [Obsolete("Use IsolatedPackageFeeds.Shared.StringExtensions.SplitLines")]
+    // public static string[] SplitLines(this string? value)
+    // {
+    //     if (value is null)
+    //         return [];
+    //     return LineBreakRegex.Split(value);
+    // }
 
-    public static IEnumerable<string> FromCsv(this string? source) => string.IsNullOrWhiteSpace(source) ? Enumerable.Empty<string>() : source.Split(',').TrimmedNotEmptyValues();
+    // [Obsolete("Use IsolatedPackageFeeds.Shared.StringExtensions.IsTrimmedNotEmpty")]
+    // public static bool IsTrimmedNotEmpty(this string? value, [NotNullWhen(true)] out string? wsNormalized) => (wsNormalized = value.ToTrimmedOrNullIfEmpty()) is not null;
 
-    public static string[] SplitLines(this string? value)
-    {
-        if (value is null)
-            return [];
-        return LineBreakRegex.Split(value);
-    }
+    // [Obsolete("Use IsolatedPackageFeeds.Shared.StringExtensions.ToWsNormalizedOrEmptyIfNull")]
+    // public static string ToWsNormalizedOrEmptyIfNull(this string? value) => (value is not null && (value = value.Trim()).Length > 0) ? NonNormalizedWhiteSpaceRegex.Replace(value, " ") : "";
 
-    public static bool IsWsNormalizedNotEmpty(this string? value, [NotNullWhen(true)] out string? wsNormalized) => (wsNormalized = value.ToWsNormalizedOrNullIfEmpty()) is not null;
+    // [Obsolete("Use IsolatedPackageFeeds.Shared.StringExtensions.ToTrimmedOrEmptyIfNull")]
+    // public static string ToTrimmedOrEmptyIfNull(this string? value) => (value is null) ? "" : value.Trim();
 
-    public static bool IsTrimmedNotEmpty(this string? value, [NotNullWhen(true)] out string? wsNormalized) => (wsNormalized = value.ToTrimmedOrNullIfEmpty()) is not null;
+    // [Obsolete("Use IsolatedPackageFeeds.Shared.StringExtensions.ToTrimmedOrNullIfEmpty")]
+    // public static string? ToTrimmedOrNullIfEmpty(this string? value) => (value is not null && (value = value.Trim()).Length > 0) ? value : null;
 
-    public static string ToWsNormalizedOrEmptyIfNull(this string? value) => (value is not null && (value = value.Trim()).Length > 0) ? NonNormalizedWhiteSpaceRegex.Replace(value, " ") : "";
+    // [Obsolete("Use IsolatedPackageFeeds.Shared.StringExtensions.ToTrimmedOrDefaultIfEmpty")]
+    // public static string ToTrimmedOrDefaultIfEmpty(this string? value, Func<string> getDefault) => (value is not null && (value = value.Trim()).Length > 0) ? value : getDefault();
 
-    public static string? ToWsNormalizedOrNullIfEmpty(this string? value) => (value is not null && (value = value.Trim()).Length > 0) ? NonNormalizedWhiteSpaceRegex.Replace(value, " ") : null;
-
-    public static string ToWsNormalizedOrDefaultIfEmpty(this string? value, Func<string> getDefaultValue) => (value is not null && (value = value.Trim()).Length > 0) ? NonNormalizedWhiteSpaceRegex.Replace(value, " ") : getDefaultValue();
-
-    public static string ToWsNormalizedOrDefaultIfEmpty(this string? value, string defaultValue) => (value is not null && (value = value.Trim()).Length > 0) ? NonNormalizedWhiteSpaceRegex.Replace(value, " ") : defaultValue;
-
-    public static string ToTrimmedOrEmptyIfNull(this string? value) => (value is null) ? "" : value.Trim();
-
-    public static string? ToTrimmedOrNullIfEmpty(this string? value) => (value is not null && (value = value.Trim()).Length > 0) ? value : null;
-
-    public static string ToTrimmedOrDefaultIfEmpty(this string? value, Func<string> getDefault) => (value is not null && (value = value.Trim()).Length > 0) ? value : getDefault();
-
-    public static string DefaultIfWhiteSpace(this string? value, string defaultValue) => string.IsNullOrWhiteSpace(value) ? defaultValue : value;
-
-    public static string DefaultIfWhiteSpace(this string? value, Func<string> getDefault) => string.IsNullOrWhiteSpace(value) ? getDefault() : value;
-
-    public static string ToTrimmedOrDefaultIfEmpty(this string? value, string defaultValue) => (value is not null && (value = value.Trim()).Length > 0) ? value : defaultValue;
+    // [Obsolete("Use IsolatedPackageFeeds.Shared.StringExtensions.ToTrimmedOrDefaultIfEmpty")]
+    // public static string ToTrimmedOrDefaultIfEmpty(this string? value, string defaultValue) => (value is not null && (value = value.Trim()).Length > 0) ? value : defaultValue;
 
     public static void SetNavigation<T>(this Guid newValue, object syncRoot, Func<T, Guid> keyAcessor, ref Guid foreignKey, ref T? target)
         where T : class
