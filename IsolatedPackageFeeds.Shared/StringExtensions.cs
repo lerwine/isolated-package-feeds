@@ -6,7 +6,7 @@ namespace IsolatedPackageFeeds.Shared;
 public static class StringExtensions
 {
     #region From CdnGetter
-        
+
     public static string? NullIfEmpty(this string? source) => (source is null || source.Length > 0) ? source : null;
 
     public static string? NullIfWhiteSpace(this string? source) => string.IsNullOrWhiteSpace(source) ? null : source;
@@ -38,7 +38,7 @@ public static class StringExtensions
     public static IEnumerable<string> FromCsv(this string? source) => string.IsNullOrWhiteSpace(source) ? Enumerable.Empty<string>() : source.Split(',').TrimmedNotEmptyValues();
 
     #endregion
-    
+
     public static string[] SplitLines(this string? value)
     {
         if (value is null)
@@ -277,7 +277,7 @@ public static class StringExtensions
         result = value;
         return true;
     }
-    
+
     public static bool TryGetNonWhitesSpace(this string? value, string? fallback, out string result)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -293,6 +293,6 @@ public static class StringExtensions
             result = value;
         return true;
     }
-    
+
     public static string ToTrimmedOrDefaultIfEmpty(this string? value, string defaultValue) => (value is not null && (value = value.Trim()).Length > 0) ? value : defaultValue;
 }

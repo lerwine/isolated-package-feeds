@@ -27,7 +27,6 @@ public class ValidatedPathsService : ValidatedRepositoryPathsService<AppSettings
                     return true;
                 path = null;
                 return false;
-
             },
             (string value, out FileInfo? result) =>
             {
@@ -42,7 +41,6 @@ public class ValidatedPathsService : ValidatedRepositoryPathsService<AppSettings
                 }
                 value = result.FullName;
                 throw logger.LogExportLocalMetaDataDirectoryNotFound(value, message => new MetaDataExportPathException(value, message));
-
             });
         Import = new LazyOptionalChainedConversion<string, FileSystemInfo>(
             (out string? path) =>
@@ -72,7 +70,6 @@ public class ValidatedPathsService : ValidatedRepositoryPathsService<AppSettings
                 }
                 value = result.FullName;
                 throw logger.LogExportLocalMetaDataDirectoryNotFound(value, message => new MetaDataExportPathException(value, message));
-
             });
         ExportBundle = new LazyOptionalChainedConversion<string, FileInfo>(
             (out string? path) =>
@@ -81,7 +78,6 @@ public class ValidatedPathsService : ValidatedRepositoryPathsService<AppSettings
                     return true;
                 path = null;
                 return false;
-
             },
             (string value, out FileInfo? result) =>
             {
@@ -96,7 +92,6 @@ public class ValidatedPathsService : ValidatedRepositoryPathsService<AppSettings
                 }
                 value = result.FullName;
                 throw logger.LogExportLocalMetaDataDirectoryNotFound(value, message => new MetaDataExportPathException(value, message));
-
             });
         TargetManifestFile = new LazyOptionalChainedConversion<string, FileInfo>(
             (out string? path) =>
@@ -105,7 +100,6 @@ public class ValidatedPathsService : ValidatedRepositoryPathsService<AppSettings
                     return true;
                 path = null;
                 return false;
-
             },
             (string value, out FileInfo? result) =>
             {
@@ -120,7 +114,6 @@ public class ValidatedPathsService : ValidatedRepositoryPathsService<AppSettings
                 }
                 value = result.FullName;
                 throw logger.LogExportLocalMetaDataDirectoryNotFound(value, message => new MetaDataExportPathException(value, message));
-
             });
         SaveTargetManifestAs = new LazyOptionalChainedConversion<string, FileInfo>(
             (out string? path) =>
@@ -129,7 +122,6 @@ public class ValidatedPathsService : ValidatedRepositoryPathsService<AppSettings
                     return true;
                 path = null;
                 return false;
-
             },
             (string value, out FileInfo? result) =>
             {
@@ -144,7 +136,6 @@ public class ValidatedPathsService : ValidatedRepositoryPathsService<AppSettings
                 }
                 value = result.FullName;
                 throw logger.LogExportLocalMetaDataDirectoryNotFound(value, message => new MetaDataExportPathException(value, message));
-
             });
     }
 }

@@ -4,8 +4,8 @@ namespace IsolatedPackageFeeds.Shared;
 
 public class LoggedException : Exception, ILogTrackable
 {
-    public LoggedException() {}
-    public LoggedException(string message) : base(message) {}
+    public LoggedException() { }
+    public LoggedException(string message) : base(message) { }
     public LoggedException(string? message, Exception? inner = null) : base(message, inner) { }
 
     public bool WasLogged => true;

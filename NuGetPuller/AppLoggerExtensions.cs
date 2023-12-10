@@ -311,7 +311,7 @@ public static class AppLoggerExtensions
         _unsupportedUpstreamRepositoryUrlScheme(logger, uriString, exception);
         return factory(MESSAGE_UnsupportedUpstreamRepositoryUrlScheme);
     }
-    
+
     public static string LogUnsupportedRepositoryUrlScheme(this ILogger logger, string uriString, bool isUpstream, Exception? exception = null)
     {
         if (isUpstream)

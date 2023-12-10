@@ -9,7 +9,7 @@ public abstract class ValidatedRepositoryPathsService<T> : IValidatedRepositoryP
     where T : ISharedAppSettings
 {
     public T Settings { get; }
-    
+
     public LazyChainedConversion<string, Uri> UpstreamServiceIndex { get; }
 
     public LazyChainedConversion<string, DirectoryInfo> LocalRepository { get; }
@@ -32,7 +32,7 @@ public abstract class ValidatedRepositoryPathsService<T> : IValidatedRepositoryP
             if (result.Scheme == Uri.UriSchemeFile)
                 try
                 {
-                    if  (!File.Exists(result.LocalPath))
+                    if (!File.Exists(result.LocalPath))
                         logger.LogRepositoryPathNotFound(result.LocalPath, true, message => new RepositoryPathNotFoundException(result.LocalPath, message));
                 }
                 catch (Exception exception)
