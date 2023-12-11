@@ -252,10 +252,13 @@ $AllVersions = @($AllPackages | ForEach-Object {
 
 $DlCount = 0;
 $CopyCount = 0;
-$WebClient = [System.Net.WebClient]::new();
 for ($i = 0; $i -lt $AllVersions.Count; $i++) {
     $Item = $AllVersions[$i];
     $Name = $Item.ID;
+    $UriLeaf = $ID;
+    if ($null -ne $Item.Version) { $UriLeaf = "$UriLeaf/$($Item.Version)" }
+    $Uri = [Uri]::new($BaseUri, "$UriLeaf");
+    Write-Information -MessageData $Uri.AbsoluteUri -InformationAction Continue;
     if ($null -ne $Item.Version) { $Name = "$Name.$($Item.Version)" }
     $UpstreamDlPath = $UpstreamRepoPath | Join-Path -ChildPath "$Name.nupkg";
     $LocalDlPath = $LocalRepoPath | Join-Path -ChildPath "$Name.nupkg";
@@ -281,21 +284,16 @@ for ($i = 0; $i -lt $AllVersions.Count; $i++) {
                 Copy-Item -LiteralPath $LocalDlPath -Destination $UpstreamDlPath;
             } else {
                 $DlCount++;
-                $UriLeaf = $ID;
-                if ($null -ne $Item.Version) { $UriLeaf = "$UriLeaf/$($Item.Version)" }
-                $Uri = [Uri]::new($BaseUri, "$UriLeaf");
                 Write-Progress -Activity 'Downloading packages' -Status $Name -CurrentOperation 'Downloading' -PercentComplete ([int](($i * 100.0) / ([double]$AllVersions.Count)));
-                $WebClient.DownloadFile($Uri.AbsoluteUri, $UpstreamDlPath);
+                Invoke-WebRequest -Uri $Uri -OutFile $UpstreamDlPath;
                 Write-Progress -Activity 'Downloading packages' -Status $Name -CurrentOperation 'Copying to example local repository' -PercentComplete ([int](($i * 100.0) / ([double]$AllVersions.Count)));
                 Copy-Item -LiteralPath $UpstreamDlPath -Destination $LocalDlPath;
             }
         } else {
             $DlCount++;
             $UriLeaf = $ID;
-            if ($null -ne $Item.Version) { $UriLeaf = "$UriLeaf/$($Item.Version)" }
-            $Uri = [Uri]::new($BaseUri, "$UriLeaf");
             Write-Progress -Activity 'Downloading packages' -Status $Name -CurrentOperation 'Downloading' -PercentComplete ([int](($i * 100.0) / ([double]$AllVersions.Count)));
-            $WebClient.DownloadFile($Uri.AbsoluteUri, $UpstreamDlPath);
+            Invoke-WebRequest -Uri $Uri -OutFile $UpstreamDlPath;
         }
     }
 }
