@@ -8,6 +8,11 @@ using static IsolatedPackageFeeds.Shared.CommonStatic;
 
 namespace NuGetPuller;
 
+/// <summary>
+/// Base class providing methods for managing the local NuGet repository.
+/// </summary>
+/// <param name="settings">The validated settings service.</param>
+/// <param name="logger">THe logger to write log information to.</param>
 public abstract class LocalClientServiceBase(IValidatedRepositoryPathsService settings, ILogger logger) : ClientService(Repository.Factory.GetCoreV3(settings.LocalRepository.GetResult().FullName), settings, logger, false)
 {
     #region Methods using the Search Query API

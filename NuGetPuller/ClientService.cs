@@ -9,6 +9,9 @@ using static IsolatedPackageFeeds.Shared.CommonStatic;
 
 namespace NuGetPuller;
 
+/// <summary>
+/// Base class providing methods for managing a NuGet repository.
+/// </summary>
 public abstract class ClientService : IDisposable
 {
     #region Fields and Properties
@@ -33,6 +36,13 @@ public abstract class ClientService : IDisposable
 
     #endregion
 
+    /// <summary>
+    /// Initializes a new <c>ClientService<c>.
+    /// </summary>
+    /// <param name="sourceRepository">The source NuGet repository.</param>
+    /// <param name="settings">The validated settings service.</param>
+    /// <param name="logger">THe logger to write log information to.</param>
+    /// <param name="isUpstream"><see langword="true"/> if the source repository represents the upstream repository; otherwise, <see langword="false"/>.</param>
     protected ClientService(SourceRepository sourceRepository, IValidatedRepositoryPathsService settings, ILogger logger, bool isUpstream)
     {
         GlobalPackagesFolder = settings.GlobalPackagesFolder.GetResult().FullName;

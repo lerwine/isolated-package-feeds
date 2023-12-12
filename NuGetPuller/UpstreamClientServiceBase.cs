@@ -4,6 +4,11 @@ using NuGet.Protocol.Core.Types;
 
 namespace NuGetPuller;
 
+/// <summary>
+/// Base class providing methods for managing the upstream NuGet repository.
+/// </summary>
+/// <param name="settings">The validated settings service.</param>
+/// <param name="logger">THe logger to write log information to.</param>
 public abstract class UpstreamClientServiceBase(IValidatedRepositoryPathsService settings, ILogger logger) : ClientService(Repository.Factory.GetCoreV3(settings.UpstreamServiceIndex.GetResult().AbsoluteUri), settings, logger, true)
 {
     /// <summary>
@@ -13,7 +18,7 @@ public abstract class UpstreamClientServiceBase(IValidatedRepositoryPathsService
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
     /// <returns><see cref="Task{TResult}.Result" /> returns the dependency information for all versions of a single package.</returns>
     public Task<IEnumerable<RemoteSourceDependencyInfo>> ResolvePackagesAsync(string packageId, CancellationToken cancellationToken) => ResolvePackagesAsync(packageId, null, cancellationToken);
-    
+
     /// <summary>
     /// Retrieve dependency info for all versions of a single package.
     /// </summary>

@@ -2,6 +2,10 @@ using Microsoft.Extensions.Logging;
 
 namespace NuGetPuller;
 
+/// <summary>
+/// Writes NuGet log events to a <see cref="ILogger"/>.
+/// </summary>
+/// <param name="logger">The underlying <see cref="ILogger"/>.</param>
 public class NugetLogWrapper(ILogger logger) : NuGet.Common.ILogger
 {
     private readonly ILogger _underlyingLogger = logger;
