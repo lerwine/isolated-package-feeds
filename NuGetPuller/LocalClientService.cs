@@ -127,7 +127,7 @@ public class LocalClientService(IValidatedRepositoryPathsService settings, ILogg
                 catch (ArgumentException error)
                 {
                     success = false;
-                    Logger.LogPackageVersionDeleteFailure(id, version, error);
+                    Logger.PackageVersionDeleteFailure(id, version, error);
                 }
                 yield return (new PackageIdentity(id, version), success);
             }
@@ -171,7 +171,7 @@ public class LocalClientService(IValidatedRepositoryPathsService settings, ILogg
             catch (ArgumentException error)
             {
                 success = false;
-                Logger.LogPackageVersionDeleteFailure(packageId, version, error);
+                Logger.PackageVersionDeleteFailure(packageId, version, error);
             }
             yield return (version, success);
         }
@@ -216,11 +216,11 @@ public class LocalClientService(IValidatedRepositoryPathsService settings, ILogg
         }
         catch (InvalidDataException error)
         {
-            Logger.LogPackageFileNotZipArchive(fileName, error);
+            Logger.PackageFileNotZipArchive(fileName, error);
         }
         catch (PackagingException error)
         {
-            Logger.LogPackageFileInvalidContent(fileName, error);
+            Logger.InvalidPackageFileContent(fileName, error);
         }
     }
 

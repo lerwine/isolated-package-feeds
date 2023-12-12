@@ -93,8 +93,8 @@ public sealed class ValidatedRepositoryPathsService<T>(IOptions<T> options, IHos
             }
             catch (Exception exception)
             {
-                throw logger.LogInvalidGlobalPackagesFolder(value, message => new InvalidGlobalPackagesPathException(value, message, exception), exception);
+                throw logger.InvalidGlobalPackagesFolder(value, message => new InvalidGlobalPackagesPathException(value, message, exception), exception);
             }
-            throw logger.LogGlobalPackagesFolderNotFound(directoryInfo.FullName, message => new GlobalPackagesPathNotFoundException(directoryInfo.FullName, message));
+            throw logger.GlobalPackagesFolderNotFound(directoryInfo.FullName, message => new GlobalPackagesPathNotFoundException(directoryInfo.FullName, message));
         });
 }

@@ -39,6 +39,12 @@ Following are the configuration options for the `NuGetPuller` configuration sect
 
 ## Development
 
+### High Performance Logging
+
+You can use the [CS Code Snippets](../.vscode/cs.code-snippets) included with this project to create extension methods for high-performance logging.
+The extension methods should be created on the [AppLoggerExtensions](./AppLoggerExtensions.cs) class.
+The event name will be the same as the [AppLoggerExtensions.NuGetPullerEventId enum](./AppLoggerExtensions.NuGetPullerEventId.cs) field as well as the extension method.
+
 ### NuGet
 
 - [NuGet Server API](https://learn.microsoft.com/en-us/nuget/api/overview)
