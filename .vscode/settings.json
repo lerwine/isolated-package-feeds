@@ -1,6 +1,6 @@
 {
     "svg.preview.background": "transparent",
-    "dotnet-test-explorer.testProjectPath": "CdnGetter.UnitTests/CdnGetter.UnitTests.csproj",
+    "dotnet-test-explorer.testProjectPath": "NuGetPuller.UnitTests/NuGetPuller.UnitTests.csproj",
     "todohighlight.keywords": [
         {
             "text": "TODO:",
@@ -76,5 +76,7 @@
     ],
     "githubPullRequests.ignoredPullRequestBranches": [
         "main"
-    ]
+    ],
+    "codeQL.createQuery.qlPackLocation": "C:\\Users\\Lenny\\Source\\Repositories\\lte-codeql",
+    "codeQL.cli.executablePath": "C:\\Program Files\\codeql\\codeql.exe"
 }
