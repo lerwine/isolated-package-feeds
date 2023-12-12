@@ -5,11 +5,22 @@ using Microsoft.Extensions.Logging;
 
 namespace NuGetPuller;
 
+/// <summary>
+/// Service for validation of repository paths.
+/// </summary>
 public abstract class ValidatedRepositoryPathsService<T>(T settings, IHostEnvironment hostEnvironment, ILogger logger) : IValidatedRepositoryPathsService
     where T : ISharedAppSettings
 {
+    /// <summary>
+    /// Gets the <see cref="ISharedAppSettings"/> that contains the original settings values.
+    /// </summary>
     public T Settings { get; } = settings;
 
+    ISharedAppSettings IValidatedRepositoryPathsService.Settings => Settings;
+
+    /// <summary>
+    /// Lazy validation for the <see cref="ISharedAppSettings.UpstreamServiceIndex"/> setting.
+    /// </summary>
     public LazyChainedConversion<string, Uri> UpstreamServiceIndex { get; } = new LazyChainedConversion<string, Uri>(
         () => settings.OverrideUpstreamServiceIndex.TryGetNonWhitesSpace(settings.UpstreamServiceIndex, out string result) ? result : ServiceDefaults.DEFAULT_UPSTREAM_SERVICE_INDEX,
         value =>
@@ -35,6 +46,9 @@ public abstract class ValidatedRepositoryPathsService<T>(T settings, IHostEnviro
             return result;
         });
 
+    /// <summary>
+    /// Lazy validation for the <see cref="ISharedAppSettings.LocalRepository"/> setting.
+    /// </summary>
     public LazyChainedConversion<string, DirectoryInfo> LocalRepository { get; } = new LazyChainedConversion<string, DirectoryInfo>(
         () => settings.OverrideLocalRepository.TryGetNonWhitesSpace(settings.LocalRepository, out string result) ? result :
             Path.Combine(hostEnvironment.ContentRootPath, ServiceDefaults.DEFAULT_LOCAL_REPOSITORY),
@@ -62,6 +76,9 @@ public abstract class ValidatedRepositoryPathsService<T>(T settings, IHostEnviro
             throw logger.LogRepositoryPathNotFound(path, false, message => new RepositoryPathNotFoundException(path, message));
         });
 
+    /// <summary>
+    /// Lazy validation for the <see cref="ISharedAppSettings.UpstreamServicGlobalPackagesFoldereIndex"/> setting.
+    /// </summary>
     public LazyChainedConversion<string, DirectoryInfo> GlobalPackagesFolder { get; } = new LazyChainedConversion<string, DirectoryInfo>(
         () => settings.OverrideGlobalPackagesFolder.TryGetNonWhitesSpace(settings.GlobalPackagesFolder, out string result) ? result :
             NuGet.Configuration.SettingsUtility.GetGlobalPackagesFolder(NuGet.Configuration.Settings.LoadDefaultSettings(root: null)),
