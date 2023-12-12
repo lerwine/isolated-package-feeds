@@ -5,21 +5,12 @@ using Microsoft.Extensions.Logging;
 
 namespace NuGetPuller;
 
-public abstract class ValidatedRepositoryPathsService<T> : IValidatedRepositoryPathsService
+public abstract class ValidatedRepositoryPathsService<T>(T settings, IHostEnvironment hostEnvironment, ILogger logger) : IValidatedRepositoryPathsService
     where T : ISharedAppSettings
 {
-    public T Settings { get; }
+    public T Settings { get; } = settings;
 
-    public LazyChainedConversion<string, Uri> UpstreamServiceIndex { get; }
-
-    public LazyChainedConversion<string, DirectoryInfo> LocalRepository { get; }
-
-    public LazyChainedConversion<string, DirectoryInfo> GlobalPackagesFolder { get; }
-
-    public ValidatedRepositoryPathsService(T settings, IHostEnvironment hostEnvironment, ILogger logger)
-    {
-        Settings = settings;
-        UpstreamServiceIndex = new LazyChainedConversion<string, Uri>(
+    public LazyChainedConversion<string, Uri> UpstreamServiceIndex { get; } = new LazyChainedConversion<string, Uri>(
             () => settings.OverrideUpstreamServiceIndex.TryGetNonWhitesSpace(settings.UpstreamServiceIndex, out string result) ? result : ServiceDefaults.DEFAULT_UPSTREAM_SERVICE_INDEX,
         value =>
         {
@@ -43,23 +34,39 @@ public abstract class ValidatedRepositoryPathsService<T> : IValidatedRepositoryP
                 throw logger.LogUnsupportedRepositoryUrlScheme(result.OriginalString, message => new UriSchemeNotSupportedException(result, message));
             return result;
         });
-        LocalRepository = new LazyChainedConversion<string, DirectoryInfo>(
-            () => settings.OverrideLocalRepository.TryGetNonWhitesSpace(settings.LocalRepository, out string result) ? result : Path.Combine(hostEnvironment.ContentRootPath, ServiceDefaults.DEFAULT_LOCAL_REPOSITORY),
+
+    public LazyChainedConversion<(string Path, bool IsDefault), DirectoryInfo> LocalRepository { get; } = new LazyChainedConversion<(string Path, bool IsDefault), DirectoryInfo>(
+            () =>
+            {
+                if (settings.OverrideLocalRepository.TryGetNonWhitesSpace(settings.LocalRepository, out string result))
+                    return (result, false);
+                return (Path.Combine(hostEnvironment.ContentRootPath, ServiceDefaults.DEFAULT_LOCAL_REPOSITORY), true);
+            },
         value =>
         {
+            string path = value.Path;
             DirectoryInfo directoryInfo;
             try
             {
-                if ((directoryInfo = new(value)).Exists)
+                if ((directoryInfo = new(value.Path)).Exists)
                     return directoryInfo;
+                path = directoryInfo.FullName;
+                if (value.IsDefault && directoryInfo.Parent is not null && directoryInfo.Parent.Exists && !File.Exists(path))
+                {
+                    directoryInfo.Create();
+                    directoryInfo.Refresh();
+                    if (directoryInfo.Exists)
+                        return directoryInfo;
+                }
             }
             catch (Exception exception)
             {
-                throw logger.LogInvalidRepositoryUrl(value, false, message => new InvalidRepositoryUriException(value, message, exception), exception);
+                throw logger.LogInvalidRepositoryUrl(path, false, message => new InvalidRepositoryUriException(path, message, exception), exception);
             }
-            throw logger.LogRepositoryPathNotFound(directoryInfo.FullName, false, message => new RepositoryPathNotFoundException(directoryInfo.FullName, message));
+            throw logger.LogRepositoryPathNotFound(path, false, message => new RepositoryPathNotFoundException(path, message));
         });
-        GlobalPackagesFolder = new LazyChainedConversion<string, DirectoryInfo>(
+
+    public LazyChainedConversion<string, DirectoryInfo> GlobalPackagesFolder { get; } = new LazyChainedConversion<string, DirectoryInfo>(
             () => settings.OverrideGlobalPackagesFolder.TryGetNonWhitesSpace(settings.GlobalPackagesFolder, out string result) ? result :
                 NuGet.Configuration.SettingsUtility.GetGlobalPackagesFolder(NuGet.Configuration.Settings.LoadDefaultSettings(root: null)),
         value =>
@@ -76,5 +83,4 @@ public abstract class ValidatedRepositoryPathsService<T> : IValidatedRepositoryP
             }
             throw logger.LogGlobalPackagesFolderNotFound(directoryInfo.FullName, message => new GlobalPackagesPathNotFoundException(directoryInfo.FullName, message));
         });
-    }
 }
