@@ -43,7 +43,6 @@ public class ResultWithType<TEnumerable, TItem>
     public string ReflectedItemType { get; set; }
     public IEnumerable<Item>? Results { get; set; }
 
-
     public class Item
     {
         public string ActualType { get; set; }

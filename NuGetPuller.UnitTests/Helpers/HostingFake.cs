@@ -22,11 +22,11 @@ record HostingFake(IHost Host, string PreviousCwd, DirectoryInfo BaseDirectory, 
             cwd.Create();
         var previousCwd = Directory.GetCurrentDirectory();
         Directory.SetCurrentDirectory(cwd.FullName);
-        
+
         DirectoryInfo localRepo = new(Path.Combine(testContext.TestDirectory, ServiceDefaults.DEFAULT_LOCAL_REPOSITORY));
         if (localRepo.Exists)
             localRepo.Delete(true);
-        
+
         HostApplicationBuilder builder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(new HostApplicationBuilderSettings()
         {
             ContentRootPath = testContext.TestDirectory,

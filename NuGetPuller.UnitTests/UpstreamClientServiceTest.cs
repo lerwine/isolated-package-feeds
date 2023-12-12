@@ -108,13 +108,13 @@ public class UpstreamClientServiceTest
         var framework = NuGetFramework.Parse("net8.0");
         var result = await target.ResolvePackage(packageId, version, framework, CancellationToken.None);
         Assert.That(result, Is.Not.Null);
-        Assert.That(result.Id, Is.EqualTo(packageId));
-        Assert.That(result.HasVersion, Is.True);
-        Assert.That(result.Version, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Id, Is.EqualTo(packageId));
+            Assert.That(result.HasVersion, Is.True);
+            Assert.That(result.Version, Is.Not.Null);
+        });
         Assert.That(result.Version, Is.EqualTo(version));
-        // var json = new ResultWithType<NuGet.Protocol.Core.Types.SourcePackageDependencyInfo>(result).ToJson(Newtonsoft.Json.Formatting.Indented);
-        // File.WriteAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "../../../../Resources/System.Text.Json.7.0.0-ResolvedDependencyInfo.json"), json,
-        //     new System.Text.UTF8Encoding(false, true));
     }
 
     [Test]
