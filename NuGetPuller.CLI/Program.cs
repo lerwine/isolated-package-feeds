@@ -30,16 +30,7 @@ internal class Program
         builder.Services
             .AddSingleton<ValidatedPathsService>()
             .AddSingleton<LocalClientService>()
-            .AddSingleton<UpstreamClientService>()
-            .PostConfigure<AppSettings>(settings =>
-            {
-                if (string.IsNullOrWhiteSpace(settings.GlobalPackagesFolder))
-                    settings.GlobalPackagesFolder = NuGet.Configuration.SettingsUtility.GetGlobalPackagesFolder(NuGet.Configuration.Settings.LoadDefaultSettings(root: null));
-                if (string.IsNullOrWhiteSpace(settings.UpstreamServiceIndex))
-                    settings.UpstreamServiceIndex = ServiceDefaults.DEFAULT_UPSTREAM_SERVICE_INDEX;
-                if (string.IsNullOrWhiteSpace(settings.LocalRepository))
-                    settings.LocalRepository = Path.Combine(builder.Environment.ContentRootPath, ServiceDefaults.DEFAULT_LOCAL_REPOSITORY);
-            });
+            .AddSingleton<UpstreamClientService>();
         builder.Services.AddHostedService<MainService>();
         (Host = builder.Build()).Run();
     }

@@ -44,16 +44,7 @@ record HostingFake(IHost Host, string PreviousCwd, DirectoryInfo BaseDirectory, 
         builder.Services
             .AddSingleton<ValidatedRepositoryPathsService>()
             .AddSingleton<LocalClientService>()
-            .AddSingleton<UpstreamClientService>()
-            .PostConfigure<TestAppSettings>(settings =>
-            {
-                if (string.IsNullOrWhiteSpace(settings.GlobalPackagesFolder))
-                    settings.GlobalPackagesFolder = NuGet.Configuration.SettingsUtility.GetGlobalPackagesFolder(NuGet.Configuration.Settings.LoadDefaultSettings(root: null));
-                if (string.IsNullOrWhiteSpace(settings.UpstreamServiceIndex))
-                    settings.UpstreamServiceIndex = ServiceDefaults.DEFAULT_UPSTREAM_SERVICE_INDEX;
-                if (string.IsNullOrWhiteSpace(settings.LocalRepository))
-                    settings.LocalRepository = Path.Combine(builder.Environment.ContentRootPath, ServiceDefaults.DEFAULT_LOCAL_REPOSITORY);
-            });
+            .AddSingleton<UpstreamClientService>();
         var host = builder.Build();
         host.Start();
         return new(Host: host, PreviousCwd: previousCwd, BaseDirectory: baseDirectory, Cwd: cwd, LocalRepo: localRepo);
@@ -65,7 +56,7 @@ record HostingFake(IHost Host, string PreviousCwd, DirectoryInfo BaseDirectory, 
         finally
         {
             try { Host.Dispose(); }
-            finally{ Directory.SetCurrentDirectory(PreviousCwd); }
+            finally { Directory.SetCurrentDirectory(PreviousCwd); }
         }
     }
 }
