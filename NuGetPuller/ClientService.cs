@@ -322,6 +322,7 @@ public abstract class ClientService
     /// <param name="packageIds">The IDs of the packages to retrieve versions and dependencies for.</param>
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
     /// <returns>All versions of packages, including all versions of all dependencies</returns>
+    // BUG: This never returns
     public async IAsyncEnumerable<PackageIdentity> GetAllVersionsWithDependenciesAsync(IEnumerable<string> packageIds, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(packageIds);
