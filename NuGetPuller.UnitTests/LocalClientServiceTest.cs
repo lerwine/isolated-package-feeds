@@ -19,14 +19,27 @@ public class LocalClientServiceTest
     public async Task AddPackageAsyncTest()
     {
         using TempStagingFolder tempStagingFolder = new();
-        var upstreamService = _hosting.Host.Services.GetRequiredService<UpstreamClientService>();
         var target = _hosting.Host.Services.GetRequiredService<LocalClientService>();
         string packageId = "Microsoft.Extensions.Logging.Abstractions";
         var version = NuGetVersion.Parse("7.0.0");
-        var fileInfo = await tempStagingFolder.NewRandomFileInfoAsync(async (stream, token) =>
+        FileInfo fileInfo;
+        try
         {
-            await target.CopyNupkgToStreamAsync(packageId, version, stream, token);
-        }, ".nupkg", CancellationToken.None);
+            var upstreamService = _hosting.Host.Services.GetRequiredService<UpstreamClientService>();
+            fileInfo = await tempStagingFolder.NewRandomFileInfoAsync(async (stream, token) =>
+            {
+                await upstreamService.CopyNupkgToStreamAsync(packageId, version, stream, token);
+            }, ".nupkg", CancellationToken.None);
+        }
+        catch (Exception exception)
+        {
+            Assert.Inconclusive($"Failed to download NuGet package: {exception}");
+            return;
+        }
+        if (!fileInfo.Exists)
+            Assert.Inconclusive("NuGet package failed to download.");
+        if (fileInfo.Length == 0)
+            Assert.Inconclusive("Downloaded NuGet package is empty.");
         await target.AddPackageAsync(fileInfo.FullName, false, CancellationToken.None);
         Assert.That(await target.DoesPackageExistAsync(packageId, version, CancellationToken.None), Is.True);
     }
