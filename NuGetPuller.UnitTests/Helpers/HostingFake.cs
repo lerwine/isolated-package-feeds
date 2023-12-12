@@ -1,12 +1,11 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Serilog;
 
 namespace NuGetPuller.UnitTests.Helpers;
 
-record HostingFake(IHost Host, string PreviousCwd, DirectoryInfo BaseDirectory, DirectoryInfo Cwd)
+record HostingFake(IHost Host, string PreviousCwd, DirectoryInfo BaseDirectory, DirectoryInfo Cwd, DirectoryInfo LocalRepo)
 {
     private const string DIRNAME_CWD = "CWD";
 
@@ -23,6 +22,10 @@ record HostingFake(IHost Host, string PreviousCwd, DirectoryInfo BaseDirectory, 
             cwd.Create();
         var previousCwd = Directory.GetCurrentDirectory();
         Directory.SetCurrentDirectory(cwd.FullName);
+        
+        DirectoryInfo localRepo = new(Path.Combine(testContext.TestDirectory, ServiceDefaults.DEFAULT_LOCAL_REPOSITORY));
+        if (localRepo.Exists)
+            localRepo.Delete(true);
         
         HostApplicationBuilder builder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder(new HostApplicationBuilderSettings()
         {
@@ -53,7 +56,7 @@ record HostingFake(IHost Host, string PreviousCwd, DirectoryInfo BaseDirectory, 
             });
         var host = builder.Build();
         host.Start();
-        return new(host, previousCwd, baseDirectory, cwd);
+        return new(Host: host, PreviousCwd: previousCwd, BaseDirectory: baseDirectory, Cwd: cwd, LocalRepo: localRepo);
     }
 
     internal async Task TearDownAsync()
@@ -62,7 +65,16 @@ record HostingFake(IHost Host, string PreviousCwd, DirectoryInfo BaseDirectory, 
         finally
         {
             try { Host.Dispose(); }
-            finally { Directory.SetCurrentDirectory(PreviousCwd); }
+            finally
+            {
+                try { Directory.SetCurrentDirectory(PreviousCwd); }
+                finally
+                {
+                    LocalRepo.Refresh();
+                    if (LocalRepo.Exists)
+                        LocalRepo.Delete(true);
+                }
+            }
         }
     }
 }
