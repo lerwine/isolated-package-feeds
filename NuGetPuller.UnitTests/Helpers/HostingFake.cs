@@ -65,16 +65,7 @@ record HostingFake(IHost Host, string PreviousCwd, DirectoryInfo BaseDirectory, 
         finally
         {
             try { Host.Dispose(); }
-            finally
-            {
-                try { Directory.SetCurrentDirectory(PreviousCwd); }
-                finally
-                {
-                    LocalRepo.Refresh();
-                    if (LocalRepo.Exists)
-                        LocalRepo.Delete(true);
-                }
-            }
+            finally{ Directory.SetCurrentDirectory(PreviousCwd); }
         }
     }
 }
