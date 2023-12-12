@@ -14,7 +14,7 @@ public partial class MainServiceStatic
         try { return new StreamWriter(path, false, new System.Text.UTF8Encoding(false, false)); }
         catch (ArgumentException exception)
         {
-            throw logger.LogInvalidExportLocalMetaData(path, m => new MetaDataExportPathException(path, m, exception), exception);
+            throw logger.InvalidExportLocalMetaData(path, m => new MetaDataExportPathException(path, m, exception), exception);
         }
         catch (UnauthorizedAccessException exception)
         {
@@ -22,15 +22,15 @@ public partial class MainServiceStatic
         }
         catch (DirectoryNotFoundException exception)
         {
-            throw logger.LogInvalidExportLocalMetaData(path, m => new MetaDataExportPathException(path, m, exception), exception);
+            throw logger.InvalidExportLocalMetaData(path, m => new MetaDataExportPathException(path, m, exception), exception);
         }
         catch (PathTooLongException exception)
         {
-            throw logger.LogInvalidExportLocalMetaData(path, m => new MetaDataExportPathException(path, m, exception), exception);
+            throw logger.InvalidExportLocalMetaData(path, m => new MetaDataExportPathException(path, m, exception), exception);
         }
         catch (IOException exception)
         {
-            throw logger.LogInvalidExportLocalMetaData(path, m => new MetaDataExportPathException(path, m, exception), exception);
+            throw logger.InvalidExportLocalMetaData(path, m => new MetaDataExportPathException(path, m, exception), exception);
         }
         catch (System.Security.SecurityException exception)
         {

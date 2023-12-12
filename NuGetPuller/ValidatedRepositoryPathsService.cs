@@ -30,20 +30,20 @@ public sealed class ValidatedRepositoryPathsService<T>(IOptions<T> options, IHos
             try { result = new Uri(value, UriKind.Absolute); }
             catch (Exception exception)
             {
-                throw logger.LogInvalidRepositoryUrl(value, true, message => new InvalidRepositoryUriException(value, message, exception), exception);
+                throw logger.InvalidRepositoryUrl(value, true, message => new InvalidRepositoryUriException(value, message, exception), exception);
             }
             if (result.Scheme == Uri.UriSchemeFile)
                 try
                 {
                     if (!File.Exists(result.LocalPath))
-                        logger.LogRepositoryPathNotFound(result.LocalPath, true, message => new RepositoryPathNotFoundException(result.LocalPath, message));
+                        logger.RepositoryPathNotFound(result.LocalPath, true, message => new RepositoryPathNotFoundException(result.LocalPath, message));
                 }
                 catch (Exception exception)
                 {
-                    throw logger.LogRepositoryPathNotFound(value, true, message => new RepositoryPathNotFoundException(value, message, exception), exception);
+                    throw logger.RepositoryPathNotFound(value, true, message => new RepositoryPathNotFoundException(value, message, exception), exception);
                 }
             else if (result.Scheme != Uri.UriSchemeHttps && result.Scheme != Uri.UriSchemeHttp)
-                throw logger.LogUnsupportedRepositoryUrlScheme(result.OriginalString, message => new UriSchemeNotSupportedException(result, message));
+                throw logger.UnsupportedRepositoryUrlScheme(result.OriginalString, message => new UriSchemeNotSupportedException(result, message));
             return result;
         });
 
@@ -72,9 +72,9 @@ public sealed class ValidatedRepositoryPathsService<T>(IOptions<T> options, IHos
             }
             catch (Exception exception)
             {
-                throw logger.LogInvalidRepositoryUrl(path, false, message => new InvalidRepositoryUriException(path, message, exception), exception);
+                throw logger.InvalidRepositoryUrl(path, false, message => new InvalidRepositoryUriException(path, message, exception), exception);
             }
-            throw logger.LogRepositoryPathNotFound(path, false, message => new RepositoryPathNotFoundException(path, message));
+            throw logger.RepositoryPathNotFound(path, false, message => new RepositoryPathNotFoundException(path, message));
         });
 
     /// <summary>

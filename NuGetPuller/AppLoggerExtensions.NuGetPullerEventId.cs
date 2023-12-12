@@ -11,17 +11,17 @@ public static partial class AppLoggerExtensions
         /// Event ID for <see cref="NuGet.Common.LogLevel.Debug"/> and <see cref="NuGet.Common.LogLevel.Verbose"/> messages relayed from the NuGet API.
         /// </summary>
         NuGetDebug = 0x1,
-        
+
         /// <summary>
         /// Event ID for <see cref="NuGet.Common.LogLevel.Information"/> and <see cref="NuGet.Common.LogLevel.Minimal"/> messages relayed from the NuGet API.
         /// </summary>
         NugetMessage = 0x2,
-        
+
         /// <summary>
         /// Event ID for <see cref="NuGet.Common.LogLevel.Warning"/> messages relayed from the NuGet API.
         /// </summary>
         NugetWarning = 0x3,
-        
+
         /// <summary>
         /// Event ID for <see cref="NuGet.Common.LogLevel.Error"/> messages relayed from the NuGet API.
         /// </summary>

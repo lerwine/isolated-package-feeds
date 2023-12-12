@@ -244,30 +244,11 @@ public static partial class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="url">The invalid NuGet repository URL.</param>
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
+    /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    /// <returns>The validation message.</returns>
-    public static string LogInvalidRepositoryUrl(this ILogger logger, string url, bool isUpstream, Exception? exception = null)
-    {
-        if (exception is PathTooLongException)
-        {
-            if (isUpstream)
-            {
-                UpstreamRepositoryPathTooLong(logger, url, exception);
-                return $"{MESSAGE_UpstreamRepositoryPathTooLong}.";
-            }
-            LocalRepositoryPathTooLong(logger, url, exception);
-            return $"{MESSAGE_LocalRepositoryPathTooLong}.";
-        }
-        if (isUpstream)
-        {
-            InvalidUpstreamRepositoryUrl(logger, url, exception);
-            return $"{MESSAGE_InvalidUpstreamRepositoryUrl}.";
-        }
-        InvalidLocalRepositoryUrl(logger, url, exception);
-        return $"{MESSAGE_InvalidLocalRepositoryUrl}.";
-    }
-
-    public static T LogInvalidRepositoryUrl<T>(this ILogger logger, string url, bool isUpstream, Func<string, T> factory, Exception? exception = null)
+    /// <typeparam name="T">The type of exception to be created.</typeparam>
+    /// <returns>The exception that was created by the <paramref name="factory"/> function.</returns>
+    public static T InvalidRepositoryUrl<T>(this ILogger logger, string url, bool isUpstream, Func<string, T> factory, Exception? exception = null)
         where T : LoggedException
     {
         if (exception is PathTooLongException)
@@ -289,31 +270,6 @@ public static partial class AppLoggerExtensions
         return factory(MESSAGE_InvalidLocalRepositoryUrl);
     }
 
-    public static string LogInvalidRepositoryUrl(this ILogger logger, Uri url, bool isUpstream, Exception? exception = null)
-    {
-        if (url.IsAbsoluteUri)
-        {
-            if (isUpstream)
-            {
-                InvalidUpstreamRepositoryUrl(logger, url.OriginalString, exception);
-                return $"{MESSAGE_InvalidUpstreamRepositoryUrl}.";
-            }
-            if (!url.IsFile)
-            {
-                LocalRepositoryUrlIsNotLocal(logger, url.OriginalString, exception);
-                return $"{MESSAGE_LocalRepositoryUrlIsNotLocal}.";
-            }
-        }
-        else if (isUpstream)
-        {
-            UpstreamRepositoryUrlIsNotAbsolute(logger, url.OriginalString, exception);
-            return $"{MESSAGE_UpstreamRepositoryUrlIsNotAbsolute}.";
-        }
-
-        InvalidLocalRepositoryUrl(logger, url.OriginalString, exception);
-        return $"{MESSAGE_InvalidLocalRepositoryUrl}.";
-    }
-
     /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.UrlSchemeNotSupported"/> event message.
     /// </summary>
@@ -323,21 +279,10 @@ public static partial class AppLoggerExtensions
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <typeparam name="T">The type of exception to be created.</typeparam>
     /// <returns>The exception that was created by the <paramref name="factory"/> function.</returns>
-    public static T LogUnsupportedRepositoryUrlScheme<T>(this ILogger logger, string uriString, Func<string, T> factory, Exception? exception = null) where T : LoggedException
+    public static T UnsupportedRepositoryUrlScheme<T>(this ILogger logger, string uriString, Func<string, T> factory, Exception? exception = null) where T : LoggedException
     {
         UnsupportedUpstreamRepositoryUrlScheme(logger, uriString, exception);
         return factory(MESSAGE_UnsupportedUpstreamRepositoryUrlScheme);
-    }
-
-    public static string LogUnsupportedRepositoryUrlScheme(this ILogger logger, string uriString, bool isUpstream, Exception? exception = null)
-    {
-        if (isUpstream)
-        {
-            UnsupportedUpstreamRepositoryUrlScheme(logger, uriString, exception);
-            return $"{MESSAGE_UnsupportedUpstreamRepositoryUrlScheme}.";
-        }
-        UnsupportedLocalRepositoryUrlScheme(logger, uriString, exception);
-        return $"{MESSAGE_UnsupportedLocalRepositoryUrlScheme}.";
     }
 
     #endregion
@@ -362,7 +307,8 @@ public static partial class AppLoggerExtensions
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogRepositorySecurityException(this ILogger logger, string path, bool isUpstream, Exception? exception = null)
+    // TODO: See if this needs to be used somewhere
+    public static string RepositorySecurityException(this ILogger logger, string path, bool isUpstream, Exception? exception = null)
     {
         if (isUpstream)
         {
@@ -379,8 +325,8 @@ public static partial class AppLoggerExtensions
 
     private const string MESSAGE_LocalRepositoryIOException = "I/O error while creating local repository folder";
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.LocalRepositoryIOException, Level = LogLevel.Critical, Message = $"{MESSAGE_LocalRepositoryIOException} {{Path}}.")]
-    private static partial void LocalRepositoryIOExceptionPrivate(this ILogger logger, string path, Exception? exception = null);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.LocalRepositoryIOException, Level = LogLevel.Critical, EventName = nameof(LocalRepositoryIOException), Message = $"{MESSAGE_LocalRepositoryIOException} {{Path}}.")]
+    private static partial void LogLocalRepositoryIOException(this ILogger logger, string path, Exception? exception = null);
 
     /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.LocalRepositoryIOException"/> event error message.
@@ -389,9 +335,10 @@ public static partial class AppLoggerExtensions
     /// <param name="path">The local repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogLocalRepositoryIOException(this ILogger logger, string path, Exception? exception = null)
+    // TODO: See if this needs to be used somewhere
+    public static string LocalRepositoryIOException(this ILogger logger, string path, Exception? exception = null)
     {
-        LocalRepositoryIOExceptionPrivate(logger, path, exception);
+        LogLocalRepositoryIOException(logger, path, exception);
         return $"{MESSAGE_LocalRepositoryIOException}.";
     }
 
@@ -415,20 +362,11 @@ public static partial class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory path.</param>
+    /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    /// <returns>The validation message.</returns>
-    public static string LogRepositoryPathNotFound(this ILogger logger, string path, bool isUpstream, Exception? exception = null)
-    {
-        if (isUpstream)
-        {
-            UpstreamRepositoryPathNotFound(logger, path, exception);
-            return $"{MESSAGE_UpstreamRepositoryPathNotFound}.";
-        }
-        LocalRepositoryPathNotFound(logger, path, exception);
-        return $"{MESSAGE_LocalRepositoryPathNotFound}.";
-    }
-
-    public static T LogRepositoryPathNotFound<T>(this ILogger logger, string path, bool isUpstream, Func<string, T> factory, Exception? exception = null)
+    /// <typeparam name="T">The type of exception to be created.</typeparam>
+    /// <returns>The exception that was created by the <paramref name="factory"/> function.</returns>
+    public static T RepositoryPathNotFound<T>(this ILogger logger, string path, bool isUpstream, Func<string, T> factory, Exception? exception = null)
         where T : LoggedException
     {
         if (isUpstream)
@@ -468,7 +406,7 @@ public static partial class AppLoggerExtensions
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <typeparam name="T">The type of exception to be created.</typeparam>
     /// <returns>The exception that was created by the <paramref name="factory"/> function.</returns>
-    public static T LogInvalidExportLocalMetaData<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : LoggedException
+    public static T InvalidExportLocalMetaData<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : LoggedException
     {
         if (exception is not null)
         {
@@ -488,40 +426,15 @@ public static partial class AppLoggerExtensions
     }
 
     /// <summary>
-    /// </summary>
-    /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidExportLocalMetaData"/> event error message.
-    /// </summary>
-    /// <param name="logger">The current logger.</param>
-    /// <param name="url">The invalid NuGet repository URL.</param>
-    /// <param name="exception">The optional exception that caused the event.</param>
-    /// <returns>The validation message.</returns>
-    public static string LogInvalidExportLocalMetaData(this ILogger logger, string url, Exception? exception = null)
-    {
-        if (exception is PathTooLongException)
-        {
-            ExportLocalMetaDataPathTooLong(logger, url, exception);
-            return $"{MESSAGE_ExportLocalMetaDataPathTooLong}.";
-        }
-        InvalidExportLocalMetaData(logger, url, exception);
-        return $"{MESSAGE_InvalidExportLocalMetaData}.";
-    }
-
-    /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidExportLocalMetaData"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    /// <returns>The validation message.</returns>
-    public static string LogExportLocalMetaDataDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
-    {
-        ExportLocalMetaDataDirectoryNotFound(logger, path, exception);
-        return $"{MESSAGE_ExportLocalMetaDataDirectoryNotFound}.";
-    }
-
-    public static T LogExportLocalMetaDataDirectoryNotFound<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : LoggedException
+    /// <typeparam name="T">The type of exception to be created.</typeparam>
+    /// <returns>The exception that was created by the <paramref name="factory"/> function.</returns>
+    public static T ExportLocalMetaDataDirectoryNotFound<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : LoggedException
     {
         ExportLocalMetaDataDirectoryNotFound(logger, path, exception);
         return factory(MESSAGE_ExportLocalMetaDataDirectoryNotFound);
@@ -928,8 +841,8 @@ public static partial class AppLoggerExtensions
     private const string MESSAGE_ExportBundleDirectoryNotFound = "Parent subdirectory of package metadata export path not found";
 
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportBundle, Level = LogLevel.Critical, Message = $"{MESSAGE_ExportBundleDirectoryNotFound} ({{Path}}).")]
-    private static partial void ExportBundleDirectoryNotFound(ILogger logger, string path, Exception? exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportBundle, Level = LogLevel.Critical, EventName = nameof(ExportBundleDirectoryNotFound), Message = $"{MESSAGE_ExportBundleDirectoryNotFound} ({{Path}}).")]
+    private static partial void LogExportBundleDirectoryNotFound(ILogger logger, string path, Exception? exception);
 
     private const string MESSAGE_ExportBundlePathTooLong = "Package metadata export path is too long";
 
@@ -938,8 +851,8 @@ public static partial class AppLoggerExtensions
 
     private const string MESSAGE_ExportBundlePathAccessDenied = "Access to export bundle path is denied";
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportBundle, Level = LogLevel.Critical, Message = $"{MESSAGE_ExportBundlePathAccessDenied} ({{Path}}).")]
-    private static partial void ExportBundlePathAccessDenied(ILogger logger, string path, Exception? exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportBundle, Level = LogLevel.Critical, EventName = nameof(ExportBundlePathAccessDenied), Message = $"{MESSAGE_ExportBundlePathAccessDenied} ({{Path}}).")]
+    private static partial void LogExportBundlePathAccessDenied(ILogger logger, string path, Exception? exception);
 
     private const string MESSAGE_InsufficientPermissionsForExportBundlePath = "Caller has insufficient permissions to export bundle path";
 
@@ -974,9 +887,10 @@ public static partial class AppLoggerExtensions
     /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogExportBundleDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
+    // TODO: See if this should be used somewhere
+    public static string ExportBundleDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
     {
-        ExportBundleDirectoryNotFound(logger, path, exception);
+        LogExportBundleDirectoryNotFound(logger, path, exception);
         return $"{MESSAGE_ExportBundleDirectoryNotFound}.";
     }
 
@@ -987,14 +901,15 @@ public static partial class AppLoggerExtensions
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogExportBundlePathAccessDenied(this ILogger logger, string path, Exception? exception = null)
+    // TODO: See if this should be used somewhere
+    public static string ExportBundlePathAccessDenied(this ILogger logger, string path, Exception? exception = null)
     {
         if (exception is System.Security.SecurityException)
         {
             InsufficientPermissionsForExportBundlePath(logger, path, exception);
             return $"{MESSAGE_InsufficientPermissionsForExportBundlePath}.";
         }
-        ExportBundlePathAccessDenied(logger, path, exception);
+        LogExportBundlePathAccessDenied(logger, path, exception);
         return $"{MESSAGE_ExportBundlePathAccessDenied}.";
     }
 
@@ -1095,8 +1010,8 @@ public static partial class AppLoggerExtensions
 
     private const string MESSAGE_SaveTargetManifestAsDirectoryNotFound = "Parent subdirectory of package metadata export path not found";
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidSaveTargetManifestAs, Level = LogLevel.Critical, Message = $"{MESSAGE_SaveTargetManifestAsDirectoryNotFound} ({{Path}}).")]
-    private static partial void SaveTargetManifestAsDirectoryNotFound(ILogger logger, string path, Exception? exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidSaveTargetManifestAs, Level = LogLevel.Critical, EventName = nameof(SaveTargetManifestAsDirectoryNotFound), Message = $"{MESSAGE_SaveTargetManifestAsDirectoryNotFound} ({{Path}}).")]
+    private static partial void LogSaveTargetManifestAsDirectoryNotFound(ILogger logger, string path, Exception? exception);
 
     private const string MESSAGE_InsufficientPermissionsForSaveTargetManifestAsPath = "Caller has insufficient permissions to access the manifest file output path";
 
@@ -1105,8 +1020,8 @@ public static partial class AppLoggerExtensions
 
     private const string MESSAGE_SaveTargetManifestAsPathAccessDenied = "Access to manifest file output path is denied";
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidSaveTargetManifestAs, Level = LogLevel.Critical, Message = $"{MESSAGE_SaveTargetManifestAsPathAccessDenied} ({{Path}}).")]
-    private static partial void SaveTargetManifestAsPathAAccessDenied(ILogger logger, string path, Exception? exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidSaveTargetManifestAs, Level = LogLevel.Critical, EventName = nameof(SaveTargetManifestAsPathAccessDenied), Message = $"{MESSAGE_SaveTargetManifestAsPathAccessDenied} ({{Path}}).")]
+    private static partial void LogSaveTargetManifestAsPathAAccessDenied(ILogger logger, string path, Exception? exception);
 
     /// <summary>
     /// </summary>
@@ -1133,12 +1048,12 @@ public static partial class AppLoggerExtensions
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
-    /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogSaveTargetManifestAsDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
+    // TODO: See if this should be used somewhere
+    public static string SaveTargetManifestAsDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
     {
-        SaveTargetManifestAsDirectoryNotFound(logger, path, exception);
+        LogSaveTargetManifestAsDirectoryNotFound(logger, path, exception);
         return $"{MESSAGE_SaveTargetManifestAsDirectoryNotFound}.";
     }
 
@@ -1149,14 +1064,15 @@ public static partial class AppLoggerExtensions
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogSaveTargetManifestAsPathAccessDenied(this ILogger logger, string path, Exception? exception = null)
+    // TODO: See if this should be used somewhere
+    public static string SaveTargetManifestAsPathAccessDenied(this ILogger logger, string path, Exception? exception = null)
     {
         if (exception is System.Security.SecurityException)
         {
             InsufficientPermissionsForSaveTargetManifestAsPath(logger, path, exception);
             return $"{MESSAGE_InsufficientPermissionsForSaveTargetManifestAsPath}.";
         }
-        SaveTargetManifestAsPathAAccessDenied(logger, path, exception);
+        LogSaveTargetManifestAsPathAAccessDenied(logger, path, exception);
         return $"{MESSAGE_SaveTargetManifestAsPathAccessDenied}.";
     }
 
@@ -1175,8 +1091,8 @@ public static partial class AppLoggerExtensions
 
     private const string MESSAGE_ImportDirectoryNotFound = "Parent subdirectory of package metadata export path not found";
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidImportPath, Level = LogLevel.Critical, Message = $"{MESSAGE_ImportDirectoryNotFound} ({{Path}}).")]
-    private static partial void ImportDirectoryNotFound(ILogger logger, string path, Exception? exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidImportPath, Level = LogLevel.Critical, EventName = nameof(ImportFileOrDirectoryNotFound), Message = $"{MESSAGE_ImportDirectoryNotFound} ({{Path}}).")]
+    private static partial void LogImportDirectoryNotFound(ILogger logger, string path, Exception? exception);
 
     private const string MESSAGE_InsufficientPermissionsForImportPath = "Caller has insufficient permissions to access the manifest file output path";
 
@@ -1185,8 +1101,8 @@ public static partial class AppLoggerExtensions
 
     private const string MESSAGE_ImportPathAccessDenied = "Access to manifest file output path is denied";
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidImportPath, Level = LogLevel.Critical, Message = $"{MESSAGE_ImportPathAccessDenied} ({{Path}}).")]
-    private static partial void ImportPathAccessDenied(ILogger logger, string path, Exception? exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidImportPath, Level = LogLevel.Critical, EventName = nameof(ImportPathAccessDenied), Message = $"{MESSAGE_ImportPathAccessDenied} ({{Path}}).")]
+    private static partial void LogImportPathAccessDenied(ILogger logger, string path, Exception? exception);
 
     /// <summary>
     /// </summary>
@@ -1213,12 +1129,12 @@ public static partial class AppLoggerExtensions
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
-    /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogImportFileOrDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
+    // TODO: See if this should be used somewhere
+    public static string ImportFileOrDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
     {
-        ImportDirectoryNotFound(logger, path, exception);
+        LogImportDirectoryNotFound(logger, path, exception);
         return $"{MESSAGE_ImportDirectoryNotFound}.";
     }
 
@@ -1229,14 +1145,15 @@ public static partial class AppLoggerExtensions
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogImportPathAccessDenied(this ILogger logger, string path, Exception? exception = null)
+    // TODO: See if this should be used somewhere
+    public static string ImportPathAccessDenied(this ILogger logger, string path, Exception? exception = null)
     {
         if (exception is System.Security.SecurityException)
         {
             InsufficientPermissionsForImportPath(logger, path, exception);
             return $"{MESSAGE_InsufficientPermissionsForMetaDataExportPath}.";
         }
-        ImportPathAccessDenied(logger, path, exception);
+        LogImportPathAccessDenied(logger, path, exception);
         return $"{MESSAGE_MetaDataExportPathAccessDenied}.";
     }
 
@@ -1645,6 +1562,7 @@ public static partial class AppLoggerExtensions
     /// <param name="framework">The package framework.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
+    // TODO: See if this should be used somewhere
     public static IDisposable? BeginGetPackageDependenciesScope(this ILogger logger, string packageId, NuGetVersion version, NuGetFramework framework, IClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
@@ -1663,6 +1581,7 @@ public static partial class AppLoggerExtensions
     /// <param name="packageId">The package identifier.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
+    // TODO: See if this should be used somewhere
     public static IDisposable? BeginGetPackageDependenciesScope(this ILogger logger, string packageId, IClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
@@ -1688,6 +1607,7 @@ public static partial class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="url">The url of the NuGet respository.</param>
     /// <param name="isUpstream"><see langword="true"/>  if the repository is upstream; otherwise, <see langword="false"/>.</param>
+    // TODO: See if this should be used somewhere
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
     public static IDisposable? BeginNugetSourceScope(this ILogger logger, string url, bool isUpstream) => _nugetSourceScope(logger, url, isUpstream);
 
@@ -1741,6 +1661,7 @@ public static partial class AppLoggerExtensions
     /// <param name="packageId">The ID of the upstream package to add locally.</param>
     /// <param name="repositoryPath">The local repository URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
+    // TODO: See if this should be used somewhere
     public static IDisposable? BeginAddLocalPackageScope(this ILogger logger, string packageId, string repositoryPath) => _addLocalPackageScope(logger, packageId, repositoryPath);
 
     #endregion
@@ -1758,6 +1679,7 @@ public static partial class AppLoggerExtensions
     /// <param name="packageId">The ID of the upstream package to update locally.</param>
     /// <param name="repositoryPath">The local repository URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
+    // TODO: See if this should be used somewhere
     public static IDisposable? BeginUpdateLocalPackageScope(this ILogger logger, string packageId, string repositoryPath) => _updateLocalPackageScope(logger, packageId, repositoryPath);
 
     #endregion

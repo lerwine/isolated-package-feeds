@@ -2,7 +2,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NuGet.Configuration;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
 using static IsolatedPackageFeeds.Shared.CommonStatic;
@@ -46,7 +45,7 @@ public class MainService : BackgroundService
             {
                 var asyncEn = scope.ServiceProvider.GetRequiredService<ILocalClientService>().GetAllPackagesAsync(stoppingToken);
                 if (!(packageIds = asyncEn.ToBlockingEnumerable(stoppingToken).Select(p => p.Identity.Id)).Any())
-                    _logger.LogNoLocalPackagesExist();
+                    _logger.NoLocalPackagesExist();
                 else
                     await scope.ServiceProvider.GetRequiredService<PackageUpdateService>().UpdatePackagesAsync(packageIds, stoppingToken);
             }
