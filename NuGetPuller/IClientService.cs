@@ -1,52 +1,16 @@
-using Microsoft.Extensions.Logging;
 using NuGet.Frameworks;
-using NuGet.Packaging.Core;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 
 namespace NuGetPuller;
 
-/// <summary>
-/// Base class providing methods for managing a NuGet repository.
-/// </summary>
-public abstract class ClientService : IClientService
+public interface IClientService : IDisposable
 {
-    #region Fields and Properties
+    bool IsUpstream { get; }
 
-    private bool _isDisposed;
+    Uri PackageSourceUri { get; }
 
-    protected string GlobalPackagesFolder { get; }
-
-    protected NugetLogWrapper NuGetLogger { get; }
-
-    protected SourceCacheContext CacheContext { get; } = new();
-
-    public bool IsUpstream { get; }
-
-    protected ILogger Logger { get; }
-
-    protected SourceRepository SourceRepository { get; }
-
-    public Uri PackageSourceUri => SourceRepository.PackageSource.SourceUri;
-
-    public string PackageSourceLocation => SourceRepository.PackageSource.Source;
-
-    #endregion
-
-    /// <summary>
-    /// Initializes a new <c>ClientService<c>.
-    /// </summary>
-    /// <param name="sourceRepository">The source NuGet repository.</param>
-    /// <param name="settings">The validated settings service.</param>
-    /// <param name="logger">THe logger to write log information to.</param>
-    /// <param name="isUpstream"><see langword="true"/> if the source repository represents the upstream repository; otherwise, <see langword="false"/>.</param>
-    protected ClientService(SourceRepository sourceRepository, IValidatedRepositoryPathsService settings, ILogger logger, bool isUpstream)
-    {
-        GlobalPackagesFolder = settings.GlobalPackagesFolder.GetResult().FullName;
-        NuGetLogger = new(Logger = logger);
-        SourceRepository = sourceRepository;
-        IsUpstream = isUpstream;
-    }
+    string PackageSourceLocation { get; }
 
     #region Methods using the Package Metadata Resource API.
 
@@ -55,7 +19,7 @@ public abstract class ClientService : IClientService
     /// </summary>
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
     /// <returns>A task that asynchronously returns the the NuGet resource for the NuGet Package Update API.</returns>
-    public Task<PackageMetadataResource> GetPackageMetadataResourceAsync(CancellationToken cancellationToken) => SourceRepository.GetResourceAsync<PackageMetadataResource>(cancellationToken);
+    Task<PackageMetadataResource> GetPackageMetadataResourceAsync(CancellationToken cancellationToken);
 
     /// <summary>
     /// Gets metadata for a specified package.
@@ -63,8 +27,7 @@ public abstract class ClientService : IClientService
     /// <param name="packageId">The package ID.</param>
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
     /// <returns><see cref="Task{TResult}.Result" /> returns a list of package meta data objects.</returns>
-    public Task<IEnumerable<IPackageSearchMetadata>> GetMetadataAsync(string packageId, CancellationToken cancellationToken) =>
-        GetMetadataAsync(packageId, false, false, cancellationToken);
+    Task<IEnumerable<IPackageSearchMetadata>> GetMetadataAsync(string packageId, CancellationToken cancellationToken);
 
     /// <summary>
     /// Gets metadata for a specified package.
@@ -73,8 +36,7 @@ public abstract class ClientService : IClientService
     /// <param name="packageMetadataResource">The NuGet resource for the NuGet Package Metadata Resource API.</param>
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
     /// <returns><see cref="Task{TResult}.Result" /> returns a list of package meta data objects.</returns>
-    public Task<IEnumerable<IPackageSearchMetadata>> GetMetadataAsync(string packageId, PackageMetadataResource? packageMetadataResource, CancellationToken cancellationToken) =>
-        GetMetadataAsync(packageId, false, false, packageMetadataResource, cancellationToken);
+    Task<IEnumerable<IPackageSearchMetadata>> GetMetadataAsync(string packageId, PackageMetadataResource? packageMetadataResource, CancellationToken cancellationToken);
 
     /// <summary>
     /// Gets metadata for a specified package.
@@ -83,8 +45,7 @@ public abstract class ClientService : IClientService
     /// <param name="includePrerelease">Whether to include PreRelease versions into result.</param>
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
     /// <returns><see cref="Task{TResult}.Result" /> returns a list of package meta data objects.</returns>
-    public Task<IEnumerable<IPackageSearchMetadata>> GetMetadataAsync(string packageId, bool includePrerelease, CancellationToken cancellationToken) =>
-        GetMetadataAsync(packageId, includePrerelease, false, cancellationToken);
+    Task<IEnumerable<IPackageSearchMetadata>> GetMetadataAsync(string packageId, bool includePrerelease, CancellationToken cancellationToken);
 
     /// <summary>
     /// Gets metadata for a specified package.
@@ -94,8 +55,7 @@ public abstract class ClientService : IClientService
     /// <param name="packageMetadataResource">The NuGet resource for the NuGet Package Metadata Resource API.</param>
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
     /// <returns><see cref="Task{TResult}.Result" /> returns a list of package meta data objects.</returns>
-    public Task<IEnumerable<IPackageSearchMetadata>> GetMetadataAsync(string packageId, bool includePrerelease, PackageMetadataResource? packageMetadataResource, CancellationToken cancellationToken) =>
-        GetMetadataAsync(packageId, includePrerelease, false, packageMetadataResource, cancellationToken);
+    Task<IEnumerable<IPackageSearchMetadata>> GetMetadataAsync(string packageId, bool includePrerelease, PackageMetadataResource? packageMetadataResource, CancellationToken cancellationToken);
 
     /// <summary>
     /// Gets metadata for a specified package.
@@ -105,8 +65,7 @@ public abstract class ClientService : IClientService
     /// <param name="includeUnlisted">Whether to include Unlisted versions into result.</param>
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
     /// <returns><see cref="Task{TResult}.Result" /> returns a list of package meta data objects.</returns>
-    public Task<IEnumerable<IPackageSearchMetadata>> GetMetadataAsync(string packageId, bool includePrerelease, bool includeUnlisted, CancellationToken cancellationToken) =>
-        GetMetadataAsync(packageId, includePrerelease, includeUnlisted, null, cancellationToken);
+    Task<IEnumerable<IPackageSearchMetadata>> GetMetadataAsync(string packageId, bool includePrerelease, bool includeUnlisted, CancellationToken cancellationToken);
 
     /// <summary>
     /// Gets metadata for a specified package.
@@ -120,13 +79,7 @@ public abstract class ClientService : IClientService
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.7.x/src/NuGet.Core/NuGet.Protocol/Resources/PackageMetadataResourceV3.cs#L46"/>
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.7.x/src/NuGet.Core/NuGet.Protocol/LocalRepositories/LocalPackageMetadataResource.cs#L29"/>
     /// <seealso href="https://learn.microsoft.com/en-us/nuget/api/registration-base-url-resource#registration-page"/>
-    public async Task<IEnumerable<IPackageSearchMetadata>> GetMetadataAsync(string packageId, bool includePrerelease, bool includeUnlisted, PackageMetadataResource? packageMetadataResource, CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
-        using var scope = Logger.BeginGetMetadataScope(packageId, includePrerelease, includeUnlisted, this);
-        return await (packageMetadataResource ?? await GetPackageMetadataResourceAsync(cancellationToken))
-            .GetMetadataAsync(packageId.ToLower(), includePrerelease, includeUnlisted, CacheContext, NuGetLogger, cancellationToken);
-    }
+    Task<IEnumerable<IPackageSearchMetadata>> GetMetadataAsync(string packageId, bool includePrerelease, bool includeUnlisted, PackageMetadataResource? packageMetadataResource, CancellationToken cancellationToken);
 
     /// <summary>
     /// Gets metadata for a specified package version.
@@ -135,7 +88,7 @@ public abstract class ClientService : IClientService
     /// <param name="version">The package version.</param>
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
     /// <returns><see cref="Task{TResult}.Result" /> returns the package meta data object or <see langword="null"/> if not found.</returns>
-    public Task<IPackageSearchMetadata?> GetMetadataAsync(string packageId, NuGetVersion version, CancellationToken cancellationToken) => GetMetadataAsync(packageId, version, null, cancellationToken);
+    Task<IPackageSearchMetadata?> GetMetadataAsync(string packageId, NuGetVersion version, CancellationToken cancellationToken);
 
     /// <summary>
     /// Gets metadata for a specified package version.
@@ -148,13 +101,7 @@ public abstract class ClientService : IClientService
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.7.x/src/NuGet.Core/NuGet.Protocol/Resources/PackageMetadataResourceV3.cs#L66"/>
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.7.x/src/NuGet.Core/NuGet.Protocol/LocalRepositories/LocalPackageMetadataResource.cs#L51"/>
     /// <seealso href="https://learn.microsoft.com/en-us/nuget/api/registration-base-url-resource#registration-page"/>
-    public async Task<IPackageSearchMetadata?> GetMetadataAsync(string packageId, NuGetVersion version, PackageMetadataResource? packageMetadataResource, CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
-        ArgumentNullException.ThrowIfNull(version);
-        using var scope = Logger.BeginGetMetadataScope(packageId, version, this);
-        return await (packageMetadataResource ?? await GetPackageMetadataResourceAsync(cancellationToken)).GetMetadataAsync(new PackageIdentity(packageId.ToLower(), version), CacheContext, NuGetLogger, cancellationToken);
-    }
+    Task<IPackageSearchMetadata?> GetMetadataAsync(string packageId, NuGetVersion version, PackageMetadataResource? packageMetadataResource, CancellationToken cancellationToken);
 
     #endregion
 
@@ -165,7 +112,7 @@ public abstract class ClientService : IClientService
     /// </summary>
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
     /// <returns>A task that asynchronously returns the the NuGet resource for the NuGet V3 Package Content API.</returns>
-    public Task<FindPackageByIdResource> GetFindPackageByIdResourceAsync(CancellationToken cancellationToken) => SourceRepository.GetResourceAsync<FindPackageByIdResource>(cancellationToken);
+    Task<FindPackageByIdResource> GetFindPackageByIdResourceAsync(CancellationToken cancellationToken);
 
     /// <summary>
     /// Asynchronously gets all package versions for a package ID.
@@ -175,7 +122,7 @@ public abstract class ClientService : IClientService
     /// <returns><see cref="Task{TResult}.Result" /> returns the package versions for the specified <paramref name="packageId"/>.</returns>
     /// <exception cref="ArgumentException">Thrown if <paramref name="packageId" /> is either <c>null</c> or an empty string.</exception>
     /// <exception cref="OperationCanceledException">Thrown if <paramref name="cancellationToken" /> is cancelled.</exception>
-    public Task<IEnumerable<NuGetVersion>> GetAllVersionsAsync(string packageId, CancellationToken cancellationToken) => GetAllVersionsAsync(packageId, null, cancellationToken);
+    Task<IEnumerable<NuGetVersion>> GetAllVersionsAsync(string packageId, CancellationToken cancellationToken);
 
     /// <summary>
     /// Asynchronously gets all package versions for a package ID.
@@ -190,12 +137,7 @@ public abstract class ClientService : IClientService
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.8.x/src/NuGet.Core/NuGet.Protocol/Resources/FindPackageByIdResource.cs#L37"/>
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.8.x/src/NuGet.Core/NuGet.Protocol/LocalRepositories/LocalV3FindPackageByIdResource.cs#L108"/>
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.8.x/src/NuGet.Core/NuGet.Protocol/RemoteRepositories/RemoteV3FindPackageByIdResource.cs#L85"/>
-    public async Task<IEnumerable<NuGetVersion>> GetAllVersionsAsync(string packageId, FindPackageByIdResource? findPackageByIdResource, CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
-        using var scope = Logger.BeginGetAllVersionsScope(packageId, this);
-        return await (findPackageByIdResource ?? await GetFindPackageByIdResourceAsync(cancellationToken)).GetAllVersionsAsync(packageId.ToLower(), CacheContext, NuGetLogger, cancellationToken);
-    }
+    Task<IEnumerable<NuGetVersion>> GetAllVersionsAsync(string packageId, FindPackageByIdResource? findPackageByIdResource, CancellationToken cancellationToken);
 
     /// <summary>
     /// Asynchronously gets dependency information for a specific package.
@@ -206,7 +148,7 @@ public abstract class ClientService : IClientService
     /// <returns><see cref="Task{TResult}.Result" /> returns dependency information for the specified <paramref name="packageId"/> and <paramref name="version"/> or <see langword="null"/> if not found.</returns>
     /// <exception cref="ArgumentException">Thrown if <paramref name="packageId" /> is either <c>null</c> or an empty string.</exception>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="version" /> <c>null</c>.</exception>
-    public Task<FindPackageByIdDependencyInfo?> GetDependencyInfoAsync(string packageId, NuGetVersion version, CancellationToken cancellationToken) => GetDependencyInfoAsync(packageId, version, null, cancellationToken);
+    Task<FindPackageByIdDependencyInfo?> GetDependencyInfoAsync(string packageId, NuGetVersion version, CancellationToken cancellationToken);
 
     /// <summary>
     /// Asynchronously gets dependency information for a specific package.
@@ -221,13 +163,7 @@ public abstract class ClientService : IClientService
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.8.x/src/NuGet.Core/NuGet.Protocol/Resources/FindPackageByIdResource.cs#L61"/>
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.8.x/src/NuGet.Core/NuGet.Protocol/LocalRepositories/LocalV3FindPackageByIdResource.cs#L248"/>
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.8.x/src/NuGet.Core/NuGet.Protocol/RemoteRepositories/RemoteV3FindPackageByIdResource.cs#L144"/>
-    public async Task<FindPackageByIdDependencyInfo?> GetDependencyInfoAsync(string packageId, NuGetVersion version, FindPackageByIdResource? findPackageByIdResource, CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
-        ArgumentNullException.ThrowIfNull(version);
-        using var scope = Logger.BeginGetDependencyInfoScope(packageId, version, this);
-        return await (findPackageByIdResource ?? await GetFindPackageByIdResourceAsync(cancellationToken)).GetDependencyInfoAsync(packageId.ToLower(), version, CacheContext, NuGetLogger, cancellationToken);
-    }
+    Task<FindPackageByIdDependencyInfo?> GetDependencyInfoAsync(string packageId, NuGetVersion version, FindPackageByIdResource? findPackageByIdResource, CancellationToken cancellationToken);
 
     /// <summary>
     /// Asynchronously downloads and copies NuGet package to output stream.
@@ -236,7 +172,7 @@ public abstract class ClientService : IClientService
     /// <param name="version">The package version.</param>
     /// <param name="destination">The output stream.</param>
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
-    public Task CopyNupkgToStreamAsync(string packageId, NuGetVersion version, Stream destination, CancellationToken cancellationToken) => CopyNupkgToStreamAsync(packageId, version, destination, null, cancellationToken);
+    Task CopyNupkgToStreamAsync(string packageId, NuGetVersion version, Stream destination, CancellationToken cancellationToken);
 
     /// <summary>
     /// Asynchronously downloads and copies NuGet package to output stream.
@@ -250,14 +186,7 @@ public abstract class ClientService : IClientService
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.8.x/src/NuGet.Core/NuGet.Protocol/Resources/FindPackageByIdResource.cs#L88"/>
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.8.x/src/NuGet.Core/NuGet.Protocol/LocalRepositories/LocalV3FindPackageByIdResource.cs#L167"/>
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.8.x/src/NuGet.Core/NuGet.Protocol/RemoteRepositories/RemoteV3FindPackageByIdResource.cs#L222"/>
-    public async Task CopyNupkgToStreamAsync(string packageId, NuGetVersion version, Stream destination, FindPackageByIdResource? findPackageByIdResource, CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
-        ArgumentNullException.ThrowIfNull(version);
-        ArgumentNullException.ThrowIfNull(destination);
-        using var scope = Logger.BeginDownloadNupkgScope(packageId, version, this);
-        await (findPackageByIdResource ?? await GetFindPackageByIdResourceAsync(cancellationToken)).CopyNupkgToStreamAsync(packageId, version, destination, CacheContext, NuGetLogger, cancellationToken);
-    }
+    Task CopyNupkgToStreamAsync(string packageId, NuGetVersion version, Stream destination, FindPackageByIdResource? findPackageByIdResource, CancellationToken cancellationToken);
 
     /// <summary>
     /// Asynchronously checks whether the exact package id and version exists at this source.
@@ -269,7 +198,7 @@ public abstract class ClientService : IClientService
     /// <exception cref="ArgumentException">Thrown if <paramref name="id" />
     /// is either <c>null</c> or an empty string.</exception>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="version" /> <c>null</c>.</exception>
-    public Task<bool> DoesPackageExistAsync(string packageId, NuGetVersion version, CancellationToken cancellationToken) => DoesPackageExistAsync(packageId, version, null, cancellationToken);
+    Task<bool> DoesPackageExistAsync(string packageId, NuGetVersion version, CancellationToken cancellationToken);
 
     /// <summary>
     /// Asynchronously checks whether the exact package id and version exists at this source.
@@ -285,13 +214,7 @@ public abstract class ClientService : IClientService
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.7.x/src/NuGet.Core/NuGet.Protocol/Resources/FindPackageByIdResource.cs#L61"/>
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.7.x/src/NuGet.Core/NuGet.Protocol/LocalRepositories/LocalV3FindPackageByIdResource.cs#L388"/>
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.7.x/src/NuGet.Core/NuGet.Protocol/RemoteRepositories/RemoteV3FindPackageByIdResource.cs#L368"/>
-    public async Task<bool> DoesPackageExistAsync(string packageId, NuGetVersion version, FindPackageByIdResource? findPackageByIdResource, CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
-        ArgumentNullException.ThrowIfNull(version);
-        using var scope = Logger.BeginDoesPackageExistScope(packageId, version, this);
-        return await (findPackageByIdResource ?? await GetFindPackageByIdResourceAsync(cancellationToken)).DoesPackageExistAsync(packageId.ToLower(), version, CacheContext, NuGetLogger, cancellationToken);
-    }
+    Task<bool> DoesPackageExistAsync(string packageId, NuGetVersion version, FindPackageByIdResource? findPackageByIdResource, CancellationToken cancellationToken);
 
     #endregion
 
@@ -302,7 +225,7 @@ public abstract class ClientService : IClientService
     /// </summary>
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
     /// <returns>A task that asynchronously returns the the NuGet resource for the NuGet Dependency Info API.</returns>
-    public Task<DependencyInfoResource> GetDependencyInfoResourceAsync(CancellationToken cancellationToken) => SourceRepository.GetResourceAsync<DependencyInfoResource>(cancellationToken);
+    Task<DependencyInfoResource> GetDependencyInfoResourceAsync(CancellationToken cancellationToken);
 
     /// <summary>
     /// Retrieve dependency info for a single package.
@@ -312,7 +235,7 @@ public abstract class ClientService : IClientService
     /// <param name="framework">The project target framework.</param>
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
     /// <returns><see cref="Task{TResult}.Result" /> returns the dependency information or <see langword="null"/> if the package does not exist.</returns>
-    public Task<SourcePackageDependencyInfo?> ResolvePackageAsync(string packageId, NuGetVersion version, NuGetFramework framework, CancellationToken cancellationToken) => ResolvePackageAsync(packageId, version, framework, null, cancellationToken);
+    Task<SourcePackageDependencyInfo?> ResolvePackageAsync(string packageId, NuGetVersion version, NuGetFramework framework, CancellationToken cancellationToken);
 
     /// <summary>
     /// <summary>
@@ -326,14 +249,7 @@ public abstract class ClientService : IClientService
     /// <returns><see cref="Task{TResult}.Result" /> returns the dependency information or <see langword="null"/> if the package does not exist.</returns>
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.7.x/src/NuGet.Core/NuGet.Protocol/Resources/DependencyInfoResourceV3.cs#L63"/>
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.7.x/src/NuGet.Core/NuGet.Protocol/LocalRepositories/LocalDependencyInfoResource.cs#L45"/>
-    public async Task<SourcePackageDependencyInfo?> ResolvePackageAsync(string packageId, NuGetVersion version, NuGetFramework framework, DependencyInfoResource? dependencyInfoResource, CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
-        ArgumentNullException.ThrowIfNull(version);
-        ArgumentNullException.ThrowIfNull(framework);
-        using var scope = Logger.BeginResolvePackageScope(packageId, version, framework, this);
-        return await (dependencyInfoResource ?? await GetDependencyInfoResourceAsync(cancellationToken)).ResolvePackage(new(packageId, version), framework, CacheContext, NuGetLogger, cancellationToken);
-    }
+    Task<SourcePackageDependencyInfo?> ResolvePackageAsync(string packageId, NuGetVersion version, NuGetFramework framework, DependencyInfoResource? dependencyInfoResource, CancellationToken cancellationToken);
 
     /// <summary>
     /// Retrieve dependency info for all versions of a single package.
@@ -342,7 +258,7 @@ public abstract class ClientService : IClientService
     /// <param name="framework">The project target framework.</param>
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
     /// <returns><see cref="Task{TResult}.Result" /> returns the dependency information for all versions of a single package.</returns>
-    public Task<IEnumerable<SourcePackageDependencyInfo>> ResolvePackagesAsync(string packageId, NuGetFramework framework, CancellationToken cancellationToken) => ResolvePackagesAsync(packageId, framework, null, cancellationToken);
+    Task<IEnumerable<SourcePackageDependencyInfo>> ResolvePackagesAsync(string packageId, NuGetFramework framework, CancellationToken cancellationToken);
 
     /// <summary>
     /// Retrieve dependency info for all versions of a single package.
@@ -354,43 +270,7 @@ public abstract class ClientService : IClientService
     /// <returns><see cref="Task{TResult}.Result" /> returns the dependency information for all versions of a single package.</returns>
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.7.x/src/NuGet.Core/NuGet.Protocol/Resources/DependencyInfoResourceV3.cs#L102"/>
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.7.x/src/NuGet.Core/NuGet.Protocol/LocalRepositories/LocalDependencyInfoResource.cs#L92"/>
-    public async Task<IEnumerable<SourcePackageDependencyInfo>> ResolvePackagesAsync(string packageId, NuGetFramework framework, DependencyInfoResource? dependencyInfoResource, CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
-        ArgumentNullException.ThrowIfNull(framework);
-        using var scope = Logger.BeginResolvePackagesScope(packageId, framework, this);
-        return await (dependencyInfoResource ?? await GetDependencyInfoResourceAsync(cancellationToken)).ResolvePackages(packageId, framework, CacheContext, NuGetLogger, cancellationToken);
-    }
+    Task<IEnumerable<SourcePackageDependencyInfo>> ResolvePackagesAsync(string packageId, NuGetFramework framework, DependencyInfoResource? dependencyInfoResource, CancellationToken cancellationToken);
 
     #endregion
-
-    // #region DownloadResource methods
-
-    // public Task<DownloadResource> GetDownloadResourceAsync(CancellationToken cancellationToken) => SourceRepository.GetResourceAsync<DownloadResource>(cancellationToken);
-
-    // public Task<DownloadResourceResult> GetDownloadResourceResultAsync(PackageIdentity identity, CancellationToken cancellationToken) => GetDownloadResourceResultAsync(identity, null, cancellationToken);
-
-    // public async Task<DownloadResourceResult> GetDownloadResourceResultAsync(PackageIdentity identity, DownloadResource? downloadResource, CancellationToken cancellationToken)
-    // {
-    //     using var scope = Logger.BeginGetDownloadResourceResultScope(identity, this);
-    //     return await (downloadResource ?? await GetDownloadResourceAsync(cancellationToken)).GetDownloadResourceResultAsync(identity, new PackageDownloadContext(CacheContext), GlobalPackagesFolder, NuGetLogger, cancellationToken);
-    // }
-
-    // #endregion
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (_isDisposed)
-            return;
-        if (disposing)
-            CacheContext.Dispose();
-        _isDisposed = true;
-    }
-
-    public void Dispose()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
-    }
 }

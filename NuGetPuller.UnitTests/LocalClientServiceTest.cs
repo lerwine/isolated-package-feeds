@@ -19,14 +19,14 @@ public class LocalClientServiceTest
     public async Task AddPackageAsyncTest()
     {
         using TempStagingFolder tempStagingFolder = new();
-        var target = _hosting.Host.Services.GetRequiredService<LocalClientService>();
+        var target = _hosting.Host.Services.GetRequiredService<ILocalClientService>();
         string packageId = "Microsoft.Extensions.Logging.Abstractions";
         var version = NuGetVersion.Parse("7.0.0");
         Assert.That(await target.DoesPackageExistAsync(packageId, version, CancellationToken.None), Is.False);
         FileInfo fileInfo;
         try
         {
-            var upstreamService = _hosting.Host.Services.GetRequiredService<UpstreamClientService>();
+            var upstreamService = _hosting.Host.Services.GetRequiredService<IUpstreamClientService>();
             fileInfo = await tempStagingFolder.NewRandomFileInfoAsync(async (stream, token) =>
             {
                 await upstreamService.CopyNupkgToStreamAsync(packageId, version, stream, token);
@@ -49,14 +49,14 @@ public class LocalClientServiceTest
     public async Task DeleteAsyncTest()
     {
         using TempStagingFolder tempStagingFolder = new();
-        var target = _hosting.Host.Services.GetRequiredService<LocalClientService>();
+        var target = _hosting.Host.Services.GetRequiredService<ILocalClientService>();
         string packageId = "Microsoft.Extensions.Logging.Abstractions";
         var version1 = NuGetVersion.Parse("7.0.0");
         var version2 = NuGetVersion.Parse("6.0.4");
         FileInfo fileInfo1, fileInfo2;
         try
         {
-            var upstreamService = _hosting.Host.Services.GetRequiredService<UpstreamClientService>();
+            var upstreamService = _hosting.Host.Services.GetRequiredService<IUpstreamClientService>();
             fileInfo1 = await tempStagingFolder.NewRandomFileInfoAsync(async (stream, token) =>
             {
                 await upstreamService.CopyNupkgToStreamAsync(packageId, version1, stream, token);

@@ -42,9 +42,9 @@ record HostingFake(IHost Host, string PreviousCwd, DirectoryInfo BaseDirectory, 
             .Bind(builder.Configuration.GetSection(nameof(NuGetPuller)))
             .ValidateDataAnnotations();
         builder.Services
-            .AddSingleton<ValidatedRepositoryPathsService>()
-            .AddSingleton<LocalClientService>()
-            .AddSingleton<UpstreamClientService>();
+            .AddSingleton<IValidatedRepositoryPathsService, ValidatedRepositoryPathsService<TestAppSettings>>()
+            .AddSingleton<ILocalClientService, LocalClientService<IValidatedRepositoryPathsService>>()
+            .AddSingleton<IUpstreamClientService, UpstreamClientService<IValidatedRepositoryPathsService>>();
         var host = builder.Build();
         host.Start();
         return new(Host: host, PreviousCwd: previousCwd, BaseDirectory: baseDirectory, Cwd: cwd, LocalRepo: localRepo);

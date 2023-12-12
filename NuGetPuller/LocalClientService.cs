@@ -13,7 +13,8 @@ namespace NuGetPuller;
 /// </summary>
 /// <param name="settings">The validated settings service.</param>
 /// <param name="logger">THe logger to write log information to.</param>
-public abstract class LocalClientServiceBase(IValidatedRepositoryPathsService settings, ILogger logger) : ClientService(Repository.Factory.GetCoreV3(settings.LocalRepository.GetResult().FullName), settings, logger, false)
+public class LocalClientService<T>(T settings, ILogger<LocalClientService<T>> logger) : ClientService(Repository.Factory.GetCoreV3(settings.LocalRepository.GetResult().FullName), settings, logger, false), ILocalClientService
+    where T : IValidatedRepositoryPathsService
 {
     #region Methods using the Search Query API
 

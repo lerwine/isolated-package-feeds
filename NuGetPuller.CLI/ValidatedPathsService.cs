@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace NuGetPuller.CLI;
 
-public class ValidatedPathsService : ValidatedRepositoryPathsService<AppSettings>
+public class ValidatedPathsService
 {
     public LazyOptionalChainedConversion<string, FileInfo> ExportLocalManifest { get; }
 
@@ -18,12 +18,12 @@ public class ValidatedPathsService : ValidatedRepositoryPathsService<AppSettings
 
     public LazyOptionalChainedConversion<string, FileInfo> SaveTargetManifestAs { get; }
 
-    public ValidatedPathsService(IOptions<AppSettings> options, IHostEnvironment hostEnvironment, ILogger<ValidatedPathsService> logger) : base(options.Value, hostEnvironment, logger)
+    public ValidatedPathsService(IOptions<AppSettings> options, IHostEnvironment hostEnvironment, ILogger<ValidatedPathsService> logger)
     {
         ExportLocalManifest = new LazyOptionalChainedConversion<string, FileInfo>(
             (out string? path) =>
             {
-                if (Settings.ExportLocalManifest.TryGetNonWhitesSpace(out path))
+                if (options.Value.ExportLocalManifest.TryGetNonWhitesSpace(out path))
                     return true;
                 path = null;
                 return false;
@@ -45,7 +45,7 @@ public class ValidatedPathsService : ValidatedRepositoryPathsService<AppSettings
         Import = new LazyOptionalChainedConversion<string, FileSystemInfo>(
             (out string? path) =>
             {
-                if (Settings.Import.TryGetNonWhitesSpace(out path))
+                if (options.Value.Import.TryGetNonWhitesSpace(out path))
                     return true;
                 path = null;
                 return false;
@@ -74,7 +74,7 @@ public class ValidatedPathsService : ValidatedRepositoryPathsService<AppSettings
         ExportBundle = new LazyOptionalChainedConversion<string, FileInfo>(
             (out string? path) =>
             {
-                if (Settings.ExportBundle.TryGetNonWhitesSpace(out path))
+                if (options.Value.ExportBundle.TryGetNonWhitesSpace(out path))
                     return true;
                 path = null;
                 return false;
@@ -96,7 +96,7 @@ public class ValidatedPathsService : ValidatedRepositoryPathsService<AppSettings
         TargetManifestFile = new LazyOptionalChainedConversion<string, FileInfo>(
             (out string? path) =>
             {
-                if (Settings.TargetManifestFile.TryGetNonWhitesSpace(out path))
+                if (options.Value.TargetManifestFile.TryGetNonWhitesSpace(out path))
                     return true;
                 path = null;
                 return false;
@@ -118,7 +118,7 @@ public class ValidatedPathsService : ValidatedRepositoryPathsService<AppSettings
         SaveTargetManifestAs = new LazyOptionalChainedConversion<string, FileInfo>(
             (out string? path) =>
             {
-                if (Settings.SaveTargetManifestAs.TryGetNonWhitesSpace(out path))
+                if (options.Value.SaveTargetManifestAs.TryGetNonWhitesSpace(out path))
                     return true;
                 path = null;
                 return false;

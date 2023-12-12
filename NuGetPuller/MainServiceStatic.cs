@@ -7,7 +7,7 @@ using NuGet.Versioning;
 
 namespace NuGetPuller;
 
-public static class MainServiceStatic
+public partial class MainServiceStatic
 {
     public static StreamWriter OpenPackageMetaDataWriter(string path, ILogger logger)
     {
@@ -109,7 +109,7 @@ public static class MainServiceStatic
         writer.Close();
     }
 
-    public static async Task AddToLocalFromRemote(string packageId, Dictionary<string, HashSet<NuGetVersion>> packagesAdded, LocalClientServiceBase localClientService, UpstreamClientServiceBase upstreamClientService, ILogger logger, CancellationToken cancellationToken)
+    public static async Task AddToLocalFromRemote(string packageId, Dictionary<string, HashSet<NuGetVersion>> packagesAdded, ILocalClientService localClientService, IUpstreamClientService upstreamClientService, ILogger logger, CancellationToken cancellationToken)
     {
         var upstreamVersions = await localClientService.GetAllVersionsAsync(packageId, cancellationToken);
         if (upstreamVersions is not null && upstreamVersions.Any())
@@ -156,37 +156,5 @@ public static class MainServiceStatic
             else
                 logger.LogEmptyPackageDownload(packageId, v);
         }
-    }
-
-    public static async Task UpdateLocalFromRemote(IEnumerable<string> packageIds, LocalClientServiceBase localClientService, UpstreamClientServiceBase upstreamClientService, ILogger logger, CancellationToken cancellationToken)
-    {
-        var asyncEn = upstreamClientService.GetAllVersionsWithDependenciesAsync(packageIds, cancellationToken).GetAsyncEnumerator(cancellationToken);
-        if (!await asyncEn.MoveNextAsync())
-            return;
-        using TempStagingFolder tempStagingFolder = new();
-        var pathResolver = new VersionFolderPathResolver(tempStagingFolder.Directory.FullName);
-        do
-        {
-            var identity = asyncEn.Current;
-            if (await localClientService.DoesPackageExistAsync(identity.Id, identity.Version, cancellationToken))
-                continue;
-            FileInfo packageFile;
-            using (var scope = logger.BeginGetDownloadResourceResultScope(identity, upstreamClientService))
-                try
-                {
-                    logger.LogDownloadingNuGetPackage(identity, upstreamClientService);
-                    packageFile = await tempStagingFolder.NewFileInfoAsync(pathResolver.GetPackageFileName(identity.Id, identity.Version), async (stream, token) =>
-                    {
-                        await upstreamClientService.CopyNupkgToStreamAsync(identity.Id, identity.Version, stream, cancellationToken);
-                    }, cancellationToken);
-                }
-                catch (Exception error)
-                {
-                    logger.LogUnexpectedPackageDownloadFailure(identity.Id, identity.Version, error);
-                    continue;
-                }
-            await localClientService.AddPackageAsync(packageFile.FullName, false, cancellationToken);
-        }
-        while (!await asyncEn.MoveNextAsync());
     }
 }

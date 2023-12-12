@@ -636,7 +636,7 @@ public static class AppLoggerExtensions
     /// <param name="packageId">The ID of the package that was not found.</param>
     /// <param name="clientService">The client service.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogPackageNotFound(this ILogger logger, string packageId, ClientService clientService, Exception? exception = null)
+    public static void LogPackageNotFound(this ILogger logger, string packageId, IClientService clientService, Exception? exception = null)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
@@ -657,7 +657,7 @@ public static class AppLoggerExtensions
     /// <param name="version">The version of the package that was not found.</param>
     /// <param name="clientService">The client service.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogPackageNotFound(this ILogger logger, string packageId, NuGetVersion version, ClientService clientService, Exception? exception = null)
+    public static void LogPackageNotFound(this ILogger logger, string packageId, NuGetVersion version, IClientService clientService, Exception? exception = null)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
@@ -1337,7 +1337,7 @@ public static class AppLoggerExtensions
     /// <param name="identity">The package identifier and version.</param>
     /// <param name="clientService">The source repository.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogDownloadingNuGetPackage(this ILogger logger, PackageIdentity identity, ClientService clientService, Exception? exception = null)
+    public static void LogDownloadingNuGetPackage(this ILogger logger, PackageIdentity identity, IClientService clientService, Exception? exception = null)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
@@ -1374,7 +1374,7 @@ public static class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetDownloadResourceResultScope(this ILogger logger, PackageIdentity identity, ClientService clientService)
+    public static IDisposable? BeginGetDownloadResourceResultScope(this ILogger logger, PackageIdentity identity, IClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
@@ -1406,7 +1406,7 @@ public static class AppLoggerExtensions
     /// <param name="version">The package version.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginDownloadNupkgScope(this ILogger logger, string packageId, NuGetVersion version, ClientService clientService)
+    public static IDisposable? BeginDownloadNupkgScope(this ILogger logger, string packageId, NuGetVersion version, IClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
@@ -1454,7 +1454,7 @@ public static class AppLoggerExtensions
     /// <param name="includeUnlisted">Whether to include unlisted packages.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetMetadataScope(this ILogger logger, string packageId, bool includePreRelease, bool includeUnlisted, ClientService clientService)
+    public static IDisposable? BeginGetMetadataScope(this ILogger logger, string packageId, bool includePreRelease, bool includeUnlisted, IClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
@@ -1465,7 +1465,7 @@ public static class AppLoggerExtensions
         return _getRemoteMetadataScope1(logger, packageId, includePreRelease, includeUnlisted, clientService.PackageSourceLocation);
     }
 
-    public static IDisposable? BeginGetMetadataScope(this ILogger logger, string packageId, NuGetVersion version, ClientService clientService)
+    public static IDisposable? BeginGetMetadataScope(this ILogger logger, string packageId, NuGetVersion version, IClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
@@ -1499,7 +1499,7 @@ public static class AppLoggerExtensions
     /// <param name="packageId">The package identifier.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetAllVersionsScope(this ILogger logger, string packageId, ClientService clientService)
+    public static IDisposable? BeginGetAllVersionsScope(this ILogger logger, string packageId, IClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
@@ -1535,7 +1535,7 @@ public static class AppLoggerExtensions
     /// <param name="framework">The package target framework.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginResolvePackageScope(this ILogger logger, string packageId, NuGetVersion version, NuGetFramework framework, ClientService clientService)
+    public static IDisposable? BeginResolvePackageScope(this ILogger logger, string packageId, NuGetVersion version, NuGetFramework framework, IClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
@@ -1581,7 +1581,7 @@ public static class AppLoggerExtensions
     /// <param name="packageId">The package ID.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginResolvePackagesScope(this ILogger logger, string packageId, ClientService clientService)
+    public static IDisposable? BeginResolvePackagesScope(this ILogger logger, string packageId, IClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
@@ -1600,7 +1600,7 @@ public static class AppLoggerExtensions
     /// <param name="framework">The package target framework.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginResolvePackagesScope(this ILogger logger, string packageId, NuGetFramework framework, ClientService clientService)
+    public static IDisposable? BeginResolvePackagesScope(this ILogger logger, string packageId, NuGetFramework framework, IClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
@@ -1635,7 +1635,7 @@ public static class AppLoggerExtensions
     /// <param name="version">The package version.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetDependencyInfoScope(this ILogger logger, string packageId, NuGetVersion version, ClientService clientService)
+    public static IDisposable? BeginGetDependencyInfoScope(this ILogger logger, string packageId, NuGetVersion version, IClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
@@ -1670,7 +1670,7 @@ public static class AppLoggerExtensions
     /// <param name="version">The package version.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginDoesPackageExistScope(this ILogger logger, string packageId, NuGetVersion version, ClientService clientService)
+    public static IDisposable? BeginDoesPackageExistScope(this ILogger logger, string packageId, NuGetVersion version, IClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
@@ -1718,7 +1718,7 @@ public static class AppLoggerExtensions
     /// <param name="framework">The package framework.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetPackageDependenciesScope(this ILogger logger, string packageId, NuGetVersion version, NuGetFramework framework, ClientService clientService)
+    public static IDisposable? BeginGetPackageDependenciesScope(this ILogger logger, string packageId, NuGetVersion version, NuGetFramework framework, IClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
@@ -1736,7 +1736,7 @@ public static class AppLoggerExtensions
     /// <param name="packageId">The package identifier.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetPackageDependenciesScope(this ILogger logger, string packageId, ClientService clientService)
+    public static IDisposable? BeginGetPackageDependenciesScope(this ILogger logger, string packageId, IClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {

@@ -28,9 +28,11 @@ internal class Program
             .Bind(builder.Configuration.GetSection(nameof(NuGetPuller)))
             .ValidateDataAnnotations();
         builder.Services
+            .AddSingleton<IValidatedRepositoryPathsService, ValidatedRepositoryPathsService<AppSettings>>()
             .AddSingleton<ValidatedPathsService>()
-            .AddSingleton<LocalClientService>()
-            .AddSingleton<UpstreamClientService>();
+            .AddSingleton<ILocalClientService, LocalClientService<IValidatedRepositoryPathsService>>()
+            .AddSingleton<IUpstreamClientService, UpstreamClientService<IValidatedRepositoryPathsService>>()
+            .AddTransient<PackageUpdateService>();
         builder.Services.AddHostedService<MainService>();
         (Host = builder.Build()).Run();
     }
