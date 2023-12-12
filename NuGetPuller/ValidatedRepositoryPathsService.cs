@@ -11,7 +11,7 @@ public abstract class ValidatedRepositoryPathsService<T>(T settings, IHostEnviro
     public T Settings { get; } = settings;
 
     public LazyChainedConversion<string, Uri> UpstreamServiceIndex { get; } = new LazyChainedConversion<string, Uri>(
-            () => settings.OverrideUpstreamServiceIndex.TryGetNonWhitesSpace(settings.UpstreamServiceIndex, out string result) ? result : ServiceDefaults.DEFAULT_UPSTREAM_SERVICE_INDEX,
+        () => settings.OverrideUpstreamServiceIndex.TryGetNonWhitesSpace(settings.UpstreamServiceIndex, out string result) ? result : ServiceDefaults.DEFAULT_UPSTREAM_SERVICE_INDEX,
         value =>
         {
             Uri result;
@@ -35,23 +35,19 @@ public abstract class ValidatedRepositoryPathsService<T>(T settings, IHostEnviro
             return result;
         });
 
-    public LazyChainedConversion<(string Path, bool IsDefault), DirectoryInfo> LocalRepository { get; } = new LazyChainedConversion<(string Path, bool IsDefault), DirectoryInfo>(
-            () =>
-            {
-                if (settings.OverrideLocalRepository.TryGetNonWhitesSpace(settings.LocalRepository, out string result))
-                    return (result, false);
-                return (Path.Combine(hostEnvironment.ContentRootPath, ServiceDefaults.DEFAULT_LOCAL_REPOSITORY), true);
-            },
+    public LazyChainedConversion<string, DirectoryInfo> LocalRepository { get; } = new LazyChainedConversion<string, DirectoryInfo>(
+        () => settings.OverrideLocalRepository.TryGetNonWhitesSpace(settings.LocalRepository, out string result) ? result :
+            Path.Combine(hostEnvironment.ContentRootPath, ServiceDefaults.DEFAULT_LOCAL_REPOSITORY),
         value =>
         {
-            string path = value.Path;
+            string path = value;
             DirectoryInfo directoryInfo;
             try
             {
-                if ((directoryInfo = new(value.Path)).Exists)
+                if ((directoryInfo = new(value)).Exists)
                     return directoryInfo;
                 path = directoryInfo.FullName;
-                if (value.IsDefault && directoryInfo.Parent is not null && directoryInfo.Parent.Exists && !File.Exists(path))
+                if (directoryInfo.Parent is not null && directoryInfo.Parent.Exists && !File.Exists(path))
                 {
                     directoryInfo.Create();
                     directoryInfo.Refresh();
@@ -67,8 +63,8 @@ public abstract class ValidatedRepositoryPathsService<T>(T settings, IHostEnviro
         });
 
     public LazyChainedConversion<string, DirectoryInfo> GlobalPackagesFolder { get; } = new LazyChainedConversion<string, DirectoryInfo>(
-            () => settings.OverrideGlobalPackagesFolder.TryGetNonWhitesSpace(settings.GlobalPackagesFolder, out string result) ? result :
-                NuGet.Configuration.SettingsUtility.GetGlobalPackagesFolder(NuGet.Configuration.Settings.LoadDefaultSettings(root: null)),
+        () => settings.OverrideGlobalPackagesFolder.TryGetNonWhitesSpace(settings.GlobalPackagesFolder, out string result) ? result :
+            NuGet.Configuration.SettingsUtility.GetGlobalPackagesFolder(NuGet.Configuration.Settings.LoadDefaultSettings(root: null)),
         value =>
         {
             DirectoryInfo directoryInfo;

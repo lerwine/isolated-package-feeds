@@ -136,7 +136,7 @@ public class UpstreamClientServiceTest
     {
         var target = _hosting.Host.Services.GetRequiredService<UpstreamClientService>();
         string packageId = "System.Text.Json";
-        var result = await target.ResolvePackages(packageId, CancellationToken.None);
+        var result = await target.ResolvePackagesAsync(packageId, CancellationToken.None);
         Assert.That(result, Is.Not.Null.And.Not.Empty);
         Assert.That(result.Select(d => d.Identity.Id), Is.All.EqualTo(packageId));
         // var json = new ResultWithType<IEnumerable<NuGet.Protocol.Core.Types.RemoteSourceDependencyInfo>, NuGet.Protocol.Core.Types.RemoteSourceDependencyInfo>(result).ToJson(Newtonsoft.Json.Formatting.Indented);
@@ -152,7 +152,7 @@ public class UpstreamClientServiceTest
         var version = NuGetVersion.Parse("7.0.0");
         var framework = NuGetFramework.Parse("net8.0");
         var result = target.GetAllDependenciesAsync(packageId, version, framework, CancellationToken.None)?.ToBlockingEnumerable(CancellationToken.None);
-        Assert.That(result, Is.Not.Null);
+        Assert.That(result, Is.Not.Null.And.Not.Empty);
         foreach (var item in result)
         {
             Assert.That(item, Is.Not.Null);

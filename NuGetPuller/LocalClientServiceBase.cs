@@ -10,37 +10,39 @@ namespace NuGetPuller;
 
 public abstract class LocalClientServiceBase(IValidatedRepositoryPathsService settings, ILogger logger) : ClientService(Repository.Factory.GetCoreV3(settings.LocalRepository.GetResult().FullName), settings, logger, false)
 {
-    private readonly object _syncRoot = new();
-
     #region Methods using the Search Query API
 
-    private Task<PackageSearchResource>? _getPackageSearchResourceAsync;
+    /// <summary>
+    /// Gets the NuGet resource for the NuGet Search Query API.
+    /// </summary>
+    /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
+    /// <returns>A task that asynchronously returns the the NuGet resource for the NuGet Search Query API.</returns>
+    public Task<PackageSearchResource> GetPackageSearchResourceAsync(CancellationToken cancellationToken) => SourceRepository.GetResourceAsync<PackageSearchResource>(cancellationToken);
 
-    private async Task<PackageSearchResource> GetPackageSearchResourceAsync(CancellationToken cancellationToken)
-    {
-        lock (_syncRoot)
-            _getPackageSearchResourceAsync ??= SourceRepository.GetResourceAsync<PackageSearchResource>(cancellationToken);
-        return await _getPackageSearchResourceAsync;
-    }
-
-    private async Task<ContextScope<PackageSearchResource>> GePackageSearchResourceScopeAsync(Func<IDisposable?> scopeFactory, CancellationToken cancellationToken) =>
-        new(await GetPackageSearchResourceAsync(cancellationToken), scopeFactory());
 
     /// <summary>
     /// Gets all packages in the local repository.
     /// </summary>
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
     /// <returns>Metadata for packages in local repository.</returns>
-    public async IAsyncEnumerable<IPackageSearchMetadata> GetAllPackagesAsync([EnumeratorCancellation] CancellationToken cancellationToken)
+    public IAsyncEnumerable<IPackageSearchMetadata> GetAllPackagesAsync(CancellationToken cancellationToken) => GetAllPackagesAsync(null, cancellationToken);
+
+    /// <summary>
+    /// Gets all packages in the local repository.
+    /// </summary>
+    /// <param name="packageSearchResource">The NuGet resource for the NuGet Search Query API.</param>
+    /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
+    /// <returns>Metadata for packages in local repository.</returns>
+    public async IAsyncEnumerable<IPackageSearchMetadata> GetAllPackagesAsync(PackageSearchResource? packageSearchResource, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        using var scope = await GePackageSearchResourceScopeAsync(() => Logger.BeginGetAllLocalPackagesScope(SourceRepository.PackageSource.Source), cancellationToken);
-        var resource = scope.Context;
+        using var scope = Logger.BeginGetAllLocalPackagesScope(SourceRepository.PackageSource.Source);
+        packageSearchResource ??= await GetPackageSearchResourceAsync(cancellationToken);
         var skip = 0;
         int count;
         do
         {
             count = 0;
-            foreach (var item in await resource.SearchAsync(null, null, skip, 50, NuGetLogger, cancellationToken))
+            foreach (var item in await packageSearchResource.SearchAsync(null, null, skip, 50, NuGetLogger, cancellationToken))
             {
                 count++;
                 cancellationToken.ThrowIfCancellationRequested();
@@ -54,17 +56,12 @@ public abstract class LocalClientServiceBase(IValidatedRepositoryPathsService se
 
     #region Methods using the NuGet V3 Push and Delete API
 
-    private Task<PackageUpdateResource>? _getPackageUpdateResourceAsync;
-
-    private async Task<PackageUpdateResource> GetPackageUpdateResourceAsync(CancellationToken cancellationToken)
-    {
-        lock (_syncRoot)
-            _getPackageUpdateResourceAsync ??= SourceRepository.GetResourceAsync<PackageUpdateResource>(cancellationToken);
-        return await _getPackageUpdateResourceAsync;
-    }
-
-    // private async Task<ContextScope<PackageUpdateResource>> GetPackageUpdateResourceScopeAsync(Func<IDisposable?> scopeFactory, CancellationToken cancellationToken) =>
-    //     new(await GetPackageUpdateResourceAsync(cancellationToken), scopeFactory());
+    /// <summary>
+    /// Gets the NuGet resource for the NuGet V3 Push and Delete API.
+    /// </summary>
+    /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
+    /// <returns>A task that asynchronously returns the the NuGet resource for the NuGet V3 Push and Delete API.</returns>
+    public Task<PackageUpdateResource> GetPackageUpdateResourceAsync(CancellationToken cancellationToken) => SourceRepository.GetResourceAsync<PackageUpdateResource>(cancellationToken);
 
     /// <summary>
     /// Asyncrhonously deletes packages.
@@ -72,19 +69,42 @@ public abstract class LocalClientServiceBase(IValidatedRepositoryPathsService se
     /// <param name="packageIds">Package IDs of packages to be deleted.</param>
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
     /// <returns>The Package IDs of the packages that were actually deleted.</returns>
+    public IAsyncEnumerable<(PackageIdentity Package, bool Success)> DeleteAsync(IEnumerable<string> packageIds, CancellationToken cancellationToken) => DeleteAsync(packageIds, null, null, cancellationToken);
+
+    public IAsyncEnumerable<(PackageIdentity Package, bool Success)> DeleteAsync(IEnumerable<string> packageIds, FindPackageByIdResource? findPackageByIdResource, CancellationToken cancellationToken) =>
+        DeleteAsync(packageIds, findPackageByIdResource, null, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously deletes packages.
+    /// </summary>
+    /// <param name="packageIds">Package IDs of packages to be deleted.</param>
+    /// <param name="packageUpdateResource">The NuGet resource for the NuGet V3 Push and Delete API.</param>
+    /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
+    /// <returns>The Package IDs of the packages that were actually deleted.</returns>
+    public IAsyncEnumerable<(PackageIdentity Package, bool Success)> DeleteAsync(IEnumerable<string> packageIds, PackageUpdateResource? packageUpdateResource, CancellationToken cancellationToken) =>
+        DeleteAsync(packageIds, null, packageUpdateResource, cancellationToken);
+
+    /// <summary>
+    /// Asyncrhonously deletes packages.
+    /// </summary>
+    /// <param name="packageIds">Package IDs of packages to be deleted.</param>
+    /// <param name="findPackageByIdResource">The NuGet resource for the NuGet V3 Package Content API.</param>
+    /// <param name="packageUpdateResource">The NuGet resource for the NuGet V3 Push and Delete API.</param>
+    /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
+    /// <returns>The Package IDs of the packages that were actually deleted.</returns>
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.8.x/src/NuGet.Core/NuGet.Protocol/Resources/PackageUpdateResource.cs#L157"/>
-    public async IAsyncEnumerable<(PackageIdentity Package, bool Success)> DeleteAsync(IEnumerable<string> packageIds, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public async IAsyncEnumerable<(PackageIdentity Package, bool Success)> DeleteAsync(IEnumerable<string> packageIds, FindPackageByIdResource? findPackageByIdResource, PackageUpdateResource? packageUpdateResource, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(packageIds);
         if (!(packageIds = packageIds.Select(i => i?.Trim()!).Where(i => !string.IsNullOrEmpty(i))).Any())
             yield break;
-        var findPackageById = await GetFindPackageByIdResourceAsync(cancellationToken);
-        var packageUpdate = await GetPackageUpdateResourceAsync(cancellationToken);
+        findPackageByIdResource ??= await GetFindPackageByIdResourceAsync(cancellationToken);
+        packageUpdateResource ??= await GetPackageUpdateResourceAsync(cancellationToken);
         foreach (string id in packageIds.Distinct(NoCaseComparer))
         {
             using var scope = Logger.BeginDeleteLocalPackageScope(id, PackageSourceLocation);
             var lc = id.ToLower();
-            var allVersions = await findPackageById.GetAllVersionsAsync(lc, CacheContext, NuGetLogger, cancellationToken);
+            var allVersions = await findPackageByIdResource.GetAllVersionsAsync(lc, CacheContext, NuGetLogger, cancellationToken);
             if (allVersions is null || !allVersions.Any())
             {
                 yield return (new PackageIdentity(id, null), false);
@@ -96,7 +116,7 @@ public abstract class LocalClientServiceBase(IValidatedRepositoryPathsService se
                 using var scope2 = Logger.BeginDeleteLocalPackageVersionScope(id, version, PackageSourceLocation);
                 try
                 {
-                    await packageUpdate.Delete(lc, version.ToString(), s => string.Empty, s => true, true, NuGetLogger);
+                    await packageUpdateResource.Delete(lc, version.ToString(), s => string.Empty, s => true, true, NuGetLogger);
                     success = true;
                 }
                 catch (ArgumentException error)
@@ -115,14 +135,22 @@ public abstract class LocalClientServiceBase(IValidatedRepositoryPathsService se
     /// <param name="packageId">The identifier of the package to be deleted.</param>
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
     /// <returns><see langword="true"/> if the package was found and deleted; otherwise, <see langword="false"/>.</returns>
+    public IAsyncEnumerable<(NuGetVersion Version, bool Success)> DeleteAsync(string packageId, CancellationToken cancellationToken) => DeleteAsync(packageId, null, cancellationToken);
+
+    /// <summary>
+    /// Asynchronously deletes a package.
+    /// </summary>
+    /// <param name="packageId">The identifier of the package to be deleted.</param>
+    /// <param name="findPackageByIdResource">The NuGet resource for the NuGet V3 Package Content API.</param>
+    /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
+    /// <returns><see langword="true"/> if the package was found and deleted; otherwise, <see langword="false"/>.</returns>
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.8.x/src/NuGet.Core/NuGet.Protocol/Resources/PackageUpdateResource.cs#L157"/>
-    public async IAsyncEnumerable<(NuGetVersion Version, bool Success)> DeleteAsync(string packageId, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public async IAsyncEnumerable<(NuGetVersion Version, bool Success)> DeleteAsync(string packageId, FindPackageByIdResource? findPackageByIdResource, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
         using var scope = Logger.BeginDeleteLocalPackageScope(packageId, PackageSourceLocation);
-        var findPackageById = await GetFindPackageByIdResourceAsync(cancellationToken);
         var lc = packageId.ToLower();
-        var allVersions = await findPackageById.GetAllVersionsAsync(lc, CacheContext, NuGetLogger, cancellationToken);
+        var allVersions = await (findPackageByIdResource ?? await GetFindPackageByIdResourceAsync(cancellationToken)).GetAllVersionsAsync(lc, CacheContext, NuGetLogger, cancellationToken);
         if (allVersions is null || !allVersions.Any())
             yield break;
         var packageUpdate = await GetPackageUpdateResourceAsync(cancellationToken);
@@ -151,15 +179,24 @@ public abstract class LocalClientServiceBase(IValidatedRepositoryPathsService se
     /// <param name="skipDuplicate">Whether to skip duplicate packages.</param>
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
     /// <returns><see langword="true"/> if the package was added; otherwise, <see langword="false"/>.</returns>
+    public Task AddPackageAsync(string fileName, bool skipDuplicate, CancellationToken cancellationToken) => AddPackageAsync(fileName, skipDuplicate, null, cancellationToken);
+
+    /// <summary>
+    /// Asynchronously adds a NuGet package.
+    /// </summary>
+    /// <param name="fileName">The path to the NuGet package file.</param>
+    /// <param name="skipDuplicate">Whether to skip duplicate packages.</param>
+    /// <param name="packageUpdateResource">NuGet resource for the NuGet V3 Push and Delete API.</param>
+    /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
+    /// <returns><see langword="true"/> if the package was added; otherwise, <see langword="false"/>.</returns>
     /// <seealso href="https://github.com/NuGet/NuGet.Client/blob/release-6.8.x/src/NuGet.Core/NuGet.Protocol/Resources/PackageUpdateResource.cs#L55"/>
-    public async Task AddPackageAsync(string fileName, bool skipDuplicate, CancellationToken cancellationToken)
+    public async Task AddPackageAsync(string fileName, bool skipDuplicate, PackageUpdateResource? packageUpdateResource, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
 
-        var packageUpdateResource = await GetPackageUpdateResourceAsync(cancellationToken);
         try
         {
-            await packageUpdateResource.Push(
+            await (packageUpdateResource ?? await GetPackageUpdateResourceAsync(cancellationToken)).Push(
                 packagePaths: new[] { fileName },
                 symbolSource: null,
                 timeoutInSecond: 60,
