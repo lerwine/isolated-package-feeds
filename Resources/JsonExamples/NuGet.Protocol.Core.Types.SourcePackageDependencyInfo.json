@@ -1,0 +1,137 @@
+[
+    {
+        "Listed": false,
+        "Source": {
+          "FeedTypeOverride": "undefined",
+          "PackageSource": {
+            "Name": "https://api.nuget.org/v3/index.json",
+            "Source": "https://api.nuget.org/v3/index.json",
+            "TrySourceAsUri": "https://api.nuget.org/v3/index.json",
+            "SourceUri": "https://api.nuget.org/v3/index.json",
+            "IsOfficial": false,
+            "IsMachineWide": false,
+            "IsEnabled": true,
+            "IsPersistable": true,
+            "MaxHttpRequestsPerSource": 0,
+            "ProtocolVersion": 2,
+            "AllowInsecureConnections": false,
+            "IsHttp": true,
+            "IsHttps": true,
+            "IsLocal": false
+          }
+        },
+        "DownloadUri": "https://api.nuget.org/v3-flatcontainer/system.text.json/1.0.0/system.text.json.1.0.0.nupkg",
+        "Dependencies": [],
+        "Id": "System.Text.Json",
+        "Version": "1.0.0",
+        "HasVersion": true
+      },
+      {
+        "Listed": false,
+        "Source": {
+          "FeedTypeOverride": "undefined",
+          "PackageSource": {
+            "Name": "https://api.nuget.org/v3/index.json",
+            "Source": "https://api.nuget.org/v3/index.json",
+            "TrySourceAsUri": "https://api.nuget.org/v3/index.json",
+            "SourceUri": "https://api.nuget.org/v3/index.json",
+            "IsOfficial": false,
+            "IsMachineWide": false,
+            "IsEnabled": true,
+            "IsPersistable": true,
+            "MaxHttpRequestsPerSource": 0,
+            "ProtocolVersion": 2,
+            "AllowInsecureConnections": false,
+            "IsHttp": true,
+            "IsHttps": true,
+            "IsLocal": false
+          }
+        },
+        "DownloadUri": "https://api.nuget.org/v3-flatcontainer/system.text.json/1.1.0/system.text.json.1.1.0.nupkg",
+        "Dependencies": [],
+        "Id": "System.Text.Json",
+        "Version": "1.1.0",
+        "HasVersion": true
+      },
+      {
+        "Listed": false,
+        "Source": {
+          "FeedTypeOverride": "undefined",
+          "PackageSource": {
+            "Name": "https://api.nuget.org/v3/index.json",
+            "Source": "https://api.nuget.org/v3/index.json",
+            "TrySourceAsUri": "https://api.nuget.org/v3/index.json",
+            "SourceUri": "https://api.nuget.org/v3/index.json",
+            "IsOfficial": false,
+            "IsMachineWide": false,
+            "IsEnabled": true,
+            "IsPersistable": true,
+            "MaxHttpRequestsPerSource": 0,
+            "ProtocolVersion": 2,
+            "AllowInsecureConnections": false,
+            "IsHttp": true,
+            "IsHttps": true,
+            "IsLocal": false
+          }
+        },
+        "DownloadUri": "https://api.nuget.org/v3-flatcontainer/system.text.json/1.2.0/system.text.json.1.2.0.nupkg",
+        "Dependencies": [],
+        "Id": "System.Text.Json",
+        "Version": "1.2.0",
+        "HasVersion": true
+      },
+      {
+        "Listed": false,
+        "Source": {
+          "FeedTypeOverride": "undefined",
+          "PackageSource": {
+            "Name": "https://api.nuget.org/v3/index.json",
+            "Source": "https://api.nuget.org/v3/index.json",
+            "TrySourceAsUri": "https://api.nuget.org/v3/index.json",
+            "SourceUri": "https://api.nuget.org/v3/index.json",
+            "IsOfficial": false,
+            "IsMachineWide": false,
+            "IsEnabled": true,
+            "IsPersistable": true,
+            "MaxHttpRequestsPerSource": 0,
+            "ProtocolVersion": 2,
+            "AllowInsecureConnections": false,
+            "IsHttp": true,
+            "IsHttps": true,
+            "IsLocal": false
+          }
+        },
+        "DownloadUri": "https://api.nuget.org/v3-flatcontainer/system.text.json/1.3.0/system.text.json.1.3.0.nupkg",
+        "Dependencies": [],
+        "Id": "System.Text.Json",
+        "Version": "1.3.0",
+        "HasVersion": true
+      },
+      {
+        "Listed": false,
+        "Source": {
+          "FeedTypeOverride": "undefined",
+          "PackageSource": {
+            "Name": "https://api.nuget.org/v3/index.json",
+            "Source": "https://api.nuget.org/v3/index.json",
+            "TrySourceAsUri": "https://api.nuget.org/v3/index.json",
+            "SourceUri": "https://api.nuget.org/v3/index.json",
+            "IsOfficial": false,
+            "IsMachineWide": false,
+            "IsEnabled": true,
+            "IsPersistable": true,
+            "MaxHttpRequestsPerSource": 0,
+            "ProtocolVersion": 2,
+            "AllowInsecureConnections": false,
+            "IsHttp": true,
+            "IsHttps": true,
+            "IsLocal": false
+          }
+        },
+        "DownloadUri": "https://api.nuget.org/v3-flatcontainer/system.text.json/1.4.0/system.text.json.1.4.0.nupkg",
+        "Dependencies": [],
+        "Id": "System.Text.Json",
+        "Version": "1.4.0",
+        "HasVersion": true
+      }
+]
