@@ -1189,6 +1189,70 @@ public static partial class AppLoggerExtensions
 
     #endregion
 
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.CommandLineArgumentsAreExclusive"/> error event message.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="switch1">A mutually-exclusive command line switch.</param>
+    /// <param name="switch2">The other mutually-exclusive command-line switch.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.CommandLineArgumentsAreExclusive, Level = LogLevel.Critical,
+        Message = "Command line switch {Switch1}; cannot be used with {Switch2})")]
+    public static partial void CommandLineArgumentsAreExclusive(this ILogger logger, string switch1, string switch2, Exception? exception = null);
+
+    #region IgnoredDependentCommandLineArgument Logger Event Methods
+
+    /// <summary>
+    /// Logs a <see cref="NuGetPullerEventId.IgnoredDependentCommandLineArgument"/> <see cref="LogLevel.Warning"/> message.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="dependentSwitch">The dependent command line switch.</param>
+    /// <param name="switchName">The primary command line switch.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.IgnoredDependentCommandLineArgument, Level = LogLevel.Warning,
+        Message = "Command line switch {DependentSwitch} is ignnored if {SwitchName} is not specified.")]
+    public static partial void IgnoredDependentCommandLineArgument(this ILogger logger, string dependentSwitch, string switchName, Exception? exception = null);
+
+    /// <summary>
+    /// Logs a <see cref="NuGetPullerEventId.IgnoredDependentCommandLineArgument"/> <see cref="LogLevel.Warning"/> message.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="dependentSwitch">The dependent command line switch.</param>
+    /// <param name="switchName1">The first primary command line switch.</param>
+    /// <param name="switchName2">The second primary command line switch.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.IgnoredDependentCommandLineArgument, Level = LogLevel.Warning,
+        Message = "Command line switch {DependentSwitch} is ignnored if {SwitchName1} or {SwitchName2} is not specified.")]
+    public static partial void IgnoredDependentCommandLineArgument(this ILogger logger, string dependentSwitch, string switchName1, string switchName2, Exception? exception = null);
+
+    /// <summary>
+    /// Logs a <see cref="NuGetPullerEventId.IgnoredDependentCommandLineArgument"/> <see cref="LogLevel.Warning"/> message.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="dependentSwitch">The dependent command line switch.</param>
+    /// <param name="switchName1">The first primary command line switch.</param>
+    /// <param name="switchName2">The second primary command line switch.</param>
+    /// <param name="switchName3">The third primary command line switch.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.IgnoredDependentCommandLineArgument, Level = LogLevel.Warning,
+        Message = "Command line switch {DependentSwitch} is ignnored if {SwitchName1}, {SwitchName2} or {SwitchName3} is not specified.")]
+    public static partial void IgnoredDependentCommandLineArgument(this ILogger logger, string dependentSwitch, string switchName1, string switchName2, string switchName3, Exception? exception = null);
+
+    /// <summary>
+    /// Logs a <see cref="NuGetPullerEventId.IgnoredDependentCommandLineArgument"/> <see cref="LogLevel.Warning"/> message.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="dependentSwitch">The dependent command line switch.</param>
+    /// <param name="switchName1">The first primary command line switch.</param>
+    /// <param name="switchName2">The second primary command line switch.</param>
+    /// <param name="switchName3">The third primary command line switch.</param>
+    /// <param name="switchName4">The fourth primary command line switch.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.IgnoredDependentCommandLineArgument, Level = LogLevel.Warning,
+        Message = "Command line switch {DependentSwitch} is ignnored if {SwitchName1}, {SwitchName2}, {SwitchName3} or {SwitchName4} is not specified.")]
+    public static partial void IgnoredDependentCommandLineArgument(this ILogger logger, string dependentSwitch, string switchName1, string switchName2, string switchName3, string switchName4, Exception? exception = null);
+
+    #endregion
 
     #region GetDownloadResource Scope
 

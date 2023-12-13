@@ -150,6 +150,8 @@ public static partial class AppLoggerExtensions
         /// <summary>
         /// Event ID when a package is being downloaded from the upstream repository.
         /// </summary>
-        DownloadingNuGetPackage = 0x1D
+        DownloadingNuGetPackage = 0x1D,
+        CommandLineArgumentsAreExclusive = 0x1E,
+        IgnoredDependentCommandLineArgument = 0x1F
     }
 }

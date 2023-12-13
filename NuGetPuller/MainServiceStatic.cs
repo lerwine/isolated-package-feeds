@@ -4,6 +4,7 @@ using NuGet.Packaging;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
+using NuGet.Packaging.Core;
 
 namespace NuGetPuller;
 
@@ -38,6 +39,7 @@ public partial class MainServiceStatic
         }
     }
 
+    [Obsolete("Shouldn't have any console-app-specific methods in class library.")]
     public static async Task ListLocalPackagesAsync(IEnumerable<IPackageSearchMetadata> packages, string? exportPath, ILogger logger, CancellationToken cancellationToken)
     {
         var pkgArr = packages.ToArray();
@@ -156,5 +158,75 @@ public partial class MainServiceStatic
             else
                 logger.DownloadPackageIsEmpty(packageId, v);
         }
+    }
+
+    public static void LogIgnoredDependentCommandLineArgumentIfSet(bool value, Func<(ILogger Logger, string DependentSwitch, string SwitchName)> getSwitchNames)
+    {
+        if (!value)
+            return;
+        (ILogger logger, string dependentSwitch, string switchName) = getSwitchNames();
+        logger.IgnoredDependentCommandLineArgument(dependentSwitch, switchName);
+    }
+    
+    public static void LogIgnoredDependentCommandLineArgumentIfSet(string? value, Func<(ILogger Logger, string DependentSwitch, string SwitchName)> getSwitchNames)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return;
+        (ILogger logger, string dependentSwitch, string switchName) = getSwitchNames();
+        logger.IgnoredDependentCommandLineArgument(dependentSwitch, switchName);
+    }
+    
+    public static void LogIgnoredDependentCommandLineArgumentIfSet(string? value, Func<(ILogger Logger, string DependentSwitch, string SwitchName1, string SwitchName2)> getSwitchNames)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return;
+        (ILogger logger, string dependentSwitch, string switchName1, string switchName2) = getSwitchNames();
+        logger.IgnoredDependentCommandLineArgument(dependentSwitch, switchName1, switchName2);
+    }
+    
+    public static void LogIgnoredDependentCommandLineArgumentIfSet(string? value, Func<(ILogger Logger, string DependentSwitch, string SwitchName1, string SwitchName2, string SwitchName3)> getSwitchNames)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return;
+        (ILogger logger, string dependentSwitch, string switchName1, string switchName2, string switchName3) = getSwitchNames();
+        logger.IgnoredDependentCommandLineArgument(dependentSwitch, switchName1, switchName2, switchName3);
+    }
+    
+    public static void LogIgnoredDependentCommandLineArgumentIfSet(string? value, Func<(ILogger Logger, string DependentSwitch, string SwitchName1, string SwitchName2, string SwitchName3, string SwitchName4)> getSwitchNames)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return;
+        (ILogger logger, string dependentSwitch, string switchName1, string switchName2, string switchName3, string switchName4) = getSwitchNames();
+        logger.IgnoredDependentCommandLineArgument(dependentSwitch, switchName1, switchName2, switchName3, switchName4);
+    }
+    
+    public static Task CheckDependenciesAsync(ILocalClientService localClientService, ILogger logger, string[] packageIds, NuGetVersion[] nuGetVersions, CancellationToken cancellationToken)
+    {
+        return Task.FromException(new NotImplementedException());
+    }
+
+    public static Task CheckDependenciesAsync(ILocalClientService localClientService, ILogger logger, string[] packageIds, CancellationToken cancellationToken)
+    {
+        return Task.FromException(new NotImplementedException());
+    }
+
+    public static Task CheckAllDependenciesAsync(ILocalClientService localClientService, ILogger logger, CancellationToken cancellationToken)
+    {
+        return Task.FromException(new NotImplementedException());
+    }
+
+    public static Task DownloadMissingDependenciesAsync(ILocalClientService localClientService, IUpstreamClientService upstreamClientService, ILogger logger, string[] packageIds, NuGetVersion[] nuGetVersions, CancellationToken cancellationToken)
+    {
+        return Task.FromException(new NotImplementedException());
+    }
+
+    public static Task DownloadMissingDependenciesAsync(ILocalClientService localClientService, IUpstreamClientService upstreamClientService, ILogger logger, string[] packageIds, CancellationToken cancellationToken)
+    {
+        return Task.FromException(new NotImplementedException());
+    }
+
+    public static Task DownloadAllMissingDependenciesAsync(ILocalClientService localClientService, IUpstreamClientService upstreamClientService, ILogger logger, CancellationToken cancellationToken)
+    {
+        return Task.FromException(new NotImplementedException());
     }
 }

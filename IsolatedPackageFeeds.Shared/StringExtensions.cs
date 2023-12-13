@@ -46,6 +46,19 @@ public static class StringExtensions
         return LineBreakRegex.Split(value);
     }
 
+    public static bool TrySplitToNonWhiteSpaceTrimmed(this string? value, char separator, [NotNullWhen(true)]out string[]? result)
+    {
+        if (value is null || (value = value.Trim()).Length == 0)
+        {
+            result = null;
+            return false;
+        }
+        if (value.Contains(separator))
+            return (result = value.Split(separator).Select(s => s.Trim()).Where(s => s.Length > 0).ToArray()).Length > 0;
+        result = [value];
+        return true;
+    }
+
     public static bool IsWsNormalizedNotEmpty(this string? value, [NotNullWhen(true)] out string? wsNormalized) => (wsNormalized = value.ToWsNormalizedOrNullIfEmpty()) is not null;
 
     public static bool IsTrimmedNotEmpty(this string? value, [NotNullWhen(true)] out string? wsNormalized) => (wsNormalized = value.ToTrimmedOrNullIfEmpty()) is not null;
