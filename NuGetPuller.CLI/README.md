@@ -48,20 +48,20 @@ NuGetPuller --download=Microsoft.Extensions.Logging,Microsoft.Extensions.Configu
 
 Add package files to the local NuGet repository.
 
-- `--add` - **Required**: Path to an individual `.nupkg` file, a `.zip` file containing package files, or to a subdirectory of `.nupkg` files. This will not recursively search sub-folders.
+- `--add-file` - **Required**: Path to an individual `.nupkg` file, a `.zip` file containing package files, or to a subdirectory of `.nupkg` files. This will not recursively search sub-folders.
   
   Multiple paths can be specified, separated by semi-colons.
 
 Example #1: Add Single Package Files
 
 ```bash
-NuGetPuller --add="microsoft.extensions.logging.8.0.0.nupkg;microsoft.extensions.logging.7.0.0.nupkg"
+NuGetPuller --add-file="microsoft.extensions.logging.8.0.0.nupkg;microsoft.extensions.logging.7.0.0.nupkg"
 ```
 
 Example #2: Add Package Files From Subdirectory
 
 ```bash
-NuGetPuller --add=john.doe/downloads
+NuGetPuller --add-file=john.doe/downloads
 ```
 
 ### Remove Packages

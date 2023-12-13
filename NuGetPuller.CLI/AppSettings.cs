@@ -45,7 +45,7 @@ public partial class AppSettings : ISharedAppSettings
     /// <summary>
     /// Semi-colon-separated list of package file paths or subdirectory paths to add to the local NuGet repository.
     /// </summary>
-    /// <remarks>This is mapped from the <c>--add</c> (<see cref="COMMAND_LINE_SWITCH_add"/>) command line switch.</remarks>
+    /// <remarks>This is mapped from the <c>--add-file</c> (<see cref="COMMAND_LINE_SWITCH_add_file"/>) command line switch.</remarks>
     public string? AddPackageFiles { get; set; }
 
     /// <summary>
