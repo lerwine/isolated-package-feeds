@@ -6,13 +6,13 @@ public static class CommandLineSwitches
     /// Used with the <see cref="COMMAND_LINE_SWITCH_version"/> to denote all versions.
     /// </summary>
     public const string COMMAND_LINE_VALUE_all = "all";
-    
+
     /// <summary>
     /// List all packages in the local repository.
     /// </summary>
     /// <remarks>This is mapped as a boolean switch to <see cref="AppSettings.ListLocal"/>.</remarks>
     public const string COMMAND_LINE_SWITCH_list = "--list";
-    
+
     /// <summary>
     /// This is used with the <c>--list</c> (<see cref="COMMAND_LINE_SWITCH_list"/>) command line switch to show all version numbers of each package in the local repository.
     /// </summary>
