@@ -26,7 +26,7 @@ public class MainService : BackgroundService
         {
             using var scope = _serviceProvider.CreateScope();
             var validatedSettings = scope.ServiceProvider.GetRequiredService<ValidatedPathsService>();
-            var packageIds = _settings.Delete?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(NoCaseComparer);
+            var packageIds = _settings.Remove?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(NoCaseComparer);
             HashSet<PackageIdentity> deletedPackages = new(PackageIdentityComparer.Default);
             if (packageIds is not null && packageIds.Any())
                 await foreach (var (package, success) in scope.ServiceProvider.GetRequiredService<ILocalClientService>().DeleteAsync(packageIds, stoppingToken))

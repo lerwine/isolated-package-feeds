@@ -23,7 +23,7 @@ public class ValidatedPathsService
         ExportLocalManifest = new LazyOptionalChainedConversion<string, FileInfo>(
             (out string? path) =>
             {
-                if (options.Value.ExportLocalManifest.TryGetNonWhitesSpace(out path))
+                if (options.Value.ExportMetaData.TryGetNonWhitesSpace(out path))
                     return true;
                 path = null;
                 return false;
@@ -74,7 +74,7 @@ public class ValidatedPathsService
         ExportBundle = new LazyOptionalChainedConversion<string, FileInfo>(
             (out string? path) =>
             {
-                if (options.Value.ExportBundle.TryGetNonWhitesSpace(out path))
+                if (options.Value.CreateBundle.TryGetNonWhitesSpace(out path))
                     return true;
                 path = null;
                 return false;
@@ -118,7 +118,7 @@ public class ValidatedPathsService
         SaveTargetManifestAs = new LazyOptionalChainedConversion<string, FileInfo>(
             (out string? path) =>
             {
-                if (options.Value.SaveTargetManifestAs.TryGetNonWhitesSpace(out path))
+                if (options.Value.SaveMetaDataTo.TryGetNonWhitesSpace(out path))
                     return true;
                 path = null;
                 return false;

@@ -10,72 +10,125 @@ This references package manifest files to represent which packages already exist
 
 See [NuGet Common Class Library Application Settings](../NuGetPuller/README.md#application-settings) for the  configuration options for the `NuGetPuller` section of [appsettings.json](./appsettings.json).
 
-## Command Line Arguments
+## Command Line Options
 
-### Get Latest Updates From Upstream NuGet Repository
+### Show All Packages
 
-- `--update-all` - **Required:** *This command line switch does not have any associated value.*
+- `--list` **Required** *(stand-alone switch)* List all packages in the local repository.
+  - `--include-versions` - *(Optional - stand-alone switch)* Show all version numbers of each package in teh local repository.
 
-*Example:* `NuGetPuller.CLI --update-all`
+Example:
 
-### Update Specific Packages From Upstream NuGet Repository
+```bash
+NuGetPuller --list --include-versions
+```
 
-- `-u` - **Required:** Identifier(s) of packages to be updated.
-  - Multiple package identifiers are separated by commas.
+### Download Packages
 
-*Example:* `NuGetPuller.CLI -u Microsoft.Extensions.Configuration.Abstractions,Microsoft.Extensions.DependencyInjection.Abstractions`
+Download packages from the upstream NuGet repository and add them to the local repository.
 
-### Add New Packages From Upstream NuGet Repository
+- `--download` - **Required**: Identifier of package to download.
+  
+  Multiple package identifiers can be specified, separated by commas.
+  - `--version` - *(Optional)* Specific version of package to be downloaded. You can use the keyword `all` to download all packages.
+  
+  Multiple versions can be specified, separated by commas.
+  
+  If the version is not specified, the latest version will be downloaded.
+  - `--no-dependencies` - *(Optional - stand-alone switch)* Do not download dependencies.
+  If this switch is not used, then all dependencies will be downloaded and added to the local repository as well.
 
-- `-a` - **Required:** Identifier(s) of packages to be downloaded and added to the local repository.
-  - Multiple package identifiers are separated by commas.
+Example:
 
-*Example:* `NuGetPuller.CLI -a System.Text.Json,Microsoft.CodeAnalysis.CSharp.Workspaces`
+```bash
+NuGetPuller --download=Microsoft.Extensions.Logging,Microsoft.Extensions.Configuration --version=8.0.0,7.0.0 --no-dependencies
+```
 
-### Import Package Files Into Local NuGet Repository
+### Add Package Files
 
-- `-i` - **Required:** Import package file(s) into the local NuGet repository.
-  - This can either refer to a single `.nupkg` file or to a subdirectory containing `.nupkg` files.
-  - If this refers to a subdirectory, it will not recursively search nested sub-directories.
+Add package files to the local NuGet repository.
 
-*Example #1:* `NuGetPuller.CLI -i C:\users\john.doe\Downloads\microsoft.extensions.logging.8.0.0.nupkg`
+- `--add` - **Required**: Path to an individual `.nupkg` file, a `.zip` file containing package files, or to a subdirectory of `.nupkg` files. This will not recursively search sub-folders.
+  
+  Multiple paths can be specified, separated by semi-colons.
 
-*Example #2:* `NuGetPuller.CLI -i C:\users\john.doe\Downloads\MyPackageFolder`
+Example #1: Add Single Package Files
 
-### Delete Packages From Local NuGet Repository
+```bash
+NuGetPuller --add="microsoft.extensions.logging.8.0.0.nupkg;microsoft.extensions.logging.7.0.0.nupkg"
+```
 
-- `-d` - **Required:** Identifier(s) of packages to be removed from the local repository.
-  - Multiple package identifiers are separated by commas.
+Example #2: Add Package Files From Subdirectory
 
-*Example:* `NuGetPuller.CLI -d PackageA,PackageB`
+```bash
+NuGetPuller --add=john.doe/downloads
+```
 
-### List Packages Stored In Local NuGet Repository
+### Remove Packages
 
-- `-l` - **Required:** *This command line switch does not have any associated value.*
+Remove packages from the local NuGet repository.
 
-*Example:* `NuGetPuller.CLI -l`
+- `--remove` - **Required**: Identifier of package to remove.
+  
+  Multiple package identifiers can be specified, separated by commas.
+  - `--version` - *(Optional)* Specific version of package to be downloaded.
+  
+  Multiple versions can be specified, separated by commas.
+  
+  If the version is not specified, all versions will be removed.
+  - `--save-to` - *(Optional)* Subdirectory to save packages to before removing them.
+
+```bash
+NuGetPuller --remove=Microsoft.Extensions.Logging,Microsoft.Extensions.Configuration --version=8.0.0,7.0.0 --save-to=john.doe/downloads
+```
+
+### Check Package Dependencies
+
+- `--check-depencencies` - **Required**: Identifier of package to check. Use the keyword `all` to check dependencies of all packages.
+  - `--version` - *(Optional)* Specific version of package to check.
+  
+  Multiple versions can be specified, separated by commas.
+  
+  If the version is not specified, all versions of the specified packages will be checked.
+  - `--no-download` - *(Optional - stand-alone switch)* Do not download missing dependencies.
+  
+  If this switch is not specified, any missing dependencies will be downloaded from the upstream NuGet repository, if they are found
+
+Example:
+
+```bash
+NuGetPuller --check-depencencies=System.Text.Json,Microsoft.Extensions.Hosting --no-download
+```
+
+### Export Local NuGet Repository Metadata
+
+Create a metadata file that represnts the contents of the local NuGet repository.
+
+- `--export-metadata` - **Required:** Path metadata file to create.
+
+Example:
+
+```bash
+NuGetPuller --export-metadata=MyLocaRepo.json
+```
 
 ### Create File Transfer Bundle
 
-- `-b` - **Required:** Path of bundle file to create.
+- `--create-bundle` - **Required:** Path of bundle file to create.
   - If no extension is specified, this will use the `.zip` file extension.
-  
-  *Example:* `NuGetPuller.CLI -b MyAirgapped_2023-12-06.zip`
-- `-t` - *Optional:* Path of the package manifest file for the locally-hosted NuGet repository that this bundle is being created for.
-  - If this is not specified, then this will look for a `.json` file with the same base file name and location as the path specified by the `-b` argument.
-  - If the package manifest file for the target NuGet repository does not exist, one it will be created.
-  
-  *Example:* `NuGetPuller.CLI -b MyAirgapped_2023-12-06.zip -t MyAirgappedFeed.json`
-- `--save-target-manifest-as` - *Optional:* Alternate path to save updated package manifest file to.
-  - If this is not specified, then the package manifest file for the target NuGet repository will be updated to include the packages that are contained in the bundle file specified by the `-b` argument.
-  
-  *Example:* `NuGetPuller.CLI -b MyAirgapped_2023-12-06.zip -t MyAirgappedFeed.json --save-target-manifest-as=MyAirgappedFeed-New.json`
+  - `--create-from` - *(Optional)* Path of a local nuget feed metadata file.
+  If this option is used, the bundle will not contain any packages that are represented in the nuget feed metadata file.
+  - `--save-metadata-to` - *(Optional)* Path of file to save the updated metadata to. If the `--create-from` was used, the metadata file will
+  reflect the contents of the associated local nuget feed after the bundle is added; otherwise, the metadata file will contain packages
+  that were exported to the `.zip` file.
 
-### Create Package Fanifest File From Local NuGet Repository
-
-- `--export-local-manifest` - **Required:** Path of `.json` file to create which will be a manifest of all packages in the local NuGet repository.
+  It is okay if the `--create-from` and `--save-metadata-to` options refer to the same file.
+  - `--include` - *(Optional)* Comma-separated list of specific package IDs to include in the bundle. If this option is not specified, then all packages will be included in the bundle.
+  - `--version` - *(Optional)* Comma-separated list of specific versions to include in the bundle. If this option is not specified, then all packages will be included in the bundle.
   
-  *Example:* `NuGetPuller.CLI --export-local-manifest=MyLocalRepoManifest.json`
+```bash
+NuGetPuller --create-bundle=Updates.zip --create-from=DisconnectedServer.json --save-metadata-to=DisconnectedServer.json
+```
 
 ### Override Application Settings
 
@@ -84,10 +137,23 @@ and can be used in combination with other command line arguments:
 
 - `--local-repository` - Override the [LocalPath](../NuGetPuller/README.md#local-nuget-repository-path) setting.
   
-  *Example:* `NuGetPuller.CLI --local-repository=C:\users\john.doe\Documents\MyLocalRepository -i mycustom.nupkg`
+  Example:
+
+  ```bash
+  NuGetPuller --local-repository=john.doe/downloads --check-depencencies="System.Text.Json" --no-download
+  ```
+
 - `--upstream-service-index` - Override the [UpstreamServiceIndex](../NuGetPuller/README.md#upstream-service-index-url) setting.
   
-  *Example:* `NuGetPuller.CLI --upstream-service-index=file://myserver/myshare --update-all`
-- `--global-packages-folder` - Override the [GlobalPackagesFolder](../NuGetPuller/README.md#global-packages-folder-path) setting.
+  Example:
+
+  ```bash
+  NuGetPuller --upstream-service-index=file://myserver/myshare --download="System.Text.Json" --version=8.0.0
+  ```
   
-  *Example:* `NuGetPuller.CLI --global-packages-folder=C:\users\john.doe\Downloads\MyNuGetGpf -u Microsoft.EntityFrameworkCore`
+- `--global-packages-folder` - Override the [GlobalPackagesFolder](../NuGetPuller/README.md#global-packages-folder-path) setting.
+  Example:
+
+  ```bash
+  NuGetPuller --global-packages-folder=ohn.doe/Downloads/MyNuGetGpf --check-depencencies
+  ```

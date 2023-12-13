@@ -9,72 +9,140 @@ namespace NuGetPuller.CLI;
 public partial class AppSettings : ISharedAppSettings
 {
     /// <summary>
-    /// If true, then all existing packages in the local NuGet repository should be checked and updated to their latest versions.
+    /// If true, then all packages in the local NuGet source will be displayed in the output.
     /// </summary>
-    /// <remarks>This is mapped from the <c>--update-all</c> (<see cref="COMMAND_LINE_SWITCH_update_2D_all"/>) command line switch.</remarks>
-    public bool UpdateAll { get; set; }
-
-    /// <summary>
-    /// Gets a comma-separated list of package IDs for packages in the local repository that should be checked and updated to their latest versions.
-    /// </summary>
-    /// <remarks>If a package is referenced in this option as well as the <c>-d</c> (<see cref="COMMAND_LINE_SWITCH_d"/>) command line switch, it will result in a warning stating that the package was not found in the local repository.
-    /// <para>This is mapped from the <c>-u</c> (<see cref="COMMAND_LINE_SWITCH_u"/>) command line switch.</para></remarks>
-    public string? Update { get; set; }
-
-    /// <summary>
-    /// Gets a comma-separated list of package IDs for packages that should be downloaded from the upstream repository and added to the local repository.
-    /// </summary>
-    /// <remarks>Packages that are referenced in this option as well as the <c>-d</c> (<see cref="COMMAND_LINE_SWITCH_d"/>) command line switch, will effectively be deleted and then re-added.
-    /// <para>This is mapped from the <c>-a</c> (<see cref="COMMAND_LINE_SWITCH_a"/>) command line switch.</para></remarks>
-    public string? Add { get; set; }
-
-    /// <summary>
-    /// Gets the path to a <c>.nupkg</c> file to import or the path to a subdirectory containing <c>.nupkg</c> files to import.
-    /// </summary>
-    /// <para>This is mapped from the <c>-i</c> (<see cref="COMMAND_LINE_SWITCH_i"/>) command line switch.</para></remarks>
-    public string? Import { get; set; }
-
-    /// <summary>
-    /// Comma-separated list of package IDs for packages to be deleted from the local reository.
-    /// </summary>
-    /// <remarks>Packages that are referenced in this option as well as the <c>-a</c> (<see cref="COMMAND_LINE_SWITCH_a"/>) command line switch, will effectively be deleted and then re-added.
-    /// <para>This is mapped from the <c>-d</c> (<see cref="COMMAND_LINE_SWITCH_d"/>) command line switch.</para></remarks>
-    public string? Delete { get; set; }
+    /// <remarks>This is mapped from the <c>-l</c> (<see cref="COMMAND_LINE_SWITCH_list"/>) command line switch.</remarks>
+    public bool ListLocal { get; set; }
 
     /// <summary>
     /// If true, then all packages in the local NuGet source will be displayed in the output.
     /// </summary>
-    /// <remarks>This is mapped from the <c>-l</c> (<see cref="COMMAND_LINE_SWITCH_l"/>) command line switch.</remarks>
-    public bool ListLocal { get; set; }
+    /// <remarks>This is mapped from the <c>-l</c> (<see cref="COMMAND_LINE_SWITCH_include_versions"/>) command line switch.</remarks>
+    public string? IncludeVersions { get; set; }
 
     /// <summary>
     /// Gets the path of the package transfer bundle to create.
     /// </summary>
-    /// <remarks>This is mapped from the <c>-b</c> (<see cref="COMMAND_LINE_SWITCH_b"/>) command line switch.</remarks>
-    public string? ExportBundle { get; set; }
+    /// <remarks>This is mapped from the <c>--download</c> (<see cref="COMMAND_LINE_SWITCH_download"/>) command line switch.</remarks>
+    public string? Download { get; set; }
 
     /// <summary>
-    /// Gets the path of the manifest file for the target NuGet feed that <see cref="ExportBundle"/> is intended for.
+    /// Gets a semi-colon or comma-separated list of version numbers of packages that should be downloaded from the upstream repository and added to the local repository.
     /// </summary>
-    /// <remarks>If this refers to a file that doesn't exist, then a new file will be created.
-    /// <para>If this is not specified, then this will default to a file at the same location and base name as <see cref="ExportBundle"/>, but with a <c>.json</c> extension.</para>
-    /// <para>This is mapped from the <c>-t</c> (<see cref="COMMAND_LINE_SWITCH_t"/>) command line switch.</para></remarks>
-    public string? TargetManifestFile { get; set; }
+    /// <remarks>This is mapped from the <c>-v</c> (<see cref="COMMAND_LINE_SWITCH_version"/>) command line switch.
+    /// <para>In addition to version number strings, you can use the key word <c>latest<c> to download the latest version or <c>all</c> to ensure that all versions are downloaded.</para></remarks>
+    public string? Version { get; set; }
+
+    /// <summary>
+    /// Gets a semi-colon or comma-separated list of version numbers of packages that should be downloaded from the upstream repository and added to the local repository.
+    /// </summary>
+    /// <remarks>This is mapped from the <c>-v</c> (<see cref="COMMAND_LINE_SWITCH_no_dependencies"/>) command line switch.
+    /// <para>In addition to version number strings, you can use the key word <c>latest<c> to download the latest version or <c>all</c> to ensure that all versions are downloaded.</para></remarks>
+    public string? NoDependencies { get; set; }
+
+    /// <summary>
+    /// Gets the path of the package transfer bundle to create.
+    /// </summary>
+    /// <remarks>This is mapped from the <c>--list</c> (<see cref="COMMAND_LINE_SWITCH_create_bundle"/>) command line switch.</remarks>
+    public string? CreateBundle { get; set; }
+
+    /// <summary>
+    /// Gets the path of the package transfer bundle to create.
+    /// </summary>
+    /// <remarks>This is mapped from the <c>--create-from</c> (<see cref="COMMAND_LINE_SWITCH_create_from"/>) command line switch.</remarks>
+    public string? CreateFrom { get; set; }
 
     /// <summary>
     /// Gets the path of the new manifest file for the target NuGet feed that includes the packages bundled in <see cref="TargetManifestFile"/>.
     /// </summary>
     /// <remarks>If this option is not specified, then <see cref="TargetManifestFile"/> will be overwritten to include the bundled package information.
-    /// <para>This is mapped from the <c>--save-target-manifest-as</c> (<see cref="COMMAND_LINE_SWITCH_save_2D_target_2D_manifest_2D_as"/>) command line switch.</para></remarks>
-    public string? SaveTargetManifestAs { get; set; }
+    /// <para>This is mapped from the <c>--save-target-manifest-as</c> (<see cref="COMMAND_LINE_SWITCH_save_to"/>) command line switch.</para></remarks>
+    public string? SaveTo { get; set; }
+
+    /// <summary>
+    /// Gets the path of the new manifest file for the target NuGet feed that includes the packages bundled in <see cref="TargetManifestFile"/>.
+    /// </summary>
+    /// <remarks>If this option is not specified, then <see cref="TargetManifestFile"/> will be overwritten to include the bundled package information.
+    /// <para>This is mapped from the <c>--save-target-manifest-as</c> (<see cref="COMMAND_LINE_SWITCH_save_metadata_to"/>) command line switch.</para></remarks>
+    public string? SaveMetaDataTo { get; set; }
+
+    /// <summary>
+    /// Gets the path of the new manifest file for the target NuGet feed that includes the packages bundled in <see cref="TargetManifestFile"/>.
+    /// </summary>
+    /// <remarks>If this option is not specified, then <see cref="TargetManifestFile"/> will be overwritten to include the bundled package information.
+    /// <para>This is mapped from the <c>--save-target-manifest-as</c> (<see cref="COMMAND_LINE_SWITCH_check_depencencies"/>) command line switch.</para></remarks>
+    public bool CheckDependencies { get; set; }
+
+    /// <summary>
+    /// Gets the path of the new manifest file for the target NuGet feed that includes the packages bundled in <see cref="TargetManifestFile"/>.
+    /// </summary>
+    /// <remarks>If this option is not specified, then <see cref="TargetManifestFile"/> will be overwritten to include the bundled package information.
+    /// <para>This is mapped from the <c>--save-target-manifest-as</c> (<see cref="COMMAND_LINE_SWITCH_no_download"/>) command line switch.</para></remarks>
+    public bool NoDownload { get; set; }
 
     /// <summary>
     /// Gets the path to export the metadata for all packages in the local repository. This refers to a relative or absolute file path.
     /// </summary>
     /// <remarks>The package listing is exported as a JSON array. If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Directory.GetCurrentDirectory"/>).
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
-    /// <para>This is mapped from the <c>--export-local-manifest</c> (<see cref="COMMAND_LINE_SWITCH_export_2D_local_2D_manifest"/>) command line switch.</para></remarks>
-    public string? ExportLocalManifest { get; set; }
+    /// <para>This is mapped from the <c>--export-local-manifest</c> (<see cref="COMMAND_LINE_SWITCH_export_metadata"/>) command line switch.</para></remarks>
+    public string? ExportMetaData { get; set; }
+
+    /// <summary>
+    /// Gets the path to export the metadata for all packages in the local repository. This refers to a relative or absolute file path.
+    /// </summary>
+    /// <remarks>The package listing is exported as a JSON array. If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Directory.GetCurrentDirectory"/>).
+    /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
+    /// <para>This is mapped from the <c>--export-local-manifest</c> (<see cref="COMMAND_LINE_SWITCH_include"/>) command line switch.</para></remarks>
+    public string? Include { get; set; }
+
+    /// <summary>
+    /// Comma-separated list of package IDs for packages to be deleted from the local reository.
+    /// </summary>
+    /// <remarks>This is mapped from the <c>-d</c> (<see cref="COMMAND_LINE_SWITCH_remove"/>) command line switch.</remarks>
+    public string? Remove { get; set; }
+
+
+    /// <summary>
+    /// If true, then all existing packages in the local NuGet repository should be checked and updated to their latest versions.
+    /// </summary>
+    /// <remarks>This is mapped from the <c>--update-all</c> (<see cref="COMMAND_LINE_SWITCH_update_2D_all"/>) command line switch.</remarks>
+    // BUG: This doesn't make sense. Packages aren't updated - newer version are downloaded.
+    [Obsolete("Use Add with Version set to 'all'")]
+    public bool UpdateAll { get; set; }
+
+    /// <summary>
+    /// Gets a semi-colon or comma-separated list of package IDs for packages in the local repository that should be checked and updated to their latest versions.
+    /// </summary>
+    /// <remarks>If a package is referenced in this option as well as the <c>-d</c> (<see cref="COMMAND_LINE_SWITCH_d"/>) command line switch, it will result in a warning stating that the package was not found in the local repository.
+    /// <para>This is mapped from the <c>-u</c> (<see cref="COMMAND_LINE_SWITCH_u"/>) command line switch.</para></remarks>
+    // BUG: This doesn't make sense. Packages aren't updated - newer version are downloaded.
+    [Obsolete("Use Add with Version")]
+    public string? Update { get; set; }
+
+    /// <summary>
+    /// Gets a semi-colon or comma-separated list of package IDs for packages that should be downloaded from the upstream repository and added to the local repository.
+    /// </summary>
+    /// <remarks>Packages that are referenced in this option as well as the <c>-d</c> (<see cref="COMMAND_LINE_SWITCH_d"/>) command line switch, will effectively be deleted and then re-added.
+    /// <para>This is mapped from the <c>-a</c> (<see cref="COMMAND_LINE_SWITCH_a"/>) command line switch.</para></remarks>
+    [Obsolete()]
+    public string? Add { get; set; }
+
+    /// <summary>
+    /// Gets the path to a <c>.nupkg</c> file to import or the path to a subdirectory containing <c>.nupkg</c> files to import.
+    /// </summary>
+    /// <para>This is mapped from the <c>-i</c> (<see cref="COMMAND_LINE_SWITCH_i"/>) command line switch.</para></remarks>
+    [Obsolete()]
+    public string? Import { get; set; }
+
+    /// <summary>
+    /// Gets the path of the manifest file for the target NuGet feed that <see cref="CreateBundle"/> is intended for.
+    /// </summary>
+    /// <remarks>If this refers to a file that doesn't exist, then a new file will be created.
+    /// <para>If this is not specified, then this will default to a file at the same location and base name as <see cref="CreateBundle"/>, but with a <c>.json</c> extension.</para>
+    /// <para>This is mapped from the <c>-t</c> (<see cref="COMMAND_LINE_SWITCH_t"/>) command line switch.</para></remarks>
+    [Obsolete()]
+    public string? TargetManifestFile { get; set; }
 
     /// <summary>
     /// Gets the override value for the <see cref="UpstreamServiceIndex" /> setting.
@@ -145,12 +213,12 @@ public partial class AppSettings : ISharedAppSettings
     private static readonly ReadOnlyDictionary<string, string> _valueSwitchMappings = new(new Dictionary<string, string>()
     {
         { COMMAND_LINE_SWITCH_a, $"{nameof(NuGetPuller)}:{nameof(Add)}" },
-        { COMMAND_LINE_SWITCH_d, $"{nameof(NuGetPuller)}:{nameof(Delete)}" },
+        { COMMAND_LINE_SWITCH_d, $"{nameof(NuGetPuller)}:{nameof(Remove)}" },
         { COMMAND_LINE_SWITCH_i, $"{nameof(NuGetPuller)}:{nameof(Import)}" },
-        { COMMAND_LINE_SWITCH_b, $"{nameof(NuGetPuller)}:{nameof(ExportBundle)}" },
+        { COMMAND_LINE_SWITCH_b, $"{nameof(NuGetPuller)}:{nameof(CreateBundle)}" },
         { COMMAND_LINE_SWITCH_t, $"{nameof(NuGetPuller)}:{nameof(TargetManifestFile)}" },
-        { COMMAND_LINE_SWITCH_save_2D_target_2D_manifest_2D_as, $"{nameof(NuGetPuller)}:{nameof(SaveTargetManifestAs)}" },
-        { COMMAND_LINE_SWITCH_export_2D_local_2D_manifest, $"{nameof(NuGetPuller)}:{nameof(ExportLocalManifest)}" },
+        { COMMAND_LINE_SWITCH_save_2D_target_2D_manifest_2D_as, $"{nameof(NuGetPuller)}:{nameof(SaveMetaDataTo)}" },
+        { COMMAND_LINE_SWITCH_export_2D_local_2D_manifest, $"{nameof(NuGetPuller)}:{nameof(ExportMetaData)}" },
         { COMMAND_LINE_SWITCH_local_2D_repository, $"{nameof(NuGetPuller)}:{nameof(OverrideLocalRepository)}" },
         { COMMAND_LINE_SWITCH_upstream_2D_service_2D_index, $"{nameof(NuGetPuller)}:{nameof(OverrideLocalRepository)}" },
         { COMMAND_LINE_SWITCH_global_2D_packages_2D_folder, $"{nameof(NuGetPuller)}:{nameof(OverrideGlobalPackagesFolder)}" }
