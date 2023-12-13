@@ -3,6 +3,11 @@ namespace NuGetPuller.CLI;
 public static class CommandLineSwitches
 {
     /// <summary>
+    /// Used with the <see cref="COMMAND_LINE_SWITCH_version"/> to denote all versions.
+    /// </summary>
+    public const string COMMAND_LINE_VALUE_all = "all";
+    
+    /// <summary>
     /// List all packages in the local repository.
     /// </summary>
     /// <remarks>This is mapped as a boolean switch to <see cref="AppSettings.ListLocal"/>.</remarks>
