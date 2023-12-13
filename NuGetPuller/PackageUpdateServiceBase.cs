@@ -26,13 +26,13 @@ public class PackageUpdateService(ILocalClientService localClient, IUpstreamClie
             var upstreamVersions = await _upstreamClient.GetAllVersionsAsync(packageId, updater.UpstreamFindPackageById, cancellationToken);
             if (upstreamVersions is null || !upstreamVersions.Any())
             {
-                _logger.LogPackageNotFound(packageId, _upstreamClient);
+                _logger.PackageNotFound(packageId, _upstreamClient);
                 continue;
             }
             var localVersions = await _localClient.GetAllVersionsAsync(packageId, localFindPackageById, cancellationToken);
             if (localVersions is null || !localVersions.Any())
             {
-                _logger.LogPackageNotFound(packageId, _localClient);
+                _logger.PackageNotFound(packageId, _localClient);
                 continue;
             }
             foreach (NuGetVersion version in upstreamVersions.Where(u => !localVersions.Contains(u, versionComparer)))
@@ -47,7 +47,7 @@ public class PackageUpdateService(ILocalClientService localClient, IUpstreamClie
         {
             var dependencyInfo = await _upstreamClient.GetDependencyInfoAsync(identity.Id, identity.Version, updater.UpstreamFindPackageById, cancellationToken);
             if (dependencyInfo is null)
-                _logger.LogPackageNotFound(identity.Id, identity.Version, _upstreamClient);
+                _logger.PackageNotFound(identity.Id, identity.Version, _upstreamClient);
             else if (dependencyInfo.DependencyGroups is not null)
                 foreach (var pkg in dependencyInfo.DependencyGroups.Where(g => g.Packages is not null).SelectMany(g => g.Packages.Select(p => new PackageIdentity(p.Id, p.VersionRange.MinVersion))))
                 {
@@ -87,7 +87,7 @@ public class PackageUpdateService(ILocalClientService localClient, IUpstreamClie
             using (var scope = logger.BeginGetDownloadResourceResultScope(identity, _upstreamClient))
             try
             {
-                logger.LogDownloadingNuGetPackage(identity, _upstreamClient);
+                logger.DownloadingNuGetPackage(identity, _upstreamClient);
                 packageFile = await _tempStaging.NewFileInfoAsync(_pathResolver.GetPackageFileName(identity.Id, identity.Version), async (stream, token) =>
                 {
                     await _upstreamClient.CopyNupkgToStreamAsync(identity.Id, identity.Version, stream, UpstreamFindPackageById, cancellationToken);
@@ -95,7 +95,7 @@ public class PackageUpdateService(ILocalClientService localClient, IUpstreamClie
             }
             catch (Exception error)
             {
-                logger.LogUnexpectedPackageDownloadFailure(identity.Id, identity.Version, error);
+                logger.UnexpectedPackageDownloadFailure(identity.Id, identity.Version, error);
                 return;
             }
             await _localClient.AddPackageAsync(packageFile.FullName, false, _updateResource, cancellationToken);
