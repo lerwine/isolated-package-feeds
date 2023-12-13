@@ -11,7 +11,7 @@ public partial class AppSettings : ISharedAppSettings
     /// <summary>
     /// If true, then all packages in the local NuGet source will be displayed in the output.
     /// </summary>
-    /// <remarks>This is mapped from the <c>-l</c> (<see cref="COMMAND_LINE_SWITCH_list"/>) command line switch.</remarks>
+    /// <remarks>This is mapped from the <c>--list</c> (<see cref="COMMAND_LINE_SWITCH_list"/>) command line switch.</remarks>
     public bool ListLocal { get; set; }
 
     /// <summary>
@@ -21,24 +21,44 @@ public partial class AppSettings : ISharedAppSettings
     public string? IncludeVersions { get; set; }
 
     /// <summary>
-    /// Gets the path of the package transfer bundle to create.
+    /// Comma-separated list of package IDs to be downloaded.
     /// </summary>
     /// <remarks>This is mapped from the <c>--download</c> (<see cref="COMMAND_LINE_SWITCH_download"/>) command line switch.</remarks>
     public string? Download { get; set; }
 
     /// <summary>
-    /// Gets a semi-colon or comma-separated list of version numbers of packages that should be downloaded from the upstream repository and added to the local repository.
+    /// Comma-separated list of package versions. This is used with the <c>--download</c> (<see cref="COMMAND_LINE_SWITCH_download"/>),
+    /// <c>--remove</c> (<see cref="COMMAND_LINE_SWITCH_remove"/>), <c>--check-depencencies</c> (<see cref="COMMAND_LINE_SWITCH_check_depencencies"/>)
+    /// and <c>--create-bundle</c> (<see cref="COMMAND_LINE_SWITCH_create_bundle"/>) command line switches.
     /// </summary>
-    /// <remarks>This is mapped from the <c>-v</c> (<see cref="COMMAND_LINE_SWITCH_version"/>) command line switch.
-    /// <para>In addition to version number strings, you can use the key word <c>latest<c> to download the latest version or <c>all</c> to ensure that all versions are downloaded.</para></remarks>
+    /// <remarks>This is mapped from the <c>--version</c> (<see cref="COMMAND_LINE_SWITCH_version"/>) command line switch.
+    /// <para>In addition to version number strings, you can use the key word <c>all</c> to ensure that all versions are downloaded.</para></remarks>
     public string? Version { get; set; }
 
     /// <summary>
-    /// Gets a semi-colon or comma-separated list of version numbers of packages that should be downloaded from the upstream repository and added to the local repository.
+    /// This is used with the (<see cref="Download"/>) setting to refrain from downloading missing dependencies if <see cref="true"/>;
+    /// otherwise, missing dependencies will be downloaded from the upstream repository, if present.
     /// </summary>
-    /// <remarks>This is mapped from the <c>-v</c> (<see cref="COMMAND_LINE_SWITCH_no_dependencies"/>) command line switch.
-    /// <para>In addition to version number strings, you can use the key word <c>latest<c> to download the latest version or <c>all</c> to ensure that all versions are downloaded.</para></remarks>
-    public string? NoDependencies { get; set; }
+    /// <remarks>This is mapped from the <c>--no-dependencies</c> (<see cref="COMMAND_LINE_SWITCH_no_dependencies"/>) command line switch.</remarks>
+    public bool NoDependencies { get; set; }
+
+    /// <summary>
+    /// Semi-colon-separated list of package file paths or subdirectory paths to add to the local NuGet repository.
+    /// </summary>
+    /// <remarks>This is mapped from the <c>--add</c> (<see cref="COMMAND_LINE_SWITCH_add"/>) command line switch.</remarks>
+    public string? AddPackages { get; set; }
+
+    /// <summary>
+    /// Comma-separated list of package IDs for packages to be deleted from the local reository.
+    /// </summary>
+    /// <remarks>This is mapped from the <c>-d</c> (<see cref="COMMAND_LINE_SWITCH_remove"/>) command line switch.</remarks>
+    public string? Remove { get; set; }
+
+    /// <summary>
+    /// This is used with the <see cref="Remove"/>) setting to specify the subdirectory to save packages to before they are removed.
+    /// </summary>
+    /// <remarks>This is mapped from the <c>-d</c> (<see cref="COMMAND_LINE_SWITCH_save_to"/>) command line switch.</remarks>
+    public string? SaveTo { get; set; }
 
     /// <summary>
     /// Gets the path of the package transfer bundle to create.
@@ -56,13 +76,6 @@ public partial class AppSettings : ISharedAppSettings
     /// Gets the path of the new manifest file for the target NuGet feed that includes the packages bundled in <see cref="TargetManifestFile"/>.
     /// </summary>
     /// <remarks>If this option is not specified, then <see cref="TargetManifestFile"/> will be overwritten to include the bundled package information.
-    /// <para>This is mapped from the <c>--save-target-manifest-as</c> (<see cref="COMMAND_LINE_SWITCH_save_to"/>) command line switch.</para></remarks>
-    public string? SaveTo { get; set; }
-
-    /// <summary>
-    /// Gets the path of the new manifest file for the target NuGet feed that includes the packages bundled in <see cref="TargetManifestFile"/>.
-    /// </summary>
-    /// <remarks>If this option is not specified, then <see cref="TargetManifestFile"/> will be overwritten to include the bundled package information.
     /// <para>This is mapped from the <c>--save-target-manifest-as</c> (<see cref="COMMAND_LINE_SWITCH_save_metadata_to"/>) command line switch.</para></remarks>
     public string? SaveMetaDataTo { get; set; }
 
@@ -71,7 +84,7 @@ public partial class AppSettings : ISharedAppSettings
     /// </summary>
     /// <remarks>If this option is not specified, then <see cref="TargetManifestFile"/> will be overwritten to include the bundled package information.
     /// <para>This is mapped from the <c>--save-target-manifest-as</c> (<see cref="COMMAND_LINE_SWITCH_check_depencencies"/>) command line switch.</para></remarks>
-    public bool CheckDependencies { get; set; }
+    public string? CheckDependencies { get; set; }
 
     /// <summary>
     /// Gets the path of the new manifest file for the target NuGet feed that includes the packages bundled in <see cref="TargetManifestFile"/>.
@@ -95,12 +108,6 @@ public partial class AppSettings : ISharedAppSettings
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
     /// <para>This is mapped from the <c>--export-local-manifest</c> (<see cref="COMMAND_LINE_SWITCH_include"/>) command line switch.</para></remarks>
     public string? Include { get; set; }
-
-    /// <summary>
-    /// Comma-separated list of package IDs for packages to be deleted from the local reository.
-    /// </summary>
-    /// <remarks>This is mapped from the <c>-d</c> (<see cref="COMMAND_LINE_SWITCH_remove"/>) command line switch.</remarks>
-    public string? Remove { get; set; }
 
 
     /// <summary>

@@ -2,28 +2,76 @@ namespace NuGetPuller.CLI;
 
 public static class CommandLineSwitches
 {
+    /// <summary>
+    /// List all packages in the local repository.
+    /// </summary>
+    /// <remarks>This is mapped as a boolean switch to <see cref="AppSettings.ListLocal"/>.</remarks>
     public const string COMMAND_LINE_SWITCH_list = "--list";
     
+    /// <summary>
+    /// This is used with the <c>--list</c> (<see cref="COMMAND_LINE_SWITCH_list"/>) command line switch to show all version numbers of each package in the local repository.
+    /// </summary>
+    /// <remarks>This is mapped as a boolean switch to <see cref="AppSettings.IncludeVersions"/>.</remarks>
     public const string COMMAND_LINE_SWITCH_include_versions = "--include-versions";
 
+    /// <summary>
+    /// Comma-separated list of package IDs to be downloaded.
+    /// </summary>
+    /// <remarks>This is mapped as a string value to <see cref="AppSettings.Download"/>.</remarks>
     public const string COMMAND_LINE_SWITCH_download = "--download";
 
+    /// <summary>
+    /// Comma-separated list of package versions. This is used with the <c>--download</c> (<see cref="COMMAND_LINE_SWITCH_download"/>),
+    /// <c>--remove</c> (<see cref="COMMAND_LINE_SWITCH_remove"/>), <c>--check-depencencies</c> (<see cref="COMMAND_LINE_SWITCH_check_depencencies"/>)
+    /// and <c>--create-bundle</c> (<see cref="COMMAND_LINE_SWITCH_create_bundle"/>) command line switches.
+    /// </summary>
+    /// <remarks>This is mapped as a string value to <see cref="AppSettings.Version"/>.</remarks>
     public const string COMMAND_LINE_SWITCH_version = "--version";
 
+    /// <summary>
+    /// This is used with the <c>--download</c> (<see cref="COMMAND_LICOMMAND_LINE_SWITCH_downloadE_SWITCH_list"/>) command line switch to refrain from downloading missing dependencies if <see cref="true"/>;
+    /// otherwise, missing dependencies will be downloaded from the upstream repository, if present.
+    /// </summary>
+    /// <remarks>This is mapped as a boolean switch to <see cref="AppSettings.NoDependencies"/>.</remarks>
     public const string COMMAND_LINE_SWITCH_no_dependencies = "--no-dependencies";
 
+    /// <summary>
+    /// Semi-colon-separated list of package file paths or subdirectory paths.
+    /// </summary>
+    /// <remarks>This is mapped as a string value to <see cref="AppSettings.AddPackages"/>.</remarks>
     public const string COMMAND_LINE_SWITCH_add = "--add";
 
+    /// <summary>
+    /// Comma-separated list of package IDs to remove from the local repository.
+    /// </summary>
     public const string COMMAND_LINE_SWITCH_remove = "--remove";
 
+    /// <summary>
+    /// This is used with the <c>--download</c> (<see cref="COMMAND_LINE_SWITCH_download"/>) command line to specify the subdirectory to save packages to before they are removed.
+    /// </summary>
     public const string COMMAND_LINE_SWITCH_save_to = "--save-to";
 
+    /// <summary>
+    /// Comma-separated list of package IDs to check for missing dependencies.
+    /// </summary>
+    /// <remarks>Use the keyword `all` to check dependencies of all packages.
+    /// <para>This is mapped as a string value to <see cref="AppSettings.CheckDependencies"/>.</para></remarks>
     public const string COMMAND_LINE_SWITCH_check_depencencies = "--check-depencencies";
 
+    /// <summary>
+    /// This is used with the <c>--check-depencencies</c> (<see cref="COMMAND_LINE_SWITCH_check_depencencies"/>) to prevent missing dependencies from being downloaded.
+    /// </summary>
+    /// <remarks>This is mapped as a boolean switch to <see cref="AppSettings.NoDownload"/>.</remarks>
     public const string COMMAND_LINE_SWITCH_no_download = "--no-download";
 
+    /// <summary>
+    /// Path of package metadata for the local NuGet rpository.
+    /// </summary>
     public const string COMMAND_LINE_SWITCH_export_metadata = "--export-metadata";
 
+    /// <summary>
+    /// Path of package bundle to create.
+    /// </summary>
     public const string COMMAND_LINE_SWITCH_create_bundle = "--create-bundle";
 
     public const string COMMAND_LINE_SWITCH_create_from = "--create-from";

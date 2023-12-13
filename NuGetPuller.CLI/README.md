@@ -15,7 +15,7 @@ See [NuGet Common Class Library Application Settings](../NuGetPuller/README.md#a
 ### Show All Packages
 
 - `--list` **Required** *(stand-alone switch)* List all packages in the local repository.
-  - `--include-versions` - *(Optional - stand-alone switch)* Show all version numbers of each package in teh local repository.
+  - `--include-versions` - *(Optional - stand-alone switch)* Show all version numbers of each package in the local repository.
 
 Example:
 
