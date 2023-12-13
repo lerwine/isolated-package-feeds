@@ -7,7 +7,6 @@ namespace IsolatedPackageFeeds.Shared.LazyInit;
 /// </summary>
 /// <typeparam name="TResult">The result value type.</typeparam>
 /// <typeparam name="TState">The result value creation status type.</typeparam>
-// TODO: Rename to LazyProducer
 public abstract class LazyProducer<TResult, TState>(TState notInvoked)
     where TState : struct, Enum
 {

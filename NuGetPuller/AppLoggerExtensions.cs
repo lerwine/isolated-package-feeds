@@ -307,7 +307,6 @@ public static partial class AppLoggerExtensions
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    // TODO: See if this needs to be used somewhere
     public static string RepositorySecurityException(this ILogger logger, string path, bool isUpstream, Exception? exception = null)
     {
         if (isUpstream)
@@ -335,7 +334,6 @@ public static partial class AppLoggerExtensions
     /// <param name="path">The local repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    // TODO: See if this needs to be used somewhere
     public static string LocalRepositoryIOException(this ILogger logger, string path, Exception? exception = null)
     {
         LogLocalRepositoryIOException(logger, path, exception);
@@ -887,7 +885,6 @@ public static partial class AppLoggerExtensions
     /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    // TODO: See if this should be used somewhere
     public static string ExportBundleDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
     {
         LogExportBundleDirectoryNotFound(logger, path, exception);
@@ -901,7 +898,6 @@ public static partial class AppLoggerExtensions
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    // TODO: See if this should be used somewhere
     public static string ExportBundlePathAccessDenied(this ILogger logger, string path, Exception? exception = null)
     {
         if (exception is System.Security.SecurityException)
@@ -1050,7 +1046,6 @@ public static partial class AppLoggerExtensions
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    // TODO: See if this should be used somewhere
     public static string SaveTargetManifestAsDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
     {
         LogSaveTargetManifestAsDirectoryNotFound(logger, path, exception);
@@ -1064,7 +1059,6 @@ public static partial class AppLoggerExtensions
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    // TODO: See if this should be used somewhere
     public static string SaveTargetManifestAsPathAccessDenied(this ILogger logger, string path, Exception? exception = null)
     {
         if (exception is System.Security.SecurityException)
@@ -1131,7 +1125,6 @@ public static partial class AppLoggerExtensions
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    // TODO: See if this should be used somewhere
     public static string ImportFileOrDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
     {
         LogImportDirectoryNotFound(logger, path, exception);
@@ -1145,7 +1138,6 @@ public static partial class AppLoggerExtensions
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    // TODO: See if this should be used somewhere
     public static string ImportPathAccessDenied(this ILogger logger, string path, Exception? exception = null)
     {
         if (exception is System.Security.SecurityException)
@@ -1562,7 +1554,6 @@ public static partial class AppLoggerExtensions
     /// <param name="framework">The package framework.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    // TODO: See if this should be used somewhere
     public static IDisposable? BeginGetPackageDependenciesScope(this ILogger logger, string packageId, NuGetVersion version, NuGetFramework framework, IClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
@@ -1581,7 +1572,6 @@ public static partial class AppLoggerExtensions
     /// <param name="packageId">The package identifier.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    // TODO: See if this should be used somewhere
     public static IDisposable? BeginGetPackageDependenciesScope(this ILogger logger, string packageId, IClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
@@ -1607,7 +1597,6 @@ public static partial class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="url">The url of the NuGet respository.</param>
     /// <param name="isUpstream"><see langword="true"/>  if the repository is upstream; otherwise, <see langword="false"/>.</param>
-    // TODO: See if this should be used somewhere
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
     public static IDisposable? BeginNugetSourceScope(this ILogger logger, string url, bool isUpstream) => _nugetSourceScope(logger, url, isUpstream);
 
@@ -1661,7 +1650,6 @@ public static partial class AppLoggerExtensions
     /// <param name="packageId">The ID of the upstream package to add locally.</param>
     /// <param name="repositoryPath">The local repository URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    // TODO: See if this should be used somewhere
     public static IDisposable? BeginAddLocalPackageScope(this ILogger logger, string packageId, string repositoryPath) => _addLocalPackageScope(logger, packageId, repositoryPath);
 
     #endregion
@@ -1679,7 +1667,6 @@ public static partial class AppLoggerExtensions
     /// <param name="packageId">The ID of the upstream package to update locally.</param>
     /// <param name="repositoryPath">The local repository URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    // TODO: See if this should be used somewhere
     public static IDisposable? BeginUpdateLocalPackageScope(this ILogger logger, string packageId, string repositoryPath) => _updateLocalPackageScope(logger, packageId, repositoryPath);
 
     #endregion
