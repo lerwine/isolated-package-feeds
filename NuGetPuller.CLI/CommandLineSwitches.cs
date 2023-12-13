@@ -43,7 +43,7 @@ public static class CommandLineSwitches
     /// <summary>
     /// Semi-colon-separated list of package file paths or subdirectory paths.
     /// </summary>
-    /// <remarks>This is mapped as a string value to <see cref="AppSettings.AddPackages"/>.</remarks>
+    /// <remarks>This is mapped as a string value to <see cref="AppSettings.AddPackageFiles"/>.</remarks>
     public const string COMMAND_LINE_SWITCH_add = "--add";
 
     /// <summary>
