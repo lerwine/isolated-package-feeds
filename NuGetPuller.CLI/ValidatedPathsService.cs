@@ -37,10 +37,10 @@ public class ValidatedPathsService
                 }
                 catch (Exception exception)
                 {
-                    throw logger.LogInvalidExportLocalMetaData(value, message => new MetaDataExportPathException(value, message, exception), exception);
+                    throw logger.InvalidExportLocalMetaData(value, message => new MetaDataExportPathException(value, message, exception), exception);
                 }
                 value = result.FullName;
-                throw logger.LogExportLocalMetaDataDirectoryNotFound(value, message => new MetaDataExportPathException(value, message));
+                throw logger.ExportLocalMetaDataDirectoryNotFound(value, message => new MetaDataExportPathException(value, message));
             });
         Import = new LazyOptionalChainedConversion<string, FileSystemInfo>(
             (out string? path) =>
@@ -66,10 +66,10 @@ public class ValidatedPathsService
                 }
                 catch (Exception exception)
                 {
-                    throw logger.LogInvalidExportLocalMetaData(value, message => new MetaDataExportPathException(value, message, exception), exception);
+                    throw logger.InvalidExportLocalMetaData(value, message => new MetaDataExportPathException(value, message, exception), exception);
                 }
                 value = result.FullName;
-                throw logger.LogExportLocalMetaDataDirectoryNotFound(value, message => new MetaDataExportPathException(value, message));
+                throw logger.ExportLocalMetaDataDirectoryNotFound(value, message => new MetaDataExportPathException(value, message));
             });
         ExportBundle = new LazyOptionalChainedConversion<string, FileInfo>(
             (out string? path) =>
@@ -88,10 +88,10 @@ public class ValidatedPathsService
                 }
                 catch (Exception exception)
                 {
-                    throw logger.LogInvalidExportLocalMetaData(value, message => new MetaDataExportPathException(value, message, exception), exception);
+                    throw logger.InvalidExportLocalMetaData(value, message => new MetaDataExportPathException(value, message, exception), exception);
                 }
                 value = result.FullName;
-                throw logger.LogExportLocalMetaDataDirectoryNotFound(value, message => new MetaDataExportPathException(value, message));
+                throw logger.ExportLocalMetaDataDirectoryNotFound(value, message => new MetaDataExportPathException(value, message));
             });
         TargetManifestFile = new LazyOptionalChainedConversion<string, FileInfo>(
             (out string? path) =>
@@ -110,10 +110,10 @@ public class ValidatedPathsService
                 }
                 catch (Exception exception)
                 {
-                    throw logger.LogInvalidExportLocalMetaData(value, message => new MetaDataExportPathException(value, message, exception), exception);
+                    throw logger.InvalidExportLocalMetaData(value, message => new MetaDataExportPathException(value, message, exception), exception);
                 }
                 value = result.FullName;
-                throw logger.LogExportLocalMetaDataDirectoryNotFound(value, message => new MetaDataExportPathException(value, message));
+                throw logger.ExportLocalMetaDataDirectoryNotFound(value, message => new MetaDataExportPathException(value, message));
             });
         SaveTargetManifestAs = new LazyOptionalChainedConversion<string, FileInfo>(
             (out string? path) =>
@@ -132,10 +132,10 @@ public class ValidatedPathsService
                 }
                 catch (Exception exception)
                 {
-                    throw logger.LogInvalidExportLocalMetaData(value, message => new MetaDataExportPathException(value, message, exception), exception);
+                    throw logger.InvalidExportLocalMetaData(value, message => new MetaDataExportPathException(value, message, exception), exception);
                 }
                 value = result.FullName;
-                throw logger.LogExportLocalMetaDataDirectoryNotFound(value, message => new MetaDataExportPathException(value, message));
+                throw logger.ExportLocalMetaDataDirectoryNotFound(value, message => new MetaDataExportPathException(value, message));
             });
     }
 }

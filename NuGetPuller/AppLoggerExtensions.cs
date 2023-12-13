@@ -6,299 +6,272 @@ using NuGet.Versioning;
 
 namespace NuGetPuller;
 
-public static class AppLoggerExtensions
+/// <summary>
+/// Extension methods for high performance logging.
+/// </summary>
+/// <remarks></remarks>
+/// <seealso href="https://learn.microsoft.com/en-us/dotnet/core/extensions/logger-message-generator"/>
+/// <seealso href="https://learn.microsoft.com/en-us/dotnet/core/extensions/high-performance-logging"/>
+public static partial class AppLoggerExtensions
 {
-    #region Nuget Debug (0x0001)
+    #region Nuget Logger Event Methods
 
-    public const int EVENT_ID_NugetDebug = 0x0001;
-    public static readonly EventId NugetDebug = new(EVENT_ID_NugetDebug, nameof(NugetDebug));
-
-    private static readonly Action<ILogger, string, Exception?> _nugetDebugMessage1 = LoggerMessage.Define<string>(LogLevel.Debug, NugetDebug, "NuGet Message: {Message}");
-
-    private static readonly Action<ILogger, string, string, int, Exception?> _nugetDebugMessage2 = LoggerMessage.Define<string, string, int>(LogLevel.Debug, NugetDebug, "NuGet {NugetID} ({Code}) Message: {Message}");
-
-    private static readonly Action<ILogger, string, Exception?> _nugetVerboseMessage1 = LoggerMessage.Define<string>(LogLevel.Trace, NugetDebug, "NuGet Message: {Message}");
-
-    private static readonly Action<ILogger, string, string, int, Exception?> _nugetVerboseMessage2 = LoggerMessage.Define<string, string, int>(LogLevel.Trace, NugetDebug, "NuGet {NugetID} ({Code}) Message: {Message}");
+    #region NuGetDebug Logger Event Methods
 
     /// <summary>
-    /// Logs a <see cref="NuGet.Common.LogLevel.Debug"/> NugetDebug event with event code 0x0001.
+    /// Logs a <see cref="NuGetPullerEventId.NuGetDebug"/> event message relayed from the NuGet API.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="message">The NuGet log message.</param>
-    /// <param name="code">The optional NuGet log code.</param>
-    public static void LogNugetDebugMessage(this ILogger logger, string message, NuGet.Common.NuGetLogCode? code = null)
-    {
-        if (code.HasValue)
-            _nugetDebugMessage2(logger, message, code.Value.ToString("F"), (int)code.Value, null);
-        else
-            _nugetDebugMessage1(logger, message, null);
-    }
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.NuGetDebug, Level = LogLevel.Debug, Message = "NuGet API Debug: {Message})")]
+    public static partial void NugetDebugMessage(this ILogger logger, string message);
+
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.NuGetDebug, Level = LogLevel.Debug, Message = "NuGet API Debug {NugetID} ({Code}): {Message}")]
+    private static partial void NugetDebugCode(ILogger logger, string nuGetId, int code, string message);
 
     /// <summary>
-    /// Logs a <see cref="NuGet.Common.LogLevel.Verbose"/> NugetDebug event with event code 0x0001.
+    /// Logs a <see cref="NuGetPullerEventId.NuGetDebug"/> event message relayed from the NuGet API.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="message">The NuGet log message.</param>
-    /// <param name="code">The optional NuGet log code.</param>
-    public static void LogNugetVerboseMessage(this ILogger logger, string message, NuGet.Common.NuGetLogCode? code = null)
-    {
-        if (code.HasValue)
-            _nugetVerboseMessage2(logger, message, code.Value.ToString("F"), (int)code.Value, null);
-        else
-            _nugetVerboseMessage1(logger, message, null);
-    }
+    /// <param name="code">The NuGet log code.</param>
+    public static void NugetDebugMessage(this ILogger logger, string message, NuGet.Common.NuGetLogCode code) =>
+        NugetDebugCode(logger, code.ToString("F"), (int)code, message);
+
+    /// <summary>
+    /// Logs a <see cref="NuGet.Common.LogLevel.Verbose"/> <see cref="NuGetPullerEventId.NuGetDebug"/> event message relayed from the NuGet API.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="message">The NuGet log message.</param>
+    /// <param name="code">The NuGet log code.</param>
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.NuGetDebug, Level = LogLevel.Trace, Message = "NuGet API Verbose: {Message})")]
+    public static partial void NugetVerboseMessage(this ILogger logger, string message);
+
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.NuGetDebug, Level = LogLevel.Trace, Message = "NuGet API Verbose {NugetID} ({Code}): {Message}")]
+    private static partial void NugetVerboseCode(ILogger logger, string nuGetId, int code, string message);
+
+    /// <summary>
+    /// Logs a <see cref="NuGet.Common.LogLevel.Verbose"/> <see cref="NuGetPullerEventId.NuGetDebug"/> event message relayed from the NuGet API.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="message">The NuGet log message.</param>
+    /// <param name="code">The NuGet log code.</param>
+    public static void NugetVerboseMessage(this ILogger logger, string message, NuGet.Common.NuGetLogCode code) =>
+        NugetVerboseCode(logger, code.ToString("F"), (int)code, message);
 
     #endregion
 
-    #region Nuget Message (0x0002)
-
-    public const int EVENT_ID_NugetMessage = 0x0002;
-
-    public static readonly EventId NugetMessage = new(EVENT_ID_NugetMessage, nameof(NugetMessage));
-
-    private static readonly Action<ILogger, string, Exception?> _nugetInformationMessage1 = LoggerMessage.Define<string>(LogLevel.Information, NugetMessage, "NuGet Message: {Message}");
-
-    private static readonly Action<ILogger, string, string, int, Exception?> _nugetInformationMessage2 = LoggerMessage.Define<string, string, int>(LogLevel.Information, NugetMessage, "NuGet {NugetID} ({Code}) Message: {Message}");
-
-    private static readonly Action<ILogger, string, Exception?> _nugetMinimalMessage1 = LoggerMessage.Define<string>(LogLevel.Information, NugetMessage, "NuGet Message: {Message}");
-
-    private static readonly Action<ILogger, string, string, int, Exception?> _nugetMinimalMessage2 = LoggerMessage.Define<string, string, int>(LogLevel.Information, NugetMessage, "NuGet {NugetID} ({Code}) Message: {Message}");
+    #region NugetMessage Logger Event Methods
 
     /// <summary>
-    /// Logs an <see cref="NuGet.Common.LogLevel.Information"/> NugetMessage event with event code 0x0002.
+    /// Logs a <see cref="NuGetPullerEventId.NugetMessage"/> event message relayed from the NuGet API.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="message">The NuGet log message.</param>
-    /// <param name="code">The optional NuGet log code.</param>
-    public static void LogNugetInformationMessage(this ILogger logger, string message, NuGet.Common.NuGetLogCode? code = null)
-    {
-        if (code.HasValue)
-            _nugetInformationMessage2(logger, message, code.Value.ToString("F"), (int)code.Value, null);
-        else
-            _nugetInformationMessage1(logger, message, null);
-    }
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.NugetMessage, Level = LogLevel.Information, Message = "NuGet API Information: {Message}")]
+    public static partial void NugetInformationMessage(this ILogger logger, string message);
+
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.NugetMessage, Level = LogLevel.Information, Message = "NuGet API Information {NugetID} ({Code}): {Message}")]
+    private static partial void NugetInformationCode(ILogger logger, string nuGetId, int code, string message);
 
     /// <summary>
-    /// Logs an <see cref="NuGet.Common.LogLevel.Minimal"/> NugetMessage event with event code 0x0002.
+    /// Logs a <see cref="NuGetPullerEventId.NugetMessage"/> event message relayed from the NuGet API.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="message">The NuGet log message.</param>
-    /// <param name="code">The optional NuGet log code.</param>
-    public static void LogNugetMinimalMessage(this ILogger logger, string message, NuGet.Common.NuGetLogCode? code = null)
-    {
-        if (code.HasValue)
-            _nugetMinimalMessage2(logger, message, code.Value.ToString("F"), (int)code.Value, null);
-        else
-            _nugetMinimalMessage1(logger, message, null);
-    }
+    /// <param name="code">The NuGet log code.</param>
+    public static void NugetInformationMessage(this ILogger logger, string message, NuGet.Common.NuGetLogCode code) =>
+        NugetInformationCode(logger, code.ToString("F"), (int)code, message);
+
+    /// <summary>
+    /// Logs a <see cref="NuGet.Common.LogLevel.Minimal"/> <see cref="NuGetPullerEventId.NugetMessage"/> event message relayed from the NuGet API.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="message">The NuGet log message.</param>
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.NugetMessage, Level = LogLevel.Information, Message = "NuGet API Minimal: {Message}")]
+    public static partial void NugetMinimalMessage(this ILogger logger, string message);
+
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.NugetMessage, Level = LogLevel.Information, Message = "NuGet API Minimal {NugetID} ({Code}): {Message}")]
+    private static partial void NugetMinimalCode(ILogger logger, string nuGetId, int code, string message);
+
+    /// <summary>
+    /// Logs a <see cref="NuGet.Common.LogLevel.Minimal"/> <see cref="NuGetPullerEventId.NugetMessage"/> event message relayed from the NuGet API.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="message">The NuGet log message.</param>
+    /// <param name="code">The NuGet log code.</param>
+    public static void NugetMinimalMessage(this ILogger logger, string message, NuGet.Common.NuGetLogCode code) =>
+        NugetMinimalCode(logger, code.ToString("F"), (int)code, message);
 
     #endregion
 
-    #region Nuget Warning Message (0x0003)
-
-    public const int EVENT_ID_NugetWarning = 0x0003;
-
-    public static readonly EventId NugetWarning = new(EVENT_ID_NugetWarning, nameof(NugetWarning));
-
-    private static readonly Action<ILogger, string, Exception?> _nugetWarning1 = LoggerMessage.Define<string>(LogLevel.Warning, NugetWarning, "NuGet Message: {Message}");
-
-    private static readonly Action<ILogger, string, string, int, Exception?> _nugetWarning2 = LoggerMessage.Define<string, string, int>(LogLevel.Warning, NugetWarning, "NuGet {NugetID} ({Code}) Message: {Message}");
+    #region NugetWarning Logger Event Methods
 
     /// <summary>
-    /// Logs an NugetWarning event with event code 0x0003.
+    /// Logs a <see cref="NuGetPullerEventId.NugetWarning"/> event message relayed from the NuGet API.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="message">The NuGet warning message.</param>
-    /// <param name="code">The optional NuGet log code.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogNugetWarning(this ILogger logger, string message, NuGet.Common.NuGetLogCode? code = null, Exception? exception = null)
-    {
-        if (code.HasValue)
-            _nugetWarning2(logger, message, code.Value.ToString("F"), (int)code.Value, exception);
-        else
-            _nugetWarning1(logger, message, exception);
-    }
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.NugetWarning, Level = LogLevel.Warning, Message = "NuGet API Warning: {Message}")]
+    public static partial void NugetWarningMessage(this ILogger logger, string message, Exception? exception = null);
+
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.NugetWarning, Level = LogLevel.Warning, Message = "NuGet API Warning {NugetID} ({Code}): {Message}")]
+    private static partial void NugetWarningCode(ILogger logger, string nuGetId, int code, string message, Exception? exception);
+
+    /// <summary>
+    /// Logs a <see cref="NuGetPullerEventId.NugetWarning"/> event message relayed from the NuGet API.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="message">The NuGet warning message.</param>
+    /// <param name="code">The NuGet log code.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    public static void NugetWarningMessage(this ILogger logger, string message, NuGet.Common.NuGetLogCode code, Exception? exception = null) =>
+        NugetWarningCode(logger, code.ToString("F"), (int)code, message, exception);
 
     #endregion
 
-    #region NuGet Error Message (0x0004)
-
-    public const int EVENT_ID_NuGetError = 0x0004;
-
-    public static readonly EventId NuGetError = new(EVENT_ID_NuGetError, nameof(NuGetError));
-
-    private static readonly Action<ILogger, string, Exception?> _nuGetError1 = LoggerMessage.Define<string>(LogLevel.Error, NuGetError, "NuGet Message: {Message}");
-
-    private static readonly Action<ILogger, string, string, int, Exception?> _nuGetError2 = LoggerMessage.Define<string, string, int>(LogLevel.Error, NuGetError, "NuGet {NugetID} ({Code}) Message: {Message}");
+    #region NuGetError Logger Event Methods
 
     /// <summary>
-    /// Logs a NuGetError event with event code 0x0004.
+    /// Logs a <see cref="NuGetPullerEventId.NuGetError"/> event message relayed from the NuGet API.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="message">The NuGet error message.</param>
-    /// <param name="code">The optional NuGet log code.</param>
+    /// <param name="code">The NuGet log code.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogNuGetError(this ILogger logger, string message, NuGet.Common.NuGetLogCode? code = null, Exception? error = null)
-    {
-        if (code.HasValue)
-            _nuGetError2(logger, message, code.Value.ToString("F"), (int)code.Value, error);
-        else
-            _nuGetError1(logger, message, error);
-    }
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.NuGetError, Level = LogLevel.Error, Message = "NuGet API Error: {Message}")]
+    public static partial void NuGetErrorMessage(this ILogger logger, string message, Exception? error = null);
 
-    #endregion
-
-    #region Critical Nuget Error (0x0005)
-
-    public const int EVENT_ID_CriticalNugetError = 0x0005;
-    public static readonly EventId CriticalNugetError = new(EVENT_ID_CriticalNugetError, nameof(CriticalNugetError));
-
-    private static readonly Action<ILogger, string, Exception?> _criticalNugetError1 = LoggerMessage.Define<string>(LogLevel.Critical, CriticalNugetError, "NuGet Message: {Message}");
-
-    private static readonly Action<ILogger, string, string, int, Exception?> _criticalNugetError2 = LoggerMessage.Define<string, string, int>(LogLevel.Critical, CriticalNugetError, "NuGet {NugetID} ({Code}) Message: {Message}");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.NuGetError, Level = LogLevel.Error, Message = "NuGet API Error {NugetID} ({Code}): {Message}")]
+    private static partial void NuGetErrorCode(ILogger logger, string nuGetId, int code, string message, Exception? error);
 
     /// <summary>
-    /// Logs a CriticalNugetError event with event code 0x0005.
+    /// Logs a <see cref="NuGetPullerEventId.NuGetError"/> event message relayed from the NuGet API.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="message">The NuGet error message.</param>
-    /// <param name="code">The optional NuGet log code.</param>
+    /// <param name="code">The NuGet log code.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogCriticalNugetError(this ILogger logger, string message, NuGet.Common.NuGetLogCode? code = null, Exception? error = null)
-    {
-        if (code.HasValue)
-            _criticalNugetError2(logger, message, code.Value.ToString("F"), (int)code.Value, error);
-        else
-            _criticalNugetError1(logger, message, error);
-    }
+    public static void NuGetErrorMessage(this ILogger logger, string message, NuGet.Common.NuGetLogCode code, Exception? error = null) =>
+        NuGetErrorCode(logger, code.ToString("F"), (int)code, message, error);
 
     #endregion
 
-    #region InvalidRepositoryUrl event logger message (0x0006)
+    #region CriticalNugetError Logger Event Methods
 
-    public const int EVENT_ID_InvalidRepositoryUrl = 0x0006;
+    /// <summary>
+    /// Logs a <see cref="NuGetPullerEventId.CriticalNugetError"/> event message relayed from the NuGet API.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="message">The NuGet error message.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.CriticalNugetError, Level = LogLevel.Critical, Message = "NuGet API Critical: {Message}")]
+    public static partial void CriticalNugetErrorMessage(this ILogger logger, string message, Exception? error = null);
 
-    public static readonly EventId InvalidRepositoryUrl = new(EVENT_ID_InvalidRepositoryUrl, nameof(InvalidRepositoryUrl));
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.CriticalNugetError, Level = LogLevel.Critical, Message = "NuGet API Critical {NugetID} ({Code}): {Message}")]
+    private static partial void CriticalNugetErrorCode(ILogger logger, string nuGetId, int code, string message, Exception? error);
 
-    private const string MESSAGE_LocalRepositoryUrlIsNotLocal = "Local NuGet repository URL does not reference a local path";
+    /// <summary>
+    /// Logs a <see cref="NuGetPullerEventId.CriticalNugetError"/> event message relayed from the NuGet API.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="message">The NuGet error message.</param>
+    /// <param name="code">The NuGet log code.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    public static void CriticalNugetErrorMessage(this ILogger logger, string message, NuGet.Common.NuGetLogCode code, Exception? error = null) =>
+        CriticalNugetErrorCode(logger, code.ToString("F"), (int)code, message, error);
 
-    private static readonly Action<ILogger, string, Exception?> _localRepositoryUrlIsNotLocal = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
-        $"{MESSAGE_LocalRepositoryUrlIsNotLocal} ({{URL}}).");
+    #endregion
 
-    private const string MESSAGE_UpstreamRepositoryUrlIsNotAbsolute = "Upstream NuGet repository URL cannot be relative";
+    #endregion
 
-    private static readonly Action<ILogger, string, Exception?> _upstreamRepositoryUrlIsNotAbsolute = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
-        $"{MESSAGE_UpstreamRepositoryUrlIsNotAbsolute} ({{URL}}).");
+    /// <summary>
+    /// Logs a <see cref="NuGetPullerEventId.Cri"/> <see cref="LogLevel.Debug"/> message.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="myParam">Dooha</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.CriticalNugetError, Level = LogLevel.Debug,
+        Message = "Message (MyParam={MyParam})")]
+    public static partial void Cri(this ILogger logger, string myParam, Exception? exception = null);
+
+    #region InvalidRepositoryUrl Logger Event Methods
 
     private const string MESSAGE_UpstreamRepositoryPathTooLong = "Upstream NuGet repository path is too long";
 
-    private static readonly Action<ILogger, string, Exception?> _upstreamRepositoryPathTooLong = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
-        $"{MESSAGE_UpstreamRepositoryPathTooLong} ({{Path}}).");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidRepositoryUrl, Level = LogLevel.Critical, Message = $"{MESSAGE_UpstreamRepositoryPathTooLong} ({{Path}}).")]
+    private static partial void UpstreamRepositoryPathTooLong(ILogger logger, string path, Exception? exception);
 
     private const string MESSAGE_LocalRepositoryPathTooLong = "Local NuGet repository path is too long";
 
-    private static readonly Action<ILogger, string, Exception?> _localRepositoryPathTooLong = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
-        $"{MESSAGE_LocalRepositoryPathTooLong} ({{Path}}).");
-
-    private const string MESSAGE_InvalidLocalRepositoryUrl = "Local NuGet repository URL is invalid";
-
-    private static readonly Action<ILogger, string, Exception?> _invalidLocalRepositoryUrl = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
-        $"{MESSAGE_InvalidLocalRepositoryUrl} ({{URL}}).");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidRepositoryUrl, Level = LogLevel.Critical, Message = $"{MESSAGE_LocalRepositoryPathTooLong} ({{Path}}).")]
+    private static partial void LocalRepositoryPathTooLong(ILogger logger, string path, Exception? exception);
 
     private const string MESSAGE_InvalidUpstreamRepositoryUrl = "Upstream NuGet repository URL is invalid";
 
-    private static readonly Action<ILogger, string, Exception?> _invalidUpstreamRepositoryUrl = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
-        $"{MESSAGE_InvalidUpstreamRepositoryUrl} ({{URL}}).");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidRepositoryUrl, Level = LogLevel.Critical, Message = $"{MESSAGE_InvalidUpstreamRepositoryUrl} ({{URL}}).")]
+    private static partial void InvalidUpstreamRepositoryUrl(ILogger logger, string url, Exception? exception);
+
+    private const string MESSAGE_InvalidLocalRepositoryUrl = "Local NuGet repository URL is invalid";
+
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidRepositoryUrl, Level = LogLevel.Critical, Message = $"{MESSAGE_InvalidLocalRepositoryUrl} ({{URL}}).")]
+    private static partial void InvalidLocalRepositoryUrl(ILogger logger, string url, Exception? exception);
+
+    private const string MESSAGE_LocalRepositoryUrlIsNotLocal = "Local NuGet repository URL does not reference a local path";
+
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidRepositoryUrl, Level = LogLevel.Critical, Message = $"{MESSAGE_LocalRepositoryUrlIsNotLocal} ({{URL}}).")]
+    private static partial void LocalRepositoryUrlIsNotLocal(ILogger logger, string url, Exception? exception);
+
+    private const string MESSAGE_UpstreamRepositoryUrlIsNotAbsolute = "Upstream NuGet repository URL cannot be relative";
+
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidRepositoryUrl, Level = LogLevel.Critical, Message = $"{MESSAGE_UpstreamRepositoryUrlIsNotAbsolute} ({{URL}}).")]
+    private static partial void UpstreamRepositoryUrlIsNotAbsolute(ILogger logger, string url, Exception? exception);
 
     private const string MESSAGE_UnsupportedUpstreamRepositoryUrlScheme = "Invalid scheme or Upstream NuGet repository URL";
 
-    private static readonly Action<ILogger, string, Exception?> _unsupportedUpstreamRepositoryUrlScheme = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
-        $"{MESSAGE_UnsupportedUpstreamRepositoryUrlScheme} ({{URL}}).");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidRepositoryUrl, Level = LogLevel.Critical, Message = $"{MESSAGE_UnsupportedUpstreamRepositoryUrlScheme} ({{URL}}).")]
+    private static partial void UnsupportedUpstreamRepositoryUrlScheme(ILogger logger, string url, Exception? exception);
 
     private const string MESSAGE_UnsupportedLocalRepositoryUrlScheme = "Invalid scheme or Local NuGet repository URL";
 
-    private static readonly Action<ILogger, string, Exception?> _unsupportedLocalRepositoryUrlScheme = LoggerMessage.Define<string>(LogLevel.Critical, InvalidRepositoryUrl,
-        $"{MESSAGE_UnsupportedLocalRepositoryUrlScheme} ({{URL}}).");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidRepositoryUrl, Level = LogLevel.Critical, Message = $"{MESSAGE_UnsupportedLocalRepositoryUrlScheme} ({{URL}}).")]
+    private static partial void UnsupportedLocalRepositoryUrlScheme(ILogger logger, string url, Exception? exception);
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidRepositoryUrl"/> event with event code 0x0006.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidRepositoryUrl"/> event error message for an invalid repository URL or path.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="url">The invalid NuGet repository URL.</param>
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory URL.</param>
+    /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    /// <returns>The validation message.</returns>
-    public static string LogInvalidRepositoryUrl(this ILogger logger, string url, bool isUpstream, Exception? exception = null)
-    {
-        if (exception is PathTooLongException)
-        {
-            if (isUpstream)
-            {
-                _upstreamRepositoryPathTooLong(logger, url, exception);
-                return MESSAGE_UpstreamRepositoryPathTooLong;
-            }
-            _localRepositoryPathTooLong(logger, url, exception);
-            return MESSAGE_LocalRepositoryPathTooLong;
-        }
-        if (isUpstream)
-        {
-            _invalidUpstreamRepositoryUrl(logger, url, exception);
-            return $"{MESSAGE_InvalidUpstreamRepositoryUrl}.";
-        }
-        _invalidLocalRepositoryUrl(logger, url, exception);
-        return $"{MESSAGE_InvalidLocalRepositoryUrl}.";
-    }
-
-    public static T LogInvalidRepositoryUrl<T>(this ILogger logger, string url, bool isUpstream, Func<string, T> factory, Exception? exception = null)
+    /// <typeparam name="T">The type of exception to be created.</typeparam>
+    /// <returns>The exception that was created by the <paramref name="factory"/> function.</returns>
+    public static T InvalidRepositoryUrl<T>(this ILogger logger, string url, bool isUpstream, Func<string, T> factory, Exception? exception = null)
         where T : LoggedException
     {
         if (exception is PathTooLongException)
         {
             if (isUpstream)
             {
-                _upstreamRepositoryPathTooLong(logger, url, exception);
+                UpstreamRepositoryPathTooLong(logger, url, exception);
                 return factory(MESSAGE_UpstreamRepositoryPathTooLong);
             }
-            _localRepositoryPathTooLong(logger, url, exception);
+            LocalRepositoryPathTooLong(logger, url, exception);
             return factory(MESSAGE_LocalRepositoryPathTooLong);
         }
         if (isUpstream)
         {
-            _invalidUpstreamRepositoryUrl(logger, url, exception);
+            InvalidUpstreamRepositoryUrl(logger, url, exception);
             return factory(MESSAGE_InvalidUpstreamRepositoryUrl);
         }
-        _invalidLocalRepositoryUrl(logger, url, exception);
+        InvalidLocalRepositoryUrl(logger, url, exception);
         return factory(MESSAGE_InvalidLocalRepositoryUrl);
     }
 
-    public static string LogInvalidRepositoryUrl(this ILogger logger, Uri url, bool isUpstream, Exception? exception = null)
-    {
-        if (url.IsAbsoluteUri)
-        {
-            if (isUpstream)
-            {
-                _invalidUpstreamRepositoryUrl(logger, url.OriginalString, exception);
-                return $"{MESSAGE_InvalidUpstreamRepositoryUrl}.";
-            }
-            if (!url.IsFile)
-            {
-                _localRepositoryUrlIsNotLocal(logger, url.OriginalString, exception);
-                return $"{MESSAGE_LocalRepositoryUrlIsNotLocal}.";
-            }
-        }
-        else if (isUpstream)
-        {
-            _upstreamRepositoryUrlIsNotAbsolute(logger, url.OriginalString, exception);
-            return $"{MESSAGE_UpstreamRepositoryUrlIsNotAbsolute}.";
-        }
-
-        _invalidLocalRepositoryUrl(logger, url.OriginalString, exception);
-        return $"{MESSAGE_InvalidLocalRepositoryUrl}.";
-    }
-
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="UrlSchemeNotSupported"/> event with code 0x0006.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.UrlSchemeNotSupported"/> event message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="uriString">The invalid URI.</param>
@@ -306,161 +279,126 @@ public static class AppLoggerExtensions
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <typeparam name="T">The type of exception to be created.</typeparam>
     /// <returns>The exception that was created by the <paramref name="factory"/> function.</returns>
-    public static T LogUnsupportedRepositoryUrlScheme<T>(this ILogger logger, string uriString, Func<string, T> factory, Exception? exception = null) where T : LoggedException
+    public static T UnsupportedRepositoryUrlScheme<T>(this ILogger logger, string uriString, Func<string, T> factory, Exception? exception = null) where T : LoggedException
     {
-        _unsupportedUpstreamRepositoryUrlScheme(logger, uriString, exception);
+        UnsupportedUpstreamRepositoryUrlScheme(logger, uriString, exception);
         return factory(MESSAGE_UnsupportedUpstreamRepositoryUrlScheme);
-    }
-
-    public static string LogUnsupportedRepositoryUrlScheme(this ILogger logger, string uriString, bool isUpstream, Exception? exception = null)
-    {
-        if (isUpstream)
-        {
-            _unsupportedUpstreamRepositoryUrlScheme(logger, uriString, exception);
-            return $"{MESSAGE_UnsupportedUpstreamRepositoryUrlScheme}.";
-        }
-        _unsupportedLocalRepositoryUrlScheme(logger, uriString, exception);
-        return $"{MESSAGE_UnsupportedLocalRepositoryUrlScheme}.";
     }
 
     #endregion
 
-    #region RepositorySecurityException event logger message (0x0007)
-
-    public const int EVENT_ID_RepositorySecurityException = 0x0007;
-
-    public static readonly EventId RepositorySecurityException = new(EVENT_ID_RepositorySecurityException, nameof(RepositorySecurityException));
+    #region RepositorySecurityException Logger Event Methods
 
     private const string MESSAGE_UpstreamRepositorySecurityException = "Access denied while accessing upstream NuGet repository path";
 
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.RepositorySecurityException, Level = LogLevel.Critical, Message = $"{MESSAGE_UpstreamRepositorySecurityException} ({{Path}}).")]
+    private static partial void UpstreamRepositorySecurityException(ILogger logger, string path, Exception? exception);
+
     private const string MESSAGE_LocalRepositorySecurityException = "Access denied while accessing local NuGet repository path";
 
-    private static readonly Action<ILogger, string, Exception?> _upstreamRepositorySecurityException = LoggerMessage.Define<string>(LogLevel.Critical, RepositorySecurityException,
-        $"{MESSAGE_UpstreamRepositorySecurityException} ({{Path}}).");
-
-    private static readonly Action<ILogger, string, Exception?> _localRepositorySecurityException = LoggerMessage.Define<string>(LogLevel.Critical, RepositorySecurityException,
-        $"{MESSAGE_LocalRepositorySecurityException} ({{Path}}).");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.RepositorySecurityException, Level = LogLevel.Critical, Message = $"{MESSAGE_LocalRepositorySecurityException} ({{Path}}).")]
+    private static partial void LocalRepositorySecurityException(ILogger logger, string path, Exception? exception);
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="RepositorySecurityException"/> event with code 0x0007.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.RepositorySecurityException"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogRepositorySecurityException(this ILogger logger, string path, bool isUpstream, Exception? exception = null)
+    // TODO: See if this needs to be used somewhere
+    public static string RepositorySecurityException(this ILogger logger, string path, bool isUpstream, Exception? exception = null)
     {
         if (isUpstream)
         {
-            _upstreamRepositorySecurityException(logger, path, exception);
-            return MESSAGE_UpstreamRepositorySecurityException;
+            UpstreamRepositorySecurityException(logger, path, exception);
+            return $"{MESSAGE_UpstreamRepositorySecurityException}.";
         }
-        _localRepositorySecurityException(logger, path, exception);
-        return MESSAGE_LocalRepositorySecurityException;
+        LocalRepositorySecurityException(logger, path, exception);
+        return $"{MESSAGE_LocalRepositorySecurityException}.";
     }
 
     #endregion
 
-    #region LocalRepositoryIOException event logger message (0x0008)
-
-    public const int EVENT_ID_LocalRepositoryIOException = 0x0008;
-
-    public static readonly EventId LocalRepositoryIOException = new(EVENT_ID_LocalRepositoryIOException, nameof(LocalRepositoryIOException));
+    #region LocalRepositoryIOException Logger Event Methods
 
     private const string MESSAGE_LocalRepositoryIOException = "I/O error while creating local repository folder";
 
-    private static readonly Action<ILogger, string, Exception?> _localRepositoryIOException = LoggerMessage.Define<string>(LogLevel.Critical, LocalRepositoryIOException,
-        $"{MESSAGE_LocalRepositoryIOException} {{Path}}.");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.LocalRepositoryIOException, Level = LogLevel.Critical, EventName = nameof(LocalRepositoryIOException), Message = $"{MESSAGE_LocalRepositoryIOException} {{Path}}.")]
+    private static partial void LogLocalRepositoryIOException(this ILogger logger, string path, Exception? exception = null);
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="LocalRepositoryIOException"/> event with code 0x0008.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.LocalRepositoryIOException"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The local repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogLocalRepositoryIOException(this ILogger logger, string path, Exception? exception = null)
+    // TODO: See if this needs to be used somewhere
+    public static string LocalRepositoryIOException(this ILogger logger, string path, Exception? exception = null)
     {
-        _localRepositoryIOException(logger, path, exception);
-        return MESSAGE_LocalRepositoryIOException;
+        LogLocalRepositoryIOException(logger, path, exception);
+        return $"{MESSAGE_LocalRepositoryIOException}.";
     }
 
     #endregion
 
-    #region RepositoryPathNotFound event logger message (0x0009)
-
-    public const int EVENT_ID_RepositoryPathNotFound = 0x0009;
-
-    public static readonly EventId RepositoryPathNotFound = new(EVENT_ID_RepositoryPathNotFound, nameof(RepositoryPathNotFound));
+    #region RepositoryPathNotFound Logger Event Methods
 
     private const string MESSAGE_UpstreamRepositoryPathNotFound = "Upstream repository path not found";
 
-    private static readonly Action<ILogger, string, Exception?> _upstreamRepositoryPathNotFound = LoggerMessage.Define<string>(LogLevel.Critical, RepositoryPathNotFound,
-        $"{MESSAGE_UpstreamRepositoryPathNotFound} ({{Path}}).");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.RepositoryPathNotFound, Level = LogLevel.Critical, Message = $"{MESSAGE_UpstreamRepositoryPathNotFound} ({{Path}})")]
+    private static partial void UpstreamRepositoryPathNotFound(ILogger logger, string path, Exception? exception);
 
     private const string MESSAGE_LocalRepositoryPathNotFound = "Local repository path not found";
 
-    private static readonly Action<ILogger, string, Exception?> _localRepositoryPathNotFound = LoggerMessage.Define<string>(LogLevel.Critical, RepositoryPathNotFound,
-        $"{MESSAGE_UpstreamRepositoryPathNotFound} ({{Path}}).");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.RepositoryPathNotFound, Level = LogLevel.Critical, Message = $"{MESSAGE_LocalRepositoryPathNotFound} ({{Path}})")]
+    private static partial void LocalRepositoryPathNotFound(ILogger logger, string path, Exception? exception);
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="RepositoryPathNotFound"/> event with code 0x0009.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.RepositoryPathNotFound"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory path.</param>
     /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    /// <returns>The validation message.</returns>
-    public static string LogRepositoryPathNotFound(this ILogger logger, string path, bool isUpstream, Exception? exception = null)
-    {
-        if (isUpstream)
-        {
-            _upstreamRepositoryPathNotFound(logger, path, exception);
-            return MESSAGE_UpstreamRepositoryPathNotFound;
-        }
-        _localRepositoryPathNotFound(logger, path, exception);
-        return MESSAGE_LocalRepositoryPathNotFound;
-    }
-
-    public static T LogRepositoryPathNotFound<T>(this ILogger logger, string path, bool isUpstream, Func<string, T> factory, Exception? exception = null)
+    /// <typeparam name="T">The type of exception to be created.</typeparam>
+    /// <returns>The exception that was created by the <paramref name="factory"/> function.</returns>
+    public static T RepositoryPathNotFound<T>(this ILogger logger, string path, bool isUpstream, Func<string, T> factory, Exception? exception = null)
         where T : LoggedException
     {
         if (isUpstream)
         {
-            _upstreamRepositoryPathNotFound(logger, path, exception);
+            UpstreamRepositoryPathNotFound(logger, path, exception);
             return factory(MESSAGE_UpstreamRepositoryPathNotFound);
         }
-        _localRepositoryPathNotFound(logger, path, exception);
+        LocalRepositoryPathNotFound(logger, path, exception);
         return factory(MESSAGE_LocalRepositoryPathNotFound);
     }
 
     #endregion
 
-    #region InvalidExportLocalMetaData event logger message (0x000a)
-
-    public const int EVENT_ID_InvalidExportLocalMetaData = 0x000a;
-
-    public static readonly EventId InvalidExportLocalMetaData = new(EVENT_ID_InvalidExportLocalMetaData, nameof(InvalidExportLocalMetaData));
-
-    private const string MESSAGE_InvalidExportLocalMetaData = "Package metadata export path is invalid";
+    #region InvalidExportLocalMetaData Logger Event Methods
 
     private const string MESSAGE_ExportLocalMetaDataDirectoryNotFound = "Parent subdirectory of package metadata export path not found";
 
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportLocalMetaData, Level = LogLevel.Critical, Message = $"{MESSAGE_ExportLocalMetaDataDirectoryNotFound} ({{Path}})")]
+    private static partial void ExportLocalMetaDataDirectoryNotFound(ILogger logger, string path, Exception? exception);
+
     private const string MESSAGE_ExportLocalMetaDataPathTooLong = "Package metadata export path is too long";
 
-    private static readonly Action<ILogger, string, Exception?> _invalidExportLocalMetaData = LoggerMessage.Define<string>(LogLevel.Critical, InvalidExportLocalMetaData,
-        $"{MESSAGE_InvalidExportLocalMetaData} ({{Path}}).");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportLocalMetaData, Level = LogLevel.Critical, Message = $"{MESSAGE_ExportLocalMetaDataPathTooLong} ({{Path}})")]
+    private static partial void ExportLocalMetaDataPathTooLong(ILogger logger, string path, Exception exception);
 
-    private static readonly Action<ILogger, string, Exception?> _exportLocalMetaDataDirectoryNotFound = LoggerMessage.Define<string>(LogLevel.Critical, InvalidExportLocalMetaData,
-        $"{MESSAGE_ExportLocalMetaDataDirectoryNotFound} ({{Path}}).");
+    private const string MESSAGE_InvalidExportLocalMetaData = "Package metadata export path is invalid";
 
-    private static readonly Action<ILogger, string, Exception?> _exportLocalMetaDataPathTooLong = LoggerMessage.Define<string>(LogLevel.Critical, InvalidExportLocalMetaData,
-        $"{MESSAGE_ExportLocalMetaDataPathTooLong} ({{Path}}).");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportLocalMetaData, Level = LogLevel.Critical, Message = $"{MESSAGE_InvalidExportLocalMetaData} ({{Path}})")]
+    private static partial void InvalidExportLocalMetaData(ILogger logger, string path, Exception? exception);
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidMetaDataExportPath"/> event with code 0x000a.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidMetaDataExportPath"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The package metadata export path.</param>
@@ -468,85 +406,56 @@ public static class AppLoggerExtensions
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <typeparam name="T">The type of exception to be created.</typeparam>
     /// <returns>The exception that was created by the <paramref name="factory"/> function.</returns>
-    public static T LogInvalidExportLocalMetaData<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : LoggedException
+    public static T InvalidExportLocalMetaData<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : LoggedException
     {
         if (exception is not null)
         {
             if (exception is DirectoryNotFoundException)
             {
-                _exportLocalMetaDataDirectoryNotFound(logger, path, exception);
+                ExportLocalMetaDataDirectoryNotFound(logger, path, exception);
                 return factory(MESSAGE_ExportLocalMetaDataDirectoryNotFound);
             }
             if (exception is PathTooLongException)
             {
-                _exportLocalMetaDataPathTooLong(logger, path, exception);
+                ExportLocalMetaDataPathTooLong(logger, path, exception);
                 return factory(MESSAGE_ExportLocalMetaDataPathTooLong);
             }
         }
-        _invalidExportLocalMetaData(logger, path, exception);
+        InvalidExportLocalMetaData(logger, path, exception);
         return factory(MESSAGE_InvalidExportLocalMetaData);
     }
 
     /// <summary>
-    /// </summary>
-    /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidExportLocalMetaData"/> event with event code 0x000a.
-    /// </summary>
-    /// <param name="logger">The current logger.</param>
-    /// <param name="url">The invalid NuGet repository URL.</param>
-    /// <param name="exception">The optional exception that caused the event.</param>
-    /// <returns>The validation message.</returns>
-    public static string LogInvalidExportLocalMetaData(this ILogger logger, string url, Exception? exception = null)
-    {
-        if (exception is PathTooLongException)
-        {
-            _exportLocalMetaDataPathTooLong(logger, url, exception);
-            return MESSAGE_ExportLocalMetaDataPathTooLong;
-        }
-        _invalidExportLocalMetaData(logger, url, exception);
-        return $"{MESSAGE_InvalidExportLocalMetaData}.";
-    }
-
-    /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidExportLocalMetaData"/> event with code 0x000a.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidExportLocalMetaData"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    /// <returns>The validation message.</returns>
-    public static string LogExportLocalMetaDataDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
+    /// <typeparam name="T">The type of exception to be created.</typeparam>
+    /// <returns>The exception that was created by the <paramref name="factory"/> function.</returns>
+    public static T ExportLocalMetaDataDirectoryNotFound<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : LoggedException
     {
-        _exportLocalMetaDataDirectoryNotFound(logger, path, exception);
-        return MESSAGE_ExportLocalMetaDataDirectoryNotFound;
-    }
-
-    public static T LogExportLocalMetaDataDirectoryNotFound<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : LoggedException
-    {
-        _exportLocalMetaDataDirectoryNotFound(logger, path, exception);
+        ExportLocalMetaDataDirectoryNotFound(logger, path, exception);
         return factory(MESSAGE_ExportLocalMetaDataDirectoryNotFound);
     }
 
     #endregion
 
-    #region MetaDataExportPathAccessDenied event logger message (0x000b)
+    #region MetaDataExportPathAccessDenied Logger Event Methods
 
-    public const int EVENT_ID_MetaDataExportPathAccessDenied = 0x000b;
+    private const string MESSAGE_MetaDataExportPathAccessDenied = "Access to package metadata export path is denied";
 
-    public static readonly EventId MetaDataExportPathAccessDenied = new(EVENT_ID_MetaDataExportPathAccessDenied, nameof(MetaDataExportPathAccessDenied));
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.MetaDataExportPathAccessDenied, Level = LogLevel.Critical, EventName = nameof(MetaDataExportPathAccessDenied), Message = $"{MESSAGE_MetaDataExportPathAccessDenied} ({{Path}})")]
+    private static partial void LogMetaDataExportPathAccessDenied(ILogger logger, string path, Exception? exception);
 
-    private const string MESSAGE_MetaDataExportPathAccessDenied1 = "Access to package metadata export path is denied";
+    private const string MESSAGE_InsufficientPermissionsForMetaDataExportPath = "Caller has insufficient permissions to package metadata export path";
 
-    private const string MESSAGE_MetaDataExportPathAccessDenied2 = "Caller has insufficient permissions to package metadata export path";
-
-    private static readonly Action<ILogger, string, Exception?> _metaDataExportPathAccessDenied1 = LoggerMessage.Define<string>(LogLevel.Critical, MetaDataExportPathAccessDenied,
-        $"{MESSAGE_MetaDataExportPathAccessDenied1} ({{Path}}).");
-
-    private static readonly Action<ILogger, string, Exception?> _metaDataExportPathAccessDenied2 = LoggerMessage.Define<string>(LogLevel.Critical, MetaDataExportPathAccessDenied,
-        $"{MESSAGE_MetaDataExportPathAccessDenied2} ({{Path}}).");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.MetaDataExportPathAccessDenied, Level = LogLevel.Critical, Message = $"{MESSAGE_InsufficientPermissionsForMetaDataExportPath} ({{Path}})")]
+    private static partial void InsufficientPermissionsForMetaDataExportPath(ILogger logger, string path, Exception exception);
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="MetaDataExportPathAccessDenied"/> event with code 0x000b.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.MetaDataExportPathAccessDenied"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The package metadata export path.</param>
@@ -554,805 +463,740 @@ public static class AppLoggerExtensions
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <typeparam name="T">The type of exception to be created.</typeparam>
     /// <returns>The exception that was created by the <paramref name="factory"/> function.</returns>
-    public static T LogMetaDataExportPathAccessDenied<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : LoggedException
+    public static T MetaDataExportPathAccessDenied<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : LoggedException
     {
         if (exception is System.Security.SecurityException)
         {
-            _metaDataExportPathAccessDenied2(logger, path, exception);
-            return factory(MESSAGE_MetaDataExportPathAccessDenied2);
+            InsufficientPermissionsForMetaDataExportPath(logger, path, exception);
+            return factory(MESSAGE_InsufficientPermissionsForMetaDataExportPath);
         }
-        _metaDataExportPathAccessDenied1(logger, path, exception);
-        return factory(MESSAGE_MetaDataExportPathAccessDenied1);
+        LogMetaDataExportPathAccessDenied(logger, path, exception);
+        return factory(MESSAGE_MetaDataExportPathAccessDenied);
     }
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="MetaDataExportPathAccessDenied"/> event with code 0x000b.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.MetaDataExportPathAccessDenied"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogMetaDataExportPathAccessDenied(this ILogger logger, string path, Exception? exception = null)
+    public static string MetaDataExportPathAccessDenied(this ILogger logger, string path, Exception? exception = null)
     {
         if (exception is System.Security.SecurityException)
         {
-            _metaDataExportPathAccessDenied2(logger, path, exception);
-            return MESSAGE_MetaDataExportPathAccessDenied2;
+            InsufficientPermissionsForMetaDataExportPath(logger, path, exception);
+            return $"{MESSAGE_InsufficientPermissionsForMetaDataExportPath}.";
         }
-        _metaDataExportPathAccessDenied1(logger, path, exception);
-        return MESSAGE_MetaDataExportPathAccessDenied1;
+        LogMetaDataExportPathAccessDenied(logger, path, exception);
+        return $"{MESSAGE_MetaDataExportPathAccessDenied}.";
     }
 
     #endregion
 
-    #region PackageDeleted event logger message (0x000c)
-
-    public const int EVENT_ID_PackageDeleted = 0x000c;
-
-    public static readonly EventId PackageDeleted = new(EVENT_ID_PackageDeleted, nameof(PackageDeleted));
-
-    private static readonly Action<ILogger, string, string, Exception?> _packageDeleted = LoggerMessage.Define<string, string>(LogLevel.Warning, PackageDeleted,
-        "Package {PackageId} has been deleted from local repository ({RepositoryPath}).");
-
     /// <summary>
-    /// Logs a <see cref="LogLevel.Warning"/> message for a <see cref="PackageDeleted"/> event with event code 0x000c.
+    /// Logs a <see cref="NuGetPullerEventId.PackageDeleted"/> <see cref="LogLevel.Warning"/> event message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The ID of the package that was deleted.</param>
     /// <param name="repositoryPath">The path of the local NuGet repository.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogPackageDeleted(this ILogger logger, string packageId, string repositoryPath, Exception? exception = null) => _packageDeleted(logger, packageId, repositoryPath, exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.PackageDeleted, Level = LogLevel.Warning, Message = "Package {PackageId} has been deleted from local repository ({RepositoryPath}).")]
+    public static partial void PackageDeleted(this ILogger logger, string packageId, string repositoryPath, Exception? exception = null);
 
-    #endregion
+    #region PackageNotFound Logger Event Methods
 
-    #region PackageNotFound event logger message (0x000d)
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.PackageNotFound, Level = LogLevel.Warning, Message = "Package {PackageId} not found in upstream NuGet source ({RepositoryPath}).")]
+    private static partial void UpstreamDirPackageNotFound(this ILogger logger, string packageId, string repositoryPath, Exception? exception);
 
-    public const int EVENT_ID_PackageNotFound = 0x000d;
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.PackageNotFound, Level = LogLevel.Warning, Message = "Package {PackageId} not found in local NuGet source ({RepositoryPath}).")]
+    private static partial void LocalPackageNotFound(this ILogger logger, string packageId, string repositoryPath, Exception? exception);
 
-    public static readonly EventId PackageNotFound = new(EVENT_ID_PackageNotFound, nameof(PackageNotFound));
-
-    private static readonly Action<ILogger, string, string, Exception?> _remotePackageNotFound1 = LoggerMessage.Define<string, string>(LogLevel.Warning, PackageNotFound,
-        "Package {PackageId} not found in upstream NuGet source ({URL}).");
-
-    private static readonly Action<ILogger, string, string, Exception?> _localPackageNotFound1 = LoggerMessage.Define<string, string>(LogLevel.Warning, PackageNotFound,
-        "Package {PackageId} not found in local NuGet source ({RepositoryPath}).");
-
-    private static readonly Action<ILogger, string, string, Exception?> _upstreamDirPackageNotFound1 = LoggerMessage.Define<string, string>(LogLevel.Warning, PackageNotFound,
-        "Package {PackageId} not found in upstream NuGet source ({RepositoryPath}).");
-
-    private static readonly Action<ILogger, string, NuGetVersion, string, Exception?> _remotePackageNotFound2 = LoggerMessage.Define<string, NuGetVersion, string>(LogLevel.Warning, PackageNotFound,
-        "Version {Version} of package {PackageId} not found in upstream NuGet source ({URL}).");
-
-    private static readonly Action<ILogger, string, NuGetVersion, string, Exception?> _localPackageNotFound2 = LoggerMessage.Define<string, NuGetVersion, string>(LogLevel.Warning, PackageNotFound,
-        "Version {Version} of package {PackageId} not found in upstream NuGet source ({URL}).");
-
-    private static readonly Action<ILogger, string, NuGetVersion, string, Exception?> _upstreamDirPackageNotFound2 = LoggerMessage.Define<string, NuGetVersion, string>(LogLevel.Warning, PackageNotFound,
-        "Version {Version} of package {PackageId} not found in upstream NuGet source ({URL}).");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.PackageNotFound, Level = LogLevel.Warning, Message = "Package {PackageId} not found in upstream NuGet source ({URL}).")]
+    private static partial void RemotePackageNotFound(this ILogger logger, string packageId, string url, Exception? exception);
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Warning"/> message for a <see cref="PackageNotFound"/> event with event code 0x000d.
+    /// Logs a <see cref="NuGetPullerEventId.PackageNotFound"/> <see cref="LogLevel.Warning"/> event message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The ID of the package that was not found.</param>
     /// <param name="clientService">The client service.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogPackageNotFound(this ILogger logger, string packageId, IClientService clientService, Exception? exception = null)
+    public static void PackageNotFound(this ILogger logger, string packageId, IClientService clientService, Exception? exception = null)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
             if (clientService.IsUpstream)
-                _upstreamDirPackageNotFound1(logger, packageId, clientService.PackageSourceLocation, exception);
+                UpstreamDirPackageNotFound(logger, packageId, clientService.PackageSourceLocation, exception);
             else
-                _localPackageNotFound1(logger, packageId, clientService.PackageSourceLocation, exception);
+                LocalPackageNotFound(logger, packageId, clientService.PackageSourceLocation, exception);
         }
         else
-            _remotePackageNotFound1(logger, packageId, clientService.PackageSourceLocation, exception);
+            RemotePackageNotFound(logger, packageId, clientService.PackageSourceLocation, exception);
     }
 
+
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.PackageNotFound, Level = LogLevel.Warning,
+        Message = "Version {Version} of package {PackageId} not found in upstream NuGet source ({URL}).")]
+    private static partial void RemotePackageVersionNotFound(ILogger logger, string packageId, NuGetVersion version, string url, Exception? exception);
+
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.PackageNotFound, Level = LogLevel.Warning,
+        Message = "Version {Version} of package {PackageId} not found in local NuGet source ({PackageSourceLocation}).")]
+    private static partial void LocalPackageVersionNotFound(ILogger logger, string packageId, NuGetVersion version, string packageSourceLocation, Exception? exception);
+
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.PackageNotFound, Level = LogLevel.Warning,
+        Message = "Version {Version} of package {PackageId} not found in upstream NuGet source ({PackageSourceLocation}).")]
+    private static partial void UstreamDirPackageVersionNotFound(ILogger logger, NuGetVersion version, string packageId, string packageSourceLocation, Exception? exception);
+
     /// <summary>
-    /// Logs a <see cref="LogLevel.Warning"/> message for a <see cref="PackageNotFound"/> event with event code 0x000d.
+    /// Logs a <see cref="NuGetPullerEventId.PackageNotFound"/> <see cref="LogLevel.Warning"/> event message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The ID of the package that was not found.</param>
     /// <param name="version">The version of the package that was not found.</param>
     /// <param name="clientService">The client service.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogPackageNotFound(this ILogger logger, string packageId, NuGetVersion version, IClientService clientService, Exception? exception = null)
+    public static void PackageNotFound(this ILogger logger, string packageId, NuGetVersion version, IClientService clientService, Exception? exception = null)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
             if (clientService.IsUpstream)
-                _upstreamDirPackageNotFound2(logger, packageId, version, clientService.PackageSourceLocation, exception);
+                UstreamDirPackageVersionNotFound(logger, version, packageId, clientService.PackageSourceLocation, exception);
             else
-                _localPackageNotFound2(logger, packageId, version, clientService.PackageSourceLocation, exception);
+                LocalPackageVersionNotFound(logger, packageId, version, clientService.PackageSourceLocation, exception);
         }
         else
-            _remotePackageNotFound2(logger, packageId, version, clientService.PackageSourceLocation, exception);
+            RemotePackageVersionNotFound(logger, packageId, version, clientService.PackageSourceLocation, exception);
     }
 
     #endregion
 
-    #region GlobalPackagesFolderNotFound event logger message (0x000e)
-
-    public const int EVENT_ID_GlobalPackagesFolderNotFound = 0x000e;
-
-    public static readonly EventId GlobalPackagesFolderNotFound = new(EVENT_ID_GlobalPackagesFolderNotFound, nameof(GlobalPackagesFolderNotFound));
+    #region GlobalPackagesFolderNotFound Logger Event Methods
 
     private const string MESSAGE_GlobalPackagesFolderNotFound = "Global packages folder not found";
 
-    private static readonly Action<ILogger, string, Exception?> _globalPackagesFolderNotFound = LoggerMessage.Define<string>(LogLevel.Critical, GlobalPackagesFolderNotFound,
-        $"{MESSAGE_GlobalPackagesFolderNotFound} ({{Path}}).");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.GlobalPackagesFolderNotFound, EventName = nameof(GlobalPackagesFolderNotFound), Level = LogLevel.Critical,
+        Message = $"{MESSAGE_GlobalPackagesFolderNotFound} ({{Path}}).")]
+    private static partial void LogGlobalPackagesFolderNotFound(ILogger logger, string path, Exception? exception);
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="GlobalPackagesFolderNotFound"/> event with code 0x000e.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.GlobalPackagesFolderNotFound"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The Global packages folder path.</param>
     /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogGlobalPackagesFolderNotFound(this ILogger logger, string path, Exception? exception = null)
+    public static string GlobalPackagesFolderNotFound(this ILogger logger, string path, Exception? exception = null)
     {
-        _globalPackagesFolderNotFound(logger, path, exception);
-        return MESSAGE_GlobalPackagesFolderNotFound;
+        LogGlobalPackagesFolderNotFound(logger, path, exception);
+        return $"{MESSAGE_GlobalPackagesFolderNotFound}.";
     }
 
-    public static T LogGlobalPackagesFolderNotFound<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : LoggedException
+    public static T GlobalPackagesFolderNotFound<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : LoggedException
     {
-        _globalPackagesFolderNotFound(logger, path, exception);
+        LogGlobalPackagesFolderNotFound(logger, path, exception);
         return factory(MESSAGE_GlobalPackagesFolderNotFound);
     }
 
     #endregion
 
-    #region GlobalPackagesFolderSecurityException event logger message (0x000f)
-
-    public const int EVENT_ID_GlobalPackagesFolderSecurityException = 0x000f;
-
-    public static readonly EventId GlobalPackagesFolderSecurityException = new(EVENT_ID_GlobalPackagesFolderSecurityException, nameof(GlobalPackagesFolderSecurityException));
+    #region GlobalPackagesFolderSecurityException Logger Event Methods
 
     private const string MESSAGE_GlobalPackagesFolderSecurityException = "Access denied while accessing global packages folder";
 
-    private static readonly Action<ILogger, string, Exception?> _globalPackagesFolderSecurityException = LoggerMessage.Define<string>(LogLevel.Critical, GlobalPackagesFolderSecurityException,
-        $"{MESSAGE_GlobalPackagesFolderSecurityException} ({{Path}}).");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.GlobalPackagesFolderSecurityException, Level = LogLevel.Critical, EventName = nameof(GlobalPackagesFolderSecurityException), Message = $"{MESSAGE_GlobalPackagesFolderSecurityException} ({{Path}}).")]
+    private static partial void LogGlobalPackagesFolderSecurityException(ILogger logger, string path, Exception? exception);
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="GlobalPackagesFolderSecurityException"/> event with code 0x000f.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.GlobalPackagesFolderSecurityException"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The Global packages folder path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogGlobalPackagesFolderSecurityException(this ILogger logger, string path, Exception? exception = null)
+    public static string GlobalPackagesFolderSecurityException(this ILogger logger, string path, Exception? exception = null)
     {
-        _globalPackagesFolderSecurityException(logger, path, exception);
-        return MESSAGE_GlobalPackagesFolderSecurityException;
+        LogGlobalPackagesFolderSecurityException(logger, path, exception);
+        return $"{MESSAGE_GlobalPackagesFolderSecurityException}.";
     }
 
     #endregion
 
-    #region InvalidGlobalPackagesFolder event logger message (0x0010)
-
-    public const int EVENT_ID_InvalidGlobalPackagesFolder = 0x0010;
-
-    public static readonly EventId InvalidGlobalPackagesFolder = new(EVENT_ID_InvalidGlobalPackagesFolder, nameof(InvalidGlobalPackagesFolder));
+    #region InvalidGlobalPackagesFolder Logger Event Methods
 
     private const string MESSAGE_GlobalPackagesFolderPathTooLong = "NuGet Global Packages Folder path is too long";
 
-    private static readonly Action<ILogger, string, Exception?> _globalPackagesFolderPathTooLong = LoggerMessage.Define<string>(LogLevel.Critical, InvalidGlobalPackagesFolder,
-        $"{MESSAGE_GlobalPackagesFolderPathTooLong} ({{Path}}).");
+
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidGlobalPackagesFolder, Level = LogLevel.Critical, Message = $"{MESSAGE_GlobalPackagesFolderPathTooLong} ({{Path}}).")]
+    private static partial void GlobalPackagesFolderPathTooLong(ILogger logger, string path, Exception exception);
 
     private const string MESSAGE_InvalidGlobalPackagesFolder = "NuGet Global Packages Folder path is invalid";
 
-    private static readonly Action<ILogger, string, Exception?> _invalidGlobalPackagesFolder = LoggerMessage.Define<string>(LogLevel.Critical, InvalidGlobalPackagesFolder,
-        $"{MESSAGE_InvalidGlobalPackagesFolder} ({{Path}}).");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidGlobalPackagesFolder, Level = LogLevel.Critical, EventName = nameof(InvalidGlobalPackagesFolder), Message = $"{MESSAGE_InvalidGlobalPackagesFolder} ({{Path}}).")]
+    private static partial void LogInvalidGlobalPackagesFolder(ILogger logger, string path, Exception? exception);
 
     private const string MESSAGE_GlobalPackagesFolderNotFileUri = "NuGet Global Packages Folder must refer to a filesystem subdirectory";
 
-    private static readonly Action<ILogger, string, Exception?> _globalPackagesFolderNotFileUri = LoggerMessage.Define<string>(LogLevel.Critical, InvalidGlobalPackagesFolder,
-        $"{MESSAGE_GlobalPackagesFolderNotFileUri} ({{URI}}).");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidGlobalPackagesFolder, Level = LogLevel.Critical, EventName = nameof(GlobalPackagesFolderNotFileUri), Message = $"{MESSAGE_GlobalPackagesFolderNotFileUri} ({{URL}}).")]
+    private static partial void LogGlobalPackagesFolderNotFileUri(ILogger logger, string url, Exception? exception);
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidGlobalPackagesFolder"/> event with event code 0x0010.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidGlobalPackagesFolder"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The invalid global packages folder path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogInvalidGlobalPackagesFolder(this ILogger logger, string path, Exception? exception = null)
+    public static string InvalidGlobalPackagesFolder(this ILogger logger, string path, Exception? exception = null)
     {
         if (exception is PathTooLongException)
         {
-            _globalPackagesFolderPathTooLong(logger, path, exception);
-            return MESSAGE_GlobalPackagesFolderPathTooLong;
+            GlobalPackagesFolderPathTooLong(logger, path, exception);
+            return $"{MESSAGE_GlobalPackagesFolderPathTooLong}.";
         }
-        _invalidGlobalPackagesFolder(logger, path, exception);
+        LogInvalidGlobalPackagesFolder(logger, path, exception);
         return $"{MESSAGE_InvalidGlobalPackagesFolder}.";
     }
 
-    public static T LogInvalidGlobalPackagesFolder<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : LoggedException
+    public static T InvalidGlobalPackagesFolder<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : LoggedException
     {
         if (exception is PathTooLongException)
         {
-            _globalPackagesFolderPathTooLong(logger, path, exception);
+            GlobalPackagesFolderPathTooLong(logger, path, exception);
             return factory(MESSAGE_GlobalPackagesFolderPathTooLong);
         }
-        _invalidGlobalPackagesFolder(logger, path, exception);
+        LogInvalidGlobalPackagesFolder(logger, path, exception);
         return factory(MESSAGE_InvalidGlobalPackagesFolder);
     }
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidGlobalPackagesFolder"/> event with event code 0x0010.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidGlobalPackagesFolder"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="url">The invalid global packages folder url.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogGlobalPackagesFolderNotFileUri(this ILogger logger, string url, Exception? exception = null)
+    public static string GlobalPackagesFolderNotFileUri(this ILogger logger, string url, Exception? exception = null)
     {
-        _globalPackagesFolderNotFileUri(logger, url, exception);
+        LogGlobalPackagesFolderNotFileUri(logger, url, exception);
         return $"{MESSAGE_GlobalPackagesFolderNotFileUri}.";
     }
 
     #endregion
 
-    #region MultipleSettingsWithSameRepositoryLocation event logger message (0x0011)
-
-    public const int EVENT_ID_MultipleSettingsWithSameRepositoryLocation = 0x0011;
-
-    public static readonly EventId MultipleSettingsWithSameRepositoryLocation = new(EVENT_ID_MultipleSettingsWithSameRepositoryLocation, nameof(MultipleSettingsWithSameRepositoryLocation));
+    #region MultipleSettingsWithSameRepositoryLocation Logger Event Methods
 
     private const string MESSAGE_LocalSameAsUpstreamNugetRepository = "Local NuGet repository path cannot be the same as the upstream NuGet repository path";
 
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.MultipleSettingsWithSameRepositoryLocation, Level = LogLevel.Critical, EventName = nameof(LocalSameAsUpstreamNugetRepository), Message = $"{MESSAGE_LocalSameAsUpstreamNugetRepository} ({{Path}}).")]
+    private static partial void LogLocalSameAsUpstreamNugetRepository(ILogger logger, string path, Exception? exception);
+
     private const string MESSAGE_LocalRepositorySameAsGlobalPackagesFolder = "Local NuGet repository path cannot be the same as the upstream NuGet repository path";
+
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.MultipleSettingsWithSameRepositoryLocation, Level = LogLevel.Critical, EventName = nameof(LocalRepositorySameAsGlobalPackagesFolder), Message = $"{MESSAGE_LocalRepositorySameAsGlobalPackagesFolder} ({{Path}}).")]
+    private static partial void LogLocalRepositorySameAsGlobalPackagesFolder(ILogger logger, string path, Exception? exception);
 
     private const string MESSAGE_UpstreamRepositorySameAsGlobalPackagesFolder = "Local NuGet repository path cannot be the same as the upstream NuGet repository path";
 
-    private static readonly Action<ILogger, string, Exception?> _localSameAsUpstreamNugetRepository = LoggerMessage.Define<string>(LogLevel.Critical, MultipleSettingsWithSameRepositoryLocation,
-        $"{MESSAGE_LocalSameAsUpstreamNugetRepository} ({{Path}}).");
-
-    private static readonly Action<ILogger, string, Exception?> _localRepositorySameAsGlobalPackagesFolder = LoggerMessage.Define<string>(LogLevel.Critical, MultipleSettingsWithSameRepositoryLocation,
-        $"{MESSAGE_LocalRepositorySameAsGlobalPackagesFolder} ({{Path}}).");
-
-    private static readonly Action<ILogger, string, Exception?> _upstreamRepositorySameAsGlobalPackagesFolder = LoggerMessage.Define<string>(LogLevel.Critical, MultipleSettingsWithSameRepositoryLocation,
-        $"{MESSAGE_UpstreamRepositorySameAsGlobalPackagesFolder} ({{Path}}).");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.MultipleSettingsWithSameRepositoryLocation, Level = LogLevel.Critical, EventName = nameof(UpstreamRepositorySameAsGlobalPackagesFolder), Message = $"{MESSAGE_UpstreamRepositorySameAsGlobalPackagesFolder} ({{Path}}).")]
+    private static partial void LogUpstreamRepositorySameAsGlobalPackagesFolder(ILogger logger, string path, Exception? exception);
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="MultipleSettingsWithSameRepositoryLocation"/> event with event code 0x0011.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.MultipleSettingsWithSameRepositoryLocation"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static string LogLocalSameAsUpstreamNugetRepository(this ILogger logger, string path, Exception? exception = null)
+    public static string LocalSameAsUpstreamNugetRepository(this ILogger logger, string path, Exception? exception = null)
     {
-        _localSameAsUpstreamNugetRepository(logger, path, exception);
-        return MESSAGE_LocalSameAsUpstreamNugetRepository;
+        LogLocalSameAsUpstreamNugetRepository(logger, path, exception);
+        return $"{MESSAGE_LocalSameAsUpstreamNugetRepository}.";
     }
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="MultipleSettingsWithSameRepositoryLocation"/> event with event code 0x0011.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.MultipleSettingsWithSameRepositoryLocation"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static string LogLocalRepositorySameAsGlobalPackagesFolder(this ILogger logger, string path, Exception? exception = null)
+    public static string LocalRepositorySameAsGlobalPackagesFolder(this ILogger logger, string path, Exception? exception = null)
     {
-        _localRepositorySameAsGlobalPackagesFolder(logger, path, exception);
-        return MESSAGE_LocalRepositorySameAsGlobalPackagesFolder;
+        LogLocalRepositorySameAsGlobalPackagesFolder(logger, path, exception);
+        return $"{MESSAGE_LocalRepositorySameAsGlobalPackagesFolder}.";
     }
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="MultipleSettingsWithSameRepositoryLocation"/> event with event code 0x0011.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.MultipleSettingsWithSameRepositoryLocation"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static string LogUpstreamRepositorySameAsGlobalPackagesFolder(this ILogger logger, string path, Exception? exception = null)
+    public static string UpstreamRepositorySameAsGlobalPackagesFolder(this ILogger logger, string path, Exception? exception = null)
     {
-        _upstreamRepositorySameAsGlobalPackagesFolder(logger, path, exception);
-        return MESSAGE_UpstreamRepositorySameAsGlobalPackagesFolder;
+        LogUpstreamRepositorySameAsGlobalPackagesFolder(logger, path, exception);
+        return $"{MESSAGE_UpstreamRepositorySameAsGlobalPackagesFolder}.";
     }
 
     #endregion
 
-    #region PackageFileNotFound event logger message (0x0012)
-
-    public const int EVENT_ID_PackageFileNotFound = 0x0012;
-
-    public static readonly EventId PackageFileNotFound = new(EVENT_ID_PackageFileNotFound, nameof(PackageFileNotFound));
-
-    private static readonly Action<ILogger, string, Exception?> _packageFileNotFound = LoggerMessage.Define<string>(LogLevel.Error, PackageFileNotFound,
-        "Package file not found: {FileName}");
-
     /// <summary>
-    /// Logs a <see cref="LogLevel.Error"/> message for a <see cref="PackageFileNotFound"/> event with event code 0x0012.
+    /// Logs a <see cref="NuGetPullerEventId.PackageFileNotFound"/> <see cref="LogLevel.Error"/> event message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="fileName">The path of the file that was not found.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogPackageFileNotFound(this ILogger logger, string fileName, Exception? exception = null) => _packageFileNotFound(logger, fileName, exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.PackageFileNotFound, Level = LogLevel.Error, Message = "Package file not found: {FileName}")]
+    public static partial void PackageFileNotFound(this ILogger logger, string fileName, Exception? exception = null);
 
-    #endregion
-
-    #region InvalidPackageFile event logger message (0x0013)
-
-    public const int EVENT_ID_InvalidPackageFile = 0x0013;
-
-    public static readonly EventId InvalidPackageFile = new(EVENT_ID_InvalidPackageFile, nameof(InvalidPackageFile));
-
-    private static readonly Action<ILogger, string, Exception?> _packageFileNotZipArchive = LoggerMessage.Define<string>(LogLevel.Error, InvalidPackageFile,
-        "Package file is not a ZIP archive: {FileName}");
-
-    private static readonly Action<ILogger, string, Exception?> _packageFileInvalidContent = LoggerMessage.Define<string>(LogLevel.Error, InvalidPackageFile,
-        "Package file has invalid content: {FileName}");
+    #region InvalidPackageFile Logger Event Methods
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Error"/> message for a <see cref="InvalidPackageFile"/> event with event code 0x0013.
+    /// Logs a <see cref="NuGetPullerEventId.InvalidPackageFile"/> <see cref="LogLevel.Error"/> event message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="fileName">The path of the invalid package file.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogPackageFileNotZipArchive(this ILogger logger, string fileName, Exception? exception = null) => _packageFileNotZipArchive(logger, fileName, exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidPackageFile, Level = LogLevel.Error, Message = "Package file is not a ZIP archive: {FileName}")]
+    public static partial void PackageFileNotZipArchive(this ILogger logger, string fileName, Exception? exception = null);
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Error"/> message for a <see cref="InvalidPackageFile"/> event with event code 0x0013.
+    /// Logs a <see cref="NuGetPullerEventId.InvalidPackageFile"/> <see cref="LogLevel.Error"/> event message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="fileName">The path of the invalid package file.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogPackageFileInvalidContent(this ILogger logger, string fileName, Exception? exception = null) => _packageFileInvalidContent(logger, fileName, exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidPackageFile, Level = LogLevel.Error, Message = "Package file has invalid content: {FileName}")]
+    public static partial void InvalidPackageFileContent(this ILogger logger, string fileName, Exception? exception = null);
 
     #endregion
 
-    #region PackageAlreadyAdded event logger message (0x0014)
-
-    public const int EVENT_ID_PackageAlreadyAdded = 0x0014;
-
-    public static readonly EventId PackageAlreadyAdded = new(EVENT_ID_PackageAlreadyAdded, nameof(PackageAlreadyAdded));
-
-    private static readonly Action<ILogger, string, Exception?> _packageAlreadyAdded = LoggerMessage.Define<string>(LogLevel.Warning, PackageAlreadyAdded,
-        "Package {PackageId} has already been added.");
-
     /// <summary>
-    /// Logs a <see cref="LogLevel.Warning"/> message for a <see cref="PackageAlreadyAdded"/> event with event code 0x0014.
+    /// Logs a <see cref="NuGetPullerEventId.PackageAlreadyAdded"/> <see cref="LogLevel.Warning"/> event message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The identifier of the existing package.</param>
-    /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogPackageAlreadyAdded(this ILogger logger, string packageId, Exception? exception = null) => _packageAlreadyAdded(logger, packageId, exception);
-
-    #endregion
-
-    #region PackageVersionDeleteFailure event logger message (0x0015)
-
-    public const int EVENT_ID_PackageVersionDeleteFailure = 0x0015;
-
-    public static readonly EventId PackageVersionDeleteFailure = new(EVENT_ID_PackageVersionDeleteFailure, nameof(PackageVersionDeleteFailure));
-
-    private static readonly Action<ILogger, string, NuGetVersion, Exception?> _packageVersionDeleteFailure = LoggerMessage.Define<string, NuGetVersion>(LogLevel.Warning, PackageVersionDeleteFailure,
-        "Unexpected error deleting Package {PackageId}, Version {Version}.");
+    /// <param name="exception">The optional exception that caused the event.</param>;
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.PackageAlreadyAdded, Level = LogLevel.Warning, Message = "Package {PackageId} has already been added.")]
+    public static partial void PackageAlreadyAdded(this ILogger logger, string packageId, Exception? exception = null);
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Warning"/> message for a <see cref="PackageVersionDeleteFailure"/> event with event code 0x0015.
+    /// Logs a <see cref="NuGetPullerEventId.PackageVersionDeleteFailure"/> <see cref="LogLevel.Warning"/> event message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The package identifier.</param>
     /// <param name="version">The package version.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogPackageVersionDeleteFailure(this ILogger logger, string packageId, NuGetVersion version, Exception? exception = null) => _packageVersionDeleteFailure(logger, packageId, version, exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.PackageVersionDeleteFailure, Level = LogLevel.Warning, Message = "Unexpected error deleting Package {PackageId}, Version {Version}.")]
+    public static partial void PackageVersionDeleteFailure(this ILogger logger, string packageId, NuGetVersion version, Exception? exception = null);
 
-    #endregion
-
-    #region UnexpectedPackageDownloadFailure event logger message (0x0016)
-
-    public const int EVENT_ID_UnexpectedPackageDownloadFailure = 0x0016;
-
-    public static readonly EventId UnexpectedPackageDownloadFailure = new(EVENT_ID_UnexpectedPackageDownloadFailure, nameof(UnexpectedPackageDownloadFailure));
-
-    private static readonly Action<ILogger, string, NuGetVersion, Exception?> _unexpectedPackageDownloadFailure = LoggerMessage.Define<string, NuGetVersion>(LogLevel.Error, UnexpectedPackageDownloadFailure,
-        "Unexpected error while downloading package {PackageId}, Version {Version}.");
-
-    private static readonly Action<ILogger, string, NuGetVersion, Exception?> _emptyPackageDownload = LoggerMessage.Define<string, NuGetVersion>(LogLevel.Error, UnexpectedPackageDownloadFailure,
-        "Package download of {PackageId}, Version {Version} was unexpectedly empty.");
+    #region UnexpectedPackageDownloadFailure Logger Event Methods
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Error"/> message for a <see cref="UnexpectedPackageDownloadFailure"/> event with event code 0x0016.
+    /// Logs a <see cref="NuGetPullerEventId.UnexpectedPackageDownloadFailure"/> <see cref="LogLevel.Error"/> event message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The package identifier.</param>
     /// <param name="version">The package version.</param>
     /// <param name="exception">The exception that caused the event.</param>
-    public static void LogUnexpectedPackageDownloadFailure(this ILogger logger, string packageId, NuGetVersion version, Exception exception) => _unexpectedPackageDownloadFailure(logger, packageId, version, exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.UnexpectedPackageDownloadFailure, Level = LogLevel.Error, Message = "Unexpected error while downloading package {PackageId}, Version {Version}.")]
+    public static partial void UnexpectedPackageDownloadFailure(this ILogger logger, string packageId, NuGetVersion version, Exception exception);
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Error"/> message for a <see cref="UnexpectedPackageDownloadFailure"/> event with event code 0x0016.
+    /// Logs a <see cref="NuGetPullerEventId.UnexpectedPackageDownloadFailure"/> <see cref="LogLevel.Error"/> event message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The package identifier.</param>
     /// <param name="version">The package version.</param>
-    public static void LogEmptyPackageDownload(this ILogger logger, string packageId, NuGetVersion version) => _emptyPackageDownload(logger, packageId, version, null);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.UnexpectedPackageDownloadFailure, Level = LogLevel.Error, Message = "Package download of {PackageId}, Version {Version} was unexpectedly empty.")]
+    public static partial void DownloadPackageIsEmpty(this ILogger logger, string packageId, NuGetVersion version);
 
     #endregion
 
-    #region UnexpectedAddFailure event logger message (0x0017)
-
-    public const int EVENT_ID_UnexpectedAddFailure = 0x0017;
-
-    public static readonly EventId UnexpectedAddFailure = new(EVENT_ID_UnexpectedAddFailure, nameof(UnexpectedAddFailure));
-
-    private static readonly Action<ILogger, string, NuGetVersion, Exception?> _unexpectedAddFailure = LoggerMessage.Define<string, NuGetVersion>(LogLevel.Error, UnexpectedAddFailure,
-        "Unexpected error while adding Package {PackageId}, Version {Version}.");
-
     /// <summary>
-    /// Logs a <see cref="LogLevel.Error"/> message for a <see cref="UnexpectedAddFailure"/> event with event code 0x0017.
+    /// Logs a <see cref="NuGetPullerEventId.UnexpectedAddFailure"/> <see cref="LogLevel.Error"/> event message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The package identifier.</param>
     /// <param name="version">The package version.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogUnexpectedAddFailure(this ILogger logger, string packageId, NuGetVersion version, Exception? exception = null) => _unexpectedAddFailure(logger, packageId, version, exception);
-
-    #endregion
-
-    #region NoLocalPackagesExist event logger message (0x0018)
-
-    public const int EVENT_ID_NoLocalPackagesExist = 0x0018;
-
-    public static readonly EventId NoLocalPackagesExist = new(EVENT_ID_NoLocalPackagesExist, nameof(NoLocalPackagesExist));
-
-    private static readonly Action<ILogger, Exception?> _nolocalPackagesExist = LoggerMessage.Define(LogLevel.Warning, NoLocalPackagesExist,
-        "Local repository has no packages.");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.UnexpectedAddFailure, Level = LogLevel.Error, Message = "Unexpected error while adding Package {PackageId}, Version {Version}.")]
+    public static partial void UnexpectedAddPackageFailure(this ILogger logger, string packageId, NuGetVersion version, Exception? exception = null);
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Warning"/> message for a <see cref="NoLocalPackagesExist"/> event with code 0x0018.
+    /// Logs a <see cref="NuGetPullerEventId.NoLocalPackagesExist"/> <see cref="LogLevel.Warning"/> event message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogNoLocalPackagesExist(this ILogger logger, Exception? exception = null) => _nolocalPackagesExist(logger, exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.NoLocalPackagesExist, Level = LogLevel.Warning, Message = "Local repository has no packages.")]
+    public static partial void NoLocalPackagesExist(this ILogger logger, Exception? exception = null);
 
-    #endregion
-
-    #region InvalidExportBundle event logger message (0x0019)
-
-    public const int EVENT_ID_InvalidExportBundle = 0x0019;
-
-    public static readonly EventId InvalidExportBundle = new(EVENT_ID_InvalidExportBundle, nameof(InvalidExportBundle));
+    #region InvalidExportBundle Logger Event Methods
 
     private const string MESSAGE_InvalidExportBundle = "Package metadata export path is invalid";
 
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportBundle, Level = LogLevel.Critical, EventName = nameof(InvalidExportBundle), Message = $"{MESSAGE_InvalidExportBundle} ({{Path}}).")]
+    private static partial void LogInvalidExportBundle(ILogger logger, string path, Exception? exception);
+
     private const string MESSAGE_ExportBundleDirectoryNotFound = "Parent subdirectory of package metadata export path not found";
+
+
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportBundle, Level = LogLevel.Critical, EventName = nameof(ExportBundleDirectoryNotFound), Message = $"{MESSAGE_ExportBundleDirectoryNotFound} ({{Path}}).")]
+    private static partial void LogExportBundleDirectoryNotFound(ILogger logger, string path, Exception? exception);
 
     private const string MESSAGE_ExportBundlePathTooLong = "Package metadata export path is too long";
 
-    private static readonly Action<ILogger, string, Exception?> _invalidExportBundle = LoggerMessage.Define<string>(LogLevel.Critical, InvalidExportBundle,
-        $"{MESSAGE_InvalidExportBundle} ({{Path}}).");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportBundle, Level = LogLevel.Critical, Message = $"{MESSAGE_ExportBundlePathTooLong} ({{Path}}).")]
+    private static partial void ExportBundlePathTooLong(ILogger logger, string path, Exception exception);
 
-    private static readonly Action<ILogger, string, Exception?> _exportBundleDirectoryNotFound = LoggerMessage.Define<string>(LogLevel.Critical, InvalidExportBundle,
-        $"{MESSAGE_ExportBundleDirectoryNotFound} ({{Path}}).");
+    private const string MESSAGE_ExportBundlePathAccessDenied = "Access to export bundle path is denied";
 
-    private static readonly Action<ILogger, string, Exception?> _exportBundlePathTooLong = LoggerMessage.Define<string>(LogLevel.Critical, InvalidExportBundle,
-        $"{MESSAGE_ExportBundlePathTooLong} ({{Path}}).");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportBundle, Level = LogLevel.Critical, EventName = nameof(ExportBundlePathAccessDenied), Message = $"{MESSAGE_ExportBundlePathAccessDenied} ({{Path}}).")]
+    private static partial void LogExportBundlePathAccessDenied(ILogger logger, string path, Exception? exception);
+
+    private const string MESSAGE_InsufficientPermissionsForExportBundlePath = "Caller has insufficient permissions to export bundle path";
+
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportBundle, Level = LogLevel.Critical, Message = $"{MESSAGE_InsufficientPermissionsForExportBundlePath} ({{Path}}).")]
+    private static partial void InsufficientPermissionsForExportBundlePath(ILogger logger, string path, Exception exception);
 
     /// <summary>
     /// </summary>
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidExportBundle"/> event with event code 0x0019.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidExportBundle"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="url">The invalid NuGet repository URL.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogInvalidExportBundle(this ILogger logger, string url, Exception? exception = null)
+    public static string InvalidExportBundle(this ILogger logger, string url, Exception? exception = null)
     {
         if (exception is PathTooLongException)
         {
-            _exportBundlePathTooLong(logger, url, exception);
-            return MESSAGE_ExportBundlePathTooLong;
+            ExportBundlePathTooLong(logger, url, exception);
+            return $"{MESSAGE_ExportBundlePathTooLong}.";
         }
-        _invalidExportBundle(logger, url, exception);
+        LogInvalidExportBundle(logger, url, exception);
         return $"{MESSAGE_InvalidExportBundle}.";
     }
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidExportBundle"/> event with code 0x0019.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidExportBundle"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogExportBundleDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
+    // TODO: See if this should be used somewhere
+    public static string ExportBundleDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
     {
-        _exportBundleDirectoryNotFound(logger, path, exception);
-        return MESSAGE_ExportBundleDirectoryNotFound;
+        LogExportBundleDirectoryNotFound(logger, path, exception);
+        return $"{MESSAGE_ExportBundleDirectoryNotFound}.";
     }
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="MetaDataExportPathAccessDenied"/> event with code 0x000b.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.MetaDataExportPathAccessDenied"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogExportBundlePathAccessDenied(this ILogger logger, string path, Exception? exception = null)
+    // TODO: See if this should be used somewhere
+    public static string ExportBundlePathAccessDenied(this ILogger logger, string path, Exception? exception = null)
     {
         if (exception is System.Security.SecurityException)
         {
-            _metaDataExportPathAccessDenied2(logger, path, exception);
-            return MESSAGE_MetaDataExportPathAccessDenied2;
+            InsufficientPermissionsForExportBundlePath(logger, path, exception);
+            return $"{MESSAGE_InsufficientPermissionsForExportBundlePath}.";
         }
-        _metaDataExportPathAccessDenied1(logger, path, exception);
-        return MESSAGE_MetaDataExportPathAccessDenied1;
+        LogExportBundlePathAccessDenied(logger, path, exception);
+        return $"{MESSAGE_ExportBundlePathAccessDenied}.";
     }
 
     #endregion
 
-    #region InvalidTargetManifestFile event logger message (0x001a)
-
-    public const int EVENT_ID_InvalidTargetManifestFile = 0x001a;
-
-    public static readonly EventId InvalidTargetManifestFile = new(EVENT_ID_InvalidTargetManifestFile, nameof(InvalidTargetManifestFile));
-
-    private const string MESSAGE_InvalidTargetManifestFile = "Package metadata export path is invalid";
-
-    private const string MESSAGE_TargetManifestFileDirectoryNotFound = "Parent subdirectory of package metadata export path not found";
+    #region InvalidTargetManifestFile Logger Event Methods
 
     private const string MESSAGE_TargetManifestFilePathTooLong = "Package metadata export path is too long";
 
-    private static readonly Action<ILogger, string, Exception?> _invalidTargetManifestFile = LoggerMessage.Define<string>(LogLevel.Critical, InvalidTargetManifestFile,
-        $"{MESSAGE_InvalidTargetManifestFile} ({{Path}}).");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidTargetManifestFile, Level = LogLevel.Critical, Message = $"{MESSAGE_TargetManifestFilePathTooLong} ({{Path}}).")]
+    private static partial void TargetManifestFilePathTooLong(ILogger logger, string path, Exception exception);
 
-    private static readonly Action<ILogger, string, Exception?> _targetManifestFileDirectoryNotFound = LoggerMessage.Define<string>(LogLevel.Critical, InvalidTargetManifestFile,
-        $"{MESSAGE_TargetManifestFileDirectoryNotFound} ({{Path}}).");
+    private const string MESSAGE_InvalidTargetManifestFile = "Package metadata export path is invalid";
 
-    private static readonly Action<ILogger, string, Exception?> _targetManifestFilePathTooLong = LoggerMessage.Define<string>(LogLevel.Critical, InvalidTargetManifestFile,
-        $"{MESSAGE_TargetManifestFilePathTooLong} ({{Path}}).");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidTargetManifestFile, Level = LogLevel.Critical, EventName = nameof(InvalidTargetManifestFile), Message = $"{MESSAGE_InvalidTargetManifestFile} ({{Path}}).")]
+    private static partial void LogInvalidTargetManifestFile(ILogger logger, string path, Exception? exception);
+
+    private const string MESSAGE_TargetManifestFileDirectoryNotFound = "Parent subdirectory of package metadata export path not found";
+
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidTargetManifestFile, Level = LogLevel.Critical, EventName = nameof(TargetManifestFileDirectoryNotFound), Message = $"{MESSAGE_TargetManifestFileDirectoryNotFound} ({{Path}}).")]
+    private static partial void LogTargetManifestFileDirectoryNotFound(ILogger logger, string path, Exception? exception);
+
+    private const string MESSAGE_InsufficientPermissionsForTargetManifestFilePath = "Caller has insufficient permissions to access the target manifest file path";
+
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidTargetManifestFile, Level = LogLevel.Critical, Message = $"{MESSAGE_InsufficientPermissionsForTargetManifestFilePath} ({{Path}}).")]
+    private static partial void InsufficientPermissionsForTargetManifestFilePath(ILogger logger, string path, Exception exception);
+
+    private const string MESSAGE_TargetManifestFilePathAccessDenied = "Access to target manifest file path is denied";
+
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidTargetManifestFile, Level = LogLevel.Critical, EventName = nameof(TargetManifestFilePathAccessDenied), Message = $"{MESSAGE_TargetManifestFilePathAccessDenied} ({{Path}}).")]
+    private static partial void LogTargetManifestFilePathAccessDenied(ILogger logger, string path, Exception? exception);
 
     /// <summary>
     /// </summary>
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidTargetManifestFile"/> event with event code 0x001a.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidTargetManifestFile"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="url">The invalid NuGet repository URL.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogInvalidTargetManifestFile(this ILogger logger, string url, Exception? exception = null)
+    public static string InvalidTargetManifestFile(this ILogger logger, string url, Exception? exception = null)
     {
         if (exception is PathTooLongException)
         {
-            _targetManifestFilePathTooLong(logger, url, exception);
-            return MESSAGE_TargetManifestFilePathTooLong;
+            TargetManifestFilePathTooLong(logger, url, exception);
+            return $"{MESSAGE_TargetManifestFilePathTooLong}.";
         }
-        _invalidTargetManifestFile(logger, url, exception);
+        LogInvalidTargetManifestFile(logger, url, exception);
         return $"{MESSAGE_InvalidTargetManifestFile}.";
     }
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidTargetManifestFile"/> event with code 0x001a.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidTargetManifestFile"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogTargetManifestFileDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
+    public static string TargetManifestFileDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
     {
-        _targetManifestFileDirectoryNotFound(logger, path, exception);
-        return MESSAGE_TargetManifestFileDirectoryNotFound;
+        LogTargetManifestFileDirectoryNotFound(logger, path, exception);
+        return $"{MESSAGE_TargetManifestFileDirectoryNotFound}.";
     }
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="MetaDataExportPathAccessDenied"/> event with code 0x000b.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.MetaDataExportPathAccessDenied"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogTargetManifestFilePathAccessDenied(this ILogger logger, string path, Exception? exception = null)
+    public static string TargetManifestFilePathAccessDenied(this ILogger logger, string path, Exception? exception = null)
     {
         if (exception is System.Security.SecurityException)
         {
-            _metaDataExportPathAccessDenied2(logger, path, exception);
-            return MESSAGE_MetaDataExportPathAccessDenied2;
+            InsufficientPermissionsForTargetManifestFilePath(logger, path, exception);
+            return $"{MESSAGE_InsufficientPermissionsForTargetManifestFilePath}.";
         }
-        _metaDataExportPathAccessDenied1(logger, path, exception);
-        return MESSAGE_MetaDataExportPathAccessDenied1;
+        LogTargetManifestFilePathAccessDenied(logger, path, exception);
+        return $"{MESSAGE_TargetManifestFilePathAccessDenied}.";
     }
 
     #endregion
 
-    #region InvalidSaveTargetManifestAs event logger message (0x001b)
-
-    public const int EVENT_ID_InvalidSaveTargetManifestAs = 0x001b;
-
-    public static readonly EventId InvalidSaveTargetManifestAs = new(EVENT_ID_InvalidSaveTargetManifestAs, nameof(InvalidSaveTargetManifestAs));
-
-    private const string MESSAGE_InvalidSaveTargetManifestAs = "Package metadata export path is invalid";
-
-    private const string MESSAGE_SaveTargetManifestAsDirectoryNotFound = "Parent subdirectory of package metadata export path not found";
+    #region InvalidSaveTargetManifestAs Logger Event Methods
 
     private const string MESSAGE_SaveTargetManifestAsPathTooLong = "Package metadata export path is too long";
 
-    private static readonly Action<ILogger, string, Exception?> _invalidSaveTargetManifestAs = LoggerMessage.Define<string>(LogLevel.Critical, InvalidSaveTargetManifestAs,
-        $"{MESSAGE_InvalidSaveTargetManifestAs} ({{Path}}).");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidSaveTargetManifestAs, Level = LogLevel.Critical, Message = $"{MESSAGE_SaveTargetManifestAsPathTooLong} ({{Path}}).")]
+    private static partial void SaveTargetManifestAsPathTooLong(ILogger logger, string path, Exception exception);
 
-    private static readonly Action<ILogger, string, Exception?> _saveTargetManifestAsDirectoryNotFound = LoggerMessage.Define<string>(LogLevel.Critical, InvalidSaveTargetManifestAs,
-        $"{MESSAGE_SaveTargetManifestAsDirectoryNotFound} ({{Path}}).");
+    private const string MESSAGE_InvalidSaveTargetManifestAs = "Package metadata export path is invalid";
 
-    private static readonly Action<ILogger, string, Exception?> _saveTargetManifestAsPathTooLong = LoggerMessage.Define<string>(LogLevel.Critical, InvalidSaveTargetManifestAs,
-        $"{MESSAGE_SaveTargetManifestAsPathTooLong} ({{Path}}).");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidSaveTargetManifestAs, Level = LogLevel.Critical, EventName = nameof(InvalidSaveTargetManifestAs), Message = $"{MESSAGE_InvalidSaveTargetManifestAs} ({{Path}}).")]
+    private static partial void LogInvalidSaveTargetManifestAs(ILogger logger, string path, Exception? exception);
+
+    private const string MESSAGE_SaveTargetManifestAsDirectoryNotFound = "Parent subdirectory of package metadata export path not found";
+
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidSaveTargetManifestAs, Level = LogLevel.Critical, EventName = nameof(SaveTargetManifestAsDirectoryNotFound), Message = $"{MESSAGE_SaveTargetManifestAsDirectoryNotFound} ({{Path}}).")]
+    private static partial void LogSaveTargetManifestAsDirectoryNotFound(ILogger logger, string path, Exception? exception);
+
+    private const string MESSAGE_InsufficientPermissionsForSaveTargetManifestAsPath = "Caller has insufficient permissions to access the manifest file output path";
+
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidSaveTargetManifestAs, Level = LogLevel.Critical, Message = $"{MESSAGE_InsufficientPermissionsForSaveTargetManifestAsPath} ({{Path}}).")]
+    private static partial void InsufficientPermissionsForSaveTargetManifestAsPath(ILogger logger, string path, Exception exception);
+
+    private const string MESSAGE_SaveTargetManifestAsPathAccessDenied = "Access to manifest file output path is denied";
+
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidSaveTargetManifestAs, Level = LogLevel.Critical, EventName = nameof(SaveTargetManifestAsPathAccessDenied), Message = $"{MESSAGE_SaveTargetManifestAsPathAccessDenied} ({{Path}}).")]
+    private static partial void LogSaveTargetManifestAsPathAAccessDenied(ILogger logger, string path, Exception? exception);
 
     /// <summary>
     /// </summary>
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidSaveTargetManifestAs"/> event with event code 0x001b.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidSaveTargetManifestAs"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="url">The invalid NuGet repository URL.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogInvalidSaveTargetManifestAs(this ILogger logger, string url, Exception? exception = null)
+    public static string InvalidSaveTargetManifestAs(this ILogger logger, string url, Exception? exception = null)
     {
         if (exception is PathTooLongException)
         {
-            _saveTargetManifestAsPathTooLong(logger, url, exception);
-            return MESSAGE_SaveTargetManifestAsPathTooLong;
+            SaveTargetManifestAsPathTooLong(logger, url, exception);
+            return $"{MESSAGE_SaveTargetManifestAsPathTooLong}.";
         }
-        _invalidSaveTargetManifestAs(logger, url, exception);
+        LogInvalidSaveTargetManifestAs(logger, url, exception);
         return $"{MESSAGE_InvalidSaveTargetManifestAs}.";
     }
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidSaveTargetManifestAs"/> event with code 0x001b.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidSaveTargetManifestAs"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
-    /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogSaveTargetManifestAsDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
+    // TODO: See if this should be used somewhere
+    public static string SaveTargetManifestAsDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
     {
-        _saveTargetManifestAsDirectoryNotFound(logger, path, exception);
-        return MESSAGE_SaveTargetManifestAsDirectoryNotFound;
+        LogSaveTargetManifestAsDirectoryNotFound(logger, path, exception);
+        return $"{MESSAGE_SaveTargetManifestAsDirectoryNotFound}.";
     }
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="MetaDataExportPathAccessDenied"/> event with code 0x000b.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.MetaDataExportPathAccessDenied"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogSaveTargetManifestAsPathAccessDenied(this ILogger logger, string path, Exception? exception = null)
+    // TODO: See if this should be used somewhere
+    public static string SaveTargetManifestAsPathAccessDenied(this ILogger logger, string path, Exception? exception = null)
     {
         if (exception is System.Security.SecurityException)
         {
-            _metaDataExportPathAccessDenied2(logger, path, exception);
-            return MESSAGE_MetaDataExportPathAccessDenied2;
+            InsufficientPermissionsForSaveTargetManifestAsPath(logger, path, exception);
+            return $"{MESSAGE_InsufficientPermissionsForSaveTargetManifestAsPath}.";
         }
-        _metaDataExportPathAccessDenied1(logger, path, exception);
-        return MESSAGE_MetaDataExportPathAccessDenied1;
+        LogSaveTargetManifestAsPathAAccessDenied(logger, path, exception);
+        return $"{MESSAGE_SaveTargetManifestAsPathAccessDenied}.";
     }
 
     #endregion
 
-    #region InvalidImport event logger message (0x001c)
+    #region InvalidImportPath Logger Event Methods
+    private const string MESSAGE_ImportPathTooLong = "Package metadata export path is too long";
 
-    public const int EVENT_ID_InvalidImport = 0x001c;
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidImportPath, Level = LogLevel.Critical, Message = $"{MESSAGE_ImportPathTooLong} ({{Path}}).")]
+    private static partial void ImportPathTooLong(ILogger logger, string path, Exception exception);
 
-    public static readonly EventId InvalidImport = new(EVENT_ID_InvalidImport, nameof(InvalidImport));
+    private const string MESSAGE_InvalidImportPath = "Package metadata export path is invalid";
 
-    private const string MESSAGE_InvalidImport = "Package metadata export path is invalid";
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidImportPath, Level = LogLevel.Critical, EventName = nameof(InvalidImportPath), Message = $"{MESSAGE_InvalidImportPath} ({{Path}}).")]
+    private static partial void LogInvalidImportPath(ILogger logger, string path, Exception? exception);
 
     private const string MESSAGE_ImportDirectoryNotFound = "Parent subdirectory of package metadata export path not found";
 
-    private const string MESSAGE_ImportPathTooLong = "Package metadata export path is too long";
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidImportPath, Level = LogLevel.Critical, EventName = nameof(ImportFileOrDirectoryNotFound), Message = $"{MESSAGE_ImportDirectoryNotFound} ({{Path}}).")]
+    private static partial void LogImportDirectoryNotFound(ILogger logger, string path, Exception? exception);
 
-    private static readonly Action<ILogger, string, Exception?> _invalidImport = LoggerMessage.Define<string>(LogLevel.Critical, InvalidImport,
-        $"{MESSAGE_InvalidImport} ({{Path}}).");
+    private const string MESSAGE_InsufficientPermissionsForImportPath = "Caller has insufficient permissions to access the manifest file output path";
 
-    private static readonly Action<ILogger, string, Exception?> _importDirectoryNotFound = LoggerMessage.Define<string>(LogLevel.Critical, InvalidImport,
-        $"{MESSAGE_ImportDirectoryNotFound} ({{Path}}).");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidImportPath, Level = LogLevel.Critical, Message = $"{MESSAGE_InsufficientPermissionsForImportPath} ({{Path}}).")]
+    private static partial void InsufficientPermissionsForImportPath(ILogger logger, string path, Exception exception);
 
-    private static readonly Action<ILogger, string, Exception?> _importPathTooLong = LoggerMessage.Define<string>(LogLevel.Critical, InvalidImport,
-        $"{MESSAGE_ImportPathTooLong} ({{Path}}).");
+    private const string MESSAGE_ImportPathAccessDenied = "Access to manifest file output path is denied";
+
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidImportPath, Level = LogLevel.Critical, EventName = nameof(ImportPathAccessDenied), Message = $"{MESSAGE_ImportPathAccessDenied} ({{Path}}).")]
+    private static partial void LogImportPathAccessDenied(ILogger logger, string path, Exception? exception);
 
     /// <summary>
     /// </summary>
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidImport"/> event with event code 0x001c.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidImport"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="url">The invalid NuGet repository URL.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogInvalidImportPath(this ILogger logger, string url, Exception? exception = null)
+    public static string InvalidImportPath(this ILogger logger, string url, Exception? exception = null)
     {
         if (exception is PathTooLongException)
         {
-            _importPathTooLong(logger, url, exception);
-            return MESSAGE_ImportPathTooLong;
+            ImportPathTooLong(logger, url, exception);
+            return $"{MESSAGE_ImportPathTooLong}.";
         }
-        _invalidImport(logger, url, exception);
-        return $"{MESSAGE_InvalidImport}.";
+        LogInvalidImportPath(logger, url, exception);
+        return $"{MESSAGE_InvalidImportPath}.";
     }
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="InvalidImport"/> event with code 0x001c.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidImport"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
-    /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogImportFileOrDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
+    // TODO: See if this should be used somewhere
+    public static string ImportFileOrDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
     {
-        _importDirectoryNotFound(logger, path, exception);
-        return MESSAGE_ImportDirectoryNotFound;
+        LogImportDirectoryNotFound(logger, path, exception);
+        return $"{MESSAGE_ImportDirectoryNotFound}.";
     }
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> message for a <see cref="MetaDataExportPathAccessDenied"/> event with code 0x000b.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.MetaDataExportPathAccessDenied"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LogImportPathAccessDenied(this ILogger logger, string path, Exception? exception = null)
+    // TODO: See if this should be used somewhere
+    public static string ImportPathAccessDenied(this ILogger logger, string path, Exception? exception = null)
     {
         if (exception is System.Security.SecurityException)
         {
-            _metaDataExportPathAccessDenied2(logger, path, exception);
-            return MESSAGE_MetaDataExportPathAccessDenied2;
+            InsufficientPermissionsForImportPath(logger, path, exception);
+            return $"{MESSAGE_InsufficientPermissionsForMetaDataExportPath}.";
         }
-        _metaDataExportPathAccessDenied1(logger, path, exception);
-        return MESSAGE_MetaDataExportPathAccessDenied1;
+        LogImportPathAccessDenied(logger, path, exception);
+        return $"{MESSAGE_MetaDataExportPathAccessDenied}.";
     }
 
     #endregion
 
-    #region DownloadingNuGetPackage event logger message (0x001d)
+    #region DownloadingNuGetPackage Logger Event Methods
 
-    public const int EVENT_ID_DownloadingNuGetPackage = 0x001d;
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.DownloadingNuGetPackage, Level = LogLevel.Warning, Message = "Downloading package {PackageId}, version {Version} from local {PackageSourceLocation}.")]
+    private static partial void DownloadingLocalNuGetPackageVersion(ILogger logger, string packageId, NuGetVersion version, string packageSourceLocation, Exception? exception);
 
-    public static readonly EventId DownloadingNuGetPackage = new(EVENT_ID_DownloadingNuGetPackage, nameof(DownloadingNuGetPackage));
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.DownloadingNuGetPackage, Level = LogLevel.Warning, Message = "Downloading package {PackageId} from local {PackageSourceLocation}.")]
+    private static partial void DownloadingLocalNuGetPackage(ILogger logger, string packageId, string packageSourceLocation, Exception? exception);
 
-    private static readonly Action<ILogger, string, Uri, Exception?> _downloadingRemoteNuGetPackage1 = LoggerMessage.Define<string, Uri>(LogLevel.Information, DownloadingNuGetPackage,
-        "Downloading package {PackageId} from {URL}.");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.DownloadingNuGetPackage, Level = LogLevel.Warning, Message = "Downloading package {PackageId}, version {Version} from upstream {PackageSourceUri}.")]
+    private static partial void DownloadingRemoteNuGetPackageVersion(ILogger logger, string packageId, NuGetVersion version, Uri packageSourceUri, Exception? exception);
 
-    private static readonly Action<ILogger, string, NuGetVersion, Uri, Exception?> _downloadingRemoteNuGetPackage2 = LoggerMessage.Define<string, NuGetVersion, Uri>(LogLevel.Information, DownloadingNuGetPackage,
-        "Downloading package {PackageId}, version {Version} from {URL}.");
-
-    private static readonly Action<ILogger, string, string, Exception?> _downloadingLocalNuGetPackage1 = LoggerMessage.Define<string, string>(LogLevel.Information, DownloadingNuGetPackage,
-        "Downloading package {PackageId} from {Path}.");
-
-    private static readonly Action<ILogger, string, NuGetVersion, string, Exception?> _downloadingLocalNuGetPackage2 = LoggerMessage.Define<string, NuGetVersion, string>(LogLevel.Information, DownloadingNuGetPackage,
-        "Downloading package {PackageId}, version {Version} from {Path}.");
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.DownloadingNuGetPackage, Level = LogLevel.Warning, EventName = nameof(DownloadingNuGetPackage), Message = "Downloading package {PackageId} from upstream {PackageSourceUri}.")]
+    private static partial void LogDownloadingRemoteNuGetPackage(ILogger logger, string packageId, Uri packageSourceUri, Exception? exception);
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Information"/> message for a <see cref="DownloadingNuGetPackage"/> event with event code 0x001d.
+    /// Logs a <see cref="NuGetPullerEventId.DownloadingNuGetPackage"/> <see cref="LogLevel.Information"/> event message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="identity">The package identifier and version.</param>
     /// <param name="clientService">The source repository.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void LogDownloadingNuGetPackage(this ILogger logger, PackageIdentity identity, IClientService clientService, Exception? exception = null)
+    public static void DownloadingNuGetPackage(this ILogger logger, PackageIdentity identity, IClientService clientService, Exception? exception = null)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
             if (identity.HasVersion)
-                _downloadingLocalNuGetPackage2(logger, identity.Id, identity.Version, clientService.PackageSourceLocation, exception);
+                DownloadingLocalNuGetPackageVersion(logger, identity.Id, identity.Version, clientService.PackageSourceLocation, exception);
             else
-                _downloadingLocalNuGetPackage1(logger, identity.Id, clientService.PackageSourceLocation, exception);
+                DownloadingLocalNuGetPackage(logger, identity.Id, clientService.PackageSourceLocation, exception);
         }
         else if (identity.HasVersion)
-            _downloadingRemoteNuGetPackage2(logger, identity.Id, identity.Version, clientService.PackageSourceUri, exception);
+            DownloadingRemoteNuGetPackageVersion(logger, identity.Id, identity.Version, clientService.PackageSourceUri, exception);
         else
-            _downloadingRemoteNuGetPackage1(logger, identity.Id, clientService.PackageSourceUri, exception);
+            LogDownloadingRemoteNuGetPackage(logger, identity.Id, clientService.PackageSourceUri, exception);
     }
 
     #endregion
+
 
     #region GetDownloadResource Scope
 
@@ -1718,6 +1562,7 @@ public static class AppLoggerExtensions
     /// <param name="framework">The package framework.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
+    // TODO: See if this should be used somewhere
     public static IDisposable? BeginGetPackageDependenciesScope(this ILogger logger, string packageId, NuGetVersion version, NuGetFramework framework, IClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
@@ -1736,6 +1581,7 @@ public static class AppLoggerExtensions
     /// <param name="packageId">The package identifier.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
+    // TODO: See if this should be used somewhere
     public static IDisposable? BeginGetPackageDependenciesScope(this ILogger logger, string packageId, IClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
@@ -1761,6 +1607,7 @@ public static class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="url">The url of the NuGet respository.</param>
     /// <param name="isUpstream"><see langword="true"/>  if the repository is upstream; otherwise, <see langword="false"/>.</param>
+    // TODO: See if this should be used somewhere
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
     public static IDisposable? BeginNugetSourceScope(this ILogger logger, string url, bool isUpstream) => _nugetSourceScope(logger, url, isUpstream);
 
@@ -1814,6 +1661,7 @@ public static class AppLoggerExtensions
     /// <param name="packageId">The ID of the upstream package to add locally.</param>
     /// <param name="repositoryPath">The local repository URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
+    // TODO: See if this should be used somewhere
     public static IDisposable? BeginAddLocalPackageScope(this ILogger logger, string packageId, string repositoryPath) => _addLocalPackageScope(logger, packageId, repositoryPath);
 
     #endregion
@@ -1831,6 +1679,7 @@ public static class AppLoggerExtensions
     /// <param name="packageId">The ID of the upstream package to update locally.</param>
     /// <param name="repositoryPath">The local repository URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
+    // TODO: See if this should be used somewhere
     public static IDisposable? BeginUpdateLocalPackageScope(this ILogger logger, string packageId, string repositoryPath) => _updateLocalPackageScope(logger, packageId, repositoryPath);
 
     #endregion

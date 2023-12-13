@@ -14,27 +14,27 @@ public partial class MainServiceStatic
         try { return new StreamWriter(path, false, new System.Text.UTF8Encoding(false, false)); }
         catch (ArgumentException exception)
         {
-            throw logger.LogInvalidExportLocalMetaData(path, m => new MetaDataExportPathException(path, m, exception), exception);
+            throw logger.InvalidExportLocalMetaData(path, m => new MetaDataExportPathException(path, m, exception), exception);
         }
         catch (UnauthorizedAccessException exception)
         {
-            throw logger.LogMetaDataExportPathAccessDenied(path, m => new MetaDataExportPathException(path, m, exception), exception);
+            throw logger.MetaDataExportPathAccessDenied(path, m => new MetaDataExportPathException(path, m, exception), exception);
         }
         catch (DirectoryNotFoundException exception)
         {
-            throw logger.LogInvalidExportLocalMetaData(path, m => new MetaDataExportPathException(path, m, exception), exception);
+            throw logger.InvalidExportLocalMetaData(path, m => new MetaDataExportPathException(path, m, exception), exception);
         }
         catch (PathTooLongException exception)
         {
-            throw logger.LogInvalidExportLocalMetaData(path, m => new MetaDataExportPathException(path, m, exception), exception);
+            throw logger.InvalidExportLocalMetaData(path, m => new MetaDataExportPathException(path, m, exception), exception);
         }
         catch (IOException exception)
         {
-            throw logger.LogInvalidExportLocalMetaData(path, m => new MetaDataExportPathException(path, m, exception), exception);
+            throw logger.InvalidExportLocalMetaData(path, m => new MetaDataExportPathException(path, m, exception), exception);
         }
         catch (System.Security.SecurityException exception)
         {
-            throw logger.LogMetaDataExportPathAccessDenied(path, m => new MetaDataExportPathException(path, m, exception), exception);
+            throw logger.MetaDataExportPathAccessDenied(path, m => new MetaDataExportPathException(path, m, exception), exception);
         }
     }
 
@@ -114,12 +114,12 @@ public partial class MainServiceStatic
         var upstreamVersions = await localClientService.GetAllVersionsAsync(packageId, cancellationToken);
         if (upstreamVersions is not null && upstreamVersions.Any())
         {
-            logger.LogPackageAlreadyAdded(packageId);
+            logger.PackageAlreadyAdded(packageId);
             return;
         }
         if ((upstreamVersions = await upstreamClientService.GetAllVersionsAsync(packageId, cancellationToken)) is null || !upstreamVersions.Any())
         {
-            logger.LogPackageNotFound(packageId, upstreamClientService);
+            logger.PackageNotFound(packageId, upstreamClientService);
             return;
         }
         if (packagesAdded.TryGetValue(packageId, out HashSet<NuGetVersion>? versionsAdded))
@@ -148,13 +148,13 @@ public partial class MainServiceStatic
             }
             catch (Exception error)
             {
-                logger.LogUnexpectedPackageDownloadFailure(packageId, v, error);
+                logger.UnexpectedPackageDownloadFailure(packageId, v, error);
                 continue;
             }
             if (packageFile.Length > 0)
                 await localClientService.AddPackageAsync(packageFile.FullName, false, cancellationToken);
             else
-                logger.LogEmptyPackageDownload(packageId, v);
+                logger.DownloadPackageIsEmpty(packageId, v);
         }
     }
 }

@@ -15,22 +15,22 @@ public class NugetLogWrapper(ILogger logger) : NuGet.Common.ILogger
         switch (level)
         {
             case NuGet.Common.LogLevel.Debug:
-                _underlyingLogger.LogNugetDebugMessage(data);
+                _underlyingLogger.NugetDebugMessage(data);
                 break;
             case NuGet.Common.LogLevel.Verbose:
-                _underlyingLogger.LogNugetVerboseMessage(data);
+                _underlyingLogger.NugetVerboseMessage(data);
                 break;
             case NuGet.Common.LogLevel.Information:
-                _underlyingLogger.LogNugetInformationMessage(data);
+                _underlyingLogger.NugetInformationMessage(data);
                 break;
             case NuGet.Common.LogLevel.Minimal:
-                _underlyingLogger.LogNugetMinimalMessage(data);
+                _underlyingLogger.NugetMinimalMessage(data);
                 break;
             case NuGet.Common.LogLevel.Error:
-                _underlyingLogger.LogNuGetError(data);
+                _underlyingLogger.NuGetErrorMessage(data);
                 break;
             default:
-                _underlyingLogger.LogNugetWarning(data);
+                _underlyingLogger.NugetWarningMessage(data);
                 break;
         }
     }
@@ -40,28 +40,28 @@ public class NugetLogWrapper(ILogger logger) : NuGet.Common.ILogger
         switch (message.Level)
         {
             case NuGet.Common.LogLevel.Debug:
-                _underlyingLogger.LogNugetDebugMessage($"{message.Message} ({message.Time})", message.Code);
+                _underlyingLogger.NugetDebugMessage($"{message.Message} ({message.Time})", message.Code);
                 break;
             case NuGet.Common.LogLevel.Verbose:
-                _underlyingLogger.LogNugetVerboseMessage($"{message.Message} ({message.Time})", message.Code);
+                _underlyingLogger.NugetVerboseMessage($"{message.Message} ({message.Time})", message.Code);
                 break;
             case NuGet.Common.LogLevel.Information:
-                _underlyingLogger.LogNugetInformationMessage($"{message.Message} ({message.Time})", message.Code);
+                _underlyingLogger.NugetInformationMessage($"{message.Message} ({message.Time})", message.Code);
                 break;
             case NuGet.Common.LogLevel.Minimal:
-                _underlyingLogger.LogNugetMinimalMessage($"{message.Message} ({message.Time})", message.Code);
+                _underlyingLogger.NugetMinimalMessage($"{message.Message} ({message.Time})", message.Code);
                 break;
             case NuGet.Common.LogLevel.Error:
                 switch (message.WarningLevel)
                 {
                     case NuGet.Common.WarningLevel.Important:
-                        _underlyingLogger.LogNuGetError($"[{message.WarningLevel:F}] {message.Message} ({message.Time})", message.Code);
+                        _underlyingLogger.NuGetErrorMessage($"[{message.WarningLevel:F}] {message.Message} ({message.Time})", message.Code);
                         break;
                     case NuGet.Common.WarningLevel.Severe:
-                        _underlyingLogger.LogCriticalNugetError($"[{message.WarningLevel:F}] {message.Message} ({message.Time})", message.Code);
+                        _underlyingLogger.CriticalNugetErrorMessage($"[{message.WarningLevel:F}] {message.Message} ({message.Time})", message.Code);
                         break;
                     default:
-                        _underlyingLogger.LogNuGetError($"{message.Message} ({message.Time})", message.Code);
+                        _underlyingLogger.NuGetErrorMessage($"{message.Message} ({message.Time})", message.Code);
                         break;
                 }
                 break;
@@ -70,10 +70,10 @@ public class NugetLogWrapper(ILogger logger) : NuGet.Common.ILogger
                 {
                     case NuGet.Common.WarningLevel.Important:
                     case NuGet.Common.WarningLevel.Severe:
-                        _underlyingLogger.LogNugetWarning($"[{message.WarningLevel:F}] {message.Message} ({message.Time})", message.Code);
+                        _underlyingLogger.NugetWarningMessage($"[{message.WarningLevel:F}] {message.Message} ({message.Time})", message.Code);
                         break;
                     default:
-                        _underlyingLogger.LogNugetWarning($"{message.Message} ({message.Time})", message.Code);
+                        _underlyingLogger.NugetWarningMessage($"{message.Message} ({message.Time})", message.Code);
                         break;
                 }
                 break;
@@ -84,17 +84,17 @@ public class NugetLogWrapper(ILogger logger) : NuGet.Common.ILogger
 
     public Task LogAsync(NuGet.Common.ILogMessage message) => Task.Run(() => Log(message));
 
-    public void LogDebug(string data) => _underlyingLogger.LogNugetDebugMessage(data);
+    public void LogDebug(string data) => _underlyingLogger.NugetDebugMessage(data);
 
-    public void LogError(string data) => _underlyingLogger.LogNuGetError(data);
+    public void LogError(string data) => _underlyingLogger.NuGetErrorMessage(data);
 
-    public void LogInformation(string data) => _underlyingLogger.LogNugetInformationMessage(data);
+    public void LogInformation(string data) => _underlyingLogger.NugetInformationMessage(data);
 
-    public void LogInformationSummary(string data) => _underlyingLogger.LogNugetInformationMessage(data);
+    public void LogInformationSummary(string data) => _underlyingLogger.NugetInformationMessage(data);
 
-    public void LogMinimal(string data) => _underlyingLogger.LogNugetMinimalMessage(data);
+    public void LogMinimal(string data) => _underlyingLogger.NugetMinimalMessage(data);
 
-    public void LogVerbose(string data) => _underlyingLogger.LogNugetVerboseMessage(data);
+    public void LogVerbose(string data) => _underlyingLogger.NugetVerboseMessage(data);
 
-    public void LogWarning(string data) => _underlyingLogger.LogNugetWarning(data);
+    public void LogWarning(string data) => _underlyingLogger.NugetWarningMessage(data);
 }
