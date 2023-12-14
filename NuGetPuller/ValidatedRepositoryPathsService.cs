@@ -20,10 +20,10 @@ public sealed class ValidatedRepositoryPathsService<T>(IOptions<T> options, IHos
     ISharedAppSettings IValidatedRepositoryPathsService.Settings => Settings;
 
     /// <summary>
-    /// Lazy validation for the <see cref="ISharedAppSettings.UpstreamServiceIndex"/> setting.
+    /// Lazy validation for the <see cref="ISharedAppSettings.UpstreamServiceIndexUrl"/> setting.
     /// </summary>
-    public LazyChainedConversion<string, Uri> UpstreamServiceIndex { get; } = new LazyChainedConversion<string, Uri>(
-        () => options.Value.OverrideUpstreamServiceIndex.TryGetNonWhitesSpace(options.Value.UpstreamServiceIndex, out string result) ? result : ServiceDefaults.DEFAULT_UPSTREAM_SERVICE_INDEX,
+    public LazyChainedConversion<string, Uri> UpstreamServiceIndexUrl { get; } = new LazyChainedConversion<string, Uri>(
+        () => options.Value.OverrideUpstreamServiceIndex.TryGetNonWhitesSpace(options.Value.UpstreamServiceIndexUrl, out string result) ? result : ServiceDefaults.Default_Service_Index_URL,
         value =>
         {
             Uri result;
@@ -36,23 +36,23 @@ public sealed class ValidatedRepositoryPathsService<T>(IOptions<T> options, IHos
                 try
                 {
                     if (!File.Exists(result.LocalPath))
-                        logger.RepositoryPathNotFound(result.LocalPath, true, message => new RepositoryPathNotFoundException(result.LocalPath, message));
+                        logger.NuGetFeedPathNotFound(result.LocalPath, true, message => new NuGetFeedPathNotFoundException(result.LocalPath, message));
                 }
                 catch (Exception exception)
                 {
-                    throw logger.RepositoryPathNotFound(value, true, message => new RepositoryPathNotFoundException(value, message, exception), exception);
+                    throw logger.NuGetFeedPathNotFound(value, true, message => new NuGetFeedPathNotFoundException(value, message, exception), exception);
                 }
             else if (result.Scheme != Uri.UriSchemeHttps && result.Scheme != Uri.UriSchemeHttp)
-                throw logger.UnsupportedRepositoryUrlScheme(result.OriginalString, message => new UriSchemeNotSupportedException(result, message));
+                throw logger.UnsupportedNuGetServiceIndexUrlScheme(result.OriginalString, message => new UriSchemeNotSupportedException(result, message));
             return result;
         });
 
     /// <summary>
-    /// Lazy validation for the <see cref="ISharedAppSettings.LocalRepository"/> setting.
+    /// Lazy validation for the <see cref="ISharedAppSettings.LocalFeedPath"/> setting.
     /// </summary>
-    public LazyChainedConversion<string, DirectoryInfo> LocalRepository { get; } = new LazyChainedConversion<string, DirectoryInfo>(
-        () => options.Value.OverrideLocalRepository.TryGetNonWhitesSpace(options.Value.LocalRepository, out string result) ? result :
-            Path.Combine(hostEnvironment.ContentRootPath, ServiceDefaults.DEFAULT_LOCAL_REPOSITORY),
+    public LazyChainedConversion<string, DirectoryInfo> LocalFeedPath { get; } = new LazyChainedConversion<string, DirectoryInfo>(
+        () => options.Value.OverrideLocalFeed.TryGetNonWhitesSpace(options.Value.LocalFeedPath, out string result) ? result :
+            Path.Combine(hostEnvironment.ContentRootPath, ServiceDefaults.Default_Local_Feed_Folder_Name),
         value =>
         {
             string path = value;
@@ -74,7 +74,7 @@ public sealed class ValidatedRepositoryPathsService<T>(IOptions<T> options, IHos
             {
                 throw logger.InvalidRepositoryUrl(path, false, message => new InvalidRepositoryUriException(path, message, exception), exception);
             }
-            throw logger.RepositoryPathNotFound(path, false, message => new RepositoryPathNotFoundException(path, message));
+            throw logger.NuGetFeedPathNotFound(path, false, message => new NuGetFeedPathNotFoundException(path, message));
         });
 
     /// <summary>

@@ -15,7 +15,7 @@ public partial class MainServiceStatic
         try { return new StreamWriter(path, false, new System.Text.UTF8Encoding(false, false)); }
         catch (ArgumentException exception)
         {
-            throw logger.InvalidExportLocalMetaData(path, m => new MetaDataExportPathException(path, m, exception), exception);
+            throw logger.InvalidLocalMetaDataExportPath(path, m => new MetaDataExportPathException(path, m, exception), exception);
         }
         catch (UnauthorizedAccessException exception)
         {
@@ -23,15 +23,15 @@ public partial class MainServiceStatic
         }
         catch (DirectoryNotFoundException exception)
         {
-            throw logger.InvalidExportLocalMetaData(path, m => new MetaDataExportPathException(path, m, exception), exception);
+            throw logger.InvalidLocalMetaDataExportPath(path, m => new MetaDataExportPathException(path, m, exception), exception);
         }
         catch (PathTooLongException exception)
         {
-            throw logger.InvalidExportLocalMetaData(path, m => new MetaDataExportPathException(path, m, exception), exception);
+            throw logger.InvalidLocalMetaDataExportPath(path, m => new MetaDataExportPathException(path, m, exception), exception);
         }
         catch (IOException exception)
         {
-            throw logger.InvalidExportLocalMetaData(path, m => new MetaDataExportPathException(path, m, exception), exception);
+            throw logger.InvalidLocalMetaDataExportPath(path, m => new MetaDataExportPathException(path, m, exception), exception);
         }
         catch (System.Security.SecurityException exception)
         {
@@ -83,12 +83,12 @@ public partial class MainServiceStatic
         }
     }
 
-    // private async Task ImportAsync(string path, LocalClientService localClientService, ILogger logger, CancellationToken cancellationToken)
+    // private async Task ImportAsync(string path, LocalNuGetFeedService localClientService, ILogger logger, CancellationToken cancellationToken)
     // {
     //     throw new NotImplementedException();
     // }
 
-    // private async Task ExportBundleAsync(string bundlePath, string targetManifestInput, string targetManifestOutput, LocalClientService localClientService, ILogger logger, CancellationToken cancellationToken)
+    // private async Task ExportBundleAsync(string bundlePath, string targetManifestInput, string targetManifestOutput, LocalNuGetFeedService localClientService, ILogger logger, CancellationToken cancellationToken)
     // {
     //     throw new NotImplementedException();
     // }
@@ -111,17 +111,17 @@ public partial class MainServiceStatic
         writer.Close();
     }
 
-    public static async Task AddToLocalFromRemote(string packageId, Dictionary<string, HashSet<NuGetVersion>> packagesAdded, ILocalClientService localClientService, IUpstreamClientService upstreamClientService, ILogger logger, CancellationToken cancellationToken)
+    public static async Task AddToLocalFromRemote(string packageId, Dictionary<string, HashSet<NuGetVersion>> packagesAdded, ILocalNuGetFeedService localClientService, IUpstreamNuGetClientService upstreamClientService, ILogger logger, CancellationToken cancellationToken)
     {
         var upstreamVersions = await localClientService.GetAllVersionsAsync(packageId, cancellationToken);
         if (upstreamVersions is not null && upstreamVersions.Any())
         {
-            logger.PackageAlreadyAdded(packageId);
+            logger.NuGetPackageAlreadyAdded(packageId);
             return;
         }
         if ((upstreamVersions = await upstreamClientService.GetAllVersionsAsync(packageId, cancellationToken)) is null || !upstreamVersions.Any())
         {
-            logger.PackageNotFound(packageId, upstreamClientService);
+            logger.NuGetPackageNotFound(packageId, upstreamClientService);
             return;
         }
         if (packagesAdded.TryGetValue(packageId, out HashSet<NuGetVersion>? versionsAdded))
@@ -200,32 +200,32 @@ public partial class MainServiceStatic
         logger.IgnoredDependentCommandLineArgument(dependentSwitch, switchName1, switchName2, switchName3, switchName4);
     }
     
-    public static Task CheckDependenciesAsync(ILocalClientService localClientService, ILogger logger, string[] packageIds, NuGetVersion[] nuGetVersions, CancellationToken cancellationToken)
+    public static Task CheckDependenciesAsync(ILocalNuGetFeedService localClientService, ILogger logger, string[] packageIds, NuGetVersion[] nuGetVersions, CancellationToken cancellationToken)
     {
         return Task.FromException(new NotImplementedException());
     }
 
-    public static Task CheckDependenciesAsync(ILocalClientService localClientService, ILogger logger, string[] packageIds, CancellationToken cancellationToken)
+    public static Task CheckDependenciesAsync(ILocalNuGetFeedService localClientService, ILogger logger, string[] packageIds, CancellationToken cancellationToken)
     {
         return Task.FromException(new NotImplementedException());
     }
 
-    public static Task CheckAllDependenciesAsync(ILocalClientService localClientService, ILogger logger, CancellationToken cancellationToken)
+    public static Task CheckAllDependenciesAsync(ILocalNuGetFeedService localClientService, ILogger logger, CancellationToken cancellationToken)
     {
         return Task.FromException(new NotImplementedException());
     }
 
-    public static Task DownloadMissingDependenciesAsync(ILocalClientService localClientService, IUpstreamClientService upstreamClientService, ILogger logger, string[] packageIds, NuGetVersion[] nuGetVersions, CancellationToken cancellationToken)
+    public static Task DownloadMissingDependenciesAsync(ILocalNuGetFeedService localClientService, IUpstreamNuGetClientService upstreamClientService, ILogger logger, string[] packageIds, NuGetVersion[] nuGetVersions, CancellationToken cancellationToken)
     {
         return Task.FromException(new NotImplementedException());
     }
 
-    public static Task DownloadMissingDependenciesAsync(ILocalClientService localClientService, IUpstreamClientService upstreamClientService, ILogger logger, string[] packageIds, CancellationToken cancellationToken)
+    public static Task DownloadMissingDependenciesAsync(ILocalNuGetFeedService localClientService, IUpstreamNuGetClientService upstreamClientService, ILogger logger, string[] packageIds, CancellationToken cancellationToken)
     {
         return Task.FromException(new NotImplementedException());
     }
 
-    public static Task DownloadAllMissingDependenciesAsync(ILocalClientService localClientService, IUpstreamClientService upstreamClientService, ILogger logger, CancellationToken cancellationToken)
+    public static Task DownloadAllMissingDependenciesAsync(ILocalNuGetFeedService localClientService, IUpstreamNuGetClientService upstreamClientService, ILogger logger, CancellationToken cancellationToken)
     {
         return Task.FromException(new NotImplementedException());
     }

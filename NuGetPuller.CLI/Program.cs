@@ -29,8 +29,8 @@ internal class Program
         builder.Services
             .AddSingleton<IValidatedRepositoryPathsService, ValidatedRepositoryPathsService<AppSettings>>()
             .AddSingleton<ValidatedPathsService>()
-            .AddSingleton<ILocalClientService, LocalClientService>()
-            .AddSingleton<IUpstreamClientService, UpstreamClientService>()
+            .AddSingleton<ILocalNuGetFeedService, LocalNuGetFeedService>()
+            .AddSingleton<IUpstreamNuGetClientService, UpstreamNuGetClientService>()
             .AddTransient<PackageUpdateService>();
         builder.Services.AddHostedService<MainService>();
         (Host = builder.Build()).Run();

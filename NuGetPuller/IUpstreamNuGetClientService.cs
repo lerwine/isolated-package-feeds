@@ -2,7 +2,7 @@ using NuGet.Protocol.Core.Types;
 
 namespace NuGetPuller;
 
-public interface IUpstreamClientService : IClientService
+public interface IUpstreamNuGetClientService : INuGetClientService
 {
     /// <summary>
     /// Retrieve dependency info for all versions of a single package.

@@ -8,21 +8,21 @@ namespace NuGetPuller;
 public class InvalidRepositoryUriException : LoggedException
 {
     /// <summary>
-    /// Gets the invalid filesystem URI string.
+    /// Gets the invalid URI string.
     /// </summary>
     public string? URIstring { get; }
 
     public InvalidRepositoryUriException() { }
 
     /// <summary>
-    /// Initializes a new <c>InvalidFileSystemUriException</c>.
+    /// Initializes a new <c>InvalidRepositoryUriException</c>.
     /// </summary>
     /// <param name="uriString">The invalid URI.</param>
     /// <param name="innerException">The optional exception that is the cause of the current exception.</param>
     public InvalidRepositoryUriException(string uriString, Exception? innerException = null) : base(null, innerException) => URIstring = uriString;
 
     /// <summary>
-    /// Initializes a new <c>InvalidFileSystemUriException</c>.
+    /// Initializes a new <c>InvalidRepositoryUriException</c>.
     /// </summary>
     /// <param name="uriString">The invalid URI.</param>
     /// <param name="message">The message that describes the error.</param>

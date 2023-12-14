@@ -8,10 +8,10 @@ using static IsolatedPackageFeeds.Shared.CommonStatic;
 
 namespace NuGetPuller;
 
-public class PackageUpdateService(ILocalClientService localClient, IUpstreamClientService upstreamClient, ILogger<PackageUpdateService> logger)
+public class PackageUpdateService(ILocalNuGetFeedService localClient, IUpstreamNuGetClientService upstreamClient, ILogger<PackageUpdateService> logger)
 {
-    private readonly ILocalClientService _localClient = localClient;
-    private readonly IUpstreamClientService _upstreamClient = upstreamClient;
+    private readonly ILocalNuGetFeedService _localClient = localClient;
+    private readonly IUpstreamNuGetClientService _upstreamClient = upstreamClient;
     private readonly ILogger _logger = logger;
 
     public async Task UpdatePackagesAsync(IEnumerable<string> packageIds, CancellationToken cancellationToken)
@@ -26,13 +26,13 @@ public class PackageUpdateService(ILocalClientService localClient, IUpstreamClie
             var upstreamVersions = await _upstreamClient.GetAllVersionsAsync(packageId, updater.UpstreamFindPackageById, cancellationToken);
             if (upstreamVersions is null || !upstreamVersions.Any())
             {
-                _logger.PackageNotFound(packageId, _upstreamClient);
+                _logger.NuGetPackageNotFound(packageId, _upstreamClient);
                 continue;
             }
             var localVersions = await _localClient.GetAllVersionsAsync(packageId, localFindPackageById, cancellationToken);
             if (localVersions is null || !localVersions.Any())
             {
-                _logger.PackageNotFound(packageId, _localClient);
+                _logger.NuGetPackageNotFound(packageId, _localClient);
                 continue;
             }
             foreach (NuGetVersion version in upstreamVersions.Where(u => !localVersions.Contains(u, versionComparer)))
@@ -47,7 +47,7 @@ public class PackageUpdateService(ILocalClientService localClient, IUpstreamClie
         {
             var dependencyInfo = await _upstreamClient.GetDependencyInfoAsync(identity.Id, identity.Version, updater.UpstreamFindPackageById, cancellationToken);
             if (dependencyInfo is null)
-                _logger.PackageNotFound(identity.Id, identity.Version, _upstreamClient);
+                _logger.NuGetPackageNotFound(identity.Id, identity.Version, _upstreamClient);
             else if (dependencyInfo.DependencyGroups is not null)
                 foreach (var pkg in dependencyInfo.DependencyGroups.Where(g => g.Packages is not null).SelectMany(g => g.Packages.Select(p => new PackageIdentity(p.Id, p.VersionRange.MinVersion))))
                 {
@@ -63,9 +63,9 @@ public class PackageUpdateService(ILocalClientService localClient, IUpstreamClie
     {
         private readonly VersionFolderPathResolver _pathResolver;
         private readonly TempStagingFolder _tempStaging;
-        private readonly ILocalClientService _localClient;
+        private readonly ILocalNuGetFeedService _localClient;
         private readonly PackageUpdateResource _updateResource;
-        private readonly IUpstreamClientService _upstreamClient;
+        private readonly IUpstreamNuGetClientService _upstreamClient;
         internal FindPackageByIdResource UpstreamFindPackageById { get; }
         private Updater(PackageUpdateService updateService, PackageUpdateResource updateResource, FindPackageByIdResource findPackageById)
         {

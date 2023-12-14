@@ -9,7 +9,7 @@ namespace NuGetPuller;
 /// </summary>
 /// <param name="settings">The validated settings service.</param>
 /// <param name="logger">THe logger to write log information to.</param>
-public class UpstreamClientService(IValidatedRepositoryPathsService settings, ILogger<UpstreamClientService> logger) : ClientService(Repository.Factory.GetCoreV3(settings.UpstreamServiceIndex.GetResult().AbsoluteUri), settings, logger, true), IUpstreamClientService
+public class UpstreamNuGetClientService(IValidatedRepositoryPathsService settings, ILogger<UpstreamNuGetClientService> logger) : NuGetClientService(Repository.Factory.GetCoreV3(settings.UpstreamServiceIndexUrl.GetResult().AbsoluteUri), settings, logger, true), IUpstreamNuGetClientService
 {
     /// <summary>
     /// Retrieve dependency info for all versions of a single package.

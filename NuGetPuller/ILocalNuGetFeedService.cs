@@ -4,7 +4,7 @@ using NuGet.Versioning;
 
 namespace NuGetPuller;
 
-public interface ILocalClientService : IClientService
+public interface ILocalNuGetFeedService : INuGetClientService
 {
     #region Methods using the Search Query API
 
@@ -16,18 +16,18 @@ public interface ILocalClientService : IClientService
     Task<PackageSearchResource> GetPackageSearchResourceAsync(CancellationToken cancellationToken);
 
     /// <summary>
-    /// Gets all packages in the local repository.
+    /// Gets all packages in the Local NuGet Feed.
     /// </summary>
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
-    /// <returns>Metadata for packages in local repository.</returns>
+    /// <returns>Metadata for packages in Local NuGet Feed.</returns>
     IAsyncEnumerable<IPackageSearchMetadata> GetAllPackagesAsync(CancellationToken cancellationToken);
 
     /// <summary>
-    /// Gets all packages in the local repository.
+    /// Gets all packages in the Local NuGet Feed.
     /// </summary>
     /// <param name="packageSearchResource">The NuGet resource for the NuGet Search Query API.</param>
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
-    /// <returns>Metadata for packages in local repository.</returns>
+    /// <returns>Metadata for packages in Local NuGet Feed.</returns>
     IAsyncEnumerable<IPackageSearchMetadata> GetAllPackagesAsync(PackageSearchResource? packageSearchResource, CancellationToken cancellationToken);
 
 

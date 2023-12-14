@@ -1,10 +1,14 @@
 # NuGetPuller CLI
 
-The purpose of this application is to synchronize a local NuGet repository with an upstream NuGet repository as well as other locally-hosted NuGet repositories.
+The purpose of this application is to synchronize packages between [NuGet](https://www.nuget.org/) feeds.
 
-An example use-case would be for a locally-hosted NuGet repository on a machine that does not have direct access to the internet. You can use this to download NuGet packages, including any dependencies, and then create a bundle of packages (a ZIP file) which can then be transferred to that disconnected host and imported into the local NuGet repository.
+This application runs in the context of a Local NuGet Feed and an Upstream NuGet Feed or server.
+> For the purposes of this application and documentation, a NuGet "Feed" refers to a filesystem subdirectory that contains properly named NuGet packages.
+> and a Nuget "Repository" refers generically to a NuGet server or filesystem-based feed.
 
-This references package manifest files to represent which packages already exist in other locally-hosted NuGet repositorys. This minimizes bundle sizes, because it doesn't have to include packages that already exist in the target NuGet repository.
+An example use-case would be for a locally-hosted NuGet feed on a machine that does not have direct access to the internet. You can use this to download NuGet packages, including any dependencies, and then create a bundle of packages (a ZIP file) which can then be transferred to that disconnected host and imported into the Local NuGet Feed.
+
+This references package manifest files to represent which packages already exist in other locally-hosted NuGet feeds. This minimizes bundle sizes, because it doesn't have to include packages that already exist in the target NuGet feed.
 
 ## Application Settings
 
@@ -14,8 +18,10 @@ See [NuGet Common Class Library Application Settings](../NuGetPuller/README.md#a
 
 ### Show All Packages
 
-- `--list` **Required** *(stand-alone switch)*: List all packages in the local repository.
-- `--include-versions` *(Optional - stand-alone switch)*: Show all version numbers of each package in the local repository.
+Command line options for showing all packages in the local feed.
+
+- `--list` **Required** *(stand-alone switch)*: List all packages in the local feed.
+- `--include-versions` *(Optional - stand-alone switch)*: Show all version numbers of each package in the local feed.
 
 Example:
 
@@ -25,7 +31,7 @@ NuGetPuller --list --include-versions
 
 ### Download Packages
 
-Download packages from the upstream NuGet repository and add them to the local repository.
+Download packages from the upstream NuGet repository and add them to the local feed.
 
 - `--download` **Required**: Identifier of package to download.
   
@@ -36,7 +42,7 @@ Download packages from the upstream NuGet repository and add them to the local r
   
   If the version is not specified, the latest version will be downloaded.
 - `--no-dependencies` *(Optional - stand-alone switch)*: Do not download dependencies.
-  If this switch is not used, then all dependencies will be downloaded and added to the local repository as well.
+  If this switch is not used, then all dependencies will be downloaded and added to the local feed as well.
 
 Example:
 
@@ -46,7 +52,7 @@ NuGetPuller --download=Microsoft.Extensions.Logging,Microsoft.Extensions.Configu
 
 ### Add Package Files
 
-Add package files to the local NuGet repository.
+Add package files to the Local NuGet Feed.
 
 - `--add-file` **Required**: Path to an individual `.nupkg` file, a `.zip` file containing package files, or to a subdirectory of `.nupkg` files. This will not recursively search sub-folders.
   
@@ -66,7 +72,7 @@ NuGetPuller --add-file=john.doe/downloads
 
 ### Remove Packages
 
-Remove packages from the local NuGet repository.
+Remove packages from the Local NuGet Feed.
 
 - `--remove` **Required**: Identifier of package to remove.
   
@@ -89,7 +95,7 @@ NuGetPuller --remove=Microsoft.Extensions.Logging,Microsoft.Extensions.Configura
   
   Multiple package identifiers can be specified, separated by commas.
   
-  If the package identifer is not specified, all packages in the local repository will be checked.
+  If the package identifer is not specified, all packages in the local feed will be checked.
 - `--version` *(Optional)*: Specific version of package to check.
   
   Multiple versions can be specified, separated by commas.
@@ -97,7 +103,7 @@ NuGetPuller --remove=Microsoft.Extensions.Logging,Microsoft.Extensions.Configura
   If the version is not specified, all package versions will be checked.
 - `--no-download` *(Optional - stand-alone switch)*: Do not download missing dependencies.
   
-  If this switch is not specified, any missing dependencies will be downloaded from the upstream NuGet repository, if they are found
+  If this switch is not specified, any missing dependencies will be downloaded from the Upstream NuGet Feed, if they are found
 
 Example:
 
@@ -105,9 +111,9 @@ Example:
 NuGetPuller --check-depencencies=System.Text.Json,Microsoft.Extensions.Hosting --no-download
 ```
 
-### Export Local NuGet Repository Metadata
+### Export Local NuGet Feed Metadata
 
-Create a metadata file that represnts the contents of the local NuGet repository.
+Create a metadata file that represnts the contents of the Local NuGet Feed.
 
 - `--export-metadata` **Required:**: Path metadata file to create.
 
@@ -121,10 +127,10 @@ NuGetPuller --export-metadata=MyLocaRepo.json
 
 - `--create-bundle` **Required:**: Path of bundle file to create.
 - If no extension is specified, this will use the `.zip` file extension.
-- `--create-from` *(Optional)*: Path of a local nuget feed metadata file.
+- `--create-from` *(Optional)*: Path of a Local NuGet Feed metadata file.
   If this option is used, the bundle will not contain any packages that are represented in the nuget feed metadata file.
 - `--save-metadata-to` *(Optional)*: Path of file to save the updated metadata to. If the `--create-from` was used, the metadata file will
-  reflect the contents of the associated local nuget feed after the bundle is added; otherwise, the metadata file will contain packages
+  reflect the contents of the associated Local NuGet Feed after the bundle is added; otherwise, the metadata file will contain packages
   that were exported to the `.zip` file.
 
   It is okay if the `--create-from` and `--save-metadata-to` options refer to the same file.
@@ -140,15 +146,15 @@ NuGetPuller --create-bundle=Updates.zip --create-from=DisconnectedServer.nuget.m
 The following optional command line arguments can be used to override [Applicaton Settings](../NuGetPuller/README.md#application-settings),
 and can be used in combination with other command line arguments:
 
-- `--local-repository`: Override the [LocalPath](../NuGetPuller/README.md#local-nuget-repository-path) setting.
+- `--local-feed-path`: Override the [LocalPath](../NuGetPuller/README.md#local-nuget-feed-path) setting.
   
   Example:
 
   ```bash
-  NuGetPuller --local-repository=john.doe/downloads --check-depencencies="System.Text.Json" --no-download
+  NuGetPuller --local-feed-path=john.doe/downloads --check-depencencies="System.Text.Json" --no-download
   ```
 
-- `--upstream-service-index`: Override the [UpstreamServiceIndex](../NuGetPuller/README.md#upstream-service-index-url) setting.
+- `--upstream-service-index`: Override the [UpstreamServiceIndexUrl](../NuGetPuller/README.md#upstream-service-index-url) setting.
   
   Example:
 

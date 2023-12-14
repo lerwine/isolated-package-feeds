@@ -23,7 +23,7 @@ record HostingFake(IHost Host, string PreviousCwd, DirectoryInfo BaseDirectory, 
         var previousCwd = Directory.GetCurrentDirectory();
         Directory.SetCurrentDirectory(cwd.FullName);
 
-        DirectoryInfo localRepo = new(Path.Combine(testContext.TestDirectory, ServiceDefaults.DEFAULT_LOCAL_REPOSITORY));
+        DirectoryInfo localRepo = new(Path.Combine(testContext.TestDirectory, ServiceDefaults.Default_Local_Feed_Folder_Name));
         if (localRepo.Exists)
             localRepo.Delete(true);
 
@@ -43,8 +43,8 @@ record HostingFake(IHost Host, string PreviousCwd, DirectoryInfo BaseDirectory, 
             .ValidateDataAnnotations();
         builder.Services
             .AddSingleton<IValidatedRepositoryPathsService, ValidatedRepositoryPathsService<TestAppSettings>>()
-            .AddSingleton<ILocalClientService, LocalClientService>()
-            .AddSingleton<IUpstreamClientService, UpstreamClientService>();
+            .AddSingleton<ILocalNuGetFeedService, LocalNuGetFeedService>()
+            .AddSingleton<IUpstreamNuGetClientService, UpstreamNuGetClientService>();
         var host = builder.Build();
         host.Start();
         return new(Host: host, PreviousCwd: previousCwd, BaseDirectory: baseDirectory, Cwd: cwd, LocalRepo: localRepo);

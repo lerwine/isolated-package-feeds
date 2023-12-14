@@ -9,7 +9,7 @@ namespace NuGetPuller;
 /// <summary>
 /// Base class providing methods for managing a NuGet repository.
 /// </summary>
-public abstract class ClientService : IClientService
+public abstract class NuGetClientService : INuGetClientService
 {
     #region Fields and Properties
 
@@ -40,7 +40,7 @@ public abstract class ClientService : IClientService
     /// <param name="settings">The validated settings service.</param>
     /// <param name="logger">THe logger to write log information to.</param>
     /// <param name="isUpstream"><see langword="true"/> if the source repository represents the upstream repository; otherwise, <see langword="false"/>.</param>
-    protected ClientService(SourceRepository sourceRepository, IValidatedRepositoryPathsService settings, ILogger logger, bool isUpstream)
+    protected NuGetClientService(SourceRepository sourceRepository, IValidatedRepositoryPathsService settings, ILogger logger, bool isUpstream)
     {
         GlobalPackagesFolder = settings.GlobalPackagesFolder.GetResult().FullName;
         NuGetLogger = new(Logger = logger);

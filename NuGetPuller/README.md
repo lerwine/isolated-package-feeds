@@ -1,10 +1,10 @@
 # NuGetPuller Common Library
 
-The purpose of this library is the basae class for applications that synchronize a local NuGet repository with an upstream NuGet repository as well as other locally-hosted NuGet repositories.
+The purpose of this library is the basae class for applications that synchronize a Local NuGet Feed with an upstream NuGet repository as well as other locally-hosted NuGet repositories.
 
-An example use-case would be for a locally-hosted NuGet repository on a machine that does not have direct access to the internet. You can use this to download NuGet packages, including any dependencies, and then create a bundle of packages (a ZIP file) which can then be transferred to that disconnected host and imported into the local NuGet repository.
+An example use-case would be for a locally-hosted NuGet feed on a machine that does not have direct access to the internet. You can use this to download NuGet packages, including any dependencies, and then create a bundle of packages (a ZIP file) which can then be transferred to that disconnected host and imported into the Local NuGet Feed.
 
-This references package manifest files to represent which packages already exist in other locally-hosted NuGet repositorys. This minimizes bundle sizes, because it doesn't have to include packages that already exist in the target NuGet repository.
+This uses package manifest files to represent which packages already exist in other locally-hosted NuGet feeds. This minimizes bundle sizes, because it doesn't have to include packages that already exist in the target NuGet feed.
 
 ## Application Settings
 
@@ -12,14 +12,14 @@ Following are the configuration options for the `NuGetPuller` configuration sect
 
 ### Upstream Service Index URL
 
-- `UpstreamServiceIndex` - The URL of the upstream NuGet server.
+- `UpstreamServiceIndexUrl` - The URL of the upstream NuGet server.
   - The default value is `https://api.nuget.org/v3/index.json`.
   - This can also be the path to a subdirectory, if you want to use a local folder as the upstream NuGet repository.
 
-### Local NuGet Repository Path
+### Local NuGet Feed Path
 
-- `LocalRepository` - The path of local NuGet repository.
-  - The default location of the local NuGet repository is a folder named `LocalSource` in the same subdirectory as the `NuGetPuller` executable.
+- `LocalFeedPath` - The path of Local NuGet Feed.
+  - The default location of the Local NuGet Feed is a folder named `LocalFeed` in the same subdirectory as the `NuGetPuller.CLI` executable.
 
 ### Global Packages Folder Path
 
@@ -30,8 +30,8 @@ Following are the configuration options for the `NuGetPuller` configuration sect
 ```json
 {
     "NuGetPuller": {
-        "UpstreamServiceIndex": "file://myserver/myshare",
-        "LocalRepository": "C:/users/john.doe/Documents/MyLocalRepository",
+        "UpstreamServiceIndexUrl": "file://myserver/myshare",
+        "LocalFeedPath": "C:/users/john.doe/Documents/MyLocalFeed",
         "GlobalPackagesFolder": "C:/users/john.doe/Downloads/MyNuGetGpf"
     }
 }

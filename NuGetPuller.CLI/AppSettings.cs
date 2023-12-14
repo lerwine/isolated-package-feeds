@@ -43,7 +43,7 @@ public partial class AppSettings : ISharedAppSettings
     public bool NoDependencies { get; set; }
 
     /// <summary>
-    /// Semi-colon-separated list of package file paths or subdirectory paths to add to the local NuGet repository.
+    /// Semi-colon-separated list of package file paths or subdirectory paths to add to the Local NuGet Feed.
     /// </summary>
     /// <remarks>This is mapped from the <c>--add-file</c> (<see cref="COMMAND_LINE_SWITCH_add_file"/>) command line argument.</remarks>
     public string? AddPackageFiles { get; set; }
@@ -61,13 +61,13 @@ public partial class AppSettings : ISharedAppSettings
     public string? SaveTo { get; set; }
 
     /// <summary>
-    /// Check to see if there are any missing dependencies for packages in the local repository.
+    /// Check to see if there are any missing dependencies for packages in the local feed.
     /// </summary>
     /// <remarks>This is mapped from the <c>--check-dependencies</c> (<see cref="COMMAND_LINE_SWITCH_check_depencencies"/>) command line switch.</remarks>
     public bool CheckDependencies { get; set; }
 
     /// <summary>
-    /// Used along with <see cref="CheckDependencies"/> and <see cref="CreateBundle"/> to indicate a specific list of comma-separated packages IDs to check, rather than referencing all packages in the local repository.
+    /// Used along with <see cref="CheckDependencies"/> and <see cref="CreateBundle"/> to indicate a specific list of comma-separated packages IDs to check, rather than referencing all packages in the local feed.
     /// </summary>
     /// <remarks>This is mapped from the <c>--package-id</c> (<see cref="COMMAND_LINE_SWITCH_package_id"/>) command line argument.</remarks>
     public string? PackageId { get; set; }
@@ -78,7 +78,7 @@ public partial class AppSettings : ISharedAppSettings
     public bool NoDownload { get; set; }
 
     /// <summary>
-    /// Gets the path to export the metadata for all packages in the local repository. This refers to a relative or absolute file path.
+    /// Gets the path to export the metadata for all packages in the local feed. This refers to a relative or absolute file path.
     /// </summary>
     /// <remarks>The package listing is exported as a JSON array. If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Directory.GetCurrentDirectory"/>).
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
@@ -92,7 +92,7 @@ public partial class AppSettings : ISharedAppSettings
     public string? CreateBundle { get; set; }
 
     /// <summary>
-    /// Optional path of package to package metadata json of another local NuGet repository.
+    /// Optional path of package to package metadata json of another Local NuGet Feed.
     /// </summary>
     /// <remarks>This is mapped from the <c>--create-from</c> (<see cref="COMMAND_LINE_SWITCH_create_from"/>) command line argument.</remarks>
     public string? CreateFrom { get; set; }
@@ -106,36 +106,11 @@ public partial class AppSettings : ISharedAppSettings
     /// <para>This is mapped from the <c>--save-metadata-to</c> (<see cref="COMMAND_LINE_SWITCH_save_metadata_to"/>) command line argument.</para></remarks>
     public string? SaveMetaDataTo { get; set; }
 
-    [Obsolete("Use Add with Version set to 'all'")]
-    public bool UpdateAll { get; set; }
-
-    [Obsolete("Use Add with Version")]
-    public string? Update { get; set; }
-
-    [Obsolete()]
-    public string? Add { get; set; }
-
     [Obsolete()]
     public string? Import { get; set; }
 
     [Obsolete()]
     public string? TargetManifestFile { get; set; }
-
-    /// <summary>
-    /// Gets the override value for the <see cref="UpstreamServiceIndex" /> setting.
-    /// </summary>
-    /// <remarks>If this refers to a subdirectory and is not absolute, it will be resolved relative to the current working directory (<see cref="Directory.GetCurrentDirectory"/>).
-    /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
-    /// <para>This is mapped from the <c>--upstream-service-index</c> (<see cref="COMMAND_LINE_SWITCH_upstream_2D_service_2D_index"/>) command line argument.</para></remarks>
-    public string? OverrideUpstreamServiceIndex { get; set; }
-
-    /// <summary>
-    /// Gets the override value for the <see cref="LocalRepository" /> setting.
-    /// </summary>
-    /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Directory.GetCurrentDirectory"/>).
-    /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
-    /// <para>This is mapped from the <c>--local-repository</c> (<see cref="COMMAND_LINE_SWITCH_local_2D_repository"/>) command line argument.</para></remarks>
-    public string? OverrideLocalRepository { get; set; }
 
     /// <summary>
     /// Gets the override value for the <see cref="GlobalPackagesFolder" /> setting.
@@ -146,22 +121,38 @@ public partial class AppSettings : ISharedAppSettings
     public string? OverrideGlobalPackagesFolder { get; set; }
 
     /// <summary>
-    /// Specifies the remote endpoint URL for the V3 NGet API or a subdirectory path that contains the upstream NuGet repository.
+    /// Specifies the remote endpoint URL for the V3 NGet API or a subdirectory path that contains the Upstream NuGet Feed.
     /// </summary>
-    /// <remarks>The default value of this setting is defined in the <see cref="DEFAULT_UPSTREAM_SERVICE_INDEX" /> constant.
+    /// <remarks>The default value of this setting is defined in the <see cref="Default_Service_Index_URL" /> constant.
     /// If this refers to a subdirectory and is not absolute, it will be resolved relative to the application assembly directory (<see cref="Microsoft.Extensions.Hosting.IHostEnvironment.ContentRootPath" />).
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
     /// <para>This can be overridden using the <c>--upstream-service-index</c> (<see cref="COMMAND_LINE_SWITCH_upstream_2D_service_2D_index"/>) command line argument.</para></remarks>
     /// <seealso href="https://learn.microsoft.com/en-us/nuget/api/overview#service-index"/>
-    public string UpstreamServiceIndex { get; set; } = null!;
+    public string UpstreamServiceIndexUrl { get; set; } = null!;
 
     /// <summary>
-    /// Specifies the relative or absolute path of a subdirectory for a local Nuget repository.
+    /// Gets the override value for the <see cref="UpstreamServiceIndexUrl" /> setting.
     /// </summary>
-    /// <remarks>If this path is not absolute, it will be resolved relative to the application assembly directory (<see cref="Microsoft.Extensions.Hosting.IHostEnvironment.ContentRootPath" />). The default value of this setting is defined in the <see cref="DEFAULT_LOCAL_REPOSITORY" /> constant.
+    /// <remarks>If this refers to a subdirectory and is not absolute, it will be resolved relative to the current working directory (<see cref="Directory.GetCurrentDirectory"/>).
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
-    /// <para>This can be overridden using the <c>--local-repository</c> (<see cref="COMMAND_LINE_SWITCH_local_2D_repository"/>) command line argument.</para></remarks>
-    public string LocalRepository { get; set; } = null!;
+    /// <para>This is mapped from the <c>--upstream-service-index</c> (<see cref="COMMAND_LINE_SWITCH_upstream_2D_service_2D_index"/>) command line argument.</para></remarks>
+    public string? OverrideUpstreamServiceIndex { get; set; }
+
+    /// <summary>
+    /// Specifies the relative or absolute path of a subdirectory for a local Nuget feed.
+    /// </summary>
+    /// <remarks>If this path is not absolute, it will be resolved relative to the application assembly directory (<see cref="Microsoft.Extensions.Hosting.IHostEnvironment.ContentRootPath" />). The default value of this setting is defined in the <see cref="Default_Local_Feed_Folder_Name" /> constant.
+    /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
+    /// <para>This can be overridden using the <c>--local-feed-path</c> (<see cref="COMMAND_LINE_SWITCH_local_2D_feed_2D_path"/>) command line argument.</para></remarks>
+    public string LocalFeedPath { get; set; } = null!;
+
+    /// <summary>
+    /// Gets the override value for the <see cref="LocalFeedPath" /> setting.
+    /// </summary>
+    /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Directory.GetCurrentDirectory"/>).
+    /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
+    /// <para>This is mapped from the <c>--local-feed-path</c> (<see cref="COMMAND_LINE_SWITCH_local_2D_feed_2D_path"/>) command line argument.</para></remarks>
+    public string? OverrideLocalFeed { get; set; }
 
     /// <summary>
     /// Specifies the relative or absolute path of the NuGet global packages folder.
@@ -202,8 +193,8 @@ public partial class AppSettings : ISharedAppSettings
         { COMMAND_LINE_SWITCH_create_bundle, $"{nameof(NuGetPuller)}:{nameof(CreateBundle)}" },
         { COMMAND_LINE_SWITCH_create_from, $"{nameof(NuGetPuller)}:{nameof(CreateFrom)}" },
         { COMMAND_LINE_SWITCH_save_metadata_to, $"{nameof(NuGetPuller)}:{nameof(SaveMetaDataTo)}" },
-        { COMMAND_LINE_SWITCH_local_2D_repository, $"{nameof(NuGetPuller)}:{nameof(OverrideLocalRepository)}" },
-        { COMMAND_LINE_SWITCH_upstream_2D_service_2D_index, $"{nameof(NuGetPuller)}:{nameof(OverrideLocalRepository)}" },
+        { COMMAND_LINE_SWITCH_local_2D_feed_2D_path, $"{nameof(NuGetPuller)}:{nameof(OverrideLocalFeed)}" },
+        { COMMAND_LINE_SWITCH_upstream_2D_service_2D_index, $"{nameof(NuGetPuller)}:{nameof(OverrideLocalFeed)}" },
         { COMMAND_LINE_SWITCH_global_2D_packages_2D_folder, $"{nameof(NuGetPuller)}:{nameof(OverrideGlobalPackagesFolder)}" }
     });
 

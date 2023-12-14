@@ -37,7 +37,7 @@ public class ValidatedPathsService
                 }
                 catch (Exception exception)
                 {
-                    throw logger.InvalidExportLocalMetaData(value, message => new MetaDataExportPathException(value, message, exception), exception);
+                    throw logger.InvalidLocalMetaDataExportPath(value, message => new MetaDataExportPathException(value, message, exception), exception);
                 }
                 value = result.FullName;
                 throw logger.ExportLocalMetaDataDirectoryNotFound(value, message => new MetaDataExportPathException(value, message));
@@ -66,7 +66,7 @@ public class ValidatedPathsService
                 }
                 catch (Exception exception)
                 {
-                    throw logger.InvalidExportLocalMetaData(value, message => new MetaDataExportPathException(value, message, exception), exception);
+                    throw logger.InvalidLocalMetaDataExportPath(value, message => new MetaDataExportPathException(value, message, exception), exception);
                 }
                 value = result.FullName;
                 throw logger.ExportLocalMetaDataDirectoryNotFound(value, message => new MetaDataExportPathException(value, message));
@@ -88,7 +88,7 @@ public class ValidatedPathsService
                 }
                 catch (Exception exception)
                 {
-                    throw logger.InvalidExportLocalMetaData(value, message => new MetaDataExportPathException(value, message, exception), exception);
+                    throw logger.InvalidLocalMetaDataExportPath(value, message => new MetaDataExportPathException(value, message, exception), exception);
                 }
                 value = result.FullName;
                 throw logger.ExportLocalMetaDataDirectoryNotFound(value, message => new MetaDataExportPathException(value, message));
@@ -110,7 +110,7 @@ public class ValidatedPathsService
                 }
                 catch (Exception exception)
                 {
-                    throw logger.InvalidExportLocalMetaData(value, message => new MetaDataExportPathException(value, message, exception), exception);
+                    throw logger.InvalidLocalMetaDataExportPath(value, message => new MetaDataExportPathException(value, message, exception), exception);
                 }
                 value = result.FullName;
                 throw logger.ExportLocalMetaDataDirectoryNotFound(value, message => new MetaDataExportPathException(value, message));
@@ -132,7 +132,7 @@ public class ValidatedPathsService
                 }
                 catch (Exception exception)
                 {
-                    throw logger.InvalidExportLocalMetaData(value, message => new MetaDataExportPathException(value, message, exception), exception);
+                    throw logger.InvalidLocalMetaDataExportPath(value, message => new MetaDataExportPathException(value, message, exception), exception);
                 }
                 value = result.FullName;
                 throw logger.ExportLocalMetaDataDirectoryNotFound(value, message => new MetaDataExportPathException(value, message));

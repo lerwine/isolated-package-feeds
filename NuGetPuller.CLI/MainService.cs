@@ -20,7 +20,7 @@ public class MainService : BackgroundService
     public MainService(IOptions<AppSettings> options, ILogger<MainService> logger, IServiceProvider serviceProvider, IHostApplicationLifetime applicationLifetime) =>
         (_settings, _logger, _serviceProvider, _applicationLifetime) = (options.Value, logger, serviceProvider, applicationLifetime);
 
-    private Task WriteLocalPackagesToConsole(ILocalClientService localClientService, bool includeVersions, CancellationToken cancellationToken)
+    private Task WriteLocalPackagesToConsole(ILocalNuGetFeedService localClientService, bool includeVersions, CancellationToken cancellationToken)
     {
         return Task.FromException(new NotImplementedException());
     }
@@ -52,7 +52,7 @@ public class MainService : BackgroundService
                     LogIgnoredDependentCommandLineArgumentIfSet(_settings.SaveTo, () => (_logger, nameof(AppSettings.SaveTo), nameof(AppSettings.Remove)));
                     LogIgnoredDependentCommandLineArgumentIfSet(_settings.CreateFrom, () => (_logger, nameof(AppSettings.CreateFrom), nameof(AppSettings.CreateBundle)));
                     LogIgnoredDependentCommandLineArgumentIfSet(_settings.SaveMetaDataTo, () => (_logger, nameof(AppSettings.SaveMetaDataTo), nameof(AppSettings.CreateBundle)));
-                    var localService = _serviceProvider.GetRequiredService<ILocalClientService>();
+                    var localService = _serviceProvider.GetRequiredService<ILocalNuGetFeedService>();
                     if (_settings.NoDownload)
                     {
                         if (_settings.PackageId.TrySplitToNonWhiteSpaceTrimmed(',', out string[]? packageIds))
@@ -70,7 +70,7 @@ public class MainService : BackgroundService
                     }
                     else
                     {
-                        var upstreamService = _serviceProvider.GetRequiredService<IUpstreamClientService>();
+                        var upstreamService = _serviceProvider.GetRequiredService<IUpstreamNuGetClientService>();
                         if (_settings.PackageId.TrySplitToNonWhiteSpaceTrimmed(',', out string[]? packageIds))
                         {
                             if (_settings.Version.TryGetNuGetVersionList(out NuGetVersion[]? versions))
@@ -233,22 +233,22 @@ public class MainService : BackgroundService
             // var packageIds = _settings.Remove?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(NoCaseComparer);
             // HashSet<PackageIdentity> deletedPackages = new(PackageIdentityComparer.Default);
             // if (packageIds is not null && packageIds.Any())
-            //     await foreach (var (package, success) in scope.ServiceProvider.GetRequiredService<ILocalClientService>().DeleteAsync(packageIds, stoppingToken))
+            //     await foreach (var (package, success) in scope.ServiceProvider.GetRequiredService<ILocalNuGetFeedService>().DeleteAsync(packageIds, stoppingToken))
             //         if (success)
             //             deletedPackages.Add(package);
             // if ((packageIds = _settings.Add?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(NoCaseComparer)) is not null && packageIds.Any())
             // {
             //     Dictionary<string, HashSet<NuGetVersion>> packagesAdded = new(NoCaseComparer);
-            //     var localClientService = scope.ServiceProvider.GetRequiredService<ILocalClientService>();
+            //     var localClientService = scope.ServiceProvider.GetRequiredService<ILocalNuGetFeedService>();
             //     foreach (string id in packageIds)
-            //         await AddToLocalFromRemote(id, packagesAdded, localClientService, scope.ServiceProvider.GetRequiredService<IUpstreamClientService>(), _logger, stoppingToken);
+            //         await AddToLocalFromRemote(id, packagesAdded, localClientService, scope.ServiceProvider.GetRequiredService<IUpstreamNuGetClientService>(), _logger, stoppingToken);
             // }
             // if (validatedSettings.Import.TryGetResult(out FileSystemInfo? importFrom))
             //     throw new NotImplementedException();
             // // await ImportAsync(validatedSettings.ImportPath, localClientService, _logger, stoppingToken);
             // if (_settings.UpdateAll)
             // {
-            //     var asyncEn = scope.ServiceProvider.GetRequiredService<ILocalClientService>().GetAllPackagesAsync(stoppingToken);
+            //     var asyncEn = scope.ServiceProvider.GetRequiredService<ILocalNuGetFeedService>().GetAllPackagesAsync(stoppingToken);
             //     if (!(packageIds = asyncEn.ToBlockingEnumerable(stoppingToken).Select(p => p.Identity.Id)).Any())
             //         _logger.NoLocalPackagesExist();
             //     else
@@ -257,9 +257,9 @@ public class MainService : BackgroundService
             // else if ((packageIds = _settings.Update?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(NoCaseComparer)) is not null && packageIds.Any())
             //     await scope.ServiceProvider.GetRequiredService<PackageUpdateService>().UpdatePackagesAsync(packageIds, stoppingToken);
             // if (_settings.ListLocal)
-            //     await ListLocalPackagesAsync(scope.ServiceProvider.GetRequiredService<ILocalClientService>().GetAllPackagesAsync(stoppingToken).ToBlockingEnumerable(stoppingToken), validatedSettings.ExportLocalManifest.TryGetResult(out FileInfo? exportLocalManifest) ? exportLocalManifest.FullName : null, _logger, stoppingToken);
+            //     await ListLocalPackagesAsync(scope.ServiceProvider.GetRequiredService<ILocalNuGetFeedService>().GetAllPackagesAsync(stoppingToken).ToBlockingEnumerable(stoppingToken), validatedSettings.ExportLocalManifest.TryGetResult(out FileInfo? exportLocalManifest) ? exportLocalManifest.FullName : null, _logger, stoppingToken);
             // if (validatedSettings.ExportLocalManifest.TryGetResult(out FileInfo? fileInfo))
-            //     await ExportLocalManifestAsync(scope.ServiceProvider.GetRequiredService<ILocalClientService>().GetAllPackagesAsync(stoppingToken).ToBlockingEnumerable(stoppingToken), fileInfo.FullName, _logger, stoppingToken);
+            //     await ExportLocalManifestAsync(scope.ServiceProvider.GetRequiredService<ILocalNuGetFeedService>().GetAllPackagesAsync(stoppingToken).ToBlockingEnumerable(stoppingToken), fileInfo.FullName, _logger, stoppingToken);
             // if (validatedSettings.ExportBundle.TryGetResult(out fileInfo))
             //     throw new NotImplementedException();
             // // await ExportBundleAsync(validatedSettings.ExportBundlePath, validatedSettings.TargetManifestFilePath, validatedSettings.TargetManifestSaveAsPath, localClientService, _logger, stoppingToken);
