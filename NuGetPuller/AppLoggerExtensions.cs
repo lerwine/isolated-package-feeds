@@ -14,6 +14,30 @@ namespace NuGetPuller;
 /// <seealso href="https://learn.microsoft.com/en-us/dotnet/core/extensions/high-performance-logging"/>
 public static partial class AppLoggerExtensions
 {
+    private const string Message_Upstream_Feed_Path = "Upstream NuGet Feed path";
+
+    private const string Message_Local_Feed_Path = "Local NuGet Feed path";
+
+    private const string Message_Is_Too_Long = "is too long";
+
+    private const string Message_Local_NuGet_Feed_URL = "Local NuGet Feed URL";
+
+    private const string Message_NuGet_Service_Index_URL = "NuGet Service Index URL";
+
+    private const string Message_Is_Invalid = "is invalid";
+
+    private const string Message_Not_Local_Path = "does not reference a local path";
+
+    private const string Message_Is_Not_Absolute = "is not absolute";
+
+    private const string Message_Is_Denied = "is denied";
+
+    private const string Message_Not_Found = "not found";
+
+    private const string Message_Not_Filesystem_Subdirectory = "does not refer to a filesystem subdirectory";
+
+    private const string MESSAGE_Global_Packages_Folder = "Global NuGet Packages Folder";
+
     #region Nuget Logger Event Methods
 
     #region NuGetDebug Logger Event Methods
@@ -186,57 +210,30 @@ public static partial class AppLoggerExtensions
 
     #endregion
 
-    /// <summary>
-    /// Logs a <see cref="NuGetPullerEventId.Cri"/> <see cref="LogLevel.Debug"/> message.
-    /// </summary>
-    /// <param name="logger">The current logger.</param>
-    /// <param name="myParam">Dooha</param>
-    /// <param name="exception">The optional exception that caused the event.</param>
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.CriticalNugetError, Level = LogLevel.Debug,
-        Message = "Message (MyParam={MyParam})")]
-    public static partial void Cri(this ILogger logger, string myParam, Exception? exception = null);
-
     #region InvalidRepositoryUrl Logger Event Methods
 
-    private const string MESSAGE_UpstreamRepositoryPathTooLong = "Upstream NuGet repository path is too long";
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidRepositoryUrl, Level = LogLevel.Critical, Message = $"{Message_Upstream_Feed_Path} \"{{Path}}\" {Message_Is_Too_Long}.")]
+    private static partial void UpstreamFeedPathTooLong(ILogger logger, string path, Exception? exception);
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidRepositoryUrl, Level = LogLevel.Critical, Message = $"{MESSAGE_UpstreamRepositoryPathTooLong} ({{Path}}).")]
-    private static partial void UpstreamRepositoryPathTooLong(ILogger logger, string path, Exception? exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidRepositoryUrl, Level = LogLevel.Critical, Message = $"{Message_Local_Feed_Path} \"{{Path}}\" {Message_Is_Too_Long}.")]
+    private static partial void LocalFeedPathTooLong(ILogger logger, string path, Exception? exception);
 
-    private const string MESSAGE_LocalRepositoryPathTooLong = "Local NuGet repository path is too long";
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidRepositoryUrl, Level = LogLevel.Critical, Message = $"{Message_NuGet_Service_Index_URL} \"{{URL}}\" {Message_Is_Invalid}.")]
+    private static partial void InvalidNuGetServiceIndexUrl(ILogger logger, string url, Exception? exception);
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidRepositoryUrl, Level = LogLevel.Critical, Message = $"{MESSAGE_LocalRepositoryPathTooLong} ({{Path}}).")]
-    private static partial void LocalRepositoryPathTooLong(ILogger logger, string path, Exception? exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidRepositoryUrl, Level = LogLevel.Critical, Message = $"{Message_Local_NuGet_Feed_URL} \"{{URL}}\" {Message_Is_Invalid}.")]
+    private static partial void InvalidLocalNuGetFeedUrl(ILogger logger, string url, Exception? exception);
 
-    private const string MESSAGE_InvalidUpstreamRepositoryUrl = "Upstream NuGet repository URL is invalid";
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidRepositoryUrl, Level = LogLevel.Critical, Message = $"{Message_Local_NuGet_Feed_URL} \"{{URL}}\" {Message_Not_Local_Path}.")]
+    private static partial void LocalNugetFeedUrlIsNotLocal(ILogger logger, string url, Exception? exception);
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidRepositoryUrl, Level = LogLevel.Critical, Message = $"{MESSAGE_InvalidUpstreamRepositoryUrl} ({{URL}}).")]
-    private static partial void InvalidUpstreamRepositoryUrl(ILogger logger, string url, Exception? exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidRepositoryUrl, Level = LogLevel.Critical, Message = $"{Message_NuGet_Service_Index_URL} \"{{URL}}\" {Message_Is_Not_Absolute}.")]
+    private static partial void NuGetServiceIndexUrlIsNotAbsolute(ILogger logger, string url, Exception? exception);
 
-    private const string MESSAGE_InvalidLocalRepositoryUrl = "Local NuGet repository URL is invalid";
+    private const string Message_UnsupportedNuGetServiceIndexUrlScheme = "Invalid URI scheme for NuGet Service Index URL";
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidRepositoryUrl, Level = LogLevel.Critical, Message = $"{MESSAGE_InvalidLocalRepositoryUrl} ({{URL}}).")]
-    private static partial void InvalidLocalRepositoryUrl(ILogger logger, string url, Exception? exception);
-
-    private const string MESSAGE_LocalRepositoryUrlIsNotLocal = "Local NuGet repository URL does not reference a local path";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidRepositoryUrl, Level = LogLevel.Critical, Message = $"{MESSAGE_LocalRepositoryUrlIsNotLocal} ({{URL}}).")]
-    private static partial void LocalRepositoryUrlIsNotLocal(ILogger logger, string url, Exception? exception);
-
-    private const string MESSAGE_UpstreamRepositoryUrlIsNotAbsolute = "Upstream NuGet repository URL cannot be relative";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidRepositoryUrl, Level = LogLevel.Critical, Message = $"{MESSAGE_UpstreamRepositoryUrlIsNotAbsolute} ({{URL}}).")]
-    private static partial void UpstreamRepositoryUrlIsNotAbsolute(ILogger logger, string url, Exception? exception);
-
-    private const string MESSAGE_UnsupportedUpstreamRepositoryUrlScheme = "Invalid scheme or Upstream NuGet repository URL";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidRepositoryUrl, Level = LogLevel.Critical, Message = $"{MESSAGE_UnsupportedUpstreamRepositoryUrlScheme} ({{URL}}).")]
-    private static partial void UnsupportedUpstreamRepositoryUrlScheme(ILogger logger, string url, Exception? exception);
-
-    private const string MESSAGE_UnsupportedLocalRepositoryUrlScheme = "Invalid scheme or Local NuGet repository URL";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidRepositoryUrl, Level = LogLevel.Critical, Message = $"{MESSAGE_UnsupportedLocalRepositoryUrlScheme} ({{URL}}).")]
-    private static partial void UnsupportedLocalRepositoryUrlScheme(ILogger logger, string url, Exception? exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidRepositoryUrl, Level = LogLevel.Critical, Message = $"{Message_UnsupportedNuGetServiceIndexUrlScheme} {{URL}}.")]
+    private static partial void UnsupportedNuGetServiceIndexUrlScheme(ILogger logger, string url, Exception? exception);
 
     /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidRepositoryUrl"/> event error message for an invalid repository URL or path.
@@ -255,19 +252,19 @@ public static partial class AppLoggerExtensions
         {
             if (isUpstream)
             {
-                UpstreamRepositoryPathTooLong(logger, url, exception);
-                return factory(MESSAGE_UpstreamRepositoryPathTooLong);
+                UpstreamFeedPathTooLong(logger, url, exception);
+                return factory($"{Message_Upstream_Feed_Path} \"{url}\" {Message_Is_Too_Long}.");
             }
-            LocalRepositoryPathTooLong(logger, url, exception);
-            return factory(MESSAGE_LocalRepositoryPathTooLong);
+            LocalFeedPathTooLong(logger, url, exception);
+            return factory($"{Message_Local_Feed_Path} \"{url}\" {Message_Is_Too_Long}.");
         }
         if (isUpstream)
         {
-            InvalidUpstreamRepositoryUrl(logger, url, exception);
-            return factory(MESSAGE_InvalidUpstreamRepositoryUrl);
+            InvalidNuGetServiceIndexUrl(logger, url, exception);
+            return factory($"{Message_NuGet_Service_Index_URL} \"{url}\" {Message_Is_Invalid}.");
         }
-        InvalidLocalRepositoryUrl(logger, url, exception);
-        return factory(MESSAGE_InvalidLocalRepositoryUrl);
+        InvalidLocalNuGetFeedUrl(logger, url, exception);
+        return factory($"{Message_Local_NuGet_Feed_URL} \"{url}\" {Message_Is_Invalid}.");
     }
 
     /// <summary>
@@ -279,121 +276,119 @@ public static partial class AppLoggerExtensions
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <typeparam name="T">The type of exception to be created.</typeparam>
     /// <returns>The exception that was created by the <paramref name="factory"/> function.</returns>
-    public static T UnsupportedRepositoryUrlScheme<T>(this ILogger logger, string uriString, Func<string, T> factory, Exception? exception = null) where T : LoggedException
+    public static T UnsupportedNuGetServiceIndexUrlScheme<T>(this ILogger logger, string uriString, Func<string, T> factory, Exception? exception = null) where T : LoggedException
     {
-        UnsupportedUpstreamRepositoryUrlScheme(logger, uriString, exception);
-        return factory(MESSAGE_UnsupportedUpstreamRepositoryUrlScheme);
+        UnsupportedNuGetServiceIndexUrlScheme(logger, uriString, exception);
+        return factory($"{Message_UnsupportedNuGetServiceIndexUrlScheme} {uriString}.");
     }
 
     #endregion
 
-    #region RepositorySecurityException Logger Event Methods
+    #region NugetFeedSecurityException Logger Event Methods
 
-    private const string MESSAGE_UpstreamRepositorySecurityException = "Access denied while accessing upstream NuGet repository path";
+    private const string Message_Access_To_Upstream_NuGet_Feed_Path = "Access to Upstream NuGet Feed path";
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.RepositorySecurityException, Level = LogLevel.Critical, Message = $"{MESSAGE_UpstreamRepositorySecurityException} ({{Path}}).")]
-    private static partial void UpstreamRepositorySecurityException(ILogger logger, string path, Exception? exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.NugetFeedSecurityException, Level = LogLevel.Critical, Message = $"{Message_Access_To_Upstream_NuGet_Feed_Path} \"{{Path}}\" {Message_Is_Denied}.")]
+    private static partial void UpstreamNugetFeedSecurityException(ILogger logger, string path, Exception? exception);
 
-    private const string MESSAGE_LocalRepositorySecurityException = "Access denied while accessing local NuGet repository path";
+    private const string Message_Access_To_Local_NuGet_Feed_Path = "Access to Local NuGet Feed path";
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.RepositorySecurityException, Level = LogLevel.Critical, Message = $"{MESSAGE_LocalRepositorySecurityException} ({{Path}}).")]
-    private static partial void LocalRepositorySecurityException(ILogger logger, string path, Exception? exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.NugetFeedSecurityException, Level = LogLevel.Critical, Message = $"{Message_Access_To_Local_NuGet_Feed_Path} \"{{Path}}\" {Message_Is_Denied}.")]
+    private static partial void LocalNugetFeedSecurityException(ILogger logger, string path, Exception? exception);
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.RepositorySecurityException"/> event error message.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.NugetFeedSecurityException"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
-    /// <param name="path">The NuGet repository path.</param>
+    /// <param name="path">The NuGet feed path.</param>
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string RepositorySecurityException(this ILogger logger, string path, bool isUpstream, Exception? exception = null)
+    public static string NugetFeedSecurityException(this ILogger logger, string path, bool isUpstream, Exception? exception = null)
     {
         if (isUpstream)
         {
-            UpstreamRepositorySecurityException(logger, path, exception);
-            return $"{MESSAGE_UpstreamRepositorySecurityException}.";
+            UpstreamNugetFeedSecurityException(logger, path, exception);
+            return $"{Message_Access_To_Upstream_NuGet_Feed_Path} \"{path}\" {Message_Is_Denied}.";
         }
-        LocalRepositorySecurityException(logger, path, exception);
-        return $"{MESSAGE_LocalRepositorySecurityException}.";
+        LocalNugetFeedSecurityException(logger, path, exception);
+        return $"{Message_Access_To_Local_NuGet_Feed_Path} \"{path}\" {Message_Is_Denied}.";
     }
 
     #endregion
 
-    #region LocalRepositoryIOException Logger Event Methods
+    #region LocalFeedIOException Logger Event Methods
 
-    private const string MESSAGE_LocalRepositoryIOException = "I/O error while creating local repository folder";
+    private const string Message_LocalFeedIOException = "I/O error while creating Local NuGet Feed folder";
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.LocalRepositoryIOException, Level = LogLevel.Critical, EventName = nameof(LocalRepositoryIOException), Message = $"{MESSAGE_LocalRepositoryIOException} {{Path}}.")]
-    private static partial void LogLocalRepositoryIOException(this ILogger logger, string path, Exception? exception = null);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.LocalFeedIOException, Level = LogLevel.Critical, EventName = nameof(NuGetPullerEventId.LocalFeedIOException), Message = $"{Message_LocalFeedIOException} \"{{Path}}\".")]
+    private static partial void LogLocalFeedIOException(this ILogger logger, string path, Exception? exception = null);
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.LocalRepositoryIOException"/> event error message.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.LocalFeedIOException"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
-    /// <param name="path">The local repository path.</param>
+    /// <param name="path">The Local NuGet Feed path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string LocalRepositoryIOException(this ILogger logger, string path, Exception? exception = null)
+    public static string LocalFeedIOException(this ILogger logger, string path, Exception? exception = null)
     {
-        LogLocalRepositoryIOException(logger, path, exception);
-        return $"{MESSAGE_LocalRepositoryIOException}.";
+        LogLocalFeedIOException(logger, path, exception);
+        return $"{Message_LocalFeedIOException} \"{path}\".";
     }
 
     #endregion
 
-    #region RepositoryPathNotFound Logger Event Methods
+    #region NuGetFeedPathNotFound Logger Event Methods
 
-    private const string MESSAGE_UpstreamRepositoryPathNotFound = "Upstream repository path not found";
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.RepositoryPathNotFound, Level = LogLevel.Critical, Message = $"{MESSAGE_UpstreamRepositoryPathNotFound} ({{Path}})")]
-    private static partial void UpstreamRepositoryPathNotFound(ILogger logger, string path, Exception? exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.NuGetFeedPathNotFound, Level = LogLevel.Critical, Message = $"{Message_Upstream_Feed_Path} \"{{Path}}\" {Message_Not_Found}.")]
+    private static partial void UpstreamNuGetFeedPathNotFound(ILogger logger, string path, Exception? exception);
 
-    private const string MESSAGE_LocalRepositoryPathNotFound = "Local repository path not found";
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.RepositoryPathNotFound, Level = LogLevel.Critical, Message = $"{MESSAGE_LocalRepositoryPathNotFound} ({{Path}})")]
-    private static partial void LocalRepositoryPathNotFound(ILogger logger, string path, Exception? exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.NuGetFeedPathNotFound, Level = LogLevel.Critical, Message = $"{Message_Local_Feed_Path} \"{{Path}}\" {Message_Not_Found}.")]
+    private static partial void LocalNuGetFeedPathNotFound(ILogger logger, string path, Exception? exception);
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.RepositoryPathNotFound"/> event error message.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.NuGetFeedPathNotFound"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
-    /// <param name="path">The NuGet repository path.</param>
+    /// <param name="path">The NuGet feed path.</param>
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory path.</param>
     /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <typeparam name="T">The type of exception to be created.</typeparam>
     /// <returns>The exception that was created by the <paramref name="factory"/> function.</returns>
-    public static T RepositoryPathNotFound<T>(this ILogger logger, string path, bool isUpstream, Func<string, T> factory, Exception? exception = null)
+    public static T NuGetFeedPathNotFound<T>(this ILogger logger, string path, bool isUpstream, Func<string, T> factory, Exception? exception = null)
         where T : LoggedException
     {
         if (isUpstream)
         {
-            UpstreamRepositoryPathNotFound(logger, path, exception);
-            return factory(MESSAGE_UpstreamRepositoryPathNotFound);
+            UpstreamNuGetFeedPathNotFound(logger, path, exception);
+            return factory($"{Message_Upstream_Feed_Path} \"{path}\" {Message_Not_Found}.");
         }
-        LocalRepositoryPathNotFound(logger, path, exception);
-        return factory(MESSAGE_LocalRepositoryPathNotFound);
+        LocalNuGetFeedPathNotFound(logger, path, exception);
+        return factory($"{Message_Local_Feed_Path} \"{path}\" {Message_Not_Found}.");
     }
 
     #endregion
 
-    #region InvalidExportLocalMetaData Logger Event Methods
+    #region InvalidLocalMetaDataExportPath Logger Event Methods
 
-    private const string MESSAGE_ExportLocalMetaDataDirectoryNotFound = "Parent subdirectory of package metadata export path not found";
+    private const string MESSAGE_Local_Nuget_Feed_MetaData_Export_Path = "Local NuGet Feed metadata export path";
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportLocalMetaData, Level = LogLevel.Critical, Message = $"{MESSAGE_ExportLocalMetaDataDirectoryNotFound} ({{Path}})")]
+    private const string MESSAGE_ExportLocalMetaDataDirectoryNotFound = "Parent subdirectory not found for package metadata export path";
+
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidLocalMetaDataExportPath, Level = LogLevel.Critical, Message = $"{MESSAGE_ExportLocalMetaDataDirectoryNotFound} \"{{Path}}\".")]
     private static partial void ExportLocalMetaDataDirectoryNotFound(ILogger logger, string path, Exception? exception);
 
-    private const string MESSAGE_ExportLocalMetaDataPathTooLong = "Package metadata export path is too long";
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportLocalMetaData, Level = LogLevel.Critical, Message = $"{MESSAGE_ExportLocalMetaDataPathTooLong} ({{Path}})")]
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidLocalMetaDataExportPath, Level = LogLevel.Critical, Message = $"{MESSAGE_Local_Nuget_Feed_MetaData_Export_Path} \"{{Path}}\" {Message_Is_Too_Long}.")]
     private static partial void ExportLocalMetaDataPathTooLong(ILogger logger, string path, Exception exception);
 
-    private const string MESSAGE_InvalidExportLocalMetaData = "Package metadata export path is invalid";
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportLocalMetaData, Level = LogLevel.Critical, Message = $"{MESSAGE_InvalidExportLocalMetaData} ({{Path}})")]
-    private static partial void InvalidExportLocalMetaData(ILogger logger, string path, Exception? exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidLocalMetaDataExportPath, Level = LogLevel.Critical, Message = $"{MESSAGE_Local_Nuget_Feed_MetaData_Export_Path} \"{{Path}}\" {Message_Is_Invalid}.")]
+    private static partial void InvalidLocalMetaDataExportPath(ILogger logger, string path, Exception? exception);
 
     /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidMetaDataExportPath"/> event error message.
@@ -404,30 +399,30 @@ public static partial class AppLoggerExtensions
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <typeparam name="T">The type of exception to be created.</typeparam>
     /// <returns>The exception that was created by the <paramref name="factory"/> function.</returns>
-    public static T InvalidExportLocalMetaData<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : LoggedException
+    public static T InvalidLocalMetaDataExportPath<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : LoggedException
     {
         if (exception is not null)
         {
             if (exception is DirectoryNotFoundException)
             {
                 ExportLocalMetaDataDirectoryNotFound(logger, path, exception);
-                return factory(MESSAGE_ExportLocalMetaDataDirectoryNotFound);
+                return factory($"{MESSAGE_ExportLocalMetaDataDirectoryNotFound} \"{path}\".");
             }
             if (exception is PathTooLongException)
             {
                 ExportLocalMetaDataPathTooLong(logger, path, exception);
-                return factory(MESSAGE_ExportLocalMetaDataPathTooLong);
+                return factory($"{MESSAGE_Local_Nuget_Feed_MetaData_Export_Path} \"{path}\" {Message_Is_Too_Long}.");
             }
         }
-        InvalidExportLocalMetaData(logger, path, exception);
-        return factory(MESSAGE_InvalidExportLocalMetaData);
+        InvalidLocalMetaDataExportPath(logger, path, exception);
+        return factory($"{MESSAGE_Local_Nuget_Feed_MetaData_Export_Path} \"{path}\" {Message_Is_Invalid}.");
     }
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidExportLocalMetaData"/> event error message.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidLocalMetaDataExportPath"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
-    /// <param name="path">The NuGet repository path.</param>
+    /// <param name="path">The NuGet feed path.</param>
     /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <typeparam name="T">The type of exception to be created.</typeparam>
@@ -442,14 +437,15 @@ public static partial class AppLoggerExtensions
 
     #region MetaDataExportPathAccessDenied Logger Event Methods
 
-    private const string MESSAGE_MetaDataExportPathAccessDenied = "Access to package metadata export path is denied";
+    private const string MESSAGE_Access_To_MetaData_Export_Path = "Access denied to NuGet Feed metadata export path";
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.MetaDataExportPathAccessDenied, Level = LogLevel.Critical, EventName = nameof(MetaDataExportPathAccessDenied), Message = $"{MESSAGE_MetaDataExportPathAccessDenied} ({{Path}})")]
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.MetaDataExportPathAccessDenied, Level = LogLevel.Critical, EventName = nameof(NuGetPullerEventId.MetaDataExportPathAccessDenied),
+        Message = $"{MESSAGE_Access_To_MetaData_Export_Path} \"{{Path}}\" {Message_Is_Denied}.")]
     private static partial void LogMetaDataExportPathAccessDenied(ILogger logger, string path, Exception? exception);
 
-    private const string MESSAGE_InsufficientPermissionsForMetaDataExportPath = "Caller has insufficient permissions to package metadata export path";
+    private const string MESSAGE_InsufficientPermissionsForMetaDataExportPath = "Caller has insufficient permissions to the Local NuGet Feed metadata export path";
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.MetaDataExportPathAccessDenied, Level = LogLevel.Critical, Message = $"{MESSAGE_InsufficientPermissionsForMetaDataExportPath} ({{Path}})")]
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.MetaDataExportPathAccessDenied, Level = LogLevel.Critical, Message = $"{MESSAGE_InsufficientPermissionsForMetaDataExportPath} \"{{Path}}\".")]
     private static partial void InsufficientPermissionsForMetaDataExportPath(ILogger logger, string path, Exception exception);
 
     /// <summary>
@@ -466,17 +462,17 @@ public static partial class AppLoggerExtensions
         if (exception is System.Security.SecurityException)
         {
             InsufficientPermissionsForMetaDataExportPath(logger, path, exception);
-            return factory(MESSAGE_InsufficientPermissionsForMetaDataExportPath);
+            return factory($"{MESSAGE_InsufficientPermissionsForMetaDataExportPath} \"{path}\".");
         }
         LogMetaDataExportPathAccessDenied(logger, path, exception);
-        return factory(MESSAGE_MetaDataExportPathAccessDenied);
+        return factory($"{MESSAGE_Access_To_MetaData_Export_Path} \"{path}\" {Message_Is_Denied}.");
     }
 
     /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.MetaDataExportPathAccessDenied"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
-    /// <param name="path">The NuGet repository path.</param>
+    /// <param name="path">The NuGet feed path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
     public static string MetaDataExportPathAccessDenied(this ILogger logger, string path, Exception? exception = null)
@@ -484,97 +480,96 @@ public static partial class AppLoggerExtensions
         if (exception is System.Security.SecurityException)
         {
             InsufficientPermissionsForMetaDataExportPath(logger, path, exception);
-            return $"{MESSAGE_InsufficientPermissionsForMetaDataExportPath}.";
+            return $"{MESSAGE_InsufficientPermissionsForMetaDataExportPath} \"{path}\".";
         }
         LogMetaDataExportPathAccessDenied(logger, path, exception);
-        return $"{MESSAGE_MetaDataExportPathAccessDenied}.";
+        return $"{MESSAGE_Access_To_MetaData_Export_Path} \"{path}\" {Message_Is_Denied}.";
     }
 
     #endregion
 
     /// <summary>
-    /// Logs a <see cref="NuGetPullerEventId.PackageDeleted"/> <see cref="LogLevel.Warning"/> event message.
+    /// Logs a <see cref="NuGetPullerEventId.NuGetPackageDeleted"/> <see cref="LogLevel.Warning"/> event message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The ID of the package that was deleted.</param>
-    /// <param name="repositoryPath">The path of the local NuGet repository.</param>
+    /// <param name="feedPath">The path of the Local NuGet Feed.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.PackageDeleted, Level = LogLevel.Warning, Message = "Package {PackageId} has been deleted from local repository ({RepositoryPath}).")]
-    public static partial void PackageDeleted(this ILogger logger, string packageId, string repositoryPath, Exception? exception = null);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.NuGetPackageDeleted, Level = LogLevel.Warning,
+        Message = "NuGet Package {PackageId} has been deleted from Local NuGet Feed {FeedPath}.")]
+    public static partial void NuGetPackageDeleted(this ILogger logger, string packageId, string feedPath, Exception? exception = null);
 
-    #region PackageNotFound Logger Event Methods
+    #region NuGetPackageNotFound Logger Event Methods
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.PackageNotFound, Level = LogLevel.Warning, Message = "Package {PackageId} not found in upstream NuGet source ({RepositoryPath}).")]
-    private static partial void UpstreamDirPackageNotFound(this ILogger logger, string packageId, string repositoryPath, Exception? exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.NuGetPackageNotFound, Level = LogLevel.Warning, Message = "NuGet Package {PackageId} not found in Upstream NuGet Feed {FeedPath}.")]
+    private static partial void NuGetPackageNotFoundInUpstreamFeed(this ILogger logger, string packageId, string feedPath, Exception? exception);
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.PackageNotFound, Level = LogLevel.Warning, Message = "Package {PackageId} not found in local NuGet source ({RepositoryPath}).")]
-    private static partial void LocalPackageNotFound(this ILogger logger, string packageId, string repositoryPath, Exception? exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.NuGetPackageNotFound, Level = LogLevel.Warning, Message = "NuGet Package {PackageId} not found in Local NuGet Feed {FeedPath}.")]
+    private static partial void NuGetPackageNotFoundInLocalFeed(this ILogger logger, string packageId, string feedPath, Exception? exception);
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.PackageNotFound, Level = LogLevel.Warning, Message = "Package {PackageId} not found in upstream NuGet source ({URL}).")]
-    private static partial void RemotePackageNotFound(this ILogger logger, string packageId, string url, Exception? exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.NuGetPackageNotFound, Level = LogLevel.Warning, Message = "NuGet Package {PackageId} not found in NuGet Server (Service Index URL = {URL}).")]
+    private static partial void NuGetPackageNotFoundInRemoteServer(this ILogger logger, string packageId, string url, Exception? exception);
 
     /// <summary>
-    /// Logs a <see cref="NuGetPullerEventId.PackageNotFound"/> <see cref="LogLevel.Warning"/> event message.
+    /// Logs a <see cref="NuGetPullerEventId.NuGetPackageNotFound"/> <see cref="LogLevel.Warning"/> event message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The ID of the package that was not found.</param>
     /// <param name="clientService">The client service.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void PackageNotFound(this ILogger logger, string packageId, IClientService clientService, Exception? exception = null)
+    public static void NuGetPackageNotFound(this ILogger logger, string packageId, INuGetClientService clientService, Exception? exception = null)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
             if (clientService.IsUpstream)
-                UpstreamDirPackageNotFound(logger, packageId, clientService.PackageSourceLocation, exception);
+                NuGetPackageNotFoundInUpstreamFeed(logger, packageId, clientService.PackageSourceLocation, exception);
             else
-                LocalPackageNotFound(logger, packageId, clientService.PackageSourceLocation, exception);
+                NuGetPackageNotFoundInLocalFeed(logger, packageId, clientService.PackageSourceLocation, exception);
         }
         else
-            RemotePackageNotFound(logger, packageId, clientService.PackageSourceLocation, exception);
+            NuGetPackageNotFoundInRemoteServer(logger, packageId, clientService.PackageSourceLocation, exception);
     }
 
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.PackageNotFound, Level = LogLevel.Warning,
-        Message = "Version {Version} of package {PackageId} not found in upstream NuGet source ({URL}).")]
-    private static partial void RemotePackageVersionNotFound(ILogger logger, string packageId, NuGetVersion version, string url, Exception? exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.NuGetPackageNotFound, Level = LogLevel.Warning,
+        Message = "Version {Version} of package {PackageId} not found in NuGet Server (Service Index URL = {URL}).")]
+    private static partial void NuGetPackageNotFoundInRemoteServer(ILogger logger, string packageId, NuGetVersion version, string url, Exception? exception);
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.PackageNotFound, Level = LogLevel.Warning,
-        Message = "Version {Version} of package {PackageId} not found in local NuGet source ({PackageSourceLocation}).")]
-    private static partial void LocalPackageVersionNotFound(ILogger logger, string packageId, NuGetVersion version, string packageSourceLocation, Exception? exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.NuGetPackageNotFound, Level = LogLevel.Warning,
+        Message = "Version {Version} of package {PackageId} not found in Local NuGet Feed {PackageSourceLocation}.")]
+    private static partial void NuGetPackageNotFoundInLocalFeed(ILogger logger, string packageId, NuGetVersion version, string packageSourceLocation, Exception? exception);
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.PackageNotFound, Level = LogLevel.Warning,
-        Message = "Version {Version} of package {PackageId} not found in upstream NuGet source ({PackageSourceLocation}).")]
-    private static partial void UstreamDirPackageVersionNotFound(ILogger logger, NuGetVersion version, string packageId, string packageSourceLocation, Exception? exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.NuGetPackageNotFound, Level = LogLevel.Warning,
+        Message = "Version {Version} of package {PackageId} not found in Upstream NuGet Feed {PackageSourceLocation}.")]
+    private static partial void NuGetPackageNotFoundInUpstreamFeed(ILogger logger, NuGetVersion version, string packageId, string packageSourceLocation, Exception? exception);
 
     /// <summary>
-    /// Logs a <see cref="NuGetPullerEventId.PackageNotFound"/> <see cref="LogLevel.Warning"/> event message.
+    /// Logs a <see cref="NuGetPullerEventId.NuGetPackageNotFound"/> <see cref="LogLevel.Warning"/> event message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The ID of the package that was not found.</param>
     /// <param name="version">The version of the package that was not found.</param>
     /// <param name="clientService">The client service.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void PackageNotFound(this ILogger logger, string packageId, NuGetVersion version, IClientService clientService, Exception? exception = null)
+    public static void NuGetPackageNotFound(this ILogger logger, string packageId, NuGetVersion version, INuGetClientService clientService, Exception? exception = null)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
             if (clientService.IsUpstream)
-                UstreamDirPackageVersionNotFound(logger, version, packageId, clientService.PackageSourceLocation, exception);
+                NuGetPackageNotFoundInUpstreamFeed(logger, version, packageId, clientService.PackageSourceLocation, exception);
             else
-                LocalPackageVersionNotFound(logger, packageId, version, clientService.PackageSourceLocation, exception);
+                NuGetPackageNotFoundInLocalFeed(logger, packageId, version, clientService.PackageSourceLocation, exception);
         }
         else
-            RemotePackageVersionNotFound(logger, packageId, version, clientService.PackageSourceLocation, exception);
+            NuGetPackageNotFoundInRemoteServer(logger, packageId, version, clientService.PackageSourceLocation, exception);
     }
 
     #endregion
 
     #region GlobalPackagesFolderNotFound Logger Event Methods
 
-    private const string MESSAGE_GlobalPackagesFolderNotFound = "Global packages folder not found";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.GlobalPackagesFolderNotFound, EventName = nameof(GlobalPackagesFolderNotFound), Level = LogLevel.Critical,
-        Message = $"{MESSAGE_GlobalPackagesFolderNotFound} ({{Path}}).")]
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.GlobalPackagesFolderNotFound, EventName = nameof(NuGetPullerEventId.GlobalPackagesFolderNotFound), Level = LogLevel.Critical,
+        Message = $"{MESSAGE_Global_Packages_Folder} \"{{Path}}\" {Message_Not_Found}.")]
     private static partial void LogGlobalPackagesFolderNotFound(ILogger logger, string path, Exception? exception);
 
     /// <summary>
@@ -588,22 +583,23 @@ public static partial class AppLoggerExtensions
     public static string GlobalPackagesFolderNotFound(this ILogger logger, string path, Exception? exception = null)
     {
         LogGlobalPackagesFolderNotFound(logger, path, exception);
-        return $"{MESSAGE_GlobalPackagesFolderNotFound}.";
+        return $"{MESSAGE_Global_Packages_Folder} \"{path}\" {Message_Not_Found}.";
     }
 
     public static T GlobalPackagesFolderNotFound<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : LoggedException
     {
         LogGlobalPackagesFolderNotFound(logger, path, exception);
-        return factory(MESSAGE_GlobalPackagesFolderNotFound);
+        return factory($"{MESSAGE_Global_Packages_Folder} \"{path}\" {Message_Not_Found}.");
     }
 
     #endregion
 
     #region GlobalPackagesFolderSecurityException Logger Event Methods
 
-    private const string MESSAGE_GlobalPackagesFolderSecurityException = "Access denied while accessing global packages folder";
+    private const string Message_Access_To_Global_Packages_Folder = "Access to Global NuGet Packages Folder";
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.GlobalPackagesFolderSecurityException, Level = LogLevel.Critical, EventName = nameof(GlobalPackagesFolderSecurityException), Message = $"{MESSAGE_GlobalPackagesFolderSecurityException} ({{Path}}).")]
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.GlobalPackagesFolderSecurityException, Level = LogLevel.Critical, EventName = nameof(NuGetPullerEventId.GlobalPackagesFolderSecurityException),
+        Message = $"{Message_Access_To_Global_Packages_Folder} \"{{Path}})\" {Message_Is_Denied}.")]
     private static partial void LogGlobalPackagesFolderSecurityException(ILogger logger, string path, Exception? exception);
 
     /// <summary>
@@ -616,27 +612,25 @@ public static partial class AppLoggerExtensions
     public static string GlobalPackagesFolderSecurityException(this ILogger logger, string path, Exception? exception = null)
     {
         LogGlobalPackagesFolderSecurityException(logger, path, exception);
-        return $"{MESSAGE_GlobalPackagesFolderSecurityException}.";
+        return $"{Message_Access_To_Global_Packages_Folder} \"{path})\" {Message_Is_Denied}.";
     }
 
     #endregion
 
     #region InvalidGlobalPackagesFolder Logger Event Methods
 
-    private const string MESSAGE_GlobalPackagesFolderPathTooLong = "NuGet Global Packages Folder path is too long";
+    private const string MESSAGE_Global_Packages_Folder_Path = "Global NuGet Packages Folder path";
 
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidGlobalPackagesFolder, Level = LogLevel.Critical, Message = $"{MESSAGE_GlobalPackagesFolderPathTooLong} ({{Path}}).")]
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidGlobalPackagesFolder, Level = LogLevel.Critical,
+        Message = $"{MESSAGE_Global_Packages_Folder_Path} \"{{Path}}\" {Message_Is_Too_Long}.")]
     private static partial void GlobalPackagesFolderPathTooLong(ILogger logger, string path, Exception exception);
 
-    private const string MESSAGE_InvalidGlobalPackagesFolder = "NuGet Global Packages Folder path is invalid";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidGlobalPackagesFolder, Level = LogLevel.Critical, EventName = nameof(InvalidGlobalPackagesFolder), Message = $"{MESSAGE_InvalidGlobalPackagesFolder} ({{Path}}).")]
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidGlobalPackagesFolder, Level = LogLevel.Critical, EventName = nameof(NuGetPullerEventId.InvalidGlobalPackagesFolder),
+        Message = $"{MESSAGE_Global_Packages_Folder_Path} \"{{Path}}\" {Message_Is_Invalid}.")]
     private static partial void LogInvalidGlobalPackagesFolder(ILogger logger, string path, Exception? exception);
 
-    private const string MESSAGE_GlobalPackagesFolderNotFileUri = "NuGet Global Packages Folder must refer to a filesystem subdirectory";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidGlobalPackagesFolder, Level = LogLevel.Critical, EventName = nameof(GlobalPackagesFolderNotFileUri), Message = $"{MESSAGE_GlobalPackagesFolderNotFileUri} ({{URL}}).")]
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidGlobalPackagesFolder, Level = LogLevel.Critical, EventName = nameof(GlobalPackagesFolderNotFileUri),
+        Message = $"{MESSAGE_Global_Packages_Folder_Path} \"{{URL}}\" {Message_Not_Filesystem_Subdirectory}.")]
     private static partial void LogGlobalPackagesFolderNotFileUri(ILogger logger, string url, Exception? exception);
 
     /// <summary>
@@ -651,10 +645,10 @@ public static partial class AppLoggerExtensions
         if (exception is PathTooLongException)
         {
             GlobalPackagesFolderPathTooLong(logger, path, exception);
-            return $"{MESSAGE_GlobalPackagesFolderPathTooLong}.";
+            return $"{MESSAGE_Global_Packages_Folder_Path} \"{path}\" {Message_Is_Too_Long}.";
         }
         LogInvalidGlobalPackagesFolder(logger, path, exception);
-        return $"{MESSAGE_InvalidGlobalPackagesFolder}.";
+        return $"{MESSAGE_Global_Packages_Folder_Path} \"{path}\" {Message_Is_Invalid}.";
     }
 
     public static T InvalidGlobalPackagesFolder<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : LoggedException
@@ -662,10 +656,10 @@ public static partial class AppLoggerExtensions
         if (exception is PathTooLongException)
         {
             GlobalPackagesFolderPathTooLong(logger, path, exception);
-            return factory(MESSAGE_GlobalPackagesFolderPathTooLong);
+            return factory($"{MESSAGE_Global_Packages_Folder_Path} \"{path}\" {Message_Is_Too_Long}.");
         }
         LogInvalidGlobalPackagesFolder(logger, path, exception);
-        return factory(MESSAGE_InvalidGlobalPackagesFolder);
+        return factory($"{MESSAGE_Global_Packages_Folder_Path} \"{path}\" {Message_Is_Invalid}.");
     }
 
     /// <summary>
@@ -678,27 +672,26 @@ public static partial class AppLoggerExtensions
     public static string GlobalPackagesFolderNotFileUri(this ILogger logger, string url, Exception? exception = null)
     {
         LogGlobalPackagesFolderNotFileUri(logger, url, exception);
-        return $"{MESSAGE_GlobalPackagesFolderNotFileUri}.";
+        return $"{MESSAGE_Global_Packages_Folder_Path} \"{url}\" {Message_Not_Filesystem_Subdirectory}.";
     }
 
     #endregion
 
     #region MultipleSettingsWithSameRepositoryLocation Logger Event Methods
 
-    private const string MESSAGE_LocalSameAsUpstreamNugetRepository = "Local NuGet repository path cannot be the same as the upstream NuGet repository path";
+    private const string MESSAGE_Cannot_Be_Same_As = "cannot be the same as the";
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.MultipleSettingsWithSameRepositoryLocation, Level = LogLevel.Critical, EventName = nameof(LocalSameAsUpstreamNugetRepository), Message = $"{MESSAGE_LocalSameAsUpstreamNugetRepository} ({{Path}}).")]
-    private static partial void LogLocalSameAsUpstreamNugetRepository(ILogger logger, string path, Exception? exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.MultipleSettingsWithSameRepositoryLocation, Level = LogLevel.Critical, EventName = nameof(LocalSameAsUpstreamNugetFeed),
+        Message = $"{Message_Local_Feed_Path} \"{{Path}}\" {MESSAGE_Cannot_Be_Same_As} {Message_Upstream_Feed_Path}.")]
+    private static partial void LogLocalSameAsUpstreamNugetFeed(ILogger logger, string path, Exception? exception);
 
-    private const string MESSAGE_LocalRepositorySameAsGlobalPackagesFolder = "Local NuGet repository path cannot be the same as the upstream NuGet repository path";
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.MultipleSettingsWithSameRepositoryLocation, Level = LogLevel.Critical, EventName = nameof(LocalNuGetFeedSameAsGlobalPackagesFolder),
+        Message = $"{Message_Local_Feed_Path} \"{{Path}}\" {MESSAGE_Cannot_Be_Same_As} {MESSAGE_Global_Packages_Folder}.")]
+    private static partial void LogLocalNuGetFeedSameAsGlobalPackagesFolder(ILogger logger, string path, Exception? exception);
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.MultipleSettingsWithSameRepositoryLocation, Level = LogLevel.Critical, EventName = nameof(LocalRepositorySameAsGlobalPackagesFolder), Message = $"{MESSAGE_LocalRepositorySameAsGlobalPackagesFolder} ({{Path}}).")]
-    private static partial void LogLocalRepositorySameAsGlobalPackagesFolder(ILogger logger, string path, Exception? exception);
-
-    private const string MESSAGE_UpstreamRepositorySameAsGlobalPackagesFolder = "Local NuGet repository path cannot be the same as the upstream NuGet repository path";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.MultipleSettingsWithSameRepositoryLocation, Level = LogLevel.Critical, EventName = nameof(UpstreamRepositorySameAsGlobalPackagesFolder), Message = $"{MESSAGE_UpstreamRepositorySameAsGlobalPackagesFolder} ({{Path}}).")]
-    private static partial void LogUpstreamRepositorySameAsGlobalPackagesFolder(ILogger logger, string path, Exception? exception);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.MultipleSettingsWithSameRepositoryLocation, Level = LogLevel.Critical, EventName = nameof(UpstreamNuGetFeedSameAsGlobalPackagesFolder),
+        Message = $"{Message_Upstream_Feed_Path} \"{{Path}}\" {MESSAGE_Cannot_Be_Same_As} {MESSAGE_Global_Packages_Folder}.")]
+    private static partial void LogUpstreamNuGetFeedSameAsGlobalPackagesFolder(ILogger logger, string path, Exception? exception);
 
     /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.MultipleSettingsWithSameRepositoryLocation"/> event error message.
@@ -706,10 +699,10 @@ public static partial class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static string LocalSameAsUpstreamNugetRepository(this ILogger logger, string path, Exception? exception = null)
+    public static string LocalSameAsUpstreamNugetFeed(this ILogger logger, string path, Exception? exception = null)
     {
-        LogLocalSameAsUpstreamNugetRepository(logger, path, exception);
-        return $"{MESSAGE_LocalSameAsUpstreamNugetRepository}.";
+        LogLocalSameAsUpstreamNugetFeed(logger, path, exception);
+        return $"{Message_Local_Feed_Path} \"{path}\" {MESSAGE_Cannot_Be_Same_As} {Message_Upstream_Feed_Path}.";
     }
 
     /// <summary>
@@ -718,10 +711,10 @@ public static partial class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static string LocalRepositorySameAsGlobalPackagesFolder(this ILogger logger, string path, Exception? exception = null)
+    public static string LocalNuGetFeedSameAsGlobalPackagesFolder(this ILogger logger, string path, Exception? exception = null)
     {
-        LogLocalRepositorySameAsGlobalPackagesFolder(logger, path, exception);
-        return $"{MESSAGE_LocalRepositorySameAsGlobalPackagesFolder}.";
+        LogLocalNuGetFeedSameAsGlobalPackagesFolder(logger, path, exception);
+        return $"{Message_Local_Feed_Path} \"{path}\" {MESSAGE_Cannot_Be_Same_As} {MESSAGE_Global_Packages_Folder}.";
     }
 
     /// <summary>
@@ -730,10 +723,10 @@ public static partial class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static string UpstreamRepositorySameAsGlobalPackagesFolder(this ILogger logger, string path, Exception? exception = null)
+    public static string UpstreamNuGetFeedSameAsGlobalPackagesFolder(this ILogger logger, string path, Exception? exception = null)
     {
-        LogUpstreamRepositorySameAsGlobalPackagesFolder(logger, path, exception);
-        return $"{MESSAGE_UpstreamRepositorySameAsGlobalPackagesFolder}.";
+        LogUpstreamNuGetFeedSameAsGlobalPackagesFolder(logger, path, exception);
+        return $"{Message_Upstream_Feed_Path} \"{path}\" {MESSAGE_Cannot_Be_Same_As} {MESSAGE_Global_Packages_Folder}.";
     }
 
     #endregion
@@ -744,28 +737,28 @@ public static partial class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="fileName">The path of the file that was not found.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.PackageFileNotFound, Level = LogLevel.Error, Message = "Package file not found: {FileName}")]
-    public static partial void PackageFileNotFound(this ILogger logger, string fileName, Exception? exception = null);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.PackageFileNotFound, Level = LogLevel.Error, Message = "NuGet Package file \"{FileName}\" not found.")]
+    public static partial void NupkgFileNotFound(this ILogger logger, string fileName, Exception? exception = null);
 
-    #region InvalidPackageFile Logger Event Methods
+    #region InvalidNupkgFile Logger Event Methods
 
     /// <summary>
-    /// Logs a <see cref="NuGetPullerEventId.InvalidPackageFile"/> <see cref="LogLevel.Error"/> event message.
+    /// Logs a <see cref="NuGetPullerEventId.InvalidNupkgFile"/> <see cref="LogLevel.Error"/> event message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="fileName">The path of the invalid package file.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidPackageFile, Level = LogLevel.Error, Message = "Package file is not a ZIP archive: {FileName}")]
-    public static partial void PackageFileNotZipArchive(this ILogger logger, string fileName, Exception? exception = null);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidNupkgFile, Level = LogLevel.Error, Message = "NuGet Package file \"{FileName}\" is not a ZIP archive.")]
+    public static partial void NupkgFileNotZipArchive(this ILogger logger, string fileName, Exception? exception = null);
 
     /// <summary>
-    /// Logs a <see cref="NuGetPullerEventId.InvalidPackageFile"/> <see cref="LogLevel.Error"/> event message.
+    /// Logs a <see cref="NuGetPullerEventId.InvalidNupkgFile"/> <see cref="LogLevel.Error"/> event message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="fileName">The path of the invalid package file.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidPackageFile, Level = LogLevel.Error, Message = "Package file has invalid content: {FileName}")]
-    public static partial void InvalidPackageFileContent(this ILogger logger, string fileName, Exception? exception = null);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidNupkgFile, Level = LogLevel.Error, Message = "NuGet Package file \"{FileName}\" has invalid content.")]
+    public static partial void InvalidNupkgFileContent(this ILogger logger, string fileName, Exception? exception = null);
 
     #endregion
 
@@ -775,8 +768,8 @@ public static partial class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The identifier of the existing package.</param>
     /// <param name="exception">The optional exception that caused the event.</param>;
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.PackageAlreadyAdded, Level = LogLevel.Warning, Message = "Package {PackageId} has already been added.")]
-    public static partial void PackageAlreadyAdded(this ILogger logger, string packageId, Exception? exception = null);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.PackageAlreadyAdded, Level = LogLevel.Warning, Message = "NuGet Package {PackageId} has already been added to the Local NuGet Feed.")]
+    public static partial void NuGetPackageAlreadyAdded(this ILogger logger, string packageId, Exception? exception = null);
 
     /// <summary>
     /// Logs a <see cref="NuGetPullerEventId.PackageVersionDeleteFailure"/> <see cref="LogLevel.Warning"/> event message.
@@ -785,7 +778,7 @@ public static partial class AppLoggerExtensions
     /// <param name="packageId">The package identifier.</param>
     /// <param name="version">The package version.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.PackageVersionDeleteFailure, Level = LogLevel.Warning, Message = "Unexpected error deleting Package {PackageId}, Version {Version}.")]
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.PackageVersionDeleteFailure, Level = LogLevel.Warning, Message = "Unexpected error deleting NuGet Package {PackageId}, Version {Version} from the Local NuGet Feed.")]
     public static partial void PackageVersionDeleteFailure(this ILogger logger, string packageId, NuGetVersion version, Exception? exception = null);
 
     #region UnexpectedPackageDownloadFailure Logger Event Methods
@@ -797,7 +790,7 @@ public static partial class AppLoggerExtensions
     /// <param name="packageId">The package identifier.</param>
     /// <param name="version">The package version.</param>
     /// <param name="exception">The exception that caused the event.</param>
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.UnexpectedPackageDownloadFailure, Level = LogLevel.Error, Message = "Unexpected error while downloading package {PackageId}, Version {Version}.")]
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.UnexpectedPackageDownloadFailure, Level = LogLevel.Error, Message = "Unexpected error while downloading package {PackageId}, Version {Version} from the upstream Nuget repository.")]
     public static partial void UnexpectedPackageDownloadFailure(this ILogger logger, string packageId, NuGetVersion version, Exception exception);
 
     /// <summary>
@@ -806,7 +799,7 @@ public static partial class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The package identifier.</param>
     /// <param name="version">The package version.</param>
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.UnexpectedPackageDownloadFailure, Level = LogLevel.Error, Message = "Package download of {PackageId}, Version {Version} was unexpectedly empty.")]
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.UnexpectedPackageDownloadFailure, Level = LogLevel.Error, Message = "NuGet Package download of {PackageId}, Version {Version} from the upstream Nuget repository was unexpectedly empty.")]
     public static partial void DownloadPackageIsEmpty(this ILogger logger, string packageId, NuGetVersion version);
 
     #endregion
@@ -818,43 +811,44 @@ public static partial class AppLoggerExtensions
     /// <param name="packageId">The package identifier.</param>
     /// <param name="version">The package version.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.UnexpectedAddFailure, Level = LogLevel.Error, Message = "Unexpected error while adding Package {PackageId}, Version {Version}.")]
-    public static partial void UnexpectedAddPackageFailure(this ILogger logger, string packageId, NuGetVersion version, Exception? exception = null);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.UnexpectedAddFailure, Level = LogLevel.Error, Message = "Unexpected error while adding Package {PackageId}, Version {Version} to the Local NuGet Feed.")]
+    public static partial void UnexpectedAddNuGetPackageFailure(this ILogger logger, string packageId, NuGetVersion version, Exception? exception = null);
 
     /// <summary>
     /// Logs a <see cref="NuGetPullerEventId.NoLocalPackagesExist"/> <see cref="LogLevel.Warning"/> event message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.NoLocalPackagesExist, Level = LogLevel.Warning, Message = "Local repository has no packages.")]
-    public static partial void NoLocalPackagesExist(this ILogger logger, Exception? exception = null);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.NoLocalPackagesExist, Level = LogLevel.Warning, Message = "Local NuGet Feed has no packages.")]
+    public static partial void NoLocalNuGetPackagesExist(this ILogger logger, Exception? exception = null);
 
     #region InvalidExportBundle Logger Event Methods
 
-    private const string MESSAGE_InvalidExportBundle = "Package metadata export path is invalid";
+    private const string MESSAGE_Package_Bundle_Export_Path = "NuGet package bundle export path";
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportBundle, Level = LogLevel.Critical, EventName = nameof(InvalidExportBundle), Message = $"{MESSAGE_InvalidExportBundle} ({{Path}}).")]
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportBundle, Level = LogLevel.Critical, EventName = nameof(NuGetPullerEventId.InvalidExportBundle),
+        Message = $"{MESSAGE_Package_Bundle_Export_Path} \"{{Path}}\" {Message_Is_Invalid}.")]
     private static partial void LogInvalidExportBundle(ILogger logger, string path, Exception? exception);
 
-    private const string MESSAGE_ExportBundleDirectoryNotFound = "Parent subdirectory of package metadata export path not found";
+    private const string MESSAGE_Bundle_Export_Path_Parent_Directory = "Parent subdirectory of NuGet package bundle export path";
 
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportBundle, Level = LogLevel.Critical, EventName = nameof(ExportBundleDirectoryNotFound), Message = $"{MESSAGE_ExportBundleDirectoryNotFound} ({{Path}}).")]
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportBundle, Level = LogLevel.Critical, EventName = nameof(ExportBundleDirectoryNotFound),
+        Message = $"{MESSAGE_Bundle_Export_Path_Parent_Directory} \"{{Path}}\" {Message_Not_Found}.")]
     private static partial void LogExportBundleDirectoryNotFound(ILogger logger, string path, Exception? exception);
 
-    private const string MESSAGE_ExportBundlePathTooLong = "Package metadata export path is too long";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportBundle, Level = LogLevel.Critical, Message = $"{MESSAGE_ExportBundlePathTooLong} ({{Path}}).")]
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportBundle, Level = LogLevel.Critical,
+        Message = $"{MESSAGE_Package_Bundle_Export_Path} \"{{Path}}\" {Message_Is_Too_Long}.")]
     private static partial void ExportBundlePathTooLong(ILogger logger, string path, Exception exception);
 
-    private const string MESSAGE_ExportBundlePathAccessDenied = "Access to export bundle path is denied";
+    private const string Message_Access_To_Export_Bundle_Path = "Access to NuGet package bundle export path";
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportBundle, Level = LogLevel.Critical, EventName = nameof(ExportBundlePathAccessDenied), Message = $"{MESSAGE_ExportBundlePathAccessDenied} ({{Path}}).")]
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportBundle, Level = LogLevel.Critical, EventName = nameof(ExportBundlePathAccessDenied),
+        Message = $"{Message_Access_To_Export_Bundle_Path} \"{{Path}}\" {Message_Is_Denied}.")]
     private static partial void LogExportBundlePathAccessDenied(ILogger logger, string path, Exception? exception);
 
-    private const string MESSAGE_InsufficientPermissionsForExportBundlePath = "Caller has insufficient permissions to export bundle path";
+    private const string MESSAGE_InsufficientPermissionsForExportBundlePath = "Caller has insufficient permissions to the NuGet package bundle export path";
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportBundle, Level = LogLevel.Critical, Message = $"{MESSAGE_InsufficientPermissionsForExportBundlePath} ({{Path}}).")]
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportBundle, Level = LogLevel.Critical, Message = $"{MESSAGE_InsufficientPermissionsForExportBundlePath} \"{{Path}}\".")]
     private static partial void InsufficientPermissionsForExportBundlePath(ILogger logger, string path, Exception exception);
 
     /// <summary>
@@ -863,39 +857,39 @@ public static partial class AppLoggerExtensions
     /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidExportBundle"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
-    /// <param name="url">The invalid NuGet repository URL.</param>
+    /// <param name="path">The invalid export bundle [atj].</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    public static string InvalidExportBundle(this ILogger logger, string url, Exception? exception = null)
+    public static string InvalidExportBundle(this ILogger logger, string path, Exception? exception = null)
     {
         if (exception is PathTooLongException)
         {
-            ExportBundlePathTooLong(logger, url, exception);
-            return $"{MESSAGE_ExportBundlePathTooLong}.";
+            ExportBundlePathTooLong(logger, path, exception);
+            return $"{MESSAGE_Package_Bundle_Export_Path} \"{path}\" {Message_Is_Too_Long}.";
         }
-        LogInvalidExportBundle(logger, url, exception);
-        return $"{MESSAGE_InvalidExportBundle}.";
+        LogInvalidExportBundle(logger, path, exception);
+        return $"{MESSAGE_Package_Bundle_Export_Path} \"{path}\" {Message_Is_Invalid}.";
     }
 
     /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidExportBundle"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
-    /// <param name="path">The NuGet repository path.</param>
+    /// <param name="path">The NuGet feed path.</param>
     /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
     public static string ExportBundleDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
     {
         LogExportBundleDirectoryNotFound(logger, path, exception);
-        return $"{MESSAGE_ExportBundleDirectoryNotFound}.";
+        return $"{MESSAGE_Bundle_Export_Path_Parent_Directory} \"{path}\" {Message_Not_Found}.";
     }
 
     /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.MetaDataExportPathAccessDenied"/> event error message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
-    /// <param name="path">The NuGet repository path.</param>
+    /// <param name="path">The NuGet feed path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
     public static string ExportBundlePathAccessDenied(this ILogger logger, string path, Exception? exception = null)
@@ -903,250 +897,10 @@ public static partial class AppLoggerExtensions
         if (exception is System.Security.SecurityException)
         {
             InsufficientPermissionsForExportBundlePath(logger, path, exception);
-            return $"{MESSAGE_InsufficientPermissionsForExportBundlePath}.";
+            return $"{MESSAGE_InsufficientPermissionsForExportBundlePath} \"{path}\".";
         }
         LogExportBundlePathAccessDenied(logger, path, exception);
-        return $"{MESSAGE_ExportBundlePathAccessDenied}.";
-    }
-
-    #endregion
-
-    #region InvalidTargetManifestFile Logger Event Methods
-
-    private const string MESSAGE_TargetManifestFilePathTooLong = "Package metadata export path is too long";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidTargetManifestFile, Level = LogLevel.Critical, Message = $"{MESSAGE_TargetManifestFilePathTooLong} ({{Path}}).")]
-    private static partial void TargetManifestFilePathTooLong(ILogger logger, string path, Exception exception);
-
-    private const string MESSAGE_InvalidTargetManifestFile = "Package metadata export path is invalid";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidTargetManifestFile, Level = LogLevel.Critical, EventName = nameof(InvalidTargetManifestFile), Message = $"{MESSAGE_InvalidTargetManifestFile} ({{Path}}).")]
-    private static partial void LogInvalidTargetManifestFile(ILogger logger, string path, Exception? exception);
-
-    private const string MESSAGE_TargetManifestFileDirectoryNotFound = "Parent subdirectory of package metadata export path not found";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidTargetManifestFile, Level = LogLevel.Critical, EventName = nameof(TargetManifestFileDirectoryNotFound), Message = $"{MESSAGE_TargetManifestFileDirectoryNotFound} ({{Path}}).")]
-    private static partial void LogTargetManifestFileDirectoryNotFound(ILogger logger, string path, Exception? exception);
-
-    private const string MESSAGE_InsufficientPermissionsForTargetManifestFilePath = "Caller has insufficient permissions to access the target manifest file path";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidTargetManifestFile, Level = LogLevel.Critical, Message = $"{MESSAGE_InsufficientPermissionsForTargetManifestFilePath} ({{Path}}).")]
-    private static partial void InsufficientPermissionsForTargetManifestFilePath(ILogger logger, string path, Exception exception);
-
-    private const string MESSAGE_TargetManifestFilePathAccessDenied = "Access to target manifest file path is denied";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidTargetManifestFile, Level = LogLevel.Critical, EventName = nameof(TargetManifestFilePathAccessDenied), Message = $"{MESSAGE_TargetManifestFilePathAccessDenied} ({{Path}}).")]
-    private static partial void LogTargetManifestFilePathAccessDenied(ILogger logger, string path, Exception? exception);
-
-    /// <summary>
-    /// </summary>
-    /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidTargetManifestFile"/> event error message.
-    /// </summary>
-    /// <param name="logger">The current logger.</param>
-    /// <param name="url">The invalid NuGet repository URL.</param>
-    /// <param name="exception">The optional exception that caused the event.</param>
-    /// <returns>The validation message.</returns>
-    public static string InvalidTargetManifestFile(this ILogger logger, string url, Exception? exception = null)
-    {
-        if (exception is PathTooLongException)
-        {
-            TargetManifestFilePathTooLong(logger, url, exception);
-            return $"{MESSAGE_TargetManifestFilePathTooLong}.";
-        }
-        LogInvalidTargetManifestFile(logger, url, exception);
-        return $"{MESSAGE_InvalidTargetManifestFile}.";
-    }
-
-    /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidTargetManifestFile"/> event error message.
-    /// </summary>
-    /// <param name="logger">The current logger.</param>
-    /// <param name="path">The NuGet repository path.</param>
-    /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
-    /// <param name="exception">The optional exception that caused the event.</param>
-    /// <returns>The validation message.</returns>
-    public static string TargetManifestFileDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
-    {
-        LogTargetManifestFileDirectoryNotFound(logger, path, exception);
-        return $"{MESSAGE_TargetManifestFileDirectoryNotFound}.";
-    }
-
-    /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.MetaDataExportPathAccessDenied"/> event error message.
-    /// </summary>
-    /// <param name="logger">The current logger.</param>
-    /// <param name="path">The NuGet repository path.</param>
-    /// <param name="exception">The optional exception that caused the event.</param>
-    /// <returns>The validation message.</returns>
-    public static string TargetManifestFilePathAccessDenied(this ILogger logger, string path, Exception? exception = null)
-    {
-        if (exception is System.Security.SecurityException)
-        {
-            InsufficientPermissionsForTargetManifestFilePath(logger, path, exception);
-            return $"{MESSAGE_InsufficientPermissionsForTargetManifestFilePath}.";
-        }
-        LogTargetManifestFilePathAccessDenied(logger, path, exception);
-        return $"{MESSAGE_TargetManifestFilePathAccessDenied}.";
-    }
-
-    #endregion
-
-    #region InvalidSaveTargetManifestAs Logger Event Methods
-
-    private const string MESSAGE_SaveTargetManifestAsPathTooLong = "Package metadata export path is too long";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidSaveTargetManifestAs, Level = LogLevel.Critical, Message = $"{MESSAGE_SaveTargetManifestAsPathTooLong} ({{Path}}).")]
-    private static partial void SaveTargetManifestAsPathTooLong(ILogger logger, string path, Exception exception);
-
-    private const string MESSAGE_InvalidSaveTargetManifestAs = "Package metadata export path is invalid";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidSaveTargetManifestAs, Level = LogLevel.Critical, EventName = nameof(InvalidSaveTargetManifestAs), Message = $"{MESSAGE_InvalidSaveTargetManifestAs} ({{Path}}).")]
-    private static partial void LogInvalidSaveTargetManifestAs(ILogger logger, string path, Exception? exception);
-
-    private const string MESSAGE_SaveTargetManifestAsDirectoryNotFound = "Parent subdirectory of package metadata export path not found";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidSaveTargetManifestAs, Level = LogLevel.Critical, EventName = nameof(SaveTargetManifestAsDirectoryNotFound), Message = $"{MESSAGE_SaveTargetManifestAsDirectoryNotFound} ({{Path}}).")]
-    private static partial void LogSaveTargetManifestAsDirectoryNotFound(ILogger logger, string path, Exception? exception);
-
-    private const string MESSAGE_InsufficientPermissionsForSaveTargetManifestAsPath = "Caller has insufficient permissions to access the manifest file output path";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidSaveTargetManifestAs, Level = LogLevel.Critical, Message = $"{MESSAGE_InsufficientPermissionsForSaveTargetManifestAsPath} ({{Path}}).")]
-    private static partial void InsufficientPermissionsForSaveTargetManifestAsPath(ILogger logger, string path, Exception exception);
-
-    private const string MESSAGE_SaveTargetManifestAsPathAccessDenied = "Access to manifest file output path is denied";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidSaveTargetManifestAs, Level = LogLevel.Critical, EventName = nameof(SaveTargetManifestAsPathAccessDenied), Message = $"{MESSAGE_SaveTargetManifestAsPathAccessDenied} ({{Path}}).")]
-    private static partial void LogSaveTargetManifestAsPathAAccessDenied(ILogger logger, string path, Exception? exception);
-
-    /// <summary>
-    /// </summary>
-    /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidSaveTargetManifestAs"/> event error message.
-    /// </summary>
-    /// <param name="logger">The current logger.</param>
-    /// <param name="url">The invalid NuGet repository URL.</param>
-    /// <param name="exception">The optional exception that caused the event.</param>
-    /// <returns>The validation message.</returns>
-    public static string InvalidSaveTargetManifestAs(this ILogger logger, string url, Exception? exception = null)
-    {
-        if (exception is PathTooLongException)
-        {
-            SaveTargetManifestAsPathTooLong(logger, url, exception);
-            return $"{MESSAGE_SaveTargetManifestAsPathTooLong}.";
-        }
-        LogInvalidSaveTargetManifestAs(logger, url, exception);
-        return $"{MESSAGE_InvalidSaveTargetManifestAs}.";
-    }
-
-    /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidSaveTargetManifestAs"/> event error message.
-    /// </summary>
-    /// <param name="logger">The current logger.</param>
-    /// <param name="path">The NuGet repository path.</param>
-    /// <param name="exception">The optional exception that caused the event.</param>
-    /// <returns>The validation message.</returns>
-    public static string SaveTargetManifestAsDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
-    {
-        LogSaveTargetManifestAsDirectoryNotFound(logger, path, exception);
-        return $"{MESSAGE_SaveTargetManifestAsDirectoryNotFound}.";
-    }
-
-    /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.MetaDataExportPathAccessDenied"/> event error message.
-    /// </summary>
-    /// <param name="logger">The current logger.</param>
-    /// <param name="path">The NuGet repository path.</param>
-    /// <param name="exception">The optional exception that caused the event.</param>
-    /// <returns>The validation message.</returns>
-    public static string SaveTargetManifestAsPathAccessDenied(this ILogger logger, string path, Exception? exception = null)
-    {
-        if (exception is System.Security.SecurityException)
-        {
-            InsufficientPermissionsForSaveTargetManifestAsPath(logger, path, exception);
-            return $"{MESSAGE_InsufficientPermissionsForSaveTargetManifestAsPath}.";
-        }
-        LogSaveTargetManifestAsPathAAccessDenied(logger, path, exception);
-        return $"{MESSAGE_SaveTargetManifestAsPathAccessDenied}.";
-    }
-
-    #endregion
-
-    #region InvalidImportPath Logger Event Methods
-    private const string MESSAGE_ImportPathTooLong = "Package metadata export path is too long";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidImportPath, Level = LogLevel.Critical, Message = $"{MESSAGE_ImportPathTooLong} ({{Path}}).")]
-    private static partial void ImportPathTooLong(ILogger logger, string path, Exception exception);
-
-    private const string MESSAGE_InvalidImportPath = "Package metadata export path is invalid";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidImportPath, Level = LogLevel.Critical, EventName = nameof(InvalidImportPath), Message = $"{MESSAGE_InvalidImportPath} ({{Path}}).")]
-    private static partial void LogInvalidImportPath(ILogger logger, string path, Exception? exception);
-
-    private const string MESSAGE_ImportDirectoryNotFound = "Parent subdirectory of package metadata export path not found";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidImportPath, Level = LogLevel.Critical, EventName = nameof(ImportFileOrDirectoryNotFound), Message = $"{MESSAGE_ImportDirectoryNotFound} ({{Path}}).")]
-    private static partial void LogImportDirectoryNotFound(ILogger logger, string path, Exception? exception);
-
-    private const string MESSAGE_InsufficientPermissionsForImportPath = "Caller has insufficient permissions to access the manifest file output path";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidImportPath, Level = LogLevel.Critical, Message = $"{MESSAGE_InsufficientPermissionsForImportPath} ({{Path}}).")]
-    private static partial void InsufficientPermissionsForImportPath(ILogger logger, string path, Exception exception);
-
-    private const string MESSAGE_ImportPathAccessDenied = "Access to manifest file output path is denied";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidImportPath, Level = LogLevel.Critical, EventName = nameof(ImportPathAccessDenied), Message = $"{MESSAGE_ImportPathAccessDenied} ({{Path}}).")]
-    private static partial void LogImportPathAccessDenied(ILogger logger, string path, Exception? exception);
-
-    /// <summary>
-    /// </summary>
-    /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidImport"/> event error message.
-    /// </summary>
-    /// <param name="logger">The current logger.</param>
-    /// <param name="url">The invalid NuGet repository URL.</param>
-    /// <param name="exception">The optional exception that caused the event.</param>
-    /// <returns>The validation message.</returns>
-    public static string InvalidImportPath(this ILogger logger, string url, Exception? exception = null)
-    {
-        if (exception is PathTooLongException)
-        {
-            ImportPathTooLong(logger, url, exception);
-            return $"{MESSAGE_ImportPathTooLong}.";
-        }
-        LogInvalidImportPath(logger, url, exception);
-        return $"{MESSAGE_InvalidImportPath}.";
-    }
-
-    /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidImport"/> event error message.
-    /// </summary>
-    /// <param name="logger">The current logger.</param>
-    /// <param name="path">The NuGet repository path.</param>
-    /// <param name="exception">The optional exception that caused the event.</param>
-    /// <returns>The validation message.</returns>
-    public static string ImportFileOrDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
-    {
-        LogImportDirectoryNotFound(logger, path, exception);
-        return $"{MESSAGE_ImportDirectoryNotFound}.";
-    }
-
-    /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.MetaDataExportPathAccessDenied"/> event error message.
-    /// </summary>
-    /// <param name="logger">The current logger.</param>
-    /// <param name="path">The NuGet repository path.</param>
-    /// <param name="exception">The optional exception that caused the event.</param>
-    /// <returns>The validation message.</returns>
-    public static string ImportPathAccessDenied(this ILogger logger, string path, Exception? exception = null)
-    {
-        if (exception is System.Security.SecurityException)
-        {
-            InsufficientPermissionsForImportPath(logger, path, exception);
-            return $"{MESSAGE_InsufficientPermissionsForMetaDataExportPath}.";
-        }
-        LogImportPathAccessDenied(logger, path, exception);
-        return $"{MESSAGE_MetaDataExportPathAccessDenied}.";
+        return $"{Message_Access_To_Export_Bundle_Path} \"{path}\" {Message_Is_Denied}.";
     }
 
     #endregion
@@ -1162,7 +916,7 @@ public static partial class AppLoggerExtensions
     [LoggerMessage(EventId = (int)NuGetPullerEventId.DownloadingNuGetPackage, Level = LogLevel.Warning, Message = "Downloading package {PackageId}, version {Version} from upstream {PackageSourceUri}.")]
     private static partial void DownloadingRemoteNuGetPackageVersion(ILogger logger, string packageId, NuGetVersion version, Uri packageSourceUri, Exception? exception);
 
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.DownloadingNuGetPackage, Level = LogLevel.Warning, EventName = nameof(DownloadingNuGetPackage), Message = "Downloading package {PackageId} from upstream {PackageSourceUri}.")]
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.DownloadingNuGetPackage, Level = LogLevel.Warning, EventName = nameof(NuGetPullerEventId.DownloadingNuGetPackage), Message = "Downloading package {PackageId} from upstream {PackageSourceUri}.")]
     private static partial void LogDownloadingRemoteNuGetPackage(ILogger logger, string packageId, Uri packageSourceUri, Exception? exception);
 
     /// <summary>
@@ -1170,9 +924,9 @@ public static partial class AppLoggerExtensions
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="identity">The package identifier and version.</param>
-    /// <param name="clientService">The source repository.</param>
+    /// <param name="clientService">The source repository service.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void DownloadingNuGetPackage(this ILogger logger, PackageIdentity identity, IClientService clientService, Exception? exception = null)
+    public static void DownloadingNuGetPackage(this ILogger logger, PackageIdentity identity, INuGetClientService clientService, Exception? exception = null)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
@@ -1198,6 +952,7 @@ public static partial class AppLoggerExtensions
     /// <param name="exception">The optional exception that caused the event.</param>
     [LoggerMessage(EventId = (int)NuGetPullerEventId.CommandLineArgumentsAreExclusive, Level = LogLevel.Critical,
         Message = "Command line switch {Switch1}; cannot be used with {Switch2})")]
+    [Obsolete("Use NuGetPuller.CLI.MainService.WriteCommandLineArgumentsAreExclusive")]
     public static partial void CommandLineArgumentsAreExclusive(this ILogger logger, string switch1, string switch2, Exception? exception = null);
 
     #region IgnoredDependentCommandLineArgument Logger Event Methods
@@ -1211,6 +966,7 @@ public static partial class AppLoggerExtensions
     /// <param name="exception">The optional exception that caused the event.</param>
     [LoggerMessage(EventId = (int)NuGetPullerEventId.IgnoredDependentCommandLineArgument, Level = LogLevel.Warning,
         Message = "Command line switch {DependentSwitch} is ignnored if {SwitchName} is not specified.")]
+    [Obsolete("Use NuGetPuller.CLI.MainService.CheckIgnoredDependentCommandLineArgument")]
     public static partial void IgnoredDependentCommandLineArgument(this ILogger logger, string dependentSwitch, string switchName, Exception? exception = null);
 
     /// <summary>
@@ -1223,6 +979,7 @@ public static partial class AppLoggerExtensions
     /// <param name="exception">The optional exception that caused the event.</param>
     [LoggerMessage(EventId = (int)NuGetPullerEventId.IgnoredDependentCommandLineArgument, Level = LogLevel.Warning,
         Message = "Command line switch {DependentSwitch} is ignnored if {SwitchName1} or {SwitchName2} is not specified.")]
+    [Obsolete("Use NuGetPuller.CLI.MainService.CheckIgnoredDependentCommandLineArgument")]
     public static partial void IgnoredDependentCommandLineArgument(this ILogger logger, string dependentSwitch, string switchName1, string switchName2, Exception? exception = null);
 
     /// <summary>
@@ -1236,6 +993,7 @@ public static partial class AppLoggerExtensions
     /// <param name="exception">The optional exception that caused the event.</param>
     [LoggerMessage(EventId = (int)NuGetPullerEventId.IgnoredDependentCommandLineArgument, Level = LogLevel.Warning,
         Message = "Command line switch {DependentSwitch} is ignnored if {SwitchName1}, {SwitchName2} or {SwitchName3} is not specified.")]
+    [Obsolete("Use NuGetPuller.CLI.MainService.CheckIgnoredDependentCommandLineArgument")]
     public static partial void IgnoredDependentCommandLineArgument(this ILogger logger, string dependentSwitch, string switchName1, string switchName2, string switchName3, Exception? exception = null);
 
     /// <summary>
@@ -1250,22 +1008,23 @@ public static partial class AppLoggerExtensions
     /// <param name="exception">The optional exception that caused the event.</param>
     [LoggerMessage(EventId = (int)NuGetPullerEventId.IgnoredDependentCommandLineArgument, Level = LogLevel.Warning,
         Message = "Command line switch {DependentSwitch} is ignnored if {SwitchName1}, {SwitchName2}, {SwitchName3} or {SwitchName4} is not specified.")]
+    [Obsolete("Use NuGetPuller.CLI.MainService.CheckIgnoredDependentCommandLineArgument")]
     public static partial void IgnoredDependentCommandLineArgument(this ILogger logger, string dependentSwitch, string switchName1, string switchName2, string switchName3, string switchName4, Exception? exception = null);
 
     #endregion
 
     #region GetDownloadResource Scope
 
-    private static readonly Func<ILogger, string, NuGetVersion?, string, IDisposable?> _getRemoteDownloadResourceResultScope = LoggerMessage.DefineScope<string, NuGetVersion?, string>(
-        "Getting Download Resource for package {PackageId}, version {Version} from upstream NuGet repository at {RepositoryUrl}."
+    private static readonly Func<ILogger, string, NuGetVersion?, string, IDisposable?> _getNugetServerDownloadResourceResultScope = LoggerMessage.DefineScope<string, NuGetVersion?, string>(
+        "Getting Download Resource for package {PackageId}, version {Version} from upstream NuGet Server at {Url}."
     );
 
-    private static readonly Func<ILogger, string, NuGetVersion?, string, IDisposable?> _getUpstreamDirDownloadResourceResultScope = LoggerMessage.DefineScope<string, NuGetVersion?, string>(
-        "Getting Download Resource for package {PackageId}, version {Version} from upstream NuGet repository at {Path}."
+    private static readonly Func<ILogger, string, NuGetVersion?, string, IDisposable?> _getUpstreamFeedDownloadResourceResultScope = LoggerMessage.DefineScope<string, NuGetVersion?, string>(
+        "Getting Download Resource for package {PackageId}, version {Version} from Upstream NuGet Feed at {Path}."
     );
 
-    private static readonly Func<ILogger, string, NuGetVersion?, string, IDisposable?> _getLocalDownloadResourceResultScope = LoggerMessage.DefineScope<string, NuGetVersion?, string>(
-        "Getting Download Resource for package {PackageId}, version {Version} from local NuGet repository at {Path}."
+    private static readonly Func<ILogger, string, NuGetVersion?, string, IDisposable?> _getLocalFeedDownloadResourceResultScope = LoggerMessage.DefineScope<string, NuGetVersion?, string>(
+        "Getting Download Resource for package {PackageId}, version {Version} from Local NuGet Feed at {Path}."
     );
 
     /// <summary>
@@ -1274,15 +1033,15 @@ public static partial class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetDownloadResourceResultScope(this ILogger logger, PackageIdentity identity, IClientService clientService)
+    public static IDisposable? BeginGetDownloadResourceResultScope(this ILogger logger, PackageIdentity identity, INuGetClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
             if (clientService.IsUpstream)
-                return _getUpstreamDirDownloadResourceResultScope(logger, identity.Id, identity.HasVersion ? identity.Version : null, clientService.PackageSourceLocation);
-            return _getLocalDownloadResourceResultScope(logger, identity.Id, identity.HasVersion ? identity.Version : null, clientService.PackageSourceLocation);
+                return _getUpstreamFeedDownloadResourceResultScope(logger, identity.Id, identity.HasVersion ? identity.Version : null, clientService.PackageSourceLocation);
+            return _getLocalFeedDownloadResourceResultScope(logger, identity.Id, identity.HasVersion ? identity.Version : null, clientService.PackageSourceLocation);
         }
-        return _getRemoteDownloadResourceResultScope(logger, identity.Id, identity.HasVersion ? identity.Version : null, clientService.PackageSourceLocation);
+        return _getNugetServerDownloadResourceResultScope(logger, identity.Id, identity.HasVersion ? identity.Version : null, clientService.PackageSourceLocation);
     }
 
     #endregion
@@ -1290,13 +1049,13 @@ public static partial class AppLoggerExtensions
     #region DownloadNupkg Scope
 
     private static readonly Func<ILogger, string, NuGetVersion?, string?, IDisposable?> _downloadRemoteNupkgScope = LoggerMessage.DefineScope<string, NuGetVersion?, string?>(
-       "Download NuGet package from upstream (PackageId={PackageId}; Version={Version}; URL={RepositoryUrl}).");
+       "Download NuGet package {PackageId}, version {Version} from server {Url}).");
 
-    private static readonly Func<ILogger, string, NuGetVersion?, string, IDisposable?> _downloadUpstreamDirNupkgScope = LoggerMessage.DefineScope<string, NuGetVersion?, string>(
-       "Download NuGet package from upstream (PackageId={PackageId}; Version={Version}; Path={RepositoryPath}).");
+    private static readonly Func<ILogger, string, NuGetVersion?, string, IDisposable?> _downloadUpstreamFeedNupkgScope = LoggerMessage.DefineScope<string, NuGetVersion?, string>(
+       "Download NuGet package {PackageId}, version {Version} from Upstream NuGet Feed {Path}.");
 
-    private static readonly Func<ILogger, string, NuGetVersion?, string, IDisposable?> _downloadLocalNupkgScope = LoggerMessage.DefineScope<string, NuGetVersion?, string>(
-       "Download NuGet package from local (PackageId={PackageId}; Version={Version}; Path={RepositoryPath}).");
+    private static readonly Func<ILogger, string, NuGetVersion?, string, IDisposable?> _downloadLocalFeedNupkgScope = LoggerMessage.DefineScope<string, NuGetVersion?, string>(
+       "Download NuGet package {PackageId}, version {Version} from Local NuGet Feed {Path}.");
 
     /// <summary>
     /// Formats the DownloadNupkg message and creates a scope.
@@ -1306,13 +1065,13 @@ public static partial class AppLoggerExtensions
     /// <param name="version">The package version.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginDownloadNupkgScope(this ILogger logger, string packageId, NuGetVersion version, IClientService clientService)
+    public static IDisposable? BeginDownloadNupkgScope(this ILogger logger, string packageId, NuGetVersion version, INuGetClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
             if (clientService.IsUpstream)
-                return _downloadUpstreamDirNupkgScope(logger, packageId, version, clientService.PackageSourceLocation);
-            return _downloadLocalNupkgScope(logger, packageId, version, clientService.PackageSourceLocation);
+                return _downloadUpstreamFeedNupkgScope(logger, packageId, version, clientService.PackageSourceLocation);
+            return _downloadLocalFeedNupkgScope(logger, packageId, version, clientService.PackageSourceLocation);
         }
         return _downloadRemoteNupkgScope(logger, packageId, version, clientService.PackageSourceLocation);
     }
@@ -1321,28 +1080,28 @@ public static partial class AppLoggerExtensions
 
     #region GetMetadata Scope
 
-    private static readonly Func<ILogger, string, bool, bool, string, IDisposable?> _getRemoteMetadataScope1 = LoggerMessage.DefineScope<string, bool, bool, string>(
-       "Get NuGet package metadata from upstream (PackageId={PackageId}; IncludePreRelease={IncludePreRelease}; IncludeUnlisted={IncludeUnlisted}; URL={RepositoryUrl})."
+    private static readonly Func<ILogger, string, bool, bool, string, IDisposable?> _getNugetServerMetadataScope1 = LoggerMessage.DefineScope<string, bool, bool, string>(
+       "Get metadata for package {PackageId} (IncludePreRelease={IncludePreRelease}; IncludeUnlisted={IncludeUnlisted}) from NuGet Server {Url}."
     );
 
-    private static readonly Func<ILogger, string, bool, bool, string, IDisposable?> _getLocalMetadataScope1 = LoggerMessage.DefineScope<string, bool, bool, string>(
-       "Get NuGet package metadata from local (PackageId={PackageId}; IncludePreRelease={IncludePreRelease}; IncludeUnlisted={IncludeUnlisted}; Path={RepositoryPath})."
+    private static readonly Func<ILogger, string, bool, bool, string, IDisposable?> _getLocalFeedMetadataScope1 = LoggerMessage.DefineScope<string, bool, bool, string>(
+       "Get metadata for package {PackageId} (IncludePreRelease={IncludePreRelease}; IncludeUnlisted={IncludeUnlisted}) from Local NuGet Feed {Path}."
     );
 
-    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _getRemoteMetadataScope2 = LoggerMessage.DefineScope<string, NuGetVersion, string>(
-       "Get NuGet package metadata from upstream (PackageId={PackageId}; Version={Version}; URL={RepositoryUrl})."
+    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _getNugetServerMetadataScope2 = LoggerMessage.DefineScope<string, NuGetVersion, string>(
+       "Get metadata for package {PackageId}, version {Version} from NuGet Server {Url}."
     );
 
-    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _getLocalMetadataScope2 = LoggerMessage.DefineScope<string, NuGetVersion, string>(
-       "Get NuGet package metadata from local (PackageId={PackageId}; Version={Version}; Path={RepositoryPath})."
+    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _getLocalFeedMetadataScope2 = LoggerMessage.DefineScope<string, NuGetVersion, string>(
+       "Get metadata for package {PackageId}, version {Version} from Local NuGet Feed {Path}."
     );
 
-    private static readonly Func<ILogger, string, bool, bool, string, IDisposable?> _getUpstreamDirMetadataScope1 = LoggerMessage.DefineScope<string, bool, bool, string>(
-       "Get NuGet package metadata from upstream (PackageId={PackageId}; IncludePreRelease={IncludePreRelease}; IncludeUnlisted={IncludeUnlisted}; Path={RepositoryPath})."
+    private static readonly Func<ILogger, string, bool, bool, string, IDisposable?> _getUpstreamFeedMetadataScope1 = LoggerMessage.DefineScope<string, bool, bool, string>(
+       "Get metadata for package {PackageId} (IncludePreRelease={IncludePreRelease}; IncludeUnlisted={IncludeUnlisted}) from Upstream NuGet Feed {Path}."
     );
 
-    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _getUpstreamDirMetadataScope2 = LoggerMessage.DefineScope<string, NuGetVersion, string>(
-       "Get NuGet package metadata from upstream (PackageId={PackageId}; Version={Version}; Path={RepositoryPath})."
+    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _getUpstreamFeedMetadataScope2 = LoggerMessage.DefineScope<string, NuGetVersion, string>(
+       "Get metadata for package {PackageId}, version {Version} from Upstream NuGet Feed {Path}."
     );
 
     /// <summary>
@@ -1354,42 +1113,42 @@ public static partial class AppLoggerExtensions
     /// <param name="includeUnlisted">Whether to include unlisted packages.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetMetadataScope(this ILogger logger, string packageId, bool includePreRelease, bool includeUnlisted, IClientService clientService)
+    public static IDisposable? BeginGetMetadataScope(this ILogger logger, string packageId, bool includePreRelease, bool includeUnlisted, INuGetClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
             if (clientService.IsUpstream)
-                return _getUpstreamDirMetadataScope1(logger, packageId, includePreRelease, includeUnlisted, clientService.PackageSourceLocation);
-            return _getLocalMetadataScope1(logger, packageId, includePreRelease, includeUnlisted, clientService.PackageSourceLocation);
+                return _getUpstreamFeedMetadataScope1(logger, packageId, includePreRelease, includeUnlisted, clientService.PackageSourceLocation);
+            return _getLocalFeedMetadataScope1(logger, packageId, includePreRelease, includeUnlisted, clientService.PackageSourceLocation);
         }
-        return _getRemoteMetadataScope1(logger, packageId, includePreRelease, includeUnlisted, clientService.PackageSourceLocation);
+        return _getNugetServerMetadataScope1(logger, packageId, includePreRelease, includeUnlisted, clientService.PackageSourceLocation);
     }
 
-    public static IDisposable? BeginGetMetadataScope(this ILogger logger, string packageId, NuGetVersion version, IClientService clientService)
+    public static IDisposable? BeginGetMetadataScope(this ILogger logger, string packageId, NuGetVersion version, INuGetClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
             if (clientService.IsUpstream)
-                return _getUpstreamDirMetadataScope2(logger, packageId, version, clientService.PackageSourceLocation);
-            return _getLocalMetadataScope2(logger, packageId, version, clientService.PackageSourceLocation);
+                return _getUpstreamFeedMetadataScope2(logger, packageId, version, clientService.PackageSourceLocation);
+            return _getLocalFeedMetadataScope2(logger, packageId, version, clientService.PackageSourceLocation);
         }
-        return _getRemoteMetadataScope2(logger, packageId, version, clientService.PackageSourceLocation);
+        return _getNugetServerMetadataScope2(logger, packageId, version, clientService.PackageSourceLocation);
     }
 
     #endregion
 
     #region GetAllVersions Scope
 
-    private static readonly Func<ILogger, string, string, IDisposable?> _getAllRemoteVersionsScope = LoggerMessage.DefineScope<string, string>(
-       "Get all NuGet package versions from upstream (PackageId={PackageId}; RepositoryUrl={RepositoryUrl})."
+    private static readonly Func<ILogger, string, string, IDisposable?> _getAllNugetServerVersionsScope = LoggerMessage.DefineScope<string, string>(
+       "Get all versions for package {PackageId} from NuGet Server {Url}."
     );
 
-    private static readonly Func<ILogger, string, string, IDisposable?> _getAllUpstreamDirVersionsScope = LoggerMessage.DefineScope<string, string>(
-       "Get all NuGet package versions from upstream (PackageId={PackageId}; RepositoryUrl={RepositoryUrl})."
+    private static readonly Func<ILogger, string, string, IDisposable?> _getAllUpstreamFeedVersionsScope = LoggerMessage.DefineScope<string, string>(
+       "Get all versions for package {PackageId} from Upstream NuGet Feed {Path}."
     );
 
-    private static readonly Func<ILogger, string, string, IDisposable?> _getAllLocalVersionsScope = LoggerMessage.DefineScope<string, string>(
-       "Get all NuGet package versions from local (PackageId={PackageId}; RepositoryUrl={RepositoryUrl})."
+    private static readonly Func<ILogger, string, string, IDisposable?> _getAllLocalFeedVersionsScope = LoggerMessage.DefineScope<string, string>(
+       "Get all versions for package {PackageId} from Local NuGet Feed {Path}."
     );
 
     /// <summary>
@@ -1399,31 +1158,31 @@ public static partial class AppLoggerExtensions
     /// <param name="packageId">The package identifier.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetAllVersionsScope(this ILogger logger, string packageId, IClientService clientService)
+    public static IDisposable? BeginGetAllVersionsScope(this ILogger logger, string packageId, INuGetClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
             if (clientService.IsUpstream)
-                return _getAllUpstreamDirVersionsScope(logger, packageId, clientService.PackageSourceLocation);
-            return _getAllLocalVersionsScope(logger, packageId, clientService.PackageSourceLocation);
+                return _getAllUpstreamFeedVersionsScope(logger, packageId, clientService.PackageSourceLocation);
+            return _getAllLocalFeedVersionsScope(logger, packageId, clientService.PackageSourceLocation);
         }
-        return _getAllRemoteVersionsScope(logger, packageId, clientService.PackageSourceLocation);
+        return _getAllNugetServerVersionsScope(logger, packageId, clientService.PackageSourceLocation);
     }
 
     #endregion
 
     #region ResolvePackage Scope
 
-    private static readonly Func<ILogger, string, NuGetVersion, NuGetFramework, string, IDisposable?> _resolveRemotePackageScope = LoggerMessage.DefineScope<string, NuGetVersion, NuGetFramework, string>(
-       "Getting upstream package dependencies (PackageId={PackageId}; Version={Version}; Framework={Framework}; URL={RepositoryUrl})."
+    private static readonly Func<ILogger, string, NuGetVersion, NuGetFramework, string, IDisposable?> _resolveNugetServerPackageScope = LoggerMessage.DefineScope<string, NuGetVersion, NuGetFramework, string>(
+       "Getting dependencies for package {PackageId}, version {Version}, framework {Framework} from NuGet Server {URL}."
     );
 
-    private static readonly Func<ILogger, string, NuGetVersion, NuGetFramework, string, IDisposable?> _resolveUpstreamDirPackageScope = LoggerMessage.DefineScope<string, NuGetVersion, NuGetFramework, string>(
-       "Getting upstream package dependencies (PackageId={PackageId}; Version={Version}; Framework={Framework}; Path={RepositoryPath})."
+    private static readonly Func<ILogger, string, NuGetVersion, NuGetFramework, string, IDisposable?> _resolveUpstreamFeedPackageScope = LoggerMessage.DefineScope<string, NuGetVersion, NuGetFramework, string>(
+       "Getting dependencies for package {PackageId}, version {Version}, framework {Framework} from Upstream NuGet Feed {Path}."
     );
 
-    private static readonly Func<ILogger, string, NuGetVersion, NuGetFramework, string, IDisposable?> _resolveLocalPackageScope = LoggerMessage.DefineScope<string, NuGetVersion, NuGetFramework, string>(
-       "Getting local package dependencies (PackageId={PackageId}; Version={Version}; Framework={Framework}; Path={RepositoryPath})."
+    private static readonly Func<ILogger, string, NuGetVersion, NuGetFramework, string, IDisposable?> _resolveLocalFeedPackageScope = LoggerMessage.DefineScope<string, NuGetVersion, NuGetFramework, string>(
+       "Getting dependencies for package {PackageId}, version {Version}, framework {Framework} from Local NuGet Feed {Path}."
     );
 
     /// <summary>
@@ -1435,43 +1194,43 @@ public static partial class AppLoggerExtensions
     /// <param name="framework">The package target framework.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginResolvePackageScope(this ILogger logger, string packageId, NuGetVersion version, NuGetFramework framework, IClientService clientService)
+    public static IDisposable? BeginResolvePackageScope(this ILogger logger, string packageId, NuGetVersion version, NuGetFramework framework, INuGetClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
             if (clientService.IsUpstream)
-                return _resolveUpstreamDirPackageScope(logger, packageId, version, framework, clientService.PackageSourceLocation);
-            return _resolveLocalPackageScope(logger, packageId, version, framework, clientService.PackageSourceLocation);
+                return _resolveUpstreamFeedPackageScope(logger, packageId, version, framework, clientService.PackageSourceLocation);
+            return _resolveLocalFeedPackageScope(logger, packageId, version, framework, clientService.PackageSourceLocation);
         }
-        return _resolveRemotePackageScope(logger, packageId, version, framework, clientService.PackageSourceLocation);
+        return _resolveNugetServerPackageScope(logger, packageId, version, framework, clientService.PackageSourceLocation);
     }
 
     #endregion
 
     #region ResolvePackages Scope
 
-    private static readonly Func<ILogger, string, string, IDisposable?> _resolveRemotePackagesScope1 = LoggerMessage.DefineScope<string, string>(
-       "Getting upstream package dependencies (PackageId={PackageId}; URL={RepositoryUrl})."
+    private static readonly Func<ILogger, string, string, IDisposable?> _resolveNugetServerPackagesScope1 = LoggerMessage.DefineScope<string, string>(
+       "Getting dependencies for package {PackageId} from NuGet Server {URL}."
     );
 
-    private static readonly Func<ILogger, string, string, IDisposable?> _resolveUpstreamDirPackagesScope1 = LoggerMessage.DefineScope<string, string>(
-       "Getting upstream package dependencies (PackageId={PackageId}; Path={RepositoryPath})."
+    private static readonly Func<ILogger, string, string, IDisposable?> _resolveUpstreamFeedPackagesScope1 = LoggerMessage.DefineScope<string, string>(
+       "Getting dependencies for package {PackageId} from Upstream NuGet Feed {Path}."
     );
 
-    private static readonly Func<ILogger, string, string, IDisposable?> _resolveLocalPackagesScope1 = LoggerMessage.DefineScope<string, string>(
-       "Getting local package dependencies (PackageId={PackageId}; Path={RepositoryPath})."
+    private static readonly Func<ILogger, string, string, IDisposable?> _resolveLocalFeedPackagesScope1 = LoggerMessage.DefineScope<string, string>(
+       "Getting dependencies for package {PackageId} from Local NuGet Feed {Path}."
     );
 
-    private static readonly Func<ILogger, string, NuGetFramework, string, IDisposable?> _resolveRemotePackagesScope2 = LoggerMessage.DefineScope<string, NuGetFramework, string>(
-       "Getting upstream package dependencies (PackageId={PackageId}; Framework={Framework}; URL={RepositoryUrl})."
+    private static readonly Func<ILogger, string, NuGetFramework, string, IDisposable?> _resolveNugetServerPackagesScope2 = LoggerMessage.DefineScope<string, NuGetFramework, string>(
+       "Getting dependencies for package {PackageId}, framework {Framework} from NuGet Server {URL}."
     );
 
-    private static readonly Func<ILogger, string, NuGetFramework, string, IDisposable?> _resolveUpstreamDirPackagesScope2 = LoggerMessage.DefineScope<string, NuGetFramework, string>(
-       "Getting upstream package dependencies (PackageId={PackageId}; Framework={Framework}; Path={RepositoryPath})."
+    private static readonly Func<ILogger, string, NuGetFramework, string, IDisposable?> _resolveUpstreamFeedPackagesScope2 = LoggerMessage.DefineScope<string, NuGetFramework, string>(
+       "Getting dependencies for package {PackageId}, framework {Framework} from Upstream NuGet Feed {Path})."
     );
 
-    private static readonly Func<ILogger, string, NuGetFramework, string, IDisposable?> _resolveLocalPackagesScope2 = LoggerMessage.DefineScope<string, NuGetFramework, string>(
-       "Getting local package dependencies (PackageId={PackageId}; Framework={Framework}; Path={RepositoryPath})."
+    private static readonly Func<ILogger, string, NuGetFramework, string, IDisposable?> _resolveLocalFeedPackagesScope2 = LoggerMessage.DefineScope<string, NuGetFramework, string>(
+       "Getting dependencies for package {PackageId}, framework {Framework} from Local NuGet Feed {Path})."
     );
 
     /// <summary>
@@ -1481,15 +1240,15 @@ public static partial class AppLoggerExtensions
     /// <param name="packageId">The package ID.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginResolvePackagesScope(this ILogger logger, string packageId, IClientService clientService)
+    public static IDisposable? BeginResolvePackagesScope(this ILogger logger, string packageId, INuGetClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
             if (clientService.IsUpstream)
-                return _resolveUpstreamDirPackagesScope1(logger, packageId, clientService.PackageSourceLocation);
-            return _resolveLocalPackagesScope1(logger, packageId, clientService.PackageSourceLocation);
+                return _resolveUpstreamFeedPackagesScope1(logger, packageId, clientService.PackageSourceLocation);
+            return _resolveLocalFeedPackagesScope1(logger, packageId, clientService.PackageSourceLocation);
         }
-        return _resolveRemotePackagesScope1(logger, packageId, clientService.PackageSourceLocation);
+        return _resolveNugetServerPackagesScope1(logger, packageId, clientService.PackageSourceLocation);
     }
 
     /// <summary>
@@ -1500,31 +1259,31 @@ public static partial class AppLoggerExtensions
     /// <param name="framework">The package target framework.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginResolvePackagesScope(this ILogger logger, string packageId, NuGetFramework framework, IClientService clientService)
+    public static IDisposable? BeginResolvePackagesScope(this ILogger logger, string packageId, NuGetFramework framework, INuGetClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
             if (clientService.IsUpstream)
-                return _resolveUpstreamDirPackagesScope2(logger, packageId, framework, clientService.PackageSourceLocation);
-            return _resolveLocalPackagesScope2(logger, packageId, framework, clientService.PackageSourceLocation);
+                return _resolveUpstreamFeedPackagesScope2(logger, packageId, framework, clientService.PackageSourceLocation);
+            return _resolveLocalFeedPackagesScope2(logger, packageId, framework, clientService.PackageSourceLocation);
         }
-        return _resolveRemotePackagesScope2(logger, packageId, framework, clientService.PackageSourceLocation);
+        return _resolveNugetServerPackagesScope2(logger, packageId, framework, clientService.PackageSourceLocation);
     }
 
     #endregion
 
     #region GetDependencyInfo Scope
 
-    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _getRemoteDependencyInfoScope = LoggerMessage.DefineScope<string, NuGetVersion, string>(
-       "Get dependency information from upstream (PackageId={PackageId}; Version={Version}; RepositoryUrl={RepositoryUrl})."
+    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _getNugetServerDependencyInfoScope = LoggerMessage.DefineScope<string, NuGetVersion, string>(
+       "Get dependency information for package {PackageId}, version {Version} from NuGet Server {URL}."
     );
 
-    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _getUpstreamDirDependencyInfoScope = LoggerMessage.DefineScope<string, NuGetVersion, string>(
-       "Get dependency information from upstream (PackageId={PackageId}; Version={Version}; RepositoryUrl={RepositoryUrl})."
+    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _getUpstreamFeedDependencyInfoScope = LoggerMessage.DefineScope<string, NuGetVersion, string>(
+       "Get dependency information for package {PackageId}, version {Version} from Upstream NuGet Feed {Path})."
     );
 
-    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _getLocalDependencyInfoScope = LoggerMessage.DefineScope<string, NuGetVersion, string>(
-       "Get dependency information from local (PackageId={PackageId}; Version={Version}; RepositoryUrl={RepositoryUrl})."
+    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _getLocalFeedDependencyInfoScope = LoggerMessage.DefineScope<string, NuGetVersion, string>(
+       "Get dependency information for package {PackageId}, version {Version} from Local NuGet Feed {Path})."
     );
 
     /// <summary>
@@ -1535,31 +1294,31 @@ public static partial class AppLoggerExtensions
     /// <param name="version">The package version.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetDependencyInfoScope(this ILogger logger, string packageId, NuGetVersion version, IClientService clientService)
+    public static IDisposable? BeginGetDependencyInfoScope(this ILogger logger, string packageId, NuGetVersion version, INuGetClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
             if (clientService.IsUpstream)
-                return _getUpstreamDirDependencyInfoScope(logger, packageId, version, clientService.PackageSourceLocation);
-            return _getLocalDependencyInfoScope(logger, packageId, version, clientService.PackageSourceLocation);
+                return _getUpstreamFeedDependencyInfoScope(logger, packageId, version, clientService.PackageSourceLocation);
+            return _getLocalFeedDependencyInfoScope(logger, packageId, version, clientService.PackageSourceLocation);
         }
-        return _getRemoteDependencyInfoScope(logger, packageId, version, clientService.PackageSourceLocation);
+        return _getNugetServerDependencyInfoScope(logger, packageId, version, clientService.PackageSourceLocation);
     }
 
     #endregion
 
     #region DoesPackageExist Scope
 
-    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _doesRemotePackageExistScope = LoggerMessage.DefineScope<string, NuGetVersion, string>(
-       "Get dependency information from upstream (PackageId={PackageId}; Version={Version}; RepositoryUrl={RepositoryUrl})."
+    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _doesNugetServerPackageExistScope = LoggerMessage.DefineScope<string, NuGetVersion, string>(
+       "Get dependency information for package {PackageId}, version {Version} from NuGet Server {URL}."
     );
 
-    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _doesUpstreamDirPackageExistScope = LoggerMessage.DefineScope<string, NuGetVersion, string>(
-       "Get dependency information from upstream (PackageId={PackageId}; Version={Version}; RepositoryUrl={RepositoryUrl})."
+    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _doesUpstreamFeedPackageExistScope = LoggerMessage.DefineScope<string, NuGetVersion, string>(
+       "Get dependency information for package {PackageId}, version {Version} from Upstream NuGet Feed {Path}."
     );
 
-    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _doesLocalPackageExistScope = LoggerMessage.DefineScope<string, NuGetVersion, string>(
-       "Get dependency information from local (PackageId={PackageId}; Version={Version}; RepositoryUrl={RepositoryUrl})."
+    private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _doesLocalFeedPackageExistScope = LoggerMessage.DefineScope<string, NuGetVersion, string>(
+       "Get dependency information for package {PackageId}, version {Version} from Local NuGet Feed {Path}."
     );
 
     /// <summary>
@@ -1570,43 +1329,43 @@ public static partial class AppLoggerExtensions
     /// <param name="version">The package version.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginDoesPackageExistScope(this ILogger logger, string packageId, NuGetVersion version, IClientService clientService)
+    public static IDisposable? BeginDoesPackageExistScope(this ILogger logger, string packageId, NuGetVersion version, INuGetClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
             if (clientService.IsUpstream)
-                return _doesUpstreamDirPackageExistScope(logger, packageId, version, clientService.PackageSourceLocation);
-            return _doesLocalPackageExistScope(logger, packageId, version, clientService.PackageSourceLocation);
+                return _doesUpstreamFeedPackageExistScope(logger, packageId, version, clientService.PackageSourceLocation);
+            return _doesLocalFeedPackageExistScope(logger, packageId, version, clientService.PackageSourceLocation);
         }
-        return _doesRemotePackageExistScope(logger, packageId, version, clientService.PackageSourceLocation);
+        return _doesNugetServerPackageExistScope(logger, packageId, version, clientService.PackageSourceLocation);
     }
 
     #endregion
 
     #region GetPackageDependencies Scope
 
-    private static readonly Func<ILogger, string, NuGetVersion, NuGetFramework, string, IDisposable?> _getRemotePackageDependenciesScope = LoggerMessage.DefineScope<string, NuGetVersion, NuGetFramework, string>(
-       "Get package dependencies from upstream (PackageId={PackageId}; Version={Version}; Framework={Framework}; URL={RepositoryUrl})."
+    private static readonly Func<ILogger, string, NuGetVersion, NuGetFramework, string, IDisposable?> _getNugetServerPackageDependenciesScope = LoggerMessage.DefineScope<string, NuGetVersion, NuGetFramework, string>(
+       "Get dependencies for package {PackageId}, version {Version}, framework {Framework} from NuGet Server {URL}."
     );
 
-    private static readonly Func<ILogger, string, NuGetVersion, NuGetFramework, string, IDisposable?> _getUpstreamDirPackageDependenciesScope = LoggerMessage.DefineScope<string, NuGetVersion, NuGetFramework, string>(
-       "Get package dependencies from upstream (PackageId={PackageId}; Version={Version}; Framework={Framework}; Path={RepositoryPath})."
+    private static readonly Func<ILogger, string, NuGetVersion, NuGetFramework, string, IDisposable?> _getUpstreamFeedPackageDependenciesScope = LoggerMessage.DefineScope<string, NuGetVersion, NuGetFramework, string>(
+       "Get dependencies for package {PackageId}, version {Version}, framework {Framework} from Upstream NuGet Feed {Path})."
     );
 
-    private static readonly Func<ILogger, string, NuGetVersion, NuGetFramework, string, IDisposable?> _getLocalPackageDependenciesScope = LoggerMessage.DefineScope<string, NuGetVersion, NuGetFramework, string>(
-       "Get package dependencies from local (PackageId={PackageId}; Version={Version}; Framework={Framework}; Path={RepositoryPath})."
+    private static readonly Func<ILogger, string, NuGetVersion, NuGetFramework, string, IDisposable?> _getLocalFeedPackageDependenciesScope = LoggerMessage.DefineScope<string, NuGetVersion, NuGetFramework, string>(
+       "Get dependencies for package {PackageId}, version {Version}, framework {Framework} from Local NuGet Feed {Path})."
     );
 
-    private static readonly Func<ILogger, string, string, IDisposable?> _getAllRemotePackageDependenciesScope = LoggerMessage.DefineScope<string, string>(
-       "Get package dependencies from upstream (PackageId={PackageId}; URL={RepositoryUrl})."
+    private static readonly Func<ILogger, string, string, IDisposable?> _getAllNugetServerPackageDependenciesScope = LoggerMessage.DefineScope<string, string>(
+       "Get dependencies for package {PackageId} from NuGet Server {URL}."
     );
 
-    private static readonly Func<ILogger, string, string, IDisposable?> _getAllUpstreamDirPackageDependenciesScope = LoggerMessage.DefineScope<string, string>(
-       "Get package dependencies from upstream (PackageId={PackageId}; Path={RepositoryPath})."
+    private static readonly Func<ILogger, string, string, IDisposable?> _getAllUpstreamFeedPackageDependenciesScope = LoggerMessage.DefineScope<string, string>(
+       "Get dependencies for package {PackageId} from Upstream NuGet Feed {Path})."
     );
 
-    private static readonly Func<ILogger, string, string, IDisposable?> _getAllLocalPackageDependenciesScope = LoggerMessage.DefineScope<string, string>(
-       "Get package dependencies from local (PackageId={PackageId}; Path={RepositoryPath})."
+    private static readonly Func<ILogger, string, string, IDisposable?> _getAllLocalFeedPackageDependenciesScope = LoggerMessage.DefineScope<string, string>(
+       "Get dependencies for package {PackageId} from Local NuGet Feed {Path})."
     );
 
     /// <summary>
@@ -1618,15 +1377,15 @@ public static partial class AppLoggerExtensions
     /// <param name="framework">The package framework.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetPackageDependenciesScope(this ILogger logger, string packageId, NuGetVersion version, NuGetFramework framework, IClientService clientService)
+    public static IDisposable? BeginGetPackageDependenciesScope(this ILogger logger, string packageId, NuGetVersion version, NuGetFramework framework, INuGetClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
             if (clientService.IsUpstream)
-                return _getUpstreamDirPackageDependenciesScope(logger, packageId, version, framework, clientService.PackageSourceLocation);
-            return _getLocalPackageDependenciesScope(logger, packageId, version, framework, clientService.PackageSourceLocation);
+                return _getUpstreamFeedPackageDependenciesScope(logger, packageId, version, framework, clientService.PackageSourceLocation);
+            return _getLocalFeedPackageDependenciesScope(logger, packageId, version, framework, clientService.PackageSourceLocation);
         }
-        return _getRemotePackageDependenciesScope(logger, packageId, version, framework, clientService.PackageSourceLocation);
+        return _getNugetServerPackageDependenciesScope(logger, packageId, version, framework, clientService.PackageSourceLocation);
     }
 
     /// <summary>
@@ -1636,15 +1395,15 @@ public static partial class AppLoggerExtensions
     /// <param name="packageId">The package identifier.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetPackageDependenciesScope(this ILogger logger, string packageId, IClientService clientService)
+    public static IDisposable? BeginGetPackageDependenciesScope(this ILogger logger, string packageId, INuGetClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
         {
             if (clientService.IsUpstream)
-                return _getAllUpstreamDirPackageDependenciesScope(logger, packageId, clientService.PackageSourceLocation);
-            return _getAllLocalPackageDependenciesScope(logger, packageId, clientService.PackageSourceLocation);
+                return _getAllUpstreamFeedPackageDependenciesScope(logger, packageId, clientService.PackageSourceLocation);
+            return _getAllLocalFeedPackageDependenciesScope(logger, packageId, clientService.PackageSourceLocation);
         }
-        return _getAllRemotePackageDependenciesScope(logger, packageId, clientService.PackageSourceLocation);
+        return _getAllNugetServerPackageDependenciesScope(logger, packageId, clientService.PackageSourceLocation);
     }
 
     #endregion
@@ -1669,7 +1428,7 @@ public static partial class AppLoggerExtensions
     #region DeleteLocalPackage Scope
 
     private static readonly Func<ILogger, string, string, IDisposable?> _deleteLocalPackageScope = LoggerMessage.DefineScope<string, string>(
-        "Delete local package {PackageId} from {RepositoryPath}."
+        "Delete package {PackageId} from Local NuGet Feed {Path}."
     );
 
     /// <summary>
@@ -1677,16 +1436,16 @@ public static partial class AppLoggerExtensions
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The ID of the local package to delete.</param>
-    /// <param name="repositoryPath">The local repository URL.</param>
+    /// <param name="path">The Local NuGet Feed URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginDeleteLocalPackageScope(this ILogger logger, string packageId, string repositoryPath) => _deleteLocalPackageScope(logger, packageId, repositoryPath);
+    public static IDisposable? BeginDeleteLocalPackageScope(this ILogger logger, string packageId, string path) => _deleteLocalPackageScope(logger, packageId, path);
 
     #endregion
 
     #region DeleteLocalPackageVersion Scope
 
     private static readonly Func<ILogger, string, NuGetVersion, string, IDisposable?> _deleteLocalPackageVersionScope = LoggerMessage.DefineScope<string, NuGetVersion, string>(
-        "Delete local package {PackageId}, version {Version} from {RepositoryPath}."
+        "Delete local package {PackageId}, version {Version} from Local NuGet Feed {Path}."
     );
 
     /// <summary>
@@ -1695,16 +1454,16 @@ public static partial class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The ID of the local package to delete.</param>
     /// <param name="version">The package version.</param>
-    /// <param name="repositoryPath">The local repository URL.</param>
+    /// <param name="path">The Local NuGet Feed URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginDeleteLocalPackageVersionScope(this ILogger logger, string packageId, NuGetVersion version, string repositoryPath) => _deleteLocalPackageVersionScope(logger, packageId, version, repositoryPath);
+    public static IDisposable? BeginDeleteLocalPackageVersionScope(this ILogger logger, string packageId, NuGetVersion version, string path) => _deleteLocalPackageVersionScope(logger, packageId, version, path);
 
     #endregion
 
     #region AddLocalPackage Scope
 
     private static readonly Func<ILogger, string, string, IDisposable?> _addLocalPackageScope = LoggerMessage.DefineScope<string, string>(
-        "Add local package {PackageId} to {RepositoryPath}."
+        "Add package {PackageId} to Local NuGet Feed {Path}."
     );
 
     /// <summary>
@@ -1712,16 +1471,16 @@ public static partial class AppLoggerExtensions
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The ID of the upstream package to add locally.</param>
-    /// <param name="repositoryPath">The local repository URL.</param>
+    /// <param name="path">The Local NuGet Feed path.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginAddLocalPackageScope(this ILogger logger, string packageId, string repositoryPath) => _addLocalPackageScope(logger, packageId, repositoryPath);
+    public static IDisposable? BeginAddLocalPackageScope(this ILogger logger, string packageId, string path) => _addLocalPackageScope(logger, packageId, path);
 
     #endregion
 
     #region UpdateLocalPackage Scope
 
     private static readonly Func<ILogger, string, string, IDisposable?> _updateLocalPackageScope = LoggerMessage.DefineScope<string, string>(
-        "Update local package {PackageId} to {RepositoryPath}."
+        "Update package {PackageId} in Local NuGet Feed {Path}."
     );
 
     /// <summary>
@@ -1729,25 +1488,25 @@ public static partial class AppLoggerExtensions
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The ID of the upstream package to update locally.</param>
-    /// <param name="repositoryPath">The local repository URL.</param>
+    /// <param name="path">The Local NuGet Feed URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginUpdateLocalPackageScope(this ILogger logger, string packageId, string repositoryPath) => _updateLocalPackageScope(logger, packageId, repositoryPath);
+    public static IDisposable? BeginUpdateLocalPackageScope(this ILogger logger, string packageId, string path) => _updateLocalPackageScope(logger, packageId, path);
 
     #endregion
 
     #region GetAllLocalPackages Scope
 
     private static readonly Func<ILogger, string, IDisposable?> _getAllLocalPackagesScope = LoggerMessage.DefineScope<string>(
-        "Getting all packages from {URL}."
+        "Getting all packages from {Path}."
     );
 
     /// <summary>
     /// Formats the GetAllLocalPackages message and creates a scope.
     /// </summary>
     /// <param name="logger">The current logger.</param>
-    /// <param name="url">The local repository URL.</param>
+    /// <param name="path">The Local Nuget Feed path.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    public static IDisposable? BeginGetAllLocalPackagesScope(this ILogger logger, string url) => _getAllLocalPackagesScope(logger, url);
+    public static IDisposable? BeginGetAllLocalPackagesScope(this ILogger logger, string path) => _getAllLocalPackagesScope(logger, path);
 
     #endregion
 }

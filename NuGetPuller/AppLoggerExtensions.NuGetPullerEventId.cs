@@ -38,24 +38,24 @@ public static partial class AppLoggerExtensions
         InvalidRepositoryUrl = 0x6,
 
         /// <summary>
-        /// Event ID for security errors when accessing repository paths.
+        /// Event ID for security errors when accessing NuGet Feed paths.
         /// </summary>
-        RepositorySecurityException = 0x7,
+        NugetFeedSecurityException = 0x7,
 
         /// <summary>
-        /// Event ID for I/O errors when accessing repository paths.
+        /// Event ID for I/O errors when accessing NuGet Feed paths.
         /// </summary>
-        LocalRepositoryIOException = 0x8,
+        LocalFeedIOException = 0x8,
 
         /// <summary>
-        /// Event ID for I/O errors for no-existent repository paths.
+        /// Event ID for I/O errors for no-existent NuGet Feed paths.
         /// </summary>
-        RepositoryPathNotFound = 0x9,
+        NuGetFeedPathNotFound = 0x9,
 
         /// <summary>
         /// Event ID for invalid NuGet package metadata.
         /// </summary>
-        InvalidExportLocalMetaData = 0xA,
+        InvalidLocalMetaDataExportPath = 0xA,
 
         /// <summary>
         /// Event ID for security errors when saving or loading metadata files.
@@ -65,12 +65,12 @@ public static partial class AppLoggerExtensions
         /// <summary>
         /// Event ID for normal package deletion.
         /// </summary>
-        PackageDeleted = 0xC,
+        NuGetPackageDeleted = 0xC,
 
         /// <summary>
         /// Event ID for a NuGet package that could not be found in a repository.
         /// </summary>
-        PackageNotFound = 0xD,
+        NuGetPackageNotFound = 0xD,
 
         /// <summary>
         /// Event ID when the global packages folder could not be found.
@@ -100,7 +100,7 @@ public static partial class AppLoggerExtensions
         /// <summary>
         /// Event ID for invalid package file.
         /// </summary>
-        InvalidPackageFile = 0x13,
+        InvalidNupkgFile = 0x13,
 
         /// <summary>
         /// Event ID when a package already exists while being added.
@@ -108,22 +108,22 @@ public static partial class AppLoggerExtensions
         PackageAlreadyAdded = 0x14,
 
         /// <summary>
-        /// Event ID when a specific package version could not be removed from the local repository.
+        /// Event ID when a specific package version could not be removed from the Local NuGet Feed.
         /// </summary>
         PackageVersionDeleteFailure = 0x15,
 
         /// <summary>
-        /// Event ID for unexpected error while downloading package file from upstream repository.
+        /// Event ID for unexpected error while downloading package file from Upstream NuGet Feed.
         /// </summary>
         UnexpectedPackageDownloadFailure = 0x16,
 
         /// <summary>
-        /// Event ID for unexpected error while adding a pacakge to the local repository.
+        /// Event ID for unexpected error while adding a pacakge to the Local NuGet Feed.
         /// </summary>
         UnexpectedAddFailure = 0x17,
 
         /// <summary>
-        /// Event ID when there are no packages in the local repository.
+        /// Event ID when there are no packages in the Local NuGet Feed.
         /// </summary>
         NoLocalPackagesExist = 0x18,
 
@@ -133,25 +133,10 @@ public static partial class AppLoggerExtensions
         InvalidExportBundle = 0x19,
 
         /// <summary>
-        /// Event when a target manifest file content is invalid.
+        /// Event ID when a package is being downloaded from the upstream NuGet repository.
         /// </summary>
-        InvalidTargetManifestFile = 0x1A,
-
-        /// <summary>
-        /// Event ID when the save-as path for the updated manifest file is invalid.
-        /// </summary>
-        InvalidSaveTargetManifestAs = 0x1B,
-
-        /// <summary>
-        /// Event ID for an invalid package import source path.
-        /// </summary>
-        InvalidImportPath = 0x1C,
-
-        /// <summary>
-        /// Event ID when a package is being downloaded from the upstream repository.
-        /// </summary>
-        DownloadingNuGetPackage = 0x1D,
-        CommandLineArgumentsAreExclusive = 0x1E,
-        IgnoredDependentCommandLineArgument = 0x1F
+        DownloadingNuGetPackage = 0x1A,
+        CommandLineArgumentsAreExclusive = 0x1B,
+        IgnoredDependentCommandLineArgument = 0x1C
     }
 }

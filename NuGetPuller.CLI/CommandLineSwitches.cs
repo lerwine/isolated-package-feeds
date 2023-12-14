@@ -12,13 +12,13 @@ public static class CommandLineSwitches
     public const string METADATA_EXTENSION_nuget_metadata_json = ".nuget.metadata.json";
     
     /// <summary>
-    /// List all packages in the local repository.
+    /// List all packages in the local feed.
     /// </summary>
     /// <remarks>This is mapped as a boolean switch to <see cref="AppSettings.ListLocal"/>.</remarks>
     public const string COMMAND_LINE_SWITCH_list = "--list";
 
     /// <summary>
-    /// This is used with the <c>--list</c> (<see cref="COMMAND_LINE_SWITCH_list"/>) command line switch to show all version numbers of each package in the local repository.
+    /// This is used with the <c>--list</c> (<see cref="COMMAND_LINE_SWITCH_list"/>) command line switch to show all version numbers of each package in the local feed.
     /// </summary>
     /// <remarks>This is mapped as a boolean switch to <see cref="AppSettings.IncludeVersions"/>.</remarks>
     public const string COMMAND_LINE_SWITCH_include_versions = "--include-versions";
@@ -51,7 +51,7 @@ public static class CommandLineSwitches
     public const string COMMAND_LINE_SWITCH_add_file = "--add-file";
 
     /// <summary>
-    /// Comma-separated list of package IDs to remove from the local repository.
+    /// Comma-separated list of package IDs to remove from the local feed.
     /// </summary>
     /// <remarks>This is mapped as a string value to <see cref="AppSettings.Remove"/>.</remarks>
     public const string COMMAND_LINE_SWITCH_remove = "--remove";
@@ -63,7 +63,7 @@ public static class CommandLineSwitches
     public const string COMMAND_LINE_SWITCH_save_to = "--save-to";
 
     /// <summary>
-    /// Check to see if there are any missing dependencies for packages in the local repository.
+    /// Check to see if there are any missing dependencies for packages in the local feed.
     /// </summary>
     /// <remarks>This is mapped as a boolean switch to <see cref="AppSettings.CheckDependencies"/>.</remarks>
     public const string COMMAND_LINE_SWITCH_check_depencencies = "--check-depencencies";
@@ -93,7 +93,7 @@ public static class CommandLineSwitches
     public const string COMMAND_LINE_SWITCH_create_bundle = "--create-bundle";
 
     /// <summary>
-    /// Path of package to package metadata json of another local NuGet repository.
+    /// Path of package to package metadata json of another Local NuGet Feed.
     /// </summary>
     /// <remarks>This is mapped as a string value to <see cref="AppSettings.CreateFrom"/>.</remarks>
     public const string COMMAND_LINE_SWITCH_create_from = "--create-from";
@@ -110,9 +110,9 @@ public static class CommandLineSwitches
     public const string COMMAND_LINE_SWITCH_upstream_2D_service_2D_index = "--upstream-service-index";
 
     /// <summary>
-    /// Gets the command line switch that sets the <see cref="AppSettings.OverrideLocalRepository" /> value.
+    /// Gets the command line switch that sets the <see cref="AppSettings.OverrideLocalFeed" /> value.
     /// </summary>
-    public const string COMMAND_LINE_SWITCH_local_2D_repository = "--local-repository";
+    public const string COMMAND_LINE_SWITCH_local_2D_feed_2D_path = "--local-feed-path";
 
     /// <summary>
     /// Gets the command line switch that sets the <see cref="AppSettings.OverrideGlobalPackagesFolder" /> value.

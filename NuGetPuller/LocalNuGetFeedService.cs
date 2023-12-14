@@ -9,11 +9,11 @@ using static IsolatedPackageFeeds.Shared.CommonStatic;
 namespace NuGetPuller;
 
 /// <summary>
-/// Base class providing methods for managing the local NuGet repository.
+/// Base class providing methods for managing the Local NuGet Feed.
 /// </summary>
 /// <param name="settings">The validated settings service.</param>
 /// <param name="logger">THe logger to write log information to.</param>
-public class LocalClientService(IValidatedRepositoryPathsService settings, ILogger<LocalClientService> logger) : ClientService(Repository.Factory.GetCoreV3(settings.LocalRepository.GetResult().FullName), settings, logger, false), ILocalClientService
+public class LocalNuGetFeedService(IValidatedRepositoryPathsService settings, ILogger<LocalNuGetFeedService> logger) : NuGetClientService(Repository.Factory.GetCoreV3(settings.LocalFeedPath.GetResult().FullName), settings, logger, false), ILocalNuGetFeedService
 {
     #region Methods using the Search Query API
 
@@ -29,15 +29,15 @@ public class LocalClientService(IValidatedRepositoryPathsService settings, ILogg
     /// Gets all packages in the local repository.
     /// </summary>
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
-    /// <returns>Metadata for packages in local repository.</returns>
+    /// <returns>Metadata for packages in Local NuGet Feed.</returns>
     public IAsyncEnumerable<IPackageSearchMetadata> GetAllPackagesAsync(CancellationToken cancellationToken) => GetAllPackagesAsync(null, cancellationToken);
 
     /// <summary>
-    /// Gets all packages in the local repository.
+    /// Gets all packages in the Local NuGet Feed.
     /// </summary>
     /// <param name="packageSearchResource">The NuGet resource for the NuGet Search Query API.</param>
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
-    /// <returns>Metadata for packages in local repository.</returns>
+    /// <returns>Metadata for packages in Local NuGet Feed.</returns>
     public async IAsyncEnumerable<IPackageSearchMetadata> GetAllPackagesAsync(PackageSearchResource? packageSearchResource, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         using var scope = Logger.BeginGetAllLocalPackagesScope(SourceRepository.PackageSource.Source);
@@ -216,11 +216,11 @@ public class LocalClientService(IValidatedRepositoryPathsService settings, ILogg
         }
         catch (InvalidDataException error)
         {
-            Logger.PackageFileNotZipArchive(fileName, error);
+            Logger.NupkgFileNotZipArchive(fileName, error);
         }
         catch (PackagingException error)
         {
-            Logger.InvalidPackageFileContent(fileName, error);
+            Logger.InvalidNupkgFileContent(fileName, error);
         }
     }
 

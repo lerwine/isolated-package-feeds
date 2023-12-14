@@ -4,7 +4,7 @@ using NuGet.Versioning;
 
 namespace NuGetPuller;
 
-public interface IClientService : IDisposable
+public interface INuGetClientService : IDisposable
 {
     bool IsUpstream { get; }
 

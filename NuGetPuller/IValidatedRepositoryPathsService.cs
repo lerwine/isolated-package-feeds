@@ -13,14 +13,14 @@ public interface IValidatedRepositoryPathsService
     ISharedAppSettings Settings { get; }
 
     /// <summary>
-    /// Lazy validation for the <see cref="ISharedAppSettings.UpstreamServiceIndex"/> setting.
+    /// Lazy validation for the <see cref="ISharedAppSettings.UpstreamServiceIndexUrl"/> setting.
     /// </summary>
-    LazyChainedConversion<string, Uri> UpstreamServiceIndex { get; }
+    LazyChainedConversion<string, Uri> UpstreamServiceIndexUrl { get; }
 
     /// <summary>
-    /// Lazy validation for the <see cref="ISharedAppSettings.LocalRepository"/> setting.
+    /// Lazy validation for the <see cref="ISharedAppSettings.LocalFeedPath"/> setting.
     /// </summary>
-    LazyChainedConversion<string, DirectoryInfo> LocalRepository { get; }
+    LazyChainedConversion<string, DirectoryInfo> LocalFeedPath { get; }
 
     /// <summary>
     /// Lazy validation for the <see cref="ISharedAppSettings.UpstreamServicGlobalPackagesFoldereIndex"/> setting.
