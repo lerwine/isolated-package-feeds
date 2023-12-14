@@ -28,7 +28,6 @@ internal class Program
             .ValidateDataAnnotations();
         builder.Services
             .AddSingleton<IValidatedRepositoryPathsService, ValidatedRepositoryPathsService<AppSettings>>()
-            .AddSingleton<ValidatedPathsService>()
             .AddSingleton<ILocalNuGetFeedService, LocalNuGetFeedService>()
             .AddSingleton<IUpstreamNuGetClientService, UpstreamNuGetClientService>()
             .AddTransient<PackageUpdateService>();

@@ -952,6 +952,7 @@ public static partial class AppLoggerExtensions
     /// <param name="exception">The optional exception that caused the event.</param>
     [LoggerMessage(EventId = (int)NuGetPullerEventId.CommandLineArgumentsAreExclusive, Level = LogLevel.Critical,
         Message = "Command line switch {Switch1}; cannot be used with {Switch2})")]
+    [Obsolete("Use NuGetPuller.CLI.MainService.WriteCommandLineArgumentsAreExclusive")]
     public static partial void CommandLineArgumentsAreExclusive(this ILogger logger, string switch1, string switch2, Exception? exception = null);
 
     #region IgnoredDependentCommandLineArgument Logger Event Methods
@@ -965,6 +966,7 @@ public static partial class AppLoggerExtensions
     /// <param name="exception">The optional exception that caused the event.</param>
     [LoggerMessage(EventId = (int)NuGetPullerEventId.IgnoredDependentCommandLineArgument, Level = LogLevel.Warning,
         Message = "Command line switch {DependentSwitch} is ignnored if {SwitchName} is not specified.")]
+    [Obsolete("Use NuGetPuller.CLI.MainService.CheckIgnoredDependentCommandLineArgument")]
     public static partial void IgnoredDependentCommandLineArgument(this ILogger logger, string dependentSwitch, string switchName, Exception? exception = null);
 
     /// <summary>
@@ -977,6 +979,7 @@ public static partial class AppLoggerExtensions
     /// <param name="exception">The optional exception that caused the event.</param>
     [LoggerMessage(EventId = (int)NuGetPullerEventId.IgnoredDependentCommandLineArgument, Level = LogLevel.Warning,
         Message = "Command line switch {DependentSwitch} is ignnored if {SwitchName1} or {SwitchName2} is not specified.")]
+    [Obsolete("Use NuGetPuller.CLI.MainService.CheckIgnoredDependentCommandLineArgument")]
     public static partial void IgnoredDependentCommandLineArgument(this ILogger logger, string dependentSwitch, string switchName1, string switchName2, Exception? exception = null);
 
     /// <summary>
@@ -990,6 +993,7 @@ public static partial class AppLoggerExtensions
     /// <param name="exception">The optional exception that caused the event.</param>
     [LoggerMessage(EventId = (int)NuGetPullerEventId.IgnoredDependentCommandLineArgument, Level = LogLevel.Warning,
         Message = "Command line switch {DependentSwitch} is ignnored if {SwitchName1}, {SwitchName2} or {SwitchName3} is not specified.")]
+    [Obsolete("Use NuGetPuller.CLI.MainService.CheckIgnoredDependentCommandLineArgument")]
     public static partial void IgnoredDependentCommandLineArgument(this ILogger logger, string dependentSwitch, string switchName1, string switchName2, string switchName3, Exception? exception = null);
 
     /// <summary>
@@ -1004,6 +1008,7 @@ public static partial class AppLoggerExtensions
     /// <param name="exception">The optional exception that caused the event.</param>
     [LoggerMessage(EventId = (int)NuGetPullerEventId.IgnoredDependentCommandLineArgument, Level = LogLevel.Warning,
         Message = "Command line switch {DependentSwitch} is ignnored if {SwitchName1}, {SwitchName2}, {SwitchName3} or {SwitchName4} is not specified.")]
+    [Obsolete("Use NuGetPuller.CLI.MainService.CheckIgnoredDependentCommandLineArgument")]
     public static partial void IgnoredDependentCommandLineArgument(this ILogger logger, string dependentSwitch, string switchName1, string switchName2, string switchName3, string switchName4, Exception? exception = null);
 
     #endregion

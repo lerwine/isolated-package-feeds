@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace NuGetPuller.CLI;
 
+[Obsolete("Validate when used")]
 public class ValidatedPathsService
 {
     public LazyOptionalChainedConversion<string, FileInfo> ExportLocalManifest { get; }
