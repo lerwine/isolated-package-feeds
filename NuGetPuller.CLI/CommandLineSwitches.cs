@@ -7,6 +7,10 @@ public static class CommandLineSwitches
     /// </summary>
     public const string COMMAND_LINE_VALUE_all = "all";
 
+    public const string EXTENSION_nupkg = ".nupkg";
+
+    public const string METADATA_EXTENSION_nuget_metadata_json = ".nuget.metadata.json";
+    
     /// <summary>
     /// List all packages in the local repository.
     /// </summary>

@@ -20,21 +20,13 @@ public class MainService : BackgroundService
     public MainService(IOptions<AppSettings> options, ILogger<MainService> logger, IServiceProvider serviceProvider, IHostApplicationLifetime applicationLifetime) =>
         (_settings, _logger, _serviceProvider, _applicationLifetime) = (options.Value, logger, serviceProvider, applicationLifetime);
 
-    private async Task WriteLocalPackagesToConsole(ILocalClientService localClientService, bool includeVersions, CancellationToken cancellationToken)
+    private Task WriteLocalPackagesToConsole(ILocalClientService localClientService, bool includeVersions, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        return Task.FromException(new NotImplementedException());
     }
 
     protected async override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // LogIgnoredDependentCommandLineArgumentIfSet(_settings.IncludeVersions, () => (_logger, nameof(AppSettings.IncludeVersions), nameof(AppSettings.ListLocal)));
-        // LogIgnoredDependentCommandLineArgumentIfSet(_settings.Version, () => (_logger, nameof(AppSettings.Version), nameof(AppSettings.Download), nameof(AppSettings.Remove), nameof(AppSettings.CheckDependencies), nameof(AppSettings.CreateBundle)));
-        // LogIgnoredDependentCommandLineArgumentIfSet(_settings.NoDependencies, () => (_logger, nameof(AppSettings.NoDependencies), nameof(AppSettings.Download)));
-        // LogIgnoredDependentCommandLineArgumentIfSet(_settings.SaveTo, () => (_logger, nameof(AppSettings.SaveTo), nameof(AppSettings.Remove)));
-        // LogIgnoredDependentCommandLineArgumentIfSet(_settings.PackageId, () => (_logger, nameof(AppSettings.PackageId), nameof(AppSettings.CheckDependencies), nameof(AppSettings.CreateBundle)));
-        // LogIgnoredDependentCommandLineArgumentIfSet(_settings.NoDownload, () => (_logger, nameof(AppSettings.NoDownload), nameof(AppSettings.CheckDependencies)));
-        // LogIgnoredDependentCommandLineArgumentIfSet(_settings.CreateFrom, () => (_logger, nameof(AppSettings.CreateFrom), nameof(AppSettings.CreateBundle)));
-        // LogIgnoredDependentCommandLineArgumentIfSet(_settings.SaveMetaDataTo, () => (_logger, nameof(AppSettings.SaveMetaDataTo), nameof(AppSettings.CreateBundle)));
         try
         {
             using var scope = _serviceProvider.CreateScope();
@@ -55,6 +47,11 @@ public class MainService : BackgroundService
                     _logger.CommandLineArgumentsAreExclusive(nameof(AppSettings.CheckDependencies), nameof(AppSettings.ExportMetaData));
                 else
                 {
+                    LogIgnoredDependentCommandLineArgumentIfSet(_settings.IncludeVersions, () => (_logger, nameof(AppSettings.IncludeVersions), nameof(AppSettings.ListLocal)));
+                    LogIgnoredDependentCommandLineArgumentIfSet(_settings.NoDependencies, () => (_logger, nameof(AppSettings.NoDependencies), nameof(AppSettings.Download)));
+                    LogIgnoredDependentCommandLineArgumentIfSet(_settings.SaveTo, () => (_logger, nameof(AppSettings.SaveTo), nameof(AppSettings.Remove)));
+                    LogIgnoredDependentCommandLineArgumentIfSet(_settings.CreateFrom, () => (_logger, nameof(AppSettings.CreateFrom), nameof(AppSettings.CreateBundle)));
+                    LogIgnoredDependentCommandLineArgumentIfSet(_settings.SaveMetaDataTo, () => (_logger, nameof(AppSettings.SaveMetaDataTo), nameof(AppSettings.CreateBundle)));
                     var localService = _serviceProvider.GetRequiredService<ILocalClientService>();
                     if (_settings.NoDownload)
                     {
@@ -91,6 +88,7 @@ public class MainService : BackgroundService
             }
             else
             {
+                LogIgnoredDependentCommandLineArgumentIfSet(_settings.NoDownload, () => (_logger, nameof(AppSettings.NoDownload), nameof(AppSettings.CheckDependencies)));
                 if (_settings.ListLocal)
                 {
                     if (!string.IsNullOrWhiteSpace(_settings.CreateBundle))
@@ -105,18 +103,32 @@ public class MainService : BackgroundService
                         _logger.CommandLineArgumentsAreExclusive(nameof(AppSettings.ListLocal), nameof(AppSettings.ExportMetaData));
                     else
                     {
+                        LogIgnoredDependentCommandLineArgumentIfSet(_settings.Version, () => (_logger, nameof(AppSettings.Version), nameof(AppSettings.Download), nameof(AppSettings.Remove), nameof(AppSettings.CheckDependencies), nameof(AppSettings.CreateBundle)));
+                        LogIgnoredDependentCommandLineArgumentIfSet(_settings.NoDependencies, () => (_logger, nameof(AppSettings.NoDependencies), nameof(AppSettings.Download)));
+                        LogIgnoredDependentCommandLineArgumentIfSet(_settings.SaveTo, () => (_logger, nameof(AppSettings.SaveTo), nameof(AppSettings.Remove)));
+                        LogIgnoredDependentCommandLineArgumentIfSet(_settings.PackageId, () => (_logger, nameof(AppSettings.PackageId), nameof(AppSettings.CheckDependencies), nameof(AppSettings.CreateBundle)));
+                        LogIgnoredDependentCommandLineArgumentIfSet(_settings.CreateFrom, () => (_logger, nameof(AppSettings.CreateFrom), nameof(AppSettings.CreateBundle)));
+                        LogIgnoredDependentCommandLineArgumentIfSet(_settings.SaveMetaDataTo, () => (_logger, nameof(AppSettings.SaveMetaDataTo), nameof(AppSettings.CreateBundle)));
                         // ListLocal
                         // _settings.IncludeVersions
                     }
                 }
                 else
                 {
+                    LogIgnoredDependentCommandLineArgumentIfSet(_settings.IncludeVersions, () => (_logger, nameof(AppSettings.IncludeVersions), nameof(AppSettings.ListLocal)));
                     if (string.IsNullOrWhiteSpace(_settings.CreateBundle))
                     {
+                        LogIgnoredDependentCommandLineArgumentIfSet(_settings.CreateFrom, () => (_logger, nameof(AppSettings.CreateFrom), nameof(AppSettings.CreateBundle)));
+                        LogIgnoredDependentCommandLineArgumentIfSet(_settings.SaveMetaDataTo, () => (_logger, nameof(AppSettings.SaveMetaDataTo), nameof(AppSettings.CreateBundle)));
                         if (string.IsNullOrWhiteSpace(_settings.Download))
                         {
+                            LogIgnoredDependentCommandLineArgumentIfSet(_settings.NoDependencies, () => (_logger, nameof(AppSettings.NoDependencies), nameof(AppSettings.Download)));
                             if (string.IsNullOrWhiteSpace(_settings.Remove))
                             {
+                                LogIgnoredDependentCommandLineArgumentIfSet(_settings.SaveTo, () => (_logger, nameof(AppSettings.SaveTo), nameof(AppSettings.Remove)));
+                                LogIgnoredDependentCommandLineArgumentIfSet(_settings.IncludeVersions, () => (_logger, nameof(AppSettings.IncludeVersions), nameof(AppSettings.ListLocal)));
+                                LogIgnoredDependentCommandLineArgumentIfSet(_settings.Version, () => (_logger, nameof(AppSettings.Version), nameof(AppSettings.Download), nameof(AppSettings.Remove), nameof(AppSettings.CheckDependencies), nameof(AppSettings.CreateBundle)));
+                                LogIgnoredDependentCommandLineArgumentIfSet(_settings.PackageId, () => (_logger, nameof(AppSettings.PackageId), nameof(AppSettings.CheckDependencies), nameof(AppSettings.CreateBundle)));
                                 if (string.IsNullOrWhiteSpace(_settings.AddPackageFiles))
                                 {
                                     if (string.IsNullOrWhiteSpace(_settings.ExportMetaData))
@@ -141,6 +153,8 @@ public class MainService : BackgroundService
                                 _logger.CommandLineArgumentsAreExclusive(nameof(AppSettings.Remove), nameof(AppSettings.ExportMetaData));
                             else
                             {
+                                LogIgnoredDependentCommandLineArgumentIfSet(_settings.IncludeVersions, () => (_logger, nameof(AppSettings.IncludeVersions), nameof(AppSettings.ListLocal)));
+                                LogIgnoredDependentCommandLineArgumentIfSet(_settings.PackageId, () => (_logger, nameof(AppSettings.PackageId), nameof(AppSettings.CheckDependencies), nameof(AppSettings.CreateBundle)));
                                 // Remove
                                 // _settings.Version, _settings.SaveTo
                             }
@@ -153,6 +167,9 @@ public class MainService : BackgroundService
                             _logger.CommandLineArgumentsAreExclusive(nameof(AppSettings.Download), nameof(AppSettings.ExportMetaData));
                         else
                         {
+                            LogIgnoredDependentCommandLineArgumentIfSet(_settings.IncludeVersions, () => (_logger, nameof(AppSettings.IncludeVersions), nameof(AppSettings.ListLocal)));
+                            LogIgnoredDependentCommandLineArgumentIfSet(_settings.SaveTo, () => (_logger, nameof(AppSettings.SaveTo), nameof(AppSettings.Remove)));
+                            LogIgnoredDependentCommandLineArgumentIfSet(_settings.PackageId, () => (_logger, nameof(AppSettings.PackageId), nameof(AppSettings.CheckDependencies), nameof(AppSettings.CreateBundle)));
                             // Download
                             // _settings.Version, _settings.NoDependencies
                         }
@@ -167,8 +184,48 @@ public class MainService : BackgroundService
                         _logger.CommandLineArgumentsAreExclusive(nameof(AppSettings.CreateBundle), nameof(AppSettings.ExportMetaData));
                     else
                     {
-                        // CreateBundle
-                        // _settings.CreateFrom, _settings.SaveMetaDataTo, _settings.PackageId, _settings.Version
+                        LogIgnoredDependentCommandLineArgumentIfSet(_settings.IncludeVersions, () => (_logger, nameof(AppSettings.IncludeVersions), nameof(AppSettings.ListLocal)));
+                        LogIgnoredDependentCommandLineArgumentIfSet(_settings.Version, () => (_logger, nameof(AppSettings.Version), nameof(AppSettings.Download), nameof(AppSettings.Remove), nameof(AppSettings.CheckDependencies), nameof(AppSettings.CreateBundle)));
+                        LogIgnoredDependentCommandLineArgumentIfSet(_settings.NoDependencies, () => (_logger, nameof(AppSettings.NoDependencies), nameof(AppSettings.Download)));
+                        LogIgnoredDependentCommandLineArgumentIfSet(_settings.SaveTo, () => (_logger, nameof(AppSettings.SaveTo), nameof(AppSettings.Remove)));
+                        LogIgnoredDependentCommandLineArgumentIfSet(_settings.PackageId, () => (_logger, nameof(AppSettings.PackageId), nameof(AppSettings.CheckDependencies), nameof(AppSettings.CreateBundle)));
+                        string? createFrom = _settings.CreateFrom.NullIfWhiteSpace();
+                        string? saveMetaDataTo = _settings.SaveMetaDataTo.NullIfWhiteSpace();
+                        if (saveMetaDataTo is null)
+                        {
+                            if (createFrom is null)
+                            {
+                                saveMetaDataTo = Environment.MachineName + CommandLineSwitches.METADATA_EXTENSION_nuget_metadata_json;
+                                if (File.Exists(saveMetaDataTo) || Directory.Exists(saveMetaDataTo))
+                                {
+                                    int index = 0;
+                                    do
+                                    {
+                                        index++;
+                                        saveMetaDataTo = $"{Environment.MachineName}{index}{CommandLineSwitches.METADATA_EXTENSION_nuget_metadata_json}";
+                                    }
+                                    while (File.Exists(saveMetaDataTo) || Directory.Exists(saveMetaDataTo));
+                                }
+                            }
+                            else
+                                saveMetaDataTo  = createFrom;
+                        }
+                        if (_settings.PackageId.TrySplitToNonWhiteSpaceTrimmed(',', out string[]? packageIds))
+                        {
+                            if (_settings.Version.TryGetNuGetVersionList(out NuGetVersion[]? versions))
+                            {
+
+                            }
+                            else
+                            {
+
+                            }
+                        }
+                        else
+                        {
+                            if (!string.IsNullOrWhiteSpace(_settings.Version))
+                                LogIgnoredDependentCommandLineArgumentIfSet(_settings.Version, () => (_logger, nameof(AppSettings.Version), nameof(AppSettings.PackageId)));
+                        }
                     }
                 }
             }
