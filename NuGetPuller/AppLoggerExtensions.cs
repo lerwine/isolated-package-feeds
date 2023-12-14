@@ -307,7 +307,6 @@ public static partial class AppLoggerExtensions
     /// <param name="isUpstream">Whether the error refers to an upstream NuGet repostitory path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    // TODO: See if this needs to be used somewhere
     public static string RepositorySecurityException(this ILogger logger, string path, bool isUpstream, Exception? exception = null)
     {
         if (isUpstream)
@@ -335,7 +334,6 @@ public static partial class AppLoggerExtensions
     /// <param name="path">The local repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    // TODO: See if this needs to be used somewhere
     public static string LocalRepositoryIOException(this ILogger logger, string path, Exception? exception = null)
     {
         LogLocalRepositoryIOException(logger, path, exception);
@@ -887,7 +885,6 @@ public static partial class AppLoggerExtensions
     /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    // TODO: See if this should be used somewhere
     public static string ExportBundleDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
     {
         LogExportBundleDirectoryNotFound(logger, path, exception);
@@ -901,7 +898,6 @@ public static partial class AppLoggerExtensions
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    // TODO: See if this should be used somewhere
     public static string ExportBundlePathAccessDenied(this ILogger logger, string path, Exception? exception = null)
     {
         if (exception is System.Security.SecurityException)
@@ -1050,7 +1046,6 @@ public static partial class AppLoggerExtensions
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    // TODO: See if this should be used somewhere
     public static string SaveTargetManifestAsDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
     {
         LogSaveTargetManifestAsDirectoryNotFound(logger, path, exception);
@@ -1064,7 +1059,6 @@ public static partial class AppLoggerExtensions
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    // TODO: See if this should be used somewhere
     public static string SaveTargetManifestAsPathAccessDenied(this ILogger logger, string path, Exception? exception = null)
     {
         if (exception is System.Security.SecurityException)
@@ -1131,7 +1125,6 @@ public static partial class AppLoggerExtensions
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    // TODO: See if this should be used somewhere
     public static string ImportFileOrDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
     {
         LogImportDirectoryNotFound(logger, path, exception);
@@ -1145,7 +1138,6 @@ public static partial class AppLoggerExtensions
     /// <param name="path">The NuGet repository path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     /// <returns>The validation message.</returns>
-    // TODO: See if this should be used somewhere
     public static string ImportPathAccessDenied(this ILogger logger, string path, Exception? exception = null)
     {
         if (exception is System.Security.SecurityException)
@@ -1197,6 +1189,70 @@ public static partial class AppLoggerExtensions
 
     #endregion
 
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.CommandLineArgumentsAreExclusive"/> error event message.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="switch1">A mutually-exclusive command line switch.</param>
+    /// <param name="switch2">The other mutually-exclusive command-line switch.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.CommandLineArgumentsAreExclusive, Level = LogLevel.Critical,
+        Message = "Command line switch {Switch1}; cannot be used with {Switch2})")]
+    public static partial void CommandLineArgumentsAreExclusive(this ILogger logger, string switch1, string switch2, Exception? exception = null);
+
+    #region IgnoredDependentCommandLineArgument Logger Event Methods
+
+    /// <summary>
+    /// Logs a <see cref="NuGetPullerEventId.IgnoredDependentCommandLineArgument"/> <see cref="LogLevel.Warning"/> message.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="dependentSwitch">The dependent command line switch.</param>
+    /// <param name="switchName">The primary command line switch.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.IgnoredDependentCommandLineArgument, Level = LogLevel.Warning,
+        Message = "Command line switch {DependentSwitch} is ignnored if {SwitchName} is not specified.")]
+    public static partial void IgnoredDependentCommandLineArgument(this ILogger logger, string dependentSwitch, string switchName, Exception? exception = null);
+
+    /// <summary>
+    /// Logs a <see cref="NuGetPullerEventId.IgnoredDependentCommandLineArgument"/> <see cref="LogLevel.Warning"/> message.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="dependentSwitch">The dependent command line switch.</param>
+    /// <param name="switchName1">The first primary command line switch.</param>
+    /// <param name="switchName2">The second primary command line switch.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.IgnoredDependentCommandLineArgument, Level = LogLevel.Warning,
+        Message = "Command line switch {DependentSwitch} is ignnored if {SwitchName1} or {SwitchName2} is not specified.")]
+    public static partial void IgnoredDependentCommandLineArgument(this ILogger logger, string dependentSwitch, string switchName1, string switchName2, Exception? exception = null);
+
+    /// <summary>
+    /// Logs a <see cref="NuGetPullerEventId.IgnoredDependentCommandLineArgument"/> <see cref="LogLevel.Warning"/> message.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="dependentSwitch">The dependent command line switch.</param>
+    /// <param name="switchName1">The first primary command line switch.</param>
+    /// <param name="switchName2">The second primary command line switch.</param>
+    /// <param name="switchName3">The third primary command line switch.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.IgnoredDependentCommandLineArgument, Level = LogLevel.Warning,
+        Message = "Command line switch {DependentSwitch} is ignnored if {SwitchName1}, {SwitchName2} or {SwitchName3} is not specified.")]
+    public static partial void IgnoredDependentCommandLineArgument(this ILogger logger, string dependentSwitch, string switchName1, string switchName2, string switchName3, Exception? exception = null);
+
+    /// <summary>
+    /// Logs a <see cref="NuGetPullerEventId.IgnoredDependentCommandLineArgument"/> <see cref="LogLevel.Warning"/> message.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="dependentSwitch">The dependent command line switch.</param>
+    /// <param name="switchName1">The first primary command line switch.</param>
+    /// <param name="switchName2">The second primary command line switch.</param>
+    /// <param name="switchName3">The third primary command line switch.</param>
+    /// <param name="switchName4">The fourth primary command line switch.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.IgnoredDependentCommandLineArgument, Level = LogLevel.Warning,
+        Message = "Command line switch {DependentSwitch} is ignnored if {SwitchName1}, {SwitchName2}, {SwitchName3} or {SwitchName4} is not specified.")]
+    public static partial void IgnoredDependentCommandLineArgument(this ILogger logger, string dependentSwitch, string switchName1, string switchName2, string switchName3, string switchName4, Exception? exception = null);
+
+    #endregion
 
     #region GetDownloadResource Scope
 
@@ -1562,7 +1618,6 @@ public static partial class AppLoggerExtensions
     /// <param name="framework">The package framework.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    // TODO: See if this should be used somewhere
     public static IDisposable? BeginGetPackageDependenciesScope(this ILogger logger, string packageId, NuGetVersion version, NuGetFramework framework, IClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
@@ -1581,7 +1636,6 @@ public static partial class AppLoggerExtensions
     /// <param name="packageId">The package identifier.</param>
     /// <param name="clientService">The client service.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    // TODO: See if this should be used somewhere
     public static IDisposable? BeginGetPackageDependenciesScope(this ILogger logger, string packageId, IClientService clientService)
     {
         if (clientService.PackageSourceUri.IsFile)
@@ -1607,7 +1661,6 @@ public static partial class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="url">The url of the NuGet respository.</param>
     /// <param name="isUpstream"><see langword="true"/>  if the repository is upstream; otherwise, <see langword="false"/>.</param>
-    // TODO: See if this should be used somewhere
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
     public static IDisposable? BeginNugetSourceScope(this ILogger logger, string url, bool isUpstream) => _nugetSourceScope(logger, url, isUpstream);
 
@@ -1661,7 +1714,6 @@ public static partial class AppLoggerExtensions
     /// <param name="packageId">The ID of the upstream package to add locally.</param>
     /// <param name="repositoryPath">The local repository URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    // TODO: See if this should be used somewhere
     public static IDisposable? BeginAddLocalPackageScope(this ILogger logger, string packageId, string repositoryPath) => _addLocalPackageScope(logger, packageId, repositoryPath);
 
     #endregion
@@ -1679,7 +1731,6 @@ public static partial class AppLoggerExtensions
     /// <param name="packageId">The ID of the upstream package to update locally.</param>
     /// <param name="repositoryPath">The local repository URL.</param>
     /// <returns>A disposable scope object representing the lifetime of the logger scope.</returns>
-    // TODO: See if this should be used somewhere
     public static IDisposable? BeginUpdateLocalPackageScope(this ILogger logger, string packageId, string repositoryPath) => _updateLocalPackageScope(logger, packageId, repositoryPath);
 
     #endregion

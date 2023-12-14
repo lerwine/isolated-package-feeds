@@ -8,11 +8,14 @@ The initial scope is to create NuGet and NPM Package Feed services as well as co
 
 ## Projects in solution
 
+- [IsolatedPackageFeeds.Shared](./IsolatedPackageFeeds.Shared/README.md) - Class library shared by other projects.
+- [IsolatedPackageFeeds.Shared.Tests](./IsolatedPackageFeeds.Shared.Tests/README.md) - Unit tests for the `IsolatedPackageFeeds.Shared` application.
 - [CdnGetter](./CdnGetter/README.md) - Console application to manage local repository of libraries hosted by upstream content delivery networks.
-- [CdnGetter.UnitTests](./CdnGetter.UnitTests/README.md) - Unit tests for `CdnGetter` application.
+- [CdnGetter.UnitTests](./CdnGetter.UnitTests/README.md) - Unit tests for the `CdnGetter` application.
 - [CdnServer](./CdnServer/README.md) - CDN website for hosting libraries downloaded by the `CdnGetter` application.
-- [NuGetPuller](./NuGetPuller/README.md) - Console application to manage local repository of packages hosted by an upstream NuGet repository.
-- [NuGetPuller.UnitTests](./NuGetPuller.UnitTests/README.md) - Unit tests for NuGetPuller application.
+- [NuGetPuller](./NuGetPuller/README.md) - Class library for managing local NuGet repositories and retrieve packages from an upstream NuGet repository.
+- [NuGetPuller.CLI](./NuGetPuller.CLI/README.md) - Console application to manage local repository of packages hosted by an upstream NuGet repository.
+- [NuGetPuller.UnitTests](./NuGetPuller.UnitTests/README.md) - Unit tests for `NuGetPuller` application.
 
 ## References
 
