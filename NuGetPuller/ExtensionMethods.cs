@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using NuGet.Packaging.Core;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
+using static NuGetPuller.NuGetPullerStatic;
 
 namespace NuGetPuller;
 
@@ -18,14 +19,13 @@ public static class ExtensionMethods
     /// <param name="source">The offline package manifest list.</param>
     /// <param name="metadata">The package metadata to add.</param>
     /// <returns>The identities of the added packages.</returns>
-    public static IEnumerable<PackageIdentity> Concat(this IList<OfflinePackageManifest> source, IEnumerable<IPackageSearchMetadata> metadata)
+    public static async IAsyncEnumerable<PackageIdentity> ConcatAsync(this ICollection<OfflinePackageManifest> source, IAsyncEnumerable<IPackageSearchMetadata> metadata)
     {
-        foreach (var item in metadata)
+        await foreach (var item in metadata)
         {
             var identity = item.Identity;
             string id = identity.Id;
-            var comparer = MainServiceStatic.PackageIdentitifierComparer;
-            OfflinePackageManifest? existing = source.FirstOrDefault(p => comparer.Equals(id, p.Identifier));
+            OfflinePackageManifest? existing = source.FirstOrDefault(p => PackageIdentitifierComparer.Equals(id, p.Identifier));
             if (existing is null)
             {
                 source.Add(new(item));
@@ -259,7 +259,7 @@ public static class ExtensionMethods
         }
         if (value.Contains(','))
         {
-            result = value.Split(',').Select(s => s.Trim()).Distinct(MainServiceStatic.PackageIdentitifierComparer).ToArray();
+            result = value.Split(',').Select(s => s.Trim()).Distinct(PackageIdentitifierComparer).ToArray();
             return result.All(id => id.Length > 0 && NuGet.Packaging.PackageIdValidator.IsValidPackageId(id));
         }
         if (NuGetVersion.TryParse(value, out NuGetVersion? version))
@@ -289,7 +289,7 @@ public static class ExtensionMethods
         NuGetVersion? version;
         if (value.Contains(','))
         {
-            string[] arr = value.Split(',').Select(s => s.Trim()).Distinct(MainServiceStatic.PackageIdentitifierComparer).ToArray();
+            string[] arr = value.Split(',').Select(s => s.Trim()).Distinct(PackageIdentitifierComparer).ToArray();
             var len = arr.Length;
             result = new NuGetVersion[len];
             for (var i = 0; i < len; i++)

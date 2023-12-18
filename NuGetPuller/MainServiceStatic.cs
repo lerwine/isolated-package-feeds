@@ -4,84 +4,118 @@ using NuGet.Packaging;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 using Newtonsoft.Json;
+using static IsolatedPackageFeeds.Shared.CommonStatic;
+using static NuGetPuller.NuGetPullerStatic;
 
 namespace NuGetPuller;
 
 public partial class MainServiceStatic
 {
-    public static readonly StringComparer PackageIdentitifierComparer = StringComparer.OrdinalIgnoreCase;
-
-    public static readonly JsonSerializerSettings MetadataDeSerializationSettings = new()
+    public static OfflinePackageManifest[] LoadOfflinePackageManifest(string? path, ILogger logger)
     {
-        MaxDepth = 512,
-        NullValueHandling = NullValueHandling.Ignore,
-        TypeNameHandling = TypeNameHandling.None,
-        Converters = [new OfflinePackageManifestConverter()],
-        Formatting = Formatting.Indented
-    };
-
-    /// <summary>
-    /// Opens a new <see cref="StreamWriter"/> for a given path.
-    /// </summary>
-    /// <param name="path">The path of the file to create.</param>
-    /// <param name="logger">The logger for writing errors.</param>
-    /// <returns>A writer for writing JSON output.</returns>
-    /// <exception cref="MetaDataExportPathException"><paramref name="path"/> was invalid, not found, or there was an access error.</exception>
-    public static StreamWriter OpenPackageMetaDataWriter(string path, ILogger logger)
-    {
-        try { return new StreamWriter(path, false, new System.Text.UTF8Encoding(false, false)); }
-        catch (ArgumentException exception)
+        if (string.IsNullOrEmpty(path))
+            return [];
+        using StreamReader reader = OpenStreamReader(path,
+            (p, e) => logger.PackageMetadataFileAccessDenied(path, m => new OfflineMetaDataIOException(p, m, e), e),
+            (p, e) => logger.PackageManifestOpenError(path, m => new OfflineMetaDataIOException(p, m, e), e));
+        try
         {
-            throw logger.InvalidLocalMetaDataExportPath(path, m => new MetaDataExportPathException(path, m, exception), exception);
+            using JsonTextReader jsonReader = new(reader);
+            JsonSerializer jsonSerializer = JsonSerializer.CreateDefault(MetadataDeSerializationSettings);        
+            return jsonSerializer.Deserialize<OfflinePackageManifest[]>(jsonReader) ?? [];
         }
-        catch (UnauthorizedAccessException exception)
+        catch (JsonReaderException exception)
         {
-            throw logger.MetaDataExportPathAccessDenied(path, m => new MetaDataExportPathException(path, m, exception), exception);
-        }
-        catch (DirectoryNotFoundException exception)
-        {
-            throw logger.InvalidLocalMetaDataExportPath(path, m => new MetaDataExportPathException(path, m, exception), exception);
-        }
-        catch (PathTooLongException exception)
-        {
-            throw logger.InvalidLocalMetaDataExportPath(path, m => new MetaDataExportPathException(path, m, exception), exception);
-        }
-        catch (IOException exception)
-        {
-            throw logger.InvalidLocalMetaDataExportPath(path, m => new MetaDataExportPathException(path, m, exception), exception);
-        }
-        catch (System.Security.SecurityException exception)
-        {
-            throw logger.MetaDataExportPathAccessDenied(path, m => new MetaDataExportPathException(path, m, exception), exception);
+            throw logger.PackageMetadataFileReadError(path, m => new OfflineMetaDataIOException(path, m, exception), exception);
         }
     }
 
-    public static Task<OfflinePackageManifest[]> LoadOfflinePackageManifestAsync(string? path, ILogger logger, CancellationToken cancellationToken)
+    private static FileInfo GetExportBundleFileInfos(string bundlePath, string? targetMetadataInput, string? targetMetaDataOutput, ILogger logger, CancellationToken cancellationToken,
+        out FileInfo targetMetadataFileInfo, out HashSet<OfflinePackageManifest> existingPackages)
     {
-        return Task.FromException<OfflinePackageManifest[]>(new NotImplementedException("NuGetPuller.MainServiceStatic.LoadOfflinePackageManifestAsync not implemented"));
+        var bundleFileInfo = GetFileInfo(bundlePath,
+            (p, e) => logger.ExportBundleAccessError(bundlePath, m => new OfflineMetaDataIOException(p, m, e), e),
+            (p, e) => logger.InvalidExportBundle(bundlePath, m => new OfflineMetaDataIOException(p, m, e), e),
+            p => logger.ExportBundlePathNotAFile(p, m => new OfflineMetaDataIOException(p, m)),
+            p => logger.ExportBundleDirectoryNotFound(p, m => new OfflineMetaDataIOException(p, m)));
+        if (string.IsNullOrEmpty(targetMetadataInput))
+        {
+            if (string.IsNullOrWhiteSpace(targetMetaDataOutput))
+            {
+                if (bundleFileInfo.Directory is null)
+                    throw logger.InvalidExportBundle(bundlePath, m => new OfflineMetaDataIOException(bundleFileInfo.FullName, m));
+                cancellationToken.ThrowIfCancellationRequested();
+                targetMetadataFileInfo = GetUniqueFileInfo(bundleFileInfo.Directory, Path.GetFileNameWithoutExtension(bundleFileInfo.Name), ".json",
+                    (p, e) => logger.ExportBundleAccessError(bundlePath, m => new OfflineMetaDataIOException(p, m, e), e),
+                    (p, e) => logger.InvalidExportBundle(bundlePath, m => new OfflineMetaDataIOException(p, m, e), e));
+            }
+            else
+                targetMetadataFileInfo = GetFileInfo(targetMetaDataOutput,
+                    (p, e) => logger.PackageMetadataFileAccessDenied(bundlePath, m => new OfflineMetaDataIOException(p, m, e), e),
+                    (p, e) => logger.PackageManifestOpenError(bundlePath, m => new OfflineMetaDataIOException(p, m, e), e),
+                    p => logger.LocalPackageManifestNotAFile(p, m => new OfflineMetaDataIOException(p, m)),
+                    p => logger.LocalPackageManifestDirectoryNotFound(p, m => new OfflineMetaDataIOException(p, m)));
+            existingPackages = [];
+        }
+        else
+        {
+            var fileInfo = GetExistingFileInfo(targetMetadataInput,
+                (p, e) => logger.PackageMetadataFileAccessDenied(bundlePath, m => new OfflineMetaDataIOException(p, m, e), e),
+                (p, e) => logger.PackageManifestOpenError(bundlePath, m => new OfflineMetaDataIOException(p, m, e), e),
+                p => logger.LocalPackageManifestNotAFile(p, m => new OfflineMetaDataIOException(p, m)),
+                p => logger.LocalPackageManifestDirectoryNotFound(p, m => new OfflineMetaDataIOException(p, m)));
+            cancellationToken.ThrowIfCancellationRequested();
+            existingPackages = new(LoadOfflinePackageManifest(fileInfo.FullName, logger));
+            if (string.IsNullOrWhiteSpace(targetMetaDataOutput))
+                targetMetadataFileInfo = fileInfo;
+            else
+                targetMetadataFileInfo = GetFileInfo(targetMetaDataOutput,
+                    (p, e) => logger.PackageMetadataFileAccessDenied(bundlePath, m => new OfflineMetaDataIOException(p, m, e), e),
+                    (p, e) => logger.PackageManifestOpenError(bundlePath, m => new OfflineMetaDataIOException(p, m, e), e),
+                    p => logger.LocalPackageManifestNotAFile(p, m => new OfflineMetaDataIOException(p, m)),
+                    p => logger.LocalPackageManifestDirectoryNotFound(p, m => new OfflineMetaDataIOException(p, m)));
+        }
+        return bundleFileInfo;
     }
 
-    public static Task ExportBundleAsync(string bundlePath, string? targetManifestInput, string? targetManifestOutput, ILocalNuGetFeedService localClientService, ILogger logger, CancellationToken cancellationToken)
+    public static async Task ExportBundleAsync(string bundlePath, string? targetMetadataInput, string? targetMetaDataOutput, ILocalNuGetFeedService localClientService, ILogger logger, CancellationToken cancellationToken)
     {
-        // var existingPackages = await LoadOfflinePackageManifestAsync(targetManifestOutput, logger, cancellationToken);
-        return Task.FromException(new NotImplementedException("NuGetPuller.MainServiceStatic.ExportBundleAsync(string bundlePath, string?, string?, ILocalNuGetFeedService, ILogger, CancellationToken) not implemented"));
+        var bundleFileInfo = GetExportBundleFileInfos(bundlePath, targetMetadataInput, targetMetaDataOutput, logger, cancellationToken, out FileInfo targetMetadataFileInfo,
+            out HashSet<OfflinePackageManifest> existingPackages);
+        using TempStagingFolder tempStagingFolder = new();
+        var pathResolver = new VersionFolderPathResolver(tempStagingFolder.Directory.FullName);
+        await foreach (var identity in existingPackages.ConcatAsync(localClientService.GetAllPackagesAsync(cancellationToken)))
+        {
+            var fileName = pathResolver.GetPackageFileName(identity.Id, identity.HasVersion ? identity.Version : null);
+            var fullName = Path.Combine(tempStagingFolder.Directory.FullName, fileName);
+            using var stream = OpenFileStream(fullName, FileMode.Create, FileAccess.Write, FileShare.None,
+                    (p, e) => logger.PackageExportAccessDenied(bundlePath, m => new OfflineMetaDataIOException(p, m, e), e),
+                    (p, e) => logger.PackageExportWriteError(bundlePath, m => new OfflineMetaDataIOException(p, m, e), e));
+            await localClientService.CopyNupkgToStreamAsync(identity.Id, identity.Version, stream, cancellationToken);
+            await stream.FlushAsync(cancellationToken);
+        }
+        await Task.FromException(new NotImplementedException("NuGetPuller.MainServiceStatic.ExportBundleAsync(string bundlePath, string?, string?, ILocalNuGetFeedService, ILogger, CancellationToken) not implemented"));
     }
 
-    public static Task ExportBundleAsync(string bundlePath, string? targetManifestInput, string? targetManifestOutput, string[] packageIds, ILocalNuGetFeedService localClientService, ILogger logger, CancellationToken cancellationToken)
+    public static async Task ExportBundleAsync(string bundlePath, string? targetMetadataInput, string? targetMetaDataOutput, string[] packageIds, ILocalNuGetFeedService localClientService, ILogger logger, CancellationToken cancellationToken)
     {
-        // var existingPackages = await LoadOfflinePackageManifestAsync(targetManifestOutput, logger, cancellationToken);
-        return Task.FromException(new NotImplementedException("NuGetPuller.MainServiceStatic.ExportBundleAsync(string bundlePath, string?, string?, string[], ILocalNuGetFeedService, ILogger, CancellationToken) not implemented"));
+        var bundleFileInfo = GetExportBundleFileInfos(bundlePath, targetMetadataInput, targetMetaDataOutput, logger, cancellationToken, out FileInfo targetMetadataFileInfo,
+            out HashSet<OfflinePackageManifest> existingPackages);
+        await Task.FromException(new NotImplementedException("NuGetPuller.MainServiceStatic.ExportBundleAsync(string bundlePath, string?, string?, string[], ILocalNuGetFeedService, ILogger, CancellationToken) not implemented"));
     }
 
-    public static Task ExportBundleAsync(string bundlePath, string? targetManifestInput, string? targetManifestOutput, string[] packageIds, NuGetVersion[] versions, ILocalNuGetFeedService localClientService, ILogger logger, CancellationToken cancellationToken)
+    public static async Task ExportBundleAsync(string bundlePath, string? targetMetadataInput, string? targetMetaDataOutput, string[] packageIds, NuGetVersion[] versions, ILocalNuGetFeedService localClientService, ILogger logger, CancellationToken cancellationToken)
     {
-        // var existingPackages = await LoadOfflinePackageManifestAsync(targetManifestOutput, logger, cancellationToken);
-        return Task.FromException(new NotImplementedException("NuGetPuller.MainServiceStatic.ExportBundleAsync(string bundlePath, string?, string?, string[], NuGetVersion[], ILocalNuGetFeedService, ILogger, CancellationToken) not implemented"));
+        var bundleFileInfo = GetExportBundleFileInfos(bundlePath, targetMetadataInput, targetMetaDataOutput, logger, cancellationToken, out FileInfo targetMetadataFileInfo,
+            out HashSet<OfflinePackageManifest> existingPackages);
+        await Task.FromException(new NotImplementedException("NuGetPuller.MainServiceStatic.ExportBundleAsync(string bundlePath, string?, string?, string[], NuGetVersion[], ILocalNuGetFeedService, ILogger, CancellationToken) not implemented"));
     }
 
     public static async Task ExportLocalManifestAsync(IEnumerable<IPackageSearchMetadata> packages, string exportPath, ILogger logger, CancellationToken cancellationToken)
     {
-        using var writer = OpenPackageMetaDataWriter(exportPath, logger);
+        using var writer = OpenStreamWriter(exportPath,
+            (p, e) => logger.MetaDataExportPathAccessDenied(p, m => new OfflineMetaDataIOException(p, m, e), e),
+            (p, e) => logger.InvalidLocalMetaDataExportPath(p, m => new OfflineMetaDataIOException(p, m, e), e));
         await OfflinePackageManifestConverter.ExportLocalManifestAsync(packages, writer, cancellationToken);
         await writer.FlushAsync(cancellationToken);
         writer.Close();

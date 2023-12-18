@@ -3,6 +3,7 @@ using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using static NuGetPuller.NuGetPullerStatic;
 
 namespace NuGetPuller;
 
@@ -130,7 +131,7 @@ public class OfflinePackageManifestConverter : JsonConverter
                 }
                 await writer.WriteLineAsync(precedingLine);
             }
-            var grouped = pkgArr.GroupBy(p => p.Identity.Id, MainServiceStatic.PackageIdentitifierComparer).OrderBy(g => g.Key, MainServiceStatic.PackageIdentitifierComparer);
+            var grouped = pkgArr.GroupBy(p => p.Identity.Id, PackageIdentitifierComparer).OrderBy(g => g.Key, PackageIdentitifierComparer);
             await writer.WriteLineAsync('[');
             foreach (var group in grouped.SkipLast(1))
             {

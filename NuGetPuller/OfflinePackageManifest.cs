@@ -1,9 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using IsolatedPackageFeeds.Shared;
 using NuGet.Packaging.Core;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
-using static NuGetPuller.MainServiceStatic;
+using static NuGetPuller.NuGetPullerStatic;
 
 namespace NuGetPuller;
 

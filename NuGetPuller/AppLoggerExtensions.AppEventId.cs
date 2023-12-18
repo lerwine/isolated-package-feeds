@@ -138,6 +138,11 @@ public static partial class AppLoggerExtensions
         DownloadingNuGetPackage = 0x1A,
         InvalidCreateFromPath = 0x1B,
         IgnoredDependentCommandLineArgument = 0x1C,
-        InvalidSaveManifestToPath = 0x1D
+        InvalidSaveManifestToPath = 0x1D,
+        PackageManifestOpenError = 0x1E,
+        PackageMetadataFileAccessDenied = 0x1F,
+        PackageMetadataFileReadError = 0x20,
+        PackageExportAccessDenied = 0x21,
+        PackageExportWriteError = 0x22
     }
 }

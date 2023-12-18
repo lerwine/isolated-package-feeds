@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NuGet.Versioning;
 using static NuGetPuller.MainServiceStatic;
+using static NuGetPuller.NuGetPullerStatic;
 using static NuGetPuller.CLI.Defaults;
 
 namespace NuGetPuller.CLI;
