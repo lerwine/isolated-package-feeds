@@ -136,7 +136,8 @@ public static partial class AppLoggerExtensions
         /// Event ID when a package is being downloaded from the upstream NuGet repository.
         /// </summary>
         DownloadingNuGetPackage = 0x1A,
-        CommandLineArgumentsAreExclusive = 0x1B,
-        IgnoredDependentCommandLineArgument = 0x1C
+        InvalidCreateFromPath = 0x1B,
+        IgnoredDependentCommandLineArgument = 0x1C,
+        InvalidSaveManifestToPath = 0x1D
     }
 }

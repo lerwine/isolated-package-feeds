@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using IsolatedPackageFeeds.Shared;
 using NuGet.Versioning;
 
 namespace NuGetPuller;
@@ -13,16 +14,23 @@ public static class ExtensionMethods
             error = null;
             return false;
         }
-        try { result = new(path); }
+        try
+        {
+            FileInfo fileInfo = new(path);
+            if (fileInfo.Exists)
+            {
+                result = fileInfo;
+                error = null;
+                return true;
+            }
+            result = fileInfo;
+            error = null;
+        }
         catch (Exception exception)
         {
             error = exception;
             result = null;
-            return false;
         }
-        error = null;
-        try { return result.Exists; }
-        catch (Exception exception) { error = exception; }
         return false;
     }
     
@@ -34,17 +42,27 @@ public static class ExtensionMethods
             error = null;
             return false;
         }
-        try { result = new(path); }
+        FileInfo fileInfo;
+        try
+        {
+            fileInfo = new(path);
+            if (fileInfo.Exists || (fileInfo.Directory is not null && fileInfo.Directory.Exists))
+                error = null;
+            else
+            {
+                error = null;
+                result = fileInfo;
+                return false;
+            }
+        }
         catch (Exception exception)
         {
             error = exception;
             result = null;
             return false;
         }
-        error = null;
-        try { return result.Exists || (result.Directory is not null && result.Directory.Exists); }
-        catch (Exception exception) { error = exception; }
-        return false;
+        result = fileInfo;
+        return true;
     }
     
     public static bool TryGetExistingDirectoryInfo(this string? path, out Exception? error, [NotNullWhen(true)] out DirectoryInfo? result)
@@ -55,16 +73,23 @@ public static class ExtensionMethods
             error = null;
             return false;
         }
-        try { result = new(path); }
+        try
+        {
+            DirectoryInfo directoryInfo = new(path);
+            if (directoryInfo.Exists)
+            {
+                result = directoryInfo;
+                error = null;
+                return true;
+            }
+            result = directoryInfo;
+            error = null;
+        }
         catch (Exception exception)
         {
             error = exception;
             result = null;
-            return false;
         }
-        error = null;
-        try { return result.Exists; }
-        catch (Exception exception) { error = exception; }
         return false;
     }
     
@@ -76,54 +101,103 @@ public static class ExtensionMethods
             error = null;
             return false;
         }
-        try { result = new(path); }
+        DirectoryInfo directoryInfo;
+        try
+        {
+            directoryInfo = new(path);
+            if (directoryInfo.Exists || (directoryInfo.Parent is not null && directoryInfo.Parent.Exists))
+                error = null;
+            else
+            {
+                error = null;
+                result = directoryInfo;
+                return false;
+            }
+        }
         catch (Exception exception)
         {
             error = exception;
             result = null;
             return false;
         }
-        error = null;
-        try { return result.Exists || (result.Parent is not null && result.Parent.Exists); }
-        catch (Exception exception) { error = exception; }
-        return false;
+        result = directoryInfo;
+        return true;
     }
     
-    public static bool TryGetExistingFileSystemInfo(this string? path, out Exception? error, [NotNullWhen(true)] out FileSystemInfo? fileSystemInfo)
+    public static IEnumerable<FileInfo> ExpandFileInfos(this string? path)
     {
         if (string.IsNullOrEmpty(path))
+            yield break;
+        FileInfo? fileInfo;
+        if (path.Contains(';'))
         {
-            fileSystemInfo = null;
-            error = null;
-            return false;
-        }
-        try { fileSystemInfo = new DirectoryInfo(path); }
-        catch (Exception exception)
-        {
-            error = exception;
-            fileSystemInfo = null;
-            return false;
-        }
-        try
-        {
-            if (fileSystemInfo.Exists)
+            foreach (string p in path.Split(';'))
             {
-                error = null;
-                return true;
+                if (p.Length == 0)
+                    throw new FileNotFoundException("Path cannot be empty.", string.Empty);
+                try
+                {
+                    if (!(fileInfo = new(p)).Exists)
+                        fileInfo = null;
+                }
+                catch (Exception exception)
+                {
+                    throw new FileSystemAccessException(exception.Message, p, exception);
+                }
+                if (fileInfo is null)
+                {
+                    FileInfo[]? files;
+                    try
+                    {
+                        DirectoryInfo? directoryInfo = new(p);
+                        files = directoryInfo.Exists ? directoryInfo.GetFiles("*.nupkg") : null;
+                    }
+                    catch (Exception exception)
+                    {
+                        throw new FileSystemAccessException(exception.Message, p, exception);
+                    }
+                    if (files is null)
+                        throw new FileNotFoundException($"File or subdirectory \"{p}\" not found.", p);
+                    foreach (var f in files)
+                        yield return f;
+                }
+                else
+                    yield return fileInfo;
             }
-            fileSystemInfo = new FileInfo(path);
         }
-        catch (Exception exception)
+        else
         {
-            error = exception;
-            return false;
+            try
+            {
+                if (!(fileInfo = new(path)).Exists)
+                    fileInfo = null;
+            }
+            catch (Exception exception)
+            {
+                throw new FileSystemAccessException(exception.Message, path, exception);
+            }
+            if (fileInfo is null)
+            {
+                FileInfo[]? files;
+                try
+                {
+                    DirectoryInfo? directoryInfo = new(path);
+                    files = directoryInfo.Exists ? directoryInfo.GetFiles("*.nupkg") : null;
+                }
+                catch (Exception exception)
+                {
+                    throw new FileSystemAccessException(exception.Message, path, exception);
+                }
+                if (files is null)
+                    throw new FileNotFoundException($"File or subdirectory \"{path}\" not found.", path);
+                foreach (var f in files)
+                    yield return f;
+            }
+            else
+                yield return fileInfo;
         }
-        error = null;
-        try { return fileSystemInfo.Exists; }
-        catch (Exception exception) { error = exception; }
-        return false;
     }
-    
+
     /// <summary>
     /// Attempts to parse list of valid NuGet package identifiers.
     /// </summary>

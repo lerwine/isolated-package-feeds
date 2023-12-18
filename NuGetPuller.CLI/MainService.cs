@@ -50,47 +50,47 @@ public class MainService : BackgroundService
         WriteConsoleWarning("Command line switch {0} is ignored because neither {1}, {2}, {3}, nor {4} is specified.", dependentSwitch, switchName1, switchName2, switchName3, switchName4);
     }
     
-    private Task WriteHelpToConsoleAsync(CancellationToken cancellationToken)
+    private Task WriteHelpToConsole()
     {
         return Task.FromException(new NotImplementedException());
     }
 
-    private Task WriteListLocalHelpToConsoleAsync(CancellationToken cancellationToken)
+    private Task WriteListLocalHelpToConsole()
     {
         return Task.FromException(new NotImplementedException());
     }
 
-    private Task WriteCheckDependenciesHelpToConsoleAsync(CancellationToken stoppingToken)
+    private Task WriteCheckDependenciesHelpToConsole()
     {
         throw new NotImplementedException();
     }
 
-    private Task WriteCreateBundleHelpToConsoleAsync(CancellationToken stoppingToken)
+    private Task WriteCreateBundleHelpToConsole()
     {
         throw new NotImplementedException();
     }
 
-    private Task WriteDownloadHelpToConsoleAsync(CancellationToken stoppingToken)
+    private Task WriteDownloadHelpToConsole()
     {
         throw new NotImplementedException();
     }
 
-    private Task WriteRemoveHelpToConsoleAsync(CancellationToken stoppingToken)
+    private Task WriteRemoveHelpToConsole()
     {
         throw new NotImplementedException();
     }
 
-    private Task WriteAddPackageFilesHelpToConsoleAsync(CancellationToken stoppingToken)
+    private Task WriteAddPackageFilesHelpToConsole()
     {
         throw new NotImplementedException();
     }
 
-    private Task WriteExportMetaDataHelpToConsoleAsync(CancellationToken stoppingToken)
+    private Task WriteExportMetaDataHelpToConsole()
     {
         throw new NotImplementedException();
     }
 
-    private async Task WriteLocalPackagesToConsoleAsync(ILocalNuGetFeedService localClientService, bool includeVersions, CancellationToken cancellationToken)
+    private static async Task WriteLocalPackagesToConsoleAsync(ILocalNuGetFeedService localClientService, bool includeVersions, CancellationToken cancellationToken)
     {
         var allPackages = localClientService.GetAllPackagesAsync(cancellationToken);
         var count = 0;
@@ -125,6 +125,214 @@ public class MainService : BackgroundService
                 break;
         }
     }
+    private static bool ArePackageIdsValid(IEnumerable<string> packageIds)
+    {
+        using var enumerator = packageIds.GetEnumerator();
+        while (enumerator.MoveNext())
+        {
+            string id = enumerator.Current;
+            if (id.Length == 0)
+            {
+                WriteConsoleError("Package identifier cannot be empty.");
+                while (enumerator.MoveNext())
+                    if ((id = enumerator.Current).Length > 0 && !NuGet.Packaging.PackageIdValidator.IsValidPackageId(id))
+                        WriteConsoleError("\"{0}\" is not a valid package identifier.", id);
+                return false;
+            }
+            if (!NuGet.Packaging.PackageIdValidator.IsValidPackageId(id))
+            {
+                WriteConsoleError("\"{0}\" is not a valid package identifier.", id);
+                while (enumerator.MoveNext())
+                    if ((id = enumerator.Current).Length == 0)
+                        WriteConsoleError("Package identifier cannot be empty.");
+                    else if (!NuGet.Packaging.PackageIdValidator.IsValidPackageId(id))
+                        WriteConsoleError("\"{0}\" is not a valid package identifier.", id);
+                return false;
+            }
+        }
+        return true;
+    }
+    private static bool TryParseVersionStrings(string[] versionStrings, out NuGetVersion[] versions)
+    {
+        int count = versionStrings.Length;
+        versions = new NuGetVersion[count];
+        for (int i = 0; i < count; i++)
+        {
+            string s = versionStrings[i];
+            if (s.Length == 0)
+            {
+                WriteConsoleError("Version string cannot be empty.");
+                while (++i < count)
+                    if ((s = versionStrings[i]).Length > 0 && !NuGetVersion.TryParse(s, out _))
+                        WriteConsoleError("\"{0}\" is not a valid version string.", s);
+                return false;
+            }
+            if (NuGetVersion.TryParse(s, out NuGetVersion? v))
+                versions[i] = v;
+            else
+            {
+                WriteConsoleError("\"{0}\" is not a valid version string.", s);
+                while (++i < count)
+                    if ((s = versionStrings[i]).Length == 0)
+                        WriteConsoleError("Version string cannot be empty.");
+                    else if (!NuGetVersion.TryParse(s, out _))
+                        WriteConsoleError("\"{0}\" is not a valid version string.", s);
+            }
+        }
+        return true;
+    }
+    private static async Task OnCheckDependenciesAsync(string[]? packageIds, string[]? versionStrings, bool noDownload, IServiceProvider serviceProvider, ILogger logger, CancellationToken cancellationToken)
+    {
+        if (packageIds is null)
+        {
+            if (versionStrings is not null)
+                WriteConsoleWarning("Command line switch {0} is ignored because {1} is not specified.", CommandLineSwitches.COMMAND_LINE_SWITCH_version,
+                    CommandLineSwitches.COMMAND_LINE_SWITCH_package_id);
+            var localService = serviceProvider.GetRequiredService<ILocalNuGetFeedService>();
+            if (noDownload)
+                await CheckAllDependenciesAsync(localService, logger, cancellationToken);
+            else
+                await DownloadAllMissingDependenciesAsync(localService, serviceProvider.GetRequiredService<IUpstreamNuGetClientService>(), logger, cancellationToken);
+        }
+        else
+        {
+            packageIds = packageIds.Distinct(StringComparer.InvariantCultureIgnoreCase).ToArray();
+            if (ArePackageIdsValid(packageIds))
+            {
+                var localService = serviceProvider.GetRequiredService<ILocalNuGetFeedService>();
+                if (versionStrings is null)
+                {
+                    if (noDownload)
+                        await CheckDependenciesAsync(localService, logger, packageIds, cancellationToken);
+                    else
+                        await DownloadMissingDependenciesAsync(localService, serviceProvider.GetRequiredService<IUpstreamNuGetClientService>(), logger, packageIds, cancellationToken);
+                }
+                else if (TryParseVersionStrings(versionStrings.Distinct(StringComparer.InvariantCultureIgnoreCase).ToArray(), out NuGetVersion[] versions))
+                {
+                    if (noDownload)
+                        await CheckDependenciesAsync(localService, logger, packageIds, versions, cancellationToken);
+                    else
+                        await DownloadMissingDependenciesAsync(localService, serviceProvider.GetRequiredService<IUpstreamNuGetClientService>(), logger, packageIds, versions, cancellationToken);
+                }
+            }
+            else if (versionStrings is not null)
+                _ = TryParseVersionStrings(versionStrings.Distinct(StringComparer.InvariantCultureIgnoreCase).ToArray(), out _);
+        }
+    }
+
+    private async static Task OnCreateBundle(string path, string? createFrom, string? saveTo, string[]? packageIds, string[]? versionStrings, IServiceProvider serviceProvider, ILogger logger, CancellationToken cancellationToken)
+    {
+        path = Path.GetFullPath(path);
+        if (!File.Exists(path))
+        {
+            if (Directory.Exists(path))
+            {
+                logger.ExportBundlePathNotAFile(path);
+                return;
+            }
+            string? parentDir = Path.GetDirectoryName(path);
+            if (string.IsNullOrEmpty(parentDir) || !Directory.Exists(parentDir))
+            {
+                logger.ExportBundleDirectoryNotFound(path);
+                return;
+            }
+        }
+        if (createFrom is not null)
+        {
+            createFrom = Path.GetFullPath(createFrom);
+            if (!File.Exists(createFrom))
+            {
+                if (Directory.Exists(createFrom))
+                    logger.CreateFromNotAFile(createFrom);
+                else
+                    logger.CreateFromFileNotFound(createFrom);
+                return;
+            }
+        }
+        if (saveTo is null)
+        {
+            if (createFrom is null)
+            {
+                // TODO: Create default export path
+            }
+            else
+                saveTo = createFrom;
+        }
+        else
+        {
+            saveTo = Path.GetFullPath(saveTo);
+            if (!File.Exists(saveTo))
+            {
+                if (Directory.Exists(saveTo))
+                {
+                    logger.SaveManifestToPathNotAFile(saveTo);
+                    return;
+                }
+                else
+                {
+                    string? parentDir = Path.GetDirectoryName(saveTo);
+                    if (string.IsNullOrEmpty(parentDir) || !Directory.Exists(parentDir))
+                    {
+                    logger.SaveManifestToFileNotFound(saveTo);
+                        return;
+                    }
+                }
+                return;
+            }
+            else
+            {
+            }
+
+        }
+            
+        if (packageIds is null)
+        {
+            if (versionStrings is not null)
+                WriteConsoleWarning("Command line switch {0} is ignored because {1} is not specified.", CommandLineSwitches.COMMAND_LINE_SWITCH_version,
+                    CommandLineSwitches.COMMAND_LINE_SWITCH_package_id);
+            var localService = serviceProvider.GetRequiredService<ILocalNuGetFeedService>();
+            throw new NotImplementedException("--create-bundle not implemented.");
+        }
+        else
+        {
+            packageIds = packageIds.Distinct(StringComparer.InvariantCultureIgnoreCase).ToArray();
+            if (ArePackageIdsValid(packageIds))
+            {
+                var localService = serviceProvider.GetRequiredService<ILocalNuGetFeedService>();
+                if (versionStrings is null)
+                {
+                    throw new NotImplementedException("--create-bundle not implemented.");
+                }
+                else if (TryParseVersionStrings(versionStrings.Distinct(StringComparer.InvariantCultureIgnoreCase).ToArray(), out NuGetVersion[] versions))
+                {
+                    throw new NotImplementedException("--create-bundle not implemented.");
+                }
+            }
+            else if (versionStrings is not null)
+                _ = TryParseVersionStrings(versionStrings.Distinct(StringComparer.InvariantCultureIgnoreCase).ToArray(), out _);
+        }
+    }
+
+    private static Task OnDownload(string[] packageIds, string[]? versionStrings, bool noDependencies, string? saveTo, IServiceProvider serviceProvider, ILogger logger, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException("--download not implemented.");
+    }
+
+    private static Task OnRemove(string[] packageIds, string[]? versionStrings, string? saveTo, IServiceProvider serviceProvide, ILogger loggerr, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException("--remove not implemented.");
+    }
+    
+    private static Task<Task> OnAddPackageFiles(string[] paths, IServiceProvider serviceProvider, ILogger logger, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException("--add-file not implemented.");
+    }
+
+    private Task<Task> OnExportMetaData(string path, IServiceProvider serviceProvider, ILogger logger, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException("--export-metadata not implemented.");
+    }
+
 
     protected async override Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -132,6 +340,7 @@ public class MainService : BackgroundService
         var originalBackgroundColor = Console.BackgroundColor;
         try
         {
+
             Console.BackgroundColor = BackgroundColor;
             Console.ForegroundColor = InfoColor;
             using var scope = _serviceProvider.CreateScope();
@@ -161,67 +370,14 @@ public class MainService : BackgroundService
                         if (string.IsNullOrWhiteSpace(_settings.PackageId) && !string.IsNullOrWhiteSpace(_settings.Version))
                             WriteConsoleWarning("Command line switch {0} is ignored because {1} is not specified.", CommandLineSwitches.COMMAND_LINE_SWITCH_version,
                                 CommandLineSwitches.COMMAND_LINE_SWITCH_package_id);
-                        await WriteCheckDependenciesHelpToConsoleAsync(stoppingToken);
+                        await WriteCheckDependenciesHelpToConsole();
                     }
                     else
-                    {
-                        bool? hasPackageIdentifiers = _settings.PackageId.TryGetValidNuGetPackageIdentifierList(out string[] packageIds);
-                        bool? hasVersions = _settings.Version.TryParseNuGetVersionList(out NuGetVersion[] versions);
-                        if (hasPackageIdentifiers.HasValue)
-                        {
-                            if (hasPackageIdentifiers.Value)
-                            {
-                                if (hasVersions.HasValue)
-                                {
-                                    if (hasVersions.Value)
-                                    {
-                                        var localService = _serviceProvider.GetRequiredService<ILocalNuGetFeedService>();
-                                        if (_settings.NoDownload)
-                                            await CheckDependenciesAsync(localService, _logger, packageIds, versions, stoppingToken);
-                                        else
-                                            await DownloadMissingDependenciesAsync(localService, _serviceProvider.GetRequiredService<IUpstreamNuGetClientService>(), _logger, packageIds, versions, stoppingToken);
-                                    }
-                                    else
-                                        WriteConsoleError("An invalid version string was specified.");
-                                }
-                                else
-                                {
-                                    var localService = _serviceProvider.GetRequiredService<ILocalNuGetFeedService>();
-                                    if (_settings.NoDownload)
-                                        await CheckDependenciesAsync(localService, _logger, packageIds, stoppingToken);
-                                    else
-                                        await DownloadMissingDependenciesAsync(localService, _serviceProvider.GetRequiredService<IUpstreamNuGetClientService>(), _logger, packageIds, stoppingToken);
-                                }
-                            }
-                            else
-                            {
-                                WriteConsoleError("An invalid package identifier was specified.");
-                                if (hasVersions.HasValue && !hasVersions.Value)
-                                    WriteConsoleError("An invalid version string was specified.");
-                            }
-                        }
-                        else if (hasVersions.HasValue)
-                        {
-                            if (hasVersions.Value)
-                                WriteConsoleWarning("Command line switch {0} is ignored because {1} is not specified.", CommandLineSwitches.COMMAND_LINE_SWITCH_version,
-                                    CommandLineSwitches.COMMAND_LINE_SWITCH_package_id);
-                            else
-                                WriteConsoleError("An invalid version string was specified.");
-                        }
-                        else
-                        {
-                            var localService = _serviceProvider.GetRequiredService<ILocalNuGetFeedService>();
-                            if (_settings.NoDownload)
-                                await CheckAllDependenciesAsync(localService, _logger, stoppingToken);
-                            else
-                                await DownloadAllMissingDependenciesAsync(localService, _serviceProvider.GetRequiredService<IUpstreamNuGetClientService>(), _logger, stoppingToken);
-                        }
-                    }
+                        await OnCheckDependenciesAsync(_settings.PackageId.SplitIfNotWhiteSpace(','), _settings.Version.SplitIfNotWhiteSpace(','), _settings.NoDownload, scope.ServiceProvider, _logger, stoppingToken);
                 }
             }
             else
             {
-                CheckIgnoredDependentCommandLineArgument(_settings.NoDownload, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_no_download, CommandLineSwitches.COMMAND_LINE_SWITCH_check_depencencies));
                 if (_settings.ListLocal)
                 {
                     if (!string.IsNullOrWhiteSpace(_settings.CreateBundle))
@@ -245,7 +401,7 @@ public class MainService : BackgroundService
                         CheckIgnoredDependentCommandLineArgument(_settings.CreateFrom, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_create_from, CommandLineSwitches.COMMAND_LINE_SWITCH_create_bundle));
                         CheckIgnoredDependentCommandLineArgument(_settings.SaveMetaDataTo, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_save_metadata_to, CommandLineSwitches.COMMAND_LINE_SWITCH_create_bundle));
                         if (_settings.Help)
-                            await WriteListLocalHelpToConsoleAsync(stoppingToken);
+                            await WriteListLocalHelpToConsole();
                         else
                             await WriteLocalPackagesToConsoleAsync(scope.ServiceProvider.GetRequiredService<ILocalNuGetFeedService>(), _settings.IncludeVersions, stoppingToken);
                     }
@@ -253,111 +409,40 @@ public class MainService : BackgroundService
                 else
                 {
                     CheckIgnoredDependentCommandLineArgument(_settings.IncludeVersions, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_include_versions, CommandLineSwitches.COMMAND_LINE_SWITCH_list));
-                    if (_settings.CreateBundle.TryGetExistingFileInfo(out Exception? error, out FileInfo? fileInfo))
-                    {
-
-                    }
-                    else if (error is not null)
-                    {
-                        // TODO: Log error
-                    }
-                    else if (fileInfo is not null)
-                    {
-                        // TODO: Does not exist
-                    }
-                    else
+                    if (string.IsNullOrWhiteSpace(_settings.CreateBundle))
                     {
                         CheckIgnoredDependentCommandLineArgument(_settings.CreateFrom, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_create_from, CommandLineSwitches.COMMAND_LINE_SWITCH_create_bundle));
                         CheckIgnoredDependentCommandLineArgument(_settings.SaveMetaDataTo, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_save_metadata_to, CommandLineSwitches.COMMAND_LINE_SWITCH_create_bundle));
-                        bool? hasPackageIds = _settings.Download.TryGetValidNuGetPackageIdentifierList(out string[] packageIds);
-                        if (hasPackageIds.HasValue)
-                        {
-                            if (hasPackageIds.Value)
-                            {
-
-                            }
-                            else
-                            {
-                                // TODO: Invalid package ID
-                            }
-                        }
-                        else
-                        {
-                            CheckIgnoredDependentCommandLineArgument(_settings.NoDependencies, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_no_dependencies, CommandLineSwitches.COMMAND_LINE_SWITCH_download));
-                            if ((hasPackageIds = _settings.Remove.TryGetValidNuGetPackageIdentifierList(out packageIds)).HasValue)
-                            {
-                                if (hasPackageIds.Value)
-                                {
-
-                                }
-                                else
-                                {
-                                    // TODO: Invalid package ID
-                                }
-                            }
-                            else
-                            {
-                                CheckIgnoredDependentCommandLineArgument(_settings.SaveTo, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_save_to, CommandLineSwitches.COMMAND_LINE_SWITCH_remove));
-                                CheckIgnoredDependentCommandLineArgument(_settings.IncludeVersions, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_include_versions, CommandLineSwitches.COMMAND_LINE_SWITCH_list));
-                                CheckIgnoredDependentCommandLineArgument(_settings.Version, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_version, CommandLineSwitches.COMMAND_LINE_SWITCH_download,
-                                    CommandLineSwitches.COMMAND_LINE_SWITCH_remove, CommandLineSwitches.COMMAND_LINE_SWITCH_check_depencencies, CommandLineSwitches.COMMAND_LINE_SWITCH_create_bundle));
-                                CheckIgnoredDependentCommandLineArgument(_settings.PackageId, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_package_id,
-                                    CommandLineSwitches.COMMAND_LINE_SWITCH_check_depencencies, CommandLineSwitches.COMMAND_LINE_SWITCH_create_bundle));
-                                if (_settings.ExportMetaData.TryGetExistingFileInfo(out error, out fileInfo))
-                                {
-
-                                }
-                                else if (error is not null)
-                                {
-                                    // TODO: Log error
-                                }
-                                else if (fileInfo is not null)
-                                {
-                                    // TODO: Does not exist
-                                }
-                                else
-                                {
-                                    // AddPackageFiles = may be split by ';'
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if (!_settings.CheckDependencies)
-            {
-                if (!_settings.ListLocal)
-                {
-                    if (string.IsNullOrWhiteSpace(_settings.CreateBundle))
-                    {
                         if (string.IsNullOrWhiteSpace(_settings.Download))
                         {
+                            CheckIgnoredDependentCommandLineArgument(_settings.NoDependencies, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_no_dependencies, CommandLineSwitches.COMMAND_LINE_SWITCH_download));
                             if (string.IsNullOrWhiteSpace(_settings.Remove))
                             {
+                                CheckIgnoredDependentCommandLineArgument(_settings.Version, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_version, CommandLineSwitches.COMMAND_LINE_SWITCH_download,
+                                    CommandLineSwitches.COMMAND_LINE_SWITCH_remove, CommandLineSwitches.COMMAND_LINE_SWITCH_check_depencencies, CommandLineSwitches.COMMAND_LINE_SWITCH_create_bundle));
+                                CheckIgnoredDependentCommandLineArgument(_settings.PackageId, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_package_id, CommandLineSwitches.COMMAND_LINE_SWITCH_check_depencencies,
+                                    CommandLineSwitches.COMMAND_LINE_SWITCH_create_bundle));
+                                CheckIgnoredDependentCommandLineArgument(_settings.SaveTo, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_save_to, CommandLineSwitches.COMMAND_LINE_SWITCH_remove));
                                 if (string.IsNullOrWhiteSpace(_settings.AddPackageFiles))
                                 {
                                     if (string.IsNullOrWhiteSpace(_settings.ExportMetaData))
                                     {
                                         if (!_settings.Help)
-                                        {
-                                            Console.ForegroundColor = WarningColor;
-                                            Console.WriteLine("No valid command line arguments provided.");
-                                            Console.ForegroundColor = InfoColor;
-                                        }
-                                        await WriteHelpToConsoleAsync(stoppingToken);
+                                            WriteConsoleWarning("No valid command line arguments provided.");
+                                        await WriteHelpToConsole();
                                     }
                                     else if (_settings.Help)
-                                        await WriteExportMetaDataHelpToConsoleAsync(stoppingToken);
+                                        await WriteExportMetaDataHelpToConsole();
                                     else
-                                        throw new NotImplementedException("--export-metadata not implemented.");
+                                        await await OnExportMetaData(_settings.ExportMetaData, scope.ServiceProvider, _logger, stoppingToken);
                                 }
                                 else if (!string.IsNullOrWhiteSpace(_settings.ExportMetaData))
                                     WriteConsoleError("Command line switch {0} cannot be used with {1}.", CommandLineSwitches.COMMAND_LINE_SWITCH_add_file,
                                         CommandLineSwitches.COMMAND_LINE_SWITCH_export_metadata);
                                 else if (_settings.Help)
-                                    await WriteAddPackageFilesHelpToConsoleAsync(stoppingToken);
+                                    await WriteAddPackageFilesHelpToConsole();
                                 else
-                                    throw new NotImplementedException("--add-file not implemented.");
+                                    await OnAddPackageFiles(_settings.AddPackageFiles.Split(';'), scope.ServiceProvider, _logger, stoppingToken);
                             }
                             else if (!string.IsNullOrWhiteSpace(_settings.AddPackageFiles))
                                 WriteConsoleError("Command line switch {0} cannot be used with {1}.", CommandLineSwitches.COMMAND_LINE_SWITCH_remove, CommandLineSwitches.COMMAND_LINE_SWITCH_add_file);
@@ -365,14 +450,12 @@ public class MainService : BackgroundService
                                 WriteConsoleError("Command line switch {0} cannot be used with {1}.", CommandLineSwitches.COMMAND_LINE_SWITCH_remove, CommandLineSwitches.COMMAND_LINE_SWITCH_export_metadata);
                             else
                             {
-                                CheckIgnoredDependentCommandLineArgument(_settings.IncludeVersions, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_include_versions, CommandLineSwitches.COMMAND_LINE_SWITCH_list));
-                                CheckIgnoredDependentCommandLineArgument(_settings.PackageId, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_package_id,
-                                    CommandLineSwitches.COMMAND_LINE_SWITCH_check_depencencies, CommandLineSwitches.COMMAND_LINE_SWITCH_create_bundle));
+                                CheckIgnoredDependentCommandLineArgument(_settings.PackageId, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_package_id, CommandLineSwitches.COMMAND_LINE_SWITCH_check_depencencies,
+                                    CommandLineSwitches.COMMAND_LINE_SWITCH_create_bundle));
                                 if (_settings.Help)
-                                    await WriteRemoveHelpToConsoleAsync(stoppingToken);
+                                    await WriteRemoveHelpToConsole();
                                 else
-                                    throw new NotImplementedException("--remove not implemented.");
-                                // _settings.Version, _settings.SaveTo
+                                    await OnRemove(_settings.Remove.Split(','), _settings.Version.SplitIfNotWhiteSpace(','), _settings.SaveTo.NullIfWhiteSpace(), scope.ServiceProvider, _logger, stoppingToken);
                             }
                         }
                         else if (!string.IsNullOrWhiteSpace(_settings.Remove))
@@ -383,15 +466,13 @@ public class MainService : BackgroundService
                             WriteConsoleError("Command line switch {0} cannot be used with {1}.", CommandLineSwitches.COMMAND_LINE_SWITCH_download, CommandLineSwitches.COMMAND_LINE_SWITCH_export_metadata);
                         else
                         {
-                            CheckIgnoredDependentCommandLineArgument(_settings.IncludeVersions, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_include_versions, CommandLineSwitches.COMMAND_LINE_SWITCH_list));
                             CheckIgnoredDependentCommandLineArgument(_settings.SaveTo, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_save_to, CommandLineSwitches.COMMAND_LINE_SWITCH_remove));
                             CheckIgnoredDependentCommandLineArgument(_settings.PackageId, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_package_id, CommandLineSwitches.COMMAND_LINE_SWITCH_check_depencencies,
                                 CommandLineSwitches.COMMAND_LINE_SWITCH_create_bundle));
                             if (_settings.Help)
-                                await WriteDownloadHelpToConsoleAsync(stoppingToken);
+                                await WriteDownloadHelpToConsole();
                             else
-                                throw new NotImplementedException("--download not implemented.");
-                            // _settings.Version, _settings.NoDependencies
+                                await OnDownload(_settings.Download.Split(','), _settings.Version.SplitIfNotWhiteSpace(','), _settings.NoDependencies, _settings.SaveTo, scope.ServiceProvider, _logger, stoppingToken);
                         }
                     }
                     else if (!string.IsNullOrWhiteSpace(_settings.Download))
@@ -404,70 +485,17 @@ public class MainService : BackgroundService
                         WriteConsoleError("Command line switch {0} cannot be used with {1}.", CommandLineSwitches.COMMAND_LINE_SWITCH_create_bundle, CommandLineSwitches.COMMAND_LINE_SWITCH_export_metadata);
                     else
                     {
-                        CheckIgnoredDependentCommandLineArgument(_settings.IncludeVersions, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_include_versions, CommandLineSwitches.COMMAND_LINE_SWITCH_list));
-                        CheckIgnoredDependentCommandLineArgument(_settings.Version, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_version, CommandLineSwitches.COMMAND_LINE_SWITCH_download,
-                            CommandLineSwitches.COMMAND_LINE_SWITCH_remove, CommandLineSwitches.COMMAND_LINE_SWITCH_check_depencencies, CommandLineSwitches.COMMAND_LINE_SWITCH_create_bundle));
                         CheckIgnoredDependentCommandLineArgument(_settings.NoDependencies, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_no_dependencies, CommandLineSwitches.COMMAND_LINE_SWITCH_download));
                         CheckIgnoredDependentCommandLineArgument(_settings.SaveTo, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_save_to, CommandLineSwitches.COMMAND_LINE_SWITCH_remove));
-                        CheckIgnoredDependentCommandLineArgument(_settings.PackageId, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_package_id, CommandLineSwitches.COMMAND_LINE_SWITCH_check_depencencies,
-                            CommandLineSwitches.COMMAND_LINE_SWITCH_create_bundle));
                         if (_settings.Help)
-                        {
-                            if (string.IsNullOrWhiteSpace(_settings.PackageId) && !string.IsNullOrWhiteSpace(_settings.Version))
-                                WriteConsoleWarning("Command line switch {0} is ignored because {1} is not specified.", CommandLineSwitches.COMMAND_LINE_SWITCH_version,
-                                    CommandLineSwitches.COMMAND_LINE_SWITCH_package_id);
-                            await WriteCreateBundleHelpToConsoleAsync(stoppingToken);
-                        }
+                            await WriteCreateBundleHelpToConsole();
                         else
-                        {
-                            string? createFrom = _settings.CreateFrom.NullIfWhiteSpace();
-                            string? saveMetaDataTo = _settings.SaveMetaDataTo.NullIfWhiteSpace();
-                            if (saveMetaDataTo is null)
-                            {
-                                if (createFrom is null)
-                                {
-                                    saveMetaDataTo = Environment.MachineName + CommandLineSwitches.METADATA_EXTENSION_nuget_metadata_json;
-                                    if (File.Exists(saveMetaDataTo) || Directory.Exists(saveMetaDataTo))
-                                    {
-                                        int index = 0;
-                                        do
-                                        {
-                                            index++;
-                                            saveMetaDataTo = $"{Environment.MachineName}{index}{CommandLineSwitches.METADATA_EXTENSION_nuget_metadata_json}";
-                                        }
-                                        while (File.Exists(saveMetaDataTo) || Directory.Exists(saveMetaDataTo));
-                                    }
-                                }
-                                else
-                                    saveMetaDataTo  = createFrom;
-                            }
-                            if (_settings.PackageId.TrySplitToNonWhiteSpaceTrimmed(',', out string[]? packageIds))
-                            {
-                                bool? hasVersions = _settings.Version.TryParseNuGetVersionList(out NuGetVersion[] versions);
-                                if (hasVersions.HasValue)
-                                {
-                                    if (hasVersions.Value)
-                                    {
-
-                                    }
-                                    else
-                                        WriteConsoleError("An invalid version string was specified.");
-                                }
-                                else
-                                {
-
-                                }
-                            }
-                            else
-                            {
-                                if (!string.IsNullOrWhiteSpace(_settings.Version))
-                                    WriteConsoleWarning("Command line switch {0} is ignored because {1} is not specified.", CommandLineSwitches.COMMAND_LINE_SWITCH_version,
-                                        CommandLineSwitches.COMMAND_LINE_SWITCH_package_id);
-                            }
-                        }
+                            await OnCreateBundle(_settings.CreateBundle, _settings.CreateFrom.NullIfWhiteSpace(), _settings.SaveMetaDataTo.NullIfWhiteSpace(), _settings.PackageId.SplitIfNotWhiteSpace(','),
+                                _settings.Version.SplitIfNotWhiteSpace(','), scope.ServiceProvider, _logger, stoppingToken);
                     }
                 }
             }
+            
 
             // var packageIds = _settings.Remove?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(NoCaseComparer);
             // HashSet<PackageIdentity> deletedPackages = new(PackageIdentityComparer.Default);

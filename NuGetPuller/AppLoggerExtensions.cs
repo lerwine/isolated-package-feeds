@@ -822,86 +822,39 @@ public static partial class AppLoggerExtensions
     [LoggerMessage(EventId = (int)NuGetPullerEventId.NoLocalPackagesExist, Level = LogLevel.Warning, Message = "Local NuGet Feed has no packages.")]
     public static partial void NoLocalNuGetPackagesExist(this ILogger logger, Exception? exception = null);
 
+    public const string Message_Is_Not_A_File = "is not a file";
+
     #region InvalidExportBundle Logger Event Methods
 
-    private const string MESSAGE_Package_Bundle_Export_Path = "NuGet package bundle export path";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportBundle, Level = LogLevel.Critical, EventName = nameof(NuGetPullerEventId.InvalidExportBundle),
-        Message = $"{MESSAGE_Package_Bundle_Export_Path} \"{{Path}}\" {Message_Is_Invalid}.")]
-    private static partial void LogInvalidExportBundle(ILogger logger, string path, Exception? exception);
-
-    private const string MESSAGE_Bundle_Export_Path_Parent_Directory = "Parent subdirectory of NuGet package bundle export path";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportBundle, Level = LogLevel.Critical, EventName = nameof(ExportBundleDirectoryNotFound),
-        Message = $"{MESSAGE_Bundle_Export_Path_Parent_Directory} \"{{Path}}\" {Message_Not_Found}.")]
-    private static partial void LogExportBundleDirectoryNotFound(ILogger logger, string path, Exception? exception);
-
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidExportBundle"/> error event message.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="path">The export bundle path.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
     [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportBundle, Level = LogLevel.Critical,
-        Message = $"{MESSAGE_Package_Bundle_Export_Path} \"{{Path}}\" {Message_Is_Too_Long}.")]
-    private static partial void ExportBundlePathTooLong(ILogger logger, string path, Exception exception);
-
-    private const string Message_Access_To_Export_Bundle_Path = "Access to NuGet package bundle export path";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportBundle, Level = LogLevel.Critical, EventName = nameof(ExportBundlePathAccessDenied),
-        Message = $"{Message_Access_To_Export_Bundle_Path} \"{{Path}}\" {Message_Is_Denied}.")]
-    private static partial void LogExportBundlePathAccessDenied(ILogger logger, string path, Exception? exception);
-
-    private const string MESSAGE_InsufficientPermissionsForExportBundlePath = "Caller has insufficient permissions to the NuGet package bundle export path";
-
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportBundle, Level = LogLevel.Critical, Message = $"{MESSAGE_InsufficientPermissionsForExportBundlePath} \"{{Path}}\".")]
-    private static partial void InsufficientPermissionsForExportBundlePath(ILogger logger, string path, Exception exception);
+        Message = "Export Bundle path {Path} is invalid.")]
+    public static partial void InvalidExportBundle(this ILogger logger, string path, Exception? exception = null);
 
     /// <summary>
-    /// </summary>
-    /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidExportBundle"/> event error message.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidExportBundle"/> error event message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
-    /// <param name="path">The invalid export bundle [atj].</param>
+    /// <param name="path">The export bundle path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    /// <returns>The validation message.</returns>
-    public static string InvalidExportBundle(this ILogger logger, string path, Exception? exception = null)
-    {
-        if (exception is PathTooLongException)
-        {
-            ExportBundlePathTooLong(logger, path, exception);
-            return $"{MESSAGE_Package_Bundle_Export_Path} \"{path}\" {Message_Is_Too_Long}.";
-        }
-        LogInvalidExportBundle(logger, path, exception);
-        return $"{MESSAGE_Package_Bundle_Export_Path} \"{path}\" {Message_Is_Invalid}.";
-    }
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportBundle, Level = LogLevel.Critical,
+        Message = "Export Bundle path {Path} does not refer to a file.")]
+    public static partial void ExportBundlePathNotAFile(this ILogger logger, string path, Exception? exception = null);
 
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidExportBundle"/> event error message.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidExportBundle"/> error event message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
-    /// <param name="path">The NuGet feed path.</param>
-    /// <param name="factory">Factory method to create the exception to be returned (and subsequently thrown).</param>
+    /// <param name="path">The export bundle path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    /// <returns>The validation message.</returns>
-    public static string ExportBundleDirectoryNotFound(this ILogger logger, string path, Exception? exception = null)
-    {
-        LogExportBundleDirectoryNotFound(logger, path, exception);
-        return $"{MESSAGE_Bundle_Export_Path_Parent_Directory} \"{path}\" {Message_Not_Found}.";
-    }
-
-    /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.MetaDataExportPathAccessDenied"/> event error message.
-    /// </summary>
-    /// <param name="logger">The current logger.</param>
-    /// <param name="path">The NuGet feed path.</param>
-    /// <param name="exception">The optional exception that caused the event.</param>
-    /// <returns>The validation message.</returns>
-    public static string ExportBundlePathAccessDenied(this ILogger logger, string path, Exception? exception = null)
-    {
-        if (exception is System.Security.SecurityException)
-        {
-            InsufficientPermissionsForExportBundlePath(logger, path, exception);
-            return $"{MESSAGE_InsufficientPermissionsForExportBundlePath} \"{path}\".";
-        }
-        LogExportBundlePathAccessDenied(logger, path, exception);
-        return $"{Message_Access_To_Export_Bundle_Path} \"{path}\" {Message_Is_Denied}.";
-    }
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidExportBundle, Level = LogLevel.Critical,
+        Message = "Parent directory of Export Bundle path {Path} does not exist.")]
+    public static partial void ExportBundleDirectoryNotFound(this ILogger logger, string path, Exception? exception = null);
 
     #endregion
 
@@ -943,17 +896,39 @@ public static partial class AppLoggerExtensions
 
     #endregion
 
+    #region InvalidCreateFromPath Logger Event Methods
+
     /// <summary>
-    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.CommandLineArgumentsAreExclusive"/> error event message.
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidCreateFromPath"/> error event message.
     /// </summary>
     /// <param name="logger">The current logger.</param>
-    /// <param name="switch1">A mutually-exclusive command line switch.</param>
-    /// <param name="switch2">The other mutually-exclusive command-line switch.</param>
+    /// <param name="path">The Create-From path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    [LoggerMessage(EventId = (int)NuGetPullerEventId.CommandLineArgumentsAreExclusive, Level = LogLevel.Critical,
-        Message = "Command line switch {Switch1}; cannot be used with {Switch2})")]
-    [Obsolete("Use NuGetPuller.CLI.MainService.WriteCommandLineArgumentsAreExclusive")]
-    public static partial void CommandLineArgumentsAreExclusive(this ILogger logger, string switch1, string switch2, Exception? exception = null);
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidCreateFromPath, Level = LogLevel.Critical,
+        Message = "Create-from path {Path} is invalid.")]
+    public static partial void InvalidCreateFromPath(this ILogger logger, string path, Exception? exception = null);
+    
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidCreateFromPath"/> error event message.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="path">The Create-From path.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidCreateFromPath, Level = LogLevel.Critical,
+        Message = "Create-from path {Path} does not exist.")]
+    public static partial void CreateFromFileNotFound(this ILogger logger, string path, Exception? exception = null);
+    
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidCreateFromPath"/> error event message.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="path">The Create-From path.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidCreateFromPath, Level = LogLevel.Critical,
+        Message = "Create-from path {Path} is not a file.")]
+    public static partial void CreateFromNotAFile(this ILogger logger, string path, Exception? exception = null);
+    
+    #endregion
 
     #region IgnoredDependentCommandLineArgument Logger Event Methods
 
@@ -1010,6 +985,40 @@ public static partial class AppLoggerExtensions
         Message = "Command line switch {DependentSwitch} is ignnored if {SwitchName1}, {SwitchName2}, {SwitchName3} or {SwitchName4} is not specified.")]
     [Obsolete("Use NuGetPuller.CLI.MainService.CheckIgnoredDependentCommandLineArgument")]
     public static partial void IgnoredDependentCommandLineArgument(this ILogger logger, string dependentSwitch, string switchName1, string switchName2, string switchName3, string switchName4, Exception? exception = null);
+
+    #endregion
+
+    #region InvalidSaveManifestToPath Logger Event Methods
+
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidSaveManifestToPath"/> error event message.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="path">The filesystem path.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidSaveManifestToPath, Level = LogLevel.Critical,
+        Message = "Save-to path {Path} is invalid")]
+    public static partial void InvalidSaveManifestToPath(this ILogger logger, string path, Exception? exception = null);
+
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidSaveManifestToPath"/> error event message.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="path">The filesystem path.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidSaveManifestToPath, Level = LogLevel.Critical,
+        Message = "Save-to path {Path} is invalid")]
+    public static partial void SaveManifestToFileNotFound(this ILogger logger, string path, Exception? exception = null);
+
+    /// <summary>
+    /// Logs a <see cref="LogLevel.Critical"/> <see cref="NuGetPullerEventId.InvalidSaveManifestToPath"/> error event message.
+    /// </summary>
+    /// <param name="logger">The current logger.</param>
+    /// <param name="path">The filesystem path.</param>
+    /// <param name="exception">The optional exception that caused the event.</param>
+    [LoggerMessage(EventId = (int)NuGetPullerEventId.InvalidSaveManifestToPath, Level = LogLevel.Critical,
+        Message = "Save-to path {Path} is invalid")]
+    public static partial void SaveManifestToPathNotAFile(this ILogger logger, string path, Exception? exception = null);
 
     #endregion
 

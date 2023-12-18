@@ -46,6 +46,8 @@ public static class StringExtensions
         return LineBreakRegex.Split(value);
     }
 
+    public static string[]? SplitIfNotWhiteSpace(this string? value, char separator) => string.IsNullOrWhiteSpace(value) ? null : value.Split(separator);
+    
     public static bool TrySplitToNonWhiteSpaceTrimmed(this string? value, char separator, [NotNullWhen(true)]out string[]? result)
     {
         if (value is null || (value = value.Trim()).Length == 0)
