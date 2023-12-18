@@ -1,29 +1,23 @@
 using Microsoft.Extensions.Logging;
 using IsolatedPackageFeeds.Shared;
 using NuGet.Packaging;
-using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Serialization;
-using System.Globalization;
 
 namespace NuGetPuller;
 
 public partial class MainServiceStatic
 {
     public static readonly StringComparer PackageIdentityComparer = StringComparer.OrdinalIgnoreCase;
-    private static readonly JsonSerializerSettings MetadataSerializationSettings = new()
+
+    public static readonly JsonSerializerSettings MetadataDeSerializationSettings = new()
     {
         MaxDepth = 512,
         NullValueHandling = NullValueHandling.Ignore,
         TypeNameHandling = TypeNameHandling.None,
-        Converters = new List<JsonConverter>
-        {
-            new NuGetVersionConverter()
-        },
-        Formatting = Formatting.None
+        Converters = [new OfflinePackageManifestConverter()],
+        Formatting = Formatting.Indented
     };
 
     /// <summary>
@@ -79,65 +73,8 @@ public partial class MainServiceStatic
 
     public static async Task ExportLocalManifestAsync(IEnumerable<IPackageSearchMetadata> packages, string exportPath, ILogger logger, CancellationToken cancellationToken)
     {
-        var pkgArr = packages.ToArray();
         using var writer = OpenPackageMetaDataWriter(exportPath, logger);
-        if (pkgArr.Length > 0)
-        {
-            var grouped = pkgArr.GroupBy(p => p.Identity.Id, PackageIdentityComparer);
-            await writer.WriteLineAsync('[');
-            static async Task writeFields(IGrouping<string, IPackageSearchMetadata> group, StreamWriter writer)
-            {
-                var hasVersion = group.Where(p => p.Identity.HasVersion).OrderByDescending(p => p.Identity.Version, VersionComparer.VersionReleaseMetadata);
-                var ordered = hasVersion.Concat(group.Where(p => !p.Identity.HasVersion));
-                await writer.WriteAsync("        \"id\": ");
-                var precedingLine = JsonConvert.SerializeObject(group.Key, MetadataSerializationSettings);
-                var text = ordered.Select(p => p.Title).FirstOrDefault(t => !string.IsNullOrWhiteSpace(t));
-                if (text is not null)
-                {
-                    await writer.WriteAsync(precedingLine);
-                    await writer.WriteLineAsync(',');
-                    await writer.WriteAsync("        \"title\": ");
-                    precedingLine = JsonConvert.SerializeObject(text, MetadataSerializationSettings);
-                }
-                if ((text = ordered.Select(p => p.Summary).FirstOrDefault(t => !string.IsNullOrWhiteSpace(t))) is not null)
-                {
-                    await writer.WriteAsync(precedingLine);
-                    await writer.WriteLineAsync(',');
-                    await writer.WriteAsync("        \"summary\": ");
-                    precedingLine = JsonConvert.SerializeObject(text, MetadataSerializationSettings);
-                }
-                if ((text = ordered.Select(p => p.Description).FirstOrDefault(t => !string.IsNullOrWhiteSpace(t))) is not null)
-                {
-                    await writer.WriteAsync(precedingLine);
-                    await writer.WriteLineAsync(',');
-                    await writer.WriteAsync("        \"description\": ");
-                    precedingLine = JsonConvert.SerializeObject(text, MetadataSerializationSettings);
-                }
-                var versions = hasVersion.Select(p => p.Identity.Version).ToArray();
-                if (versions.Length > 0)
-                {
-                    await writer.WriteAsync(precedingLine);
-                    await writer.WriteLineAsync(',');
-                    await writer.WriteAsync("        \"versions\": ");
-                    precedingLine = JsonConvert.SerializeObject(versions, MetadataSerializationSettings);
-                }
-                await writer.WriteLineAsync(precedingLine);
-            }
-            foreach (var group in grouped.SkipLast(1))
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                await writer.WriteLineAsync("    {");
-                await writeFields(group, writer);
-                await writer.WriteLineAsync("    },");
-            }
-            cancellationToken.ThrowIfCancellationRequested();
-            await writer.WriteLineAsync("    {");
-            await writeFields(grouped.Last(), writer);
-            await writer.WriteLineAsync("    }");
-            await writer.WriteLineAsync(']');
-        }
-        else
-            await writer.WriteLineAsync("[]");
+        await OfflinePackageManifestConverter.ExportLocalManifestAsync(packages, writer, cancellationToken);
         await writer.FlushAsync(cancellationToken);
         writer.Close();
     }
