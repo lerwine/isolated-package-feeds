@@ -125,6 +125,7 @@ public class MainService : BackgroundService
                 break;
         }
     }
+    
     private static bool ArePackageIdsValid(IEnumerable<string> packageIds)
     {
         using var enumerator = packageIds.GetEnumerator();
@@ -152,6 +153,7 @@ public class MainService : BackgroundService
         }
         return true;
     }
+    
     private static bool TryParseVersionStrings(string[] versionStrings, out NuGetVersion[] versions)
     {
         int count = versionStrings.Length;
@@ -181,6 +183,7 @@ public class MainService : BackgroundService
         }
         return true;
     }
+    
     private static async Task OnCheckDependenciesAsync(string[]? packageIds, string[]? versionStrings, bool noDownload, IServiceProvider serviceProvider, ILogger logger, CancellationToken cancellationToken)
     {
         if (packageIds is null)
@@ -222,95 +225,17 @@ public class MainService : BackgroundService
 
     private async static Task OnCreateBundle(string path, string? createFrom, string? saveTo, string[]? packageIds, string[]? versionStrings, IServiceProvider serviceProvider, ILogger logger, CancellationToken cancellationToken)
     {
-        path = Path.GetFullPath(path);
-        if (!File.Exists(path))
-        {
-            if (Directory.Exists(path))
-            {
-                logger.ExportBundlePathNotAFile(path);
-                return;
-            }
-            string? parentDir = Path.GetDirectoryName(path);
-            if (string.IsNullOrEmpty(parentDir) || !Directory.Exists(parentDir))
-            {
-                logger.ExportBundleDirectoryNotFound(path);
-                return;
-            }
-        }
-        if (createFrom is not null)
-        {
-            createFrom = Path.GetFullPath(createFrom);
-            if (!File.Exists(createFrom))
-            {
-                if (Directory.Exists(createFrom))
-                    logger.CreateFromNotAFile(createFrom);
-                else
-                    logger.CreateFromFileNotFound(createFrom);
-                return;
-            }
-        }
-        if (saveTo is null)
-        {
-            if (createFrom is null)
-            {
-                // TODO: Create default export path
-            }
-            else
-                saveTo = createFrom;
-        }
-        else
-        {
-            saveTo = Path.GetFullPath(saveTo);
-            if (!File.Exists(saveTo))
-            {
-                if (Directory.Exists(saveTo))
-                {
-                    logger.SaveManifestToPathNotAFile(saveTo);
-                    return;
-                }
-                else
-                {
-                    string? parentDir = Path.GetDirectoryName(saveTo);
-                    if (string.IsNullOrEmpty(parentDir) || !Directory.Exists(parentDir))
-                    {
-                    logger.SaveManifestToFileNotFound(saveTo);
-                        return;
-                    }
-                }
-                return;
-            }
-            else
-            {
-            }
-
-        }
-            
         if (packageIds is null)
         {
             if (versionStrings is not null)
                 WriteConsoleWarning("Command line switch {0} is ignored because {1} is not specified.", CommandLineSwitches.COMMAND_LINE_SWITCH_version,
                     CommandLineSwitches.COMMAND_LINE_SWITCH_package_id);
-            var localService = serviceProvider.GetRequiredService<ILocalNuGetFeedService>();
-            throw new NotImplementedException("--create-bundle not implemented.");
+            await ExportBundleAsync(path, createFrom, saveTo, serviceProvider.GetRequiredService<ILocalNuGetFeedService>(), logger, cancellationToken);
         }
-        else
-        {
-            packageIds = packageIds.Distinct(StringComparer.InvariantCultureIgnoreCase).ToArray();
-            if (ArePackageIdsValid(packageIds))
-            {
-                var localService = serviceProvider.GetRequiredService<ILocalNuGetFeedService>();
-                if (versionStrings is null)
-                {
-                    throw new NotImplementedException("--create-bundle not implemented.");
-                }
-                else if (TryParseVersionStrings(versionStrings.Distinct(StringComparer.InvariantCultureIgnoreCase).ToArray(), out NuGetVersion[] versions))
-                {
-                    throw new NotImplementedException("--create-bundle not implemented.");
-                }
-            }
-            else if (versionStrings is not null)
-                _ = TryParseVersionStrings(versionStrings.Distinct(StringComparer.InvariantCultureIgnoreCase).ToArray(), out _);
-        }
+        else if (versionStrings is null)
+            await ExportBundleAsync(path, createFrom, saveTo, packageIds, serviceProvider.GetRequiredService<ILocalNuGetFeedService>(), logger, cancellationToken);
+        else if (TryParseVersionStrings(versionStrings.Distinct(StringComparer.InvariantCultureIgnoreCase).ToArray(), out NuGetVersion[] versions))
+            await ExportBundleAsync(path, createFrom, saveTo, packageIds, versions, serviceProvider.GetRequiredService<ILocalNuGetFeedService>(), logger, cancellationToken);
     }
 
     private static Task OnDownload(string[] packageIds, string[]? versionStrings, bool noDependencies, string? saveTo, IServiceProvider serviceProvider, ILogger logger, CancellationToken cancellationToken)

@@ -38,15 +38,20 @@ public partial class MainServiceStatic
         }
     }
 
-    // private async Task ImportAsync(string path, LocalNuGetFeedService localClientService, ILogger logger, CancellationToken cancellationToken)
-    // {
-    //     throw new NotImplementedException();
-    // }
+    public static Task ExportBundleAsync(string bundlePath, string? targetManifestInput, string? targetManifestOutput, ILocalNuGetFeedService localClientService, ILogger logger, CancellationToken cancellationToken)
+    {
+        return Task.FromException(new NotImplementedException("NuGetPuller.MainServiceStatic.ExportBundleAsync(string bundlePath, string?, string?, ILocalNuGetFeedService, ILogger, CancellationToken) not implemented"));
+    }
 
-    // private async Task ExportBundleAsync(string bundlePath, string targetManifestInput, string targetManifestOutput, LocalNuGetFeedService localClientService, ILogger logger, CancellationToken cancellationToken)
-    // {
-    //     throw new NotImplementedException();
-    // }
+    public static Task ExportBundleAsync(string bundlePath, string? targetManifestInput, string? targetManifestOutput, string[] packageIds, ILocalNuGetFeedService localClientService, ILogger logger, CancellationToken cancellationToken)
+    {
+        return Task.FromException(new NotImplementedException("NuGetPuller.MainServiceStatic.ExportBundleAsync(string bundlePath, string?, string?, string[], ILocalNuGetFeedService, ILogger, CancellationToken) not implemented"));
+    }
+
+    public static Task ExportBundleAsync(string bundlePath, string? targetManifestInput, string? targetManifestOutput, string[] packageIds, NuGetVersion[] versions, ILocalNuGetFeedService localClientService, ILogger logger, CancellationToken cancellationToken)
+    {
+        return Task.FromException(new NotImplementedException("NuGetPuller.MainServiceStatic.ExportBundleAsync(string bundlePath, string?, string?, string[], NuGetVersion[], ILocalNuGetFeedService, ILogger, CancellationToken) not implemented"));
+    }
 
     public static async Task ExportLocalManifestAsync(IEnumerable<IPackageSearchMetadata> packages, string exportPath, ILogger logger, CancellationToken cancellationToken)
     {
@@ -56,8 +61,11 @@ public partial class MainServiceStatic
         {
             await writer.WriteLineAsync('[');
             foreach (var p in pkgArr.SkipLast(1))
-                await writer.WriteLineAsync($"  {p.ToJson()},");
-            await writer.WriteLineAsync($"  {pkgArr.Last().ToJson()}");
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                await writer.WriteLineAsync($"  {(await OfflinePackageManifest.CreateAsync(p)).ToJson()},");
+            }
+            await writer.WriteLineAsync($"  {(await OfflinePackageManifest.CreateAsync(pkgArr.Last())).ToJson()}");
             await writer.WriteLineAsync(']');
         }
         else
@@ -115,43 +123,43 @@ public partial class MainServiceStatic
         }
     }
 
-    public static Task CheckDependenciesAsync(ILocalNuGetFeedService localClientService, ILogger logger, string[] packageIds, NuGetVersion[] nuGetVersions, CancellationToken cancellationToken)
+    public static Task CheckDependenciesAsync(ILocalNuGetFeedService localClientService, ILogger logger, string[] packageIds, NuGetVersion[] versions, CancellationToken cancellationToken)
     {
-        return Task.FromException(new NotImplementedException());
+        return Task.FromException(new NotImplementedException("NuGetPuller.MainServiceStatic.CheckDependenciesAsync(ILocalNuGetFeedService, ILogger, string[], NuGetVersion[], CancellationToken) not implemented"));
     }
 
     public static Task CheckDependenciesAsync(ILocalNuGetFeedService localClientService, ILogger logger, string[] packageIds, CancellationToken cancellationToken)
     {
-        return Task.FromException(new NotImplementedException());
+        return Task.FromException(new NotImplementedException("NuGetPuller.MainServiceStatic.ExportBundleAsync(ILocalNuGetFeedService, ILogger, string[], CancellationToken) not implemented"));
     }
 
     public static Task CheckAllDependenciesAsync(ILocalNuGetFeedService localClientService, ILogger logger, CancellationToken cancellationToken)
     {
-        return Task.FromException(new NotImplementedException());
+        return Task.FromException(new NotImplementedException("NuGetPuller.MainServiceStatic.CheckAllDependenciesAsync not implemented"));
     }
 
     public static Task DownloadMissingDependenciesAsync(ILocalNuGetFeedService localClientService, IUpstreamNuGetClientService upstreamClientService, ILogger logger, string[] packageIds, NuGetVersion[] nuGetVersions, CancellationToken cancellationToken)
     {
-        return Task.FromException(new NotImplementedException());
+        return Task.FromException(new NotImplementedException("NuGetPuller.MainServiceStatic.ExportBundleAsync not implemented"));
     }
 
     public static Task DownloadMissingDependenciesAsync(ILocalNuGetFeedService localClientService, IUpstreamNuGetClientService upstreamClientService, ILogger logger, string[] packageIds, CancellationToken cancellationToken)
     {
-        return Task.FromException(new NotImplementedException());
+        return Task.FromException(new NotImplementedException("NuGetPuller.MainServiceStatic.ExportBundleAsync not implemented"));
     }
 
     public static Task DownloadAllMissingDependenciesAsync(ILocalNuGetFeedService localClientService, IUpstreamNuGetClientService upstreamClientService, ILogger logger, CancellationToken cancellationToken)
     {
-        return Task.FromException(new NotImplementedException());
+        return Task.FromException(new NotImplementedException("NuGetPuller.MainServiceStatic.ExportBundleAsync not implemented"));
     }
 
     public Task DeletePackagesAsync(ILocalNuGetFeedService localClientService, ILogger logger, string[] packageIds, CancellationToken cancellationToken)
     {
-        return Task.FromException(new NotImplementedException());
+        return Task.FromException(new NotImplementedException("NuGetPuller.MainServiceStatic.ExportBundleAsync not implemented"));
     }
 
     public Task DeletePackageVersionsAsync(ILocalNuGetFeedService localClientService, ILogger logger, string[] packageIds, NuGetVersion[] nuGetVersions, CancellationToken cancellationToken)
     {
-        return Task.FromException(new NotImplementedException());
+        return Task.FromException(new NotImplementedException("NuGetPuller.MainServiceStatic.ExportBundleAsync not implemented"));
     }
 }
