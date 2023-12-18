@@ -9,6 +9,13 @@ namespace NuGetPuller;
 
 public partial class MainServiceStatic
 {
+    /// <summary>
+    /// Opens a new <see cref="StreamWriter"/> for a given path.
+    /// </summary>
+    /// <param name="path">The path of the file to create.</param>
+    /// <param name="logger">The logger for writing errors.</param>
+    /// <returns>A writer for writing JSON output.</returns>
+    /// <exception cref="MetaDataExportPathException"><paramref name="path"/> was invalid, not found, or there was an access error.</exception>
     public static StreamWriter OpenPackageMetaDataWriter(string path, ILogger logger)
     {
         try { return new StreamWriter(path, false, new System.Text.UTF8Encoding(false, false)); }
