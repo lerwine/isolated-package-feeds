@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using IsolatedPackageFeeds.Shared;
 using NuGet.Packaging.Core;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
@@ -50,7 +49,7 @@ public static class ExtensionMethods
             }
         }
     }
-    
+
     public static bool TryGetExistingFileInfo(this string? path, out Exception? error, [NotNullWhen(true)] out FileInfo? result)
     {
         if (string.IsNullOrEmpty(path))
@@ -260,7 +259,7 @@ public static class ExtensionMethods
         }
         if (value.Contains(','))
         {
-            result = value.Split(',').Select(s => s.Trim()).Distinct(StringComparer.InvariantCultureIgnoreCase).ToArray();
+            result = value.Split(',').Select(s => s.Trim()).Distinct(MainServiceStatic.PackageIdentitifierComparer).ToArray();
             return result.All(id => id.Length > 0 && NuGet.Packaging.PackageIdValidator.IsValidPackageId(id));
         }
         if (NuGetVersion.TryParse(value, out NuGetVersion? version))
@@ -290,7 +289,7 @@ public static class ExtensionMethods
         NuGetVersion? version;
         if (value.Contains(','))
         {
-            string[] arr = value.Split(',').Select(s => s.Trim()).Distinct(StringComparer.InvariantCultureIgnoreCase).ToArray();
+            string[] arr = value.Split(',').Select(s => s.Trim()).Distinct(MainServiceStatic.PackageIdentitifierComparer).ToArray();
             var len = arr.Length;
             result = new NuGetVersion[len];
             for (var i = 0; i < len; i++)
