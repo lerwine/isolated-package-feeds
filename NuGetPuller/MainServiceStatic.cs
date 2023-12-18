@@ -115,51 +115,6 @@ public partial class MainServiceStatic
         }
     }
 
-    [Obsolete("Use NuGetPuller.CLI.MainService.CheckIgnoredDependentCommandLineArgument")]
-    public static void LogIgnoredDependentCommandLineArgumentIfSet(bool value, Func<(ILogger Logger, string DependentSwitch, string SwitchName)> getSwitchNames)
-    {
-        if (!value)
-            return;
-        (ILogger logger, string dependentSwitch, string switchName) = getSwitchNames();
-        logger.IgnoredDependentCommandLineArgument(dependentSwitch, switchName);
-    }
-    
-    [Obsolete("Use NuGetPuller.CLI.MainService.CheckIgnoredDependentCommandLineArgument")]
-    public static void LogIgnoredDependentCommandLineArgumentIfSet(string? value, Func<(ILogger Logger, string DependentSwitch, string SwitchName)> getSwitchNames)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            return;
-        (ILogger logger, string dependentSwitch, string switchName) = getSwitchNames();
-        logger.IgnoredDependentCommandLineArgument(dependentSwitch, switchName);
-    }
-    
-    [Obsolete("Use NuGetPuller.CLI.MainService.CheckIgnoredDependentCommandLineArgument")]
-    public static void LogIgnoredDependentCommandLineArgumentIfSet(string? value, Func<(ILogger Logger, string DependentSwitch, string SwitchName1, string SwitchName2)> getSwitchNames)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            return;
-        (ILogger logger, string dependentSwitch, string switchName1, string switchName2) = getSwitchNames();
-        logger.IgnoredDependentCommandLineArgument(dependentSwitch, switchName1, switchName2);
-    }
-    
-    [Obsolete("Use NuGetPuller.CLI.MainService.CheckIgnoredDependentCommandLineArgument")]
-    public static void LogIgnoredDependentCommandLineArgumentIfSet(string? value, Func<(ILogger Logger, string DependentSwitch, string SwitchName1, string SwitchName2, string SwitchName3)> getSwitchNames)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            return;
-        (ILogger logger, string dependentSwitch, string switchName1, string switchName2, string switchName3) = getSwitchNames();
-        logger.IgnoredDependentCommandLineArgument(dependentSwitch, switchName1, switchName2, switchName3);
-    }
-    
-    [Obsolete("Use NuGetPuller.CLI.MainService.CheckIgnoredDependentCommandLineArgument")]
-    public static void LogIgnoredDependentCommandLineArgumentIfSet(string? value, Func<(ILogger Logger, string DependentSwitch, string SwitchName1, string SwitchName2, string SwitchName3, string SwitchName4)> getSwitchNames)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            return;
-        (ILogger logger, string dependentSwitch, string switchName1, string switchName2, string switchName3, string switchName4) = getSwitchNames();
-        logger.IgnoredDependentCommandLineArgument(dependentSwitch, switchName1, switchName2, switchName3, switchName4);
-    }
-    
     public static Task CheckDependenciesAsync(ILocalNuGetFeedService localClientService, ILogger logger, string[] packageIds, NuGetVersion[] nuGetVersions, CancellationToken cancellationToken)
     {
         return Task.FromException(new NotImplementedException());
