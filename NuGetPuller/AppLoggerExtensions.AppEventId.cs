@@ -5,7 +5,7 @@ public static partial class AppLoggerExtensions
     /// <summary>
     /// Logger event IDs.
     /// </summary>
-    public enum NuGetPullerEventId : int
+    public enum AppEventId : int
     {
         /// <summary>
         /// Event ID for <see cref="NuGet.Common.LogLevel.Debug"/> and <see cref="NuGet.Common.LogLevel.Verbose"/> messages relayed from the NuGet API.
