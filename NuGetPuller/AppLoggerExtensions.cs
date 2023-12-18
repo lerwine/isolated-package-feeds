@@ -907,7 +907,7 @@ public static partial class AppLoggerExtensions
     [LoggerMessage(EventId = (int)AppEventId.InvalidCreateFromPath, Level = LogLevel.Critical,
         Message = "Create-from path {Path} is invalid.")]
     public static partial void InvalidCreateFromPath(this ILogger logger, string path, Exception? exception = null);
-    
+
     /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> <see cref="AppEventId.InvalidCreateFromPath"/> error event message.
     /// </summary>
@@ -917,7 +917,7 @@ public static partial class AppLoggerExtensions
     [LoggerMessage(EventId = (int)AppEventId.InvalidCreateFromPath, Level = LogLevel.Critical,
         Message = "Create-from path {Path} does not exist.")]
     public static partial void CreateFromFileNotFound(this ILogger logger, string path, Exception? exception = null);
-    
+
     /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> <see cref="AppEventId.InvalidCreateFromPath"/> error event message.
     /// </summary>
@@ -927,7 +927,7 @@ public static partial class AppLoggerExtensions
     [LoggerMessage(EventId = (int)AppEventId.InvalidCreateFromPath, Level = LogLevel.Critical,
         Message = "Create-from path {Path} is not a file.")]
     public static partial void CreateFromNotAFile(this ILogger logger, string path, Exception? exception = null);
-    
+
     #endregion
 
     #region IgnoredDependentCommandLineArgument Logger Event Methods
