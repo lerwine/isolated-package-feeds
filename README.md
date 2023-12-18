@@ -1,4 +1,9 @@
-# isolated-package-feeds
+# Isolated Package Feeds
+
+- [Isolated Package Feeds](#isolated-package-feeds)
+  - [Projects in solution](#projects-in-solution)
+  - [References](#references)
+  - [Package Sources](#package-sources)
 
 The goal of this project is to develop content feed provders for environments that are isolated from the public internet, which caches and synchronizes content from public feed providers.
 

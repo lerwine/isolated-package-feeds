@@ -78,5 +78,6 @@
         "main"
     ],
     "codeQL.createQuery.qlPackLocation": "C:\\Users\\Lenny\\Source\\Repositories\\lte-codeql",
-    "codeQL.cli.executablePath": "C:\\Program Files\\codeql\\codeql.exe"
+    "codeQL.cli.executablePath": "C:\\Program Files\\codeql\\codeql.exe",
+    "markdown.extension.toc.levels": "2..6"
 }
