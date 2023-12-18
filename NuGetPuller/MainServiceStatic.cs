@@ -9,7 +9,7 @@ namespace NuGetPuller;
 
 public partial class MainServiceStatic
 {
-    public static readonly StringComparer PackageIdentityComparer = StringComparer.OrdinalIgnoreCase;
+    public static readonly StringComparer PackageIdentitifierComparer = StringComparer.OrdinalIgnoreCase;
 
     public static readonly JsonSerializerSettings MetadataDeSerializationSettings = new()
     {
@@ -56,18 +56,26 @@ public partial class MainServiceStatic
         }
     }
 
+    public static Task<OfflinePackageManifest[]> LoadOfflinePackageManifestAsync(string? path, ILogger logger, CancellationToken cancellationToken)
+    {
+        return Task.FromException<OfflinePackageManifest[]>(new NotImplementedException("NuGetPuller.MainServiceStatic.LoadOfflinePackageManifestAsync not implemented"));
+    }
+
     public static Task ExportBundleAsync(string bundlePath, string? targetManifestInput, string? targetManifestOutput, ILocalNuGetFeedService localClientService, ILogger logger, CancellationToken cancellationToken)
     {
+        // var existingPackages = await LoadOfflinePackageManifestAsync(targetManifestOutput, logger, cancellationToken);
         return Task.FromException(new NotImplementedException("NuGetPuller.MainServiceStatic.ExportBundleAsync(string bundlePath, string?, string?, ILocalNuGetFeedService, ILogger, CancellationToken) not implemented"));
     }
 
     public static Task ExportBundleAsync(string bundlePath, string? targetManifestInput, string? targetManifestOutput, string[] packageIds, ILocalNuGetFeedService localClientService, ILogger logger, CancellationToken cancellationToken)
     {
+        // var existingPackages = await LoadOfflinePackageManifestAsync(targetManifestOutput, logger, cancellationToken);
         return Task.FromException(new NotImplementedException("NuGetPuller.MainServiceStatic.ExportBundleAsync(string bundlePath, string?, string?, string[], ILocalNuGetFeedService, ILogger, CancellationToken) not implemented"));
     }
 
     public static Task ExportBundleAsync(string bundlePath, string? targetManifestInput, string? targetManifestOutput, string[] packageIds, NuGetVersion[] versions, ILocalNuGetFeedService localClientService, ILogger logger, CancellationToken cancellationToken)
     {
+        // var existingPackages = await LoadOfflinePackageManifestAsync(targetManifestOutput, logger, cancellationToken);
         return Task.FromException(new NotImplementedException("NuGetPuller.MainServiceStatic.ExportBundleAsync(string bundlePath, string?, string?, string[], NuGetVersion[], ILocalNuGetFeedService, ILogger, CancellationToken) not implemented"));
     }
 

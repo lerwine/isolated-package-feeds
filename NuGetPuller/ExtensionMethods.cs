@@ -1,11 +1,56 @@
 using System.Diagnostics.CodeAnalysis;
 using IsolatedPackageFeeds.Shared;
+using NuGet.Packaging.Core;
+using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 
 namespace NuGetPuller;
 
 public static class ExtensionMethods
 {
+    public static bool Contains(this IEnumerable<OfflinePackageManifest>? source, PackageIdentity identity) => source is not null && identity is not null && source.Any(m => m.Equals(identity));
+
+    public static bool Contains(this IEnumerable<OfflinePackageManifest>? source, string packageId, NuGetVersion? version = null) => source is not null && packageId is not null &&
+        ((version is null) ? source.Any(m => m.Equals(packageId)) : source.Any(m => m.Equals(packageId, version)));
+
+    /// <summary>
+    /// Adds packages to offline package manifest list.
+    /// </summary>
+    /// <param name="source">The offline package manifest list.</param>
+    /// <param name="metadata">The package metadata to add.</param>
+    /// <returns>The identities of the added packages.</returns>
+    public static IEnumerable<PackageIdentity> Concat(this IList<OfflinePackageManifest> source, IEnumerable<IPackageSearchMetadata> metadata)
+    {
+        foreach (var item in metadata)
+        {
+            var identity = item.Identity;
+            string id = identity.Id;
+            var comparer = MainServiceStatic.PackageIdentitifierComparer;
+            OfflinePackageManifest? existing = source.FirstOrDefault(p => comparer.Equals(id, p.Identifier));
+            if (existing is null)
+            {
+                source.Add(new(item));
+                yield return identity;
+            }
+            else
+            {
+                if (string.IsNullOrWhiteSpace(existing.Title) && !string.IsNullOrWhiteSpace(item.Title))
+                    existing.Title = item.Title;
+                if (string.IsNullOrWhiteSpace(existing.Summary) && !string.IsNullOrWhiteSpace(item.Summary))
+                    existing.Summary = item.Summary;
+                if (string.IsNullOrWhiteSpace(existing.Description) && !string.IsNullOrWhiteSpace(item.Description))
+                    existing.Description = item.Description;
+                if (!identity.HasVersion)
+                    continue;
+                var version = identity.Version;
+                if (existing.Versions.Contains(version))
+                    continue;
+                existing.Versions.Add(version);
+                yield return identity;
+            }
+        }
+    }
+    
     public static bool TryGetExistingFileInfo(this string? path, out Exception? error, [NotNullWhen(true)] out FileInfo? result)
     {
         if (string.IsNullOrEmpty(path))
@@ -33,7 +78,7 @@ public static class ExtensionMethods
         }
         return false;
     }
-    
+
     public static bool TryGetFileInfo(this string? path, out Exception? error, [NotNullWhen(true)] out FileInfo? result)
     {
         if (string.IsNullOrEmpty(path))
@@ -64,7 +109,7 @@ public static class ExtensionMethods
         result = fileInfo;
         return true;
     }
-    
+
     public static bool TryGetExistingDirectoryInfo(this string? path, out Exception? error, [NotNullWhen(true)] out DirectoryInfo? result)
     {
         if (string.IsNullOrEmpty(path))
@@ -92,7 +137,7 @@ public static class ExtensionMethods
         }
         return false;
     }
-    
+
     public static bool TryGetDirectoryInfo(this string? path, out Exception? error, [NotNullWhen(true)] out DirectoryInfo? result)
     {
         if (string.IsNullOrEmpty(path))
@@ -123,7 +168,7 @@ public static class ExtensionMethods
         result = directoryInfo;
         return true;
     }
-    
+
     public static IEnumerable<FileInfo> ExpandFileInfos(this string? path)
     {
         if (string.IsNullOrEmpty(path))
@@ -245,7 +290,7 @@ public static class ExtensionMethods
         NuGetVersion? version;
         if (value.Contains(','))
         {
-            string[] arr = value.Split(',').Select(s => s.Trim()).Distinct(StringComparer.InvariantCultureIgnoreCase).ToArray(); 
+            string[] arr = value.Split(',').Select(s => s.Trim()).Distinct(StringComparer.InvariantCultureIgnoreCase).ToArray();
             var len = arr.Length;
             result = new NuGetVersion[len];
             for (var i = 0; i < len; i++)

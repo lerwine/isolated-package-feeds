@@ -130,7 +130,7 @@ public class OfflinePackageManifestConverter : JsonConverter
                 }
                 await writer.WriteLineAsync(precedingLine);
             }
-            var grouped = pkgArr.GroupBy(p => p.Identity.Id, MainServiceStatic.PackageIdentityComparer).OrderBy(g => g.Key, MainServiceStatic.PackageIdentityComparer);
+            var grouped = pkgArr.GroupBy(p => p.Identity.Id, MainServiceStatic.PackageIdentitifierComparer).OrderBy(g => g.Key, MainServiceStatic.PackageIdentitifierComparer);
             await writer.WriteLineAsync('[');
             foreach (var group in grouped.SkipLast(1))
             {
