@@ -21,7 +21,7 @@ public partial class MainServiceStatic
         try
         {
             using JsonTextReader jsonReader = new(reader);
-            JsonSerializer jsonSerializer = JsonSerializer.CreateDefault(MetadataDeSerializationSettings);        
+            JsonSerializer jsonSerializer = JsonSerializer.CreateDefault(MetadataDeSerializationSettings);
             return jsonSerializer.Deserialize<OfflinePackageManifest[]>(jsonReader) ?? [];
         }
         catch (JsonReaderException exception)
@@ -78,6 +78,22 @@ public partial class MainServiceStatic
         return bundleFileInfo;
     }
 
+    private static async Task ExportNupkgAsync(string id, NuGetVersion version, TempStagingFolder tempStagingFolder, VersionFolderPathResolver pathResolver, ILocalNuGetFeedService localClientService, ILogger logger, CancellationToken cancellationToken)
+    {
+        var fileName = pathResolver.GetPackageFileName(id, version);
+        var fullName = Path.Combine(tempStagingFolder.Directory.FullName, fileName);
+        using var stream = OpenFileStream(fullName, FileMode.Create, FileAccess.Write, FileShare.None,
+                (p, e) => logger.PackageExportAccessDenied(p, m => new OfflineMetaDataIOException(p, m, e), e),
+                (p, e) => logger.PackageExportWriteError(p, m => new OfflineMetaDataIOException(p, m, e), e));
+        await localClientService.CopyNupkgToStreamAsync(id, version, stream, cancellationToken);
+        await stream.FlushAsync(cancellationToken);
+    }
+
+    private static Task CreateBundleFileFileAsync(DirectoryInfo directory, FileInfo bundleFileInfo, ILogger logger, CancellationToken cancellationToken)
+    {
+        return Task.FromException(new NotImplementedException("NuGetPuller.MainServiceStatic.CreateBundleFileFileAsync not implemented"));
+    }
+
     public static async Task ExportBundleAsync(string bundlePath, string? targetMetadataInput, string? targetMetaDataOutput, ILocalNuGetFeedService localClientService, ILogger logger, CancellationToken cancellationToken)
     {
         var bundleFileInfo = GetExportBundleFileInfos(bundlePath, targetMetadataInput, targetMetaDataOutput, logger, cancellationToken, out FileInfo targetMetadataFileInfo,
@@ -85,30 +101,40 @@ public partial class MainServiceStatic
         using TempStagingFolder tempStagingFolder = new();
         var pathResolver = new VersionFolderPathResolver(tempStagingFolder.Directory.FullName);
         await foreach (var identity in existingPackages.ConcatAsync(localClientService.GetAllPackagesAsync(cancellationToken)))
-        {
-            var fileName = pathResolver.GetPackageFileName(identity.Id, identity.HasVersion ? identity.Version : null);
-            var fullName = Path.Combine(tempStagingFolder.Directory.FullName, fileName);
-            using var stream = OpenFileStream(fullName, FileMode.Create, FileAccess.Write, FileShare.None,
-                    (p, e) => logger.PackageExportAccessDenied(bundlePath, m => new OfflineMetaDataIOException(p, m, e), e),
-                    (p, e) => logger.PackageExportWriteError(bundlePath, m => new OfflineMetaDataIOException(p, m, e), e));
-            await localClientService.CopyNupkgToStreamAsync(identity.Id, identity.Version, stream, cancellationToken);
-            await stream.FlushAsync(cancellationToken);
-        }
-        await Task.FromException(new NotImplementedException("NuGetPuller.MainServiceStatic.ExportBundleAsync(string bundlePath, string?, string?, ILocalNuGetFeedService, ILogger, CancellationToken) not implemented"));
+            await ExportNupkgAsync(identity.Id, identity.Version, tempStagingFolder, pathResolver, localClientService, logger, cancellationToken);
+        await CreateBundleFileFileAsync(tempStagingFolder.Directory, bundleFileInfo, logger, cancellationToken);
     }
 
     public static async Task ExportBundleAsync(string bundlePath, string? targetMetadataInput, string? targetMetaDataOutput, string[] packageIds, ILocalNuGetFeedService localClientService, ILogger logger, CancellationToken cancellationToken)
     {
         var bundleFileInfo = GetExportBundleFileInfos(bundlePath, targetMetadataInput, targetMetaDataOutput, logger, cancellationToken, out FileInfo targetMetadataFileInfo,
             out HashSet<OfflinePackageManifest> existingPackages);
-        await Task.FromException(new NotImplementedException("NuGetPuller.MainServiceStatic.ExportBundleAsync(string bundlePath, string?, string?, string[], ILocalNuGetFeedService, ILogger, CancellationToken) not implemented"));
+        using TempStagingFolder tempStagingFolder = new();
+        var pathResolver = new VersionFolderPathResolver(tempStagingFolder.Directory.FullName);
+        foreach (string id in packageIds)
+        {
+            var pm = await localClientService.GetMetadataAsync(id, cancellationToken);
+            if (pm is not null)
+                foreach (var identity in existingPackages.Concat(pm))
+                    await ExportNupkgAsync(identity.Id, identity.Version, tempStagingFolder, pathResolver, localClientService, logger, cancellationToken);
+        }
+        await CreateBundleFileFileAsync(tempStagingFolder.Directory, bundleFileInfo, logger, cancellationToken);
     }
 
     public static async Task ExportBundleAsync(string bundlePath, string? targetMetadataInput, string? targetMetaDataOutput, string[] packageIds, NuGetVersion[] versions, ILocalNuGetFeedService localClientService, ILogger logger, CancellationToken cancellationToken)
     {
         var bundleFileInfo = GetExportBundleFileInfos(bundlePath, targetMetadataInput, targetMetaDataOutput, logger, cancellationToken, out FileInfo targetMetadataFileInfo,
             out HashSet<OfflinePackageManifest> existingPackages);
-        await Task.FromException(new NotImplementedException("NuGetPuller.MainServiceStatic.ExportBundleAsync(string bundlePath, string?, string?, string[], NuGetVersion[], ILocalNuGetFeedService, ILogger, CancellationToken) not implemented"));
+        using TempStagingFolder tempStagingFolder = new();
+        var pathResolver = new VersionFolderPathResolver(tempStagingFolder.Directory.FullName);
+        foreach (string id in packageIds)
+        {
+            var pm = await localClientService.GetMetadataAsync(id, cancellationToken);
+            if (pm is not null && (pm = pm.Where(p => versions.Contains(p.Identity.Version))).Any())
+                foreach (var identity in existingPackages.Concat(pm))
+                    await ExportNupkgAsync(identity.Id, identity.Version, tempStagingFolder, pathResolver, localClientService, logger, cancellationToken);
+        }
+        await CreateBundleFileFileAsync(tempStagingFolder.Directory, bundleFileInfo, logger, cancellationToken);
     }
 
     public static async Task ExportLocalManifestAsync(IEnumerable<IPackageSearchMetadata> packages, string exportPath, ILogger logger, CancellationToken cancellationToken)
