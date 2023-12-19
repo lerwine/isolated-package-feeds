@@ -4,6 +4,9 @@ using NuGet.Versioning;
 
 namespace NuGetPuller;
 
+/// <summary>
+/// Interface for reading from the Local NuGet Feed containing the downloaded packages.
+/// </summary>
 public interface ILocalNuGetFeedService : INuGetClientService
 {
     #region Methods using the Search Query API
