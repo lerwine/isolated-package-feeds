@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NuGet.Versioning;
 
@@ -26,7 +22,7 @@ public static class NuGetPullerStatic
     /// The default path of the local feed, relative to the <see cref="Microsoft.Extensions.Hosting.IHostEnvironment.ContentRootPath" />.
     /// </summary>
     public const string Default_Downloaded_Packages_Folder_Name = "LocalFeed";
-    
+
     /// <summary>
     /// Comparer for package identifier and version strings.
     /// </summary>
@@ -36,22 +32,22 @@ public static class NuGetPullerStatic
     /// Inverted comparer for package identifier and version strings.
     /// </summary>
     public static readonly IsolatedPackageFeeds.Shared.InvertedComparer<string> InvertedPackageIdentitifierComparer = IsolatedPackageFeeds.Shared.InvertedComparer.StringOrdinalIgnoreCase;
-    
+
     /// <summary>
     /// Inverted comparer for NuGet version including release and metadata.
     /// </summary>
     public static readonly IsolatedPackageFeeds.Shared.InvertedComparer<NuGetVersion> InvertedNuGetVersionReleaseMetadataComparer = new(VersionComparer.VersionReleaseMetadata);
-    
+
     /// <summary>
     /// Inverted comparer for NuGet version including release.
     /// </summary>
     public static readonly IsolatedPackageFeeds.Shared.InvertedComparer<NuGetVersion> InvertedNuGetVersionReleaseComparer = new(VersionComparer.VersionRelease);
-    
+
     /// <summary>
     /// Inverted comparer for NuGet version including.
     /// </summary>
     public static readonly IsolatedPackageFeeds.Shared.InvertedComparer<NuGetVersion> InvertedNuGetVersionComparer = new(VersionComparer.Version);
-    
+
     /// <summary>
     /// Settings for deserializing <see cref="OfflinePackageMetadata" /> objects.
     /// </summary>

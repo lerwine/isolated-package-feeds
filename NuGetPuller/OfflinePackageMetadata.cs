@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using IsolatedPackageFeeds.Shared;
 using NuGet.Packaging.Core;
 using NuGet.Protocol;
