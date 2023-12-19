@@ -9,6 +9,9 @@ using static NuGetPuller.NuGetPullerStatic;
 
 namespace NuGetPuller;
 
+/// <summary>
+/// Static methods for user interface commands.
+/// </summary>
 public partial class MainServiceStatic
 {
     public static OfflinePackageManifest[] LoadOfflinePackageManifest(string? path, ILogger logger)
