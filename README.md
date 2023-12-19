@@ -56,6 +56,8 @@ The initial scope is to create NuGet and NPM Package Feed services as well as co
 - [SQLite](https://marketplace.visualstudio.com/items?itemName=alexcvzz.vscode-sqlite)
 - [SQLTools SQLite](https://marketplace.visualstudio.com/items?itemName=mtxr.sqltools-driver-sqlite)
 - [SQLTools](https://marketplace.visualstudio.com/items?itemName=mtxr.sqltools)
+- [Test Adapter Converter](https://marketplace.visualstudio.com/items?itemName=ms-vscode.test-adapter-converter)
+- [Test Explorer UI](https://marketplace.visualstudio.com/items?itemName=hbenl.vscode-test-explorer)
 - [TODO Highlight](https://marketplace.visualstudio.com/items?itemName=wayou.vscode-todo-highlight)
 - [Trx viewer](https://marketplace.visualstudio.com/items?itemName=scabana.trxviewer)
 - [TypeScript + Webpack Problem Matchers](https://marketplace.visualstudio.com/items?itemName=amodio.tsl-problem-matcher)
