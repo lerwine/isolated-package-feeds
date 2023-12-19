@@ -4,7 +4,8 @@
   - [Projects in solution](#projects-in-solution)
   - [Required Solution Development Dependencies](#required-solution-development-dependencies)
     - [APIs](#apis)
-    - [VS Code Extensions](#required-strongly-suggested-vs-code-extensions)
+    - [Required / Strongly Suggested VS Code Extensions](#required--strongly-suggested-vs-code-extensions)
+    - [Suggested VS Code Extensions](#suggested-vs-code-extensions)
   - [References](#references)
   - [Package Sources](#package-sources)
 
