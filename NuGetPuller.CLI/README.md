@@ -44,7 +44,7 @@ NuGetPuller --list --include-versions
 
 ### Download Packages
 
-Download packages from the [Upstream NuGet Repository](../NuGetPuller/README.md#upstream-nuget-repository) and add them to the [Downloaded Packages Feed](../NuGetPuller/README.md#locally-downloaded-packages-folder).
+Download packages from the [Upstream NuGet Repository](../NuGetPuller/README.md#upstream-nuget-repository) and add them to the [Downloaded Packages Folder](../NuGetPuller/README.md#locally-downloaded-packages-folder).
 
 - `--download` **Required**: Identifier(s) of package to download.
   
@@ -55,7 +55,7 @@ Download packages from the [Upstream NuGet Repository](../NuGetPuller/README.md#
   
   If no version is specified, the latest version of each package will be downloaded.
 - `--no-dependencies` *(Optional - stand-alone switch)*: Do not download dependencies.
-  If this switch is not used, then all dependencies will be downloaded and added to the [Downloaded Packages Feed](../NuGetPuller/README.md#locally-downloaded-packages-folder) as well.
+  If this switch is not used, then all dependencies will be downloaded and added to the [Downloaded Packages Folder](../NuGetPuller/README.md#locally-downloaded-packages-folder) as well.
 
 Example:
 
@@ -85,7 +85,7 @@ NuGetPuller --add-file=john.doe/downloads
 
 ### Remove Packages
 
-Remove packages from the [Downloaded Packages Feed](../NuGetPuller/README.md#locally-downloaded-packages-folder).
+Remove packages from the [Downloaded Packages Folder](../NuGetPuller/README.md#locally-downloaded-packages-folder).
 
 - `--remove` **Required**: Identifier of package to remove.
   
@@ -103,7 +103,7 @@ NuGetPuller --remove=Microsoft.Extensions.Logging,Microsoft.Extensions.Configura
 
 ### Check Package Dependencies
 
-Verify that all dependiencies have been downloaded for all packages in the [Downloaded Packages Feed](../NuGetPuller/README.md#locally-downloaded-packages-folder).
+Verify that all dependiencies have been downloaded for all packages currently in the [Downloaded Packages Folder](../NuGetPuller/README.md#locally-downloaded-packages-folder).
 
 - `--check-depencencies` **Required** *(stand-alone switch)*: Check locally downloaded packages for dependencies.
 - `--package-id` *(Optional)*: Identifier of pecific package to check.
@@ -130,7 +130,7 @@ NuGetPuller --check-depencencies=System.Text.Json,Microsoft.Extensions.Hosting -
 
 ### Export Downloaded NuGet Package Metadata
 
-Create a [NuGet Feed Metadata File](../NuGetPuller/README.md#nuget-feed-metadata-file) that represents all versions of all packages in the [Downloaded Packages Feed](../NuGetPuller/README.md#locally-downloaded-packages-folder).
+Create a [NuGet Feed Metadata File](../NuGetPuller/README.md#nuget-feed-metadata-file) that represents all versions of all packages in the [Downloaded Packages Folder](../NuGetPuller/README.md#locally-downloaded-packages-folder).
 
 - `--export-metadata` **Required:**: Path of the metadata file to create.
 
