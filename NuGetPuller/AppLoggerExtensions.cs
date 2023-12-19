@@ -9,7 +9,6 @@ namespace NuGetPuller;
 /// <summary>
 /// Extension methods for high performance logging.
 /// </summary>
-/// <remarks></remarks>
 /// <seealso href="https://learn.microsoft.com/en-us/dotnet/core/extensions/logger-message-generator"/>
 /// <seealso href="https://learn.microsoft.com/en-us/dotnet/core/extensions/high-performance-logging"/>
 public static partial class AppLoggerExtensions
@@ -41,6 +40,8 @@ public static partial class AppLoggerExtensions
     private const string Message_Not_File = "does not refer to a file";
 
     private const string Message_Does_Not_Exist = "does not exist";
+
+    private const string Message_Is_Not_A_File = "is not a file";
 
     #region Nuget Logger Event Methods
 
@@ -215,7 +216,7 @@ public static partial class AppLoggerExtensions
 
     #region InvalidRepositoryUrl Logger Event Methods
 
-    public static readonly EventId EventId_InvalidRepositoryUrl = new((int)AppEventId.InvalidRepositoryUrl, nameof(InvalidRepositoryUrl));
+    private static readonly EventId EventId_InvalidRepositoryUrl = new((int)AppEventId.InvalidRepositoryUrl, nameof(InvalidRepositoryUrl));
 
     private static readonly Action<ILogger, string, Exception?> UpstreamFeedPathTooLong = LoggerMessage.Define<string>(LogLevel.Critical,
         EventId_InvalidRepositoryUrl, $"{Message_Upstream_Feed_Path} \"{{Path}}\" {Message_Is_Too_Long}.");
@@ -319,7 +320,7 @@ public static partial class AppLoggerExtensions
 
     #region NugetFeedSecurityException Logger Event Methods
 
-    public static readonly EventId EventId_NugetFeedSecurityException = new((int)AppEventId.NugetFeedSecurityException, nameof(NugetFeedSecurityException));
+    private static readonly EventId EventId_NugetFeedSecurityException = new((int)AppEventId.NugetFeedSecurityException, nameof(NugetFeedSecurityException));
 
     private const string Message_Access_To_Upstream_NuGet_Feed_Path = "Access to Upstream NuGet Feed path";
 
@@ -360,7 +361,7 @@ public static partial class AppLoggerExtensions
 
     #region DownloadedPackagesFolderIOException Logger Event Methods
 
-    public static readonly EventId EventId_DownloadedPackagesFolderIOException = new((int)AppEventId.DownloadedPackagesFolderIOException, nameof(DownloadedPackagesFolderIOException));
+    private static readonly EventId EventId_DownloadedPackagesFolderIOException = new((int)AppEventId.DownloadedPackagesFolderIOException, nameof(DownloadedPackagesFolderIOException));
 
     private const string Message_DownloadedPackagesFolderIOException = "I/O error while creating Downloaded NuGet Packages Folder";
 
@@ -388,7 +389,7 @@ public static partial class AppLoggerExtensions
 
     #region NuGetFeedPathNotFound Logger Event Methods
 
-    public static readonly EventId EventId_NuGetFeedPathNotFound = new((int)AppEventId.NuGetFeedPathNotFound, nameof(NuGetFeedPathNotFound));
+    private static readonly EventId EventId_NuGetFeedPathNotFound = new((int)AppEventId.NuGetFeedPathNotFound, nameof(NuGetFeedPathNotFound));
 
     private static readonly Action<ILogger, string, Exception?> UpstreamNuGetFeedPathNotFound = LoggerMessage.Define<string>(LogLevel.Critical,
         EventId_NuGetFeedPathNotFound, $"{Message_Upstream_Feed_Path} \"{{Path}}\" {Message_Not_Found}.");
@@ -428,7 +429,7 @@ public static partial class AppLoggerExtensions
 
     #region InvalidMetaDataExportPath Logger Event Methods
 
-    public static readonly EventId EventId_InvalidMetaDataExportPath = new((int)AppEventId.InvalidMetaDataExportPath, nameof(InvalidMetaDataExportPath));
+    private static readonly EventId EventId_InvalidMetaDataExportPath = new((int)AppEventId.InvalidMetaDataExportPath, nameof(InvalidMetaDataExportPath));
 
     private const string MESSAGE_Downloaded_Nuget_Package_MetaData_Export_Path = "Downloaded NuGet Package metadata export path";
 
@@ -499,7 +500,7 @@ public static partial class AppLoggerExtensions
 
     #region MetaDataExportPathAccessDenied Logger Event Methods
 
-    public static readonly EventId EventId_MetaDataExportPathAccessDenied = new((int)AppEventId.MetaDataExportPathAccessDenied, nameof(MetaDataExportPathAccessDenied));
+    private static readonly EventId EventId_MetaDataExportPathAccessDenied = new((int)AppEventId.MetaDataExportPathAccessDenied, nameof(MetaDataExportPathAccessDenied));
 
     private const string MESSAGE_Access_To_MetaData_Export_Path = "Access denied to NuGet Feed metadata export path";
 
@@ -637,7 +638,7 @@ public static partial class AppLoggerExtensions
 
     #region GlobalPackagesFolderNotFound Logger Event Methods
 
-    public static readonly EventId EventId_GlobalPackagesFolderNotFound = new((int)AppEventId.GlobalPackagesFolderNotFound, nameof(GlobalPackagesFolderNotFound));
+    private static readonly EventId EventId_GlobalPackagesFolderNotFound = new((int)AppEventId.GlobalPackagesFolderNotFound, nameof(GlobalPackagesFolderNotFound));
 
     private static readonly Action<ILogger, string, Exception?> LogGlobalPackagesFolderNotFound = LoggerMessage.Define<string>(LogLevel.Critical,
         EventId_GlobalPackagesFolderNotFound, $"{MESSAGE_Global_Packages_Folder} \"{{Path}}\" {Message_Not_Found}.");
@@ -670,7 +671,7 @@ public static partial class AppLoggerExtensions
 
     #region GlobalPackagesFolderSecurityException Logger Event Methods
 
-    public static readonly EventId EventId_GlobalPackagesFolderSecurityException = new((int)AppEventId.GlobalPackagesFolderSecurityException, nameof(GlobalPackagesFolderSecurityException));
+    private static readonly EventId EventId_GlobalPackagesFolderSecurityException = new((int)AppEventId.GlobalPackagesFolderSecurityException, nameof(GlobalPackagesFolderSecurityException));
 
     private const string Message_Access_To_Global_Packages_Folder = "Access to Global NuGet Packages Folder";
 
@@ -698,7 +699,7 @@ public static partial class AppLoggerExtensions
 
     #region InvalidGlobalPackagesFolder Logger Event Methods
 
-    public static readonly EventId EventId_InvalidGlobalPackagesFolder = new((int)AppEventId.InvalidGlobalPackagesFolder, nameof(InvalidGlobalPackagesFolder));
+    private static readonly EventId EventId_InvalidGlobalPackagesFolder = new((int)AppEventId.InvalidGlobalPackagesFolder, nameof(InvalidGlobalPackagesFolder));
 
     private const string MESSAGE_Global_Packages_Folder_Path = "Global NuGet Packages Folder path";
 
@@ -769,7 +770,7 @@ public static partial class AppLoggerExtensions
 
     #region MultipleSettingsWithSameRepositoryLocation Logger Event Methods
 
-    public static readonly EventId EventId_MultipleSettingsWithSameRepositoryLocation = new((int)AppEventId.MultipleSettingsWithSameRepositoryLocation, nameof(AppEventId.MultipleSettingsWithSameRepositoryLocation));
+    private static readonly EventId EventId_MultipleSettingsWithSameRepositoryLocation = new((int)AppEventId.MultipleSettingsWithSameRepositoryLocation, nameof(AppEventId.MultipleSettingsWithSameRepositoryLocation));
 
     private const string MESSAGE_Cannot_Be_Same_As = "cannot be the same as the";
 
@@ -927,11 +928,9 @@ public static partial class AppLoggerExtensions
     [LoggerMessage(EventId = (int)AppEventId.NoDownloadedPackagesExist, Level = LogLevel.Warning, Message = "Downloaded NuGet Packages Folder has no packages.")]
     public static partial void NoDownloadedPackagesPackagesExist(this ILogger logger, Exception? exception = null);
 
-    public const string Message_Is_Not_A_File = "is not a file";
-
     #region InvalidExportBundle Logger Event Methods
 
-    public static readonly EventId EventId_InvalidExportBundle = new((int)AppEventId.InvalidExportBundle, nameof(InvalidExportBundle));
+    private static readonly EventId EventId_InvalidExportBundle = new((int)AppEventId.InvalidExportBundle, nameof(InvalidExportBundle));
 
     private const string Message_Export_Bundle_Path = "Export Bundle path";
 
@@ -1123,7 +1122,7 @@ public static partial class AppLoggerExtensions
 
     #region PackageMetadataOpenError Logger Event Methods
 
-    public static readonly EventId EventId_PackageMetadataOpenError = new((int)AppEventId.PackageMetadataOpenError, nameof(PackageMetadataOpenError));
+    private static readonly EventId EventId_PackageMetadataOpenError = new((int)AppEventId.PackageMetadataOpenError, nameof(PackageMetadataOpenError));
 
     private const string MESSAGE_Package_Metadata_File = "Offline package metadata file";
 
@@ -1209,7 +1208,7 @@ public static partial class AppLoggerExtensions
 
     #region PackageMetadataFileAccessDenied Logger Event Methods
 
-    public static readonly EventId EventId_PackageMetadataFileAccessDenied = new((int)AppEventId.PackageMetadataFileAccessDenied, nameof(PackageMetadataFileAccessDenied));
+    private static readonly EventId EventId_PackageMetadataFileAccessDenied = new((int)AppEventId.PackageMetadataFileAccessDenied, nameof(PackageMetadataFileAccessDenied));
 
     private const string MESSAGE_Access_To_Package_MetaData_File = "Access to the Offline NuGet Feed metadata file";
 
@@ -1252,7 +1251,7 @@ public static partial class AppLoggerExtensions
 
     #region PackageMetadataFileReadError Logger Event Methods
 
-    public static readonly EventId EventId_PackageMetadataFileReadError = new((int)AppEventId.PackageMetadataFileReadError, nameof(PackageMetadataFileReadError));
+    private static readonly EventId EventId_PackageMetadataFileReadError = new((int)AppEventId.PackageMetadataFileReadError, nameof(PackageMetadataFileReadError));
 
     private const string MESSAGE_PackageMetadataFileReadError = "Error parsing JSON data from offline package metadata file";
 
@@ -1281,7 +1280,7 @@ public static partial class AppLoggerExtensions
 
     #region PackageExportAccessDenied Logger Event Methods
 
-    public static readonly EventId EventId_PackageExportAccessDenied = new((int)AppEventId.PackageExportAccessDenied, nameof(PackageExportAccessDenied));
+    private static readonly EventId EventId_PackageExportAccessDenied = new((int)AppEventId.PackageExportAccessDenied, nameof(PackageExportAccessDenied));
 
     private const string MESSAGE_Access_To_Package_File = "Access to the Offline NuGet Feed metadata file";
 
@@ -1324,7 +1323,7 @@ public static partial class AppLoggerExtensions
 
     #region PackageExportWriteError Logger Event Methods
 
-    public static readonly EventId EventId_PackageExportWriteError = new((int)AppEventId.PackageExportWriteError, nameof(PackageExportWriteError));
+    private static readonly EventId EventId_PackageExportWriteError = new((int)AppEventId.PackageExportWriteError, nameof(PackageExportWriteError));
 
     private static readonly Action<ILogger, string, Exception?> LogPackageExportWriteError = LoggerMessage.Define<string>(LogLevel.Error,
         EventId_PackageExportWriteError, $"{MESSAGE_PackageExportWriteError} {{Path}}.");
