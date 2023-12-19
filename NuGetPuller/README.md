@@ -59,7 +59,7 @@ Typically, this will be a [NuGet Server](#nuget-server) using `https://api.nuget
 
 ### Locally Downloaded Packages Folder
 
-This application saves locally-downloaded packages in a [Local NuGet Package Feed](#local-nuget-package-feed), which can be specified using the [DownloadedPackagesFolder application setting](#local-nuget-feed-path).
+This application saves locally-downloaded packages in a [Local NuGet Package Feed](#local-nuget-package-feed), which can be specified using the [DownloadedPackagesFolder application setting](#downloaded-packages-folder).
 
 Typically, this is a folder named `LocalFeed` in the same subdirectory as the `NuGetPuller.CLI` executable.
 
@@ -87,7 +87,7 @@ Following are the configuration options for the `NuGetPuller` configuration sect
   - The default value is `https://api.nuget.org/v3/index.json`.
   - This can also be the path to a subdirectory, if you want to use a local folder as the upstream NuGet repository.
 
-### Local NuGet Feed Path
+### Downloaded Packages Folder
 
 - `DownloadedPackagesFolder` - The path of Local NuGet Feed.
   - The default location of the Local NuGet Feed is a folder named `LocalFeed` in the same subdirectory as the `NuGetPuller.CLI` executable.
