@@ -2,15 +2,6 @@
 
 - [About NuGetPuller CLI](#about-nugetpuller-cli)
 - [Links](#links)
-- [Concepts](#concepts)
-  - [NuGet Server](#nuget-server)
-  - [Local NuGet Package Feed](#local-nuget-package-feed)
-  - [Offline NuGet Feed](#offline-nuget-feed)
-  - [Upstream NuGet Repository](#upstream-nuget-repository)
-  - [NuGet Repository](#nuget-repository)
-  - [Locally Downloaded Packages Folder](#locally-downloaded-packages-folder)
-  - [File Transfer Bundle](#file-transfer-bundle)
-- [NuGet Feed Metadata File](#nuget-feed-metadata-file)
 - [Command Line Options](#command-line-options)
   - [Show All Packages](#show-all-packages)
   - [Download Packages](#download-packages)
@@ -24,55 +15,17 @@
 
 ## About NuGetPuller CLI
 
-This is part of the [] purpose of this application is to synchronize packages between a source [NuGet](https://www.nuget.org/) repository and offline NuGet Package Feeds.
+The purpose of this application is to synchronize packages between an authoritative [NuGet](https://www.nuget.org/) repository and Offline NuGet Package Feeds.
 
 An example use-case would be for a locally-hosted NuGet feed on a machine that does not have direct access to the internet. You can use this to download NuGet packages, including any dependencies, and then create a bundle of packages (a ZIP file) which can then be transferred to that disconnected host and imported into the Local NuGet Feed.
+
+See [Key Concepts](../NuGetPuller/README.md#key-concepts) for a conceptual overview of terms used by this application.
 
 ## Links
 
 - [Isolate Pacakge Feeds Home](../README.md)
-- [NuGetPuller Class Library](../NuGetPuller/README.md)
+- [NuGetPuller Class Library](../NuGetPuller/README.md) - Base class library for User Interface Applications.
 - [NuGetPuller Unit Tests](../NuGetPuller.UnitTests/README.md)
-
-## Concepts
-
-### NuGet Server
-
-This is a web-based service implementing the the [NuGet Server API](https://learn.microsoft.com/en-us/nuget/api/overview).
-
-### Local NuGet Package Feed
-
-This is a subdirectory that contains `.nupkg` files that represent individual versions of packages.
-
-### Offline NuGet Feed
-
-This represents a [Local NuGet Feed](#local-nuget-package-feed) for an environment that does not have internet access.
-
-### Upstream NuGet Repository
-
-This is the source [NuGet Repository](#nuget-repository) that packages will be downloaded from.
-
-This can specified using the [UpstreamServiceIndexUrl application setting](../NuGetPuller/README.md#upstream-service-index-url), and overridden using the `--upstream-service-index` command line argument  *(see [Override Application Settings](#override-application-settings))*.
-
-Typically, this will be a [NuGet Server](#nuget-server) using `https://api.nuget.org/v3/index.json` as the URL.
-
-### NuGet Repository
-
-This is a generic term for either a [NuGet Server](#nuget-server) or a [Local NuGet Feed](#local-nuget-package-feed).
-
-### Locally Downloaded Packages Folder
-
-This application saves locally-downloaded packages in a [Local NuGet Package Feed](#local-nuget-package-feed), which can be specified using the [LocalFeedPath application setting](../NuGetPuller/README.md#local-nuget-feed-path), and overridden using the `--local-feed-path` command line argument *(see [Override Application Settings](#override-application-settings))*.
-
-Typically, this is a folder named `LocalFeed` in the same subdirectory as the `NuGetPuller.CLI` executable.
-
-### File Transfer Bundle
-
-A ZIP file containing `.nupkg` files to be transferred to an [Offline NuGet Feed](#offline-nuget-feed).
-
-## NuGet Feed Metadata File
-
-This is a `JSON` file which contains an array of package metadata for packages that exist in an [Offline NuGet Feed](#offline-nuget-feed).
 
 ## Command Line Options
 
@@ -80,7 +33,7 @@ This is a `JSON` file which contains an array of package metadata for packages t
 
 Command line options for showing all packages that have been downloaded.
 
-- `--list` **Required** *(stand-alone switch)*: List all [Locally Downloaded Packages](#locally-downloaded-packages-folder).
+- `--list` **Required** *(stand-alone switch)*: List all [Locally Downloaded Packages](../NuGetPuller/README.md#locally-downloaded-packages-folder).
 - `--include-versions` *(Optional - stand-alone switch)*: Show all version numbers of each downloaded package.
 
 Example:
@@ -91,7 +44,7 @@ NuGetPuller --list --include-versions
 
 ### Download Packages
 
-Download packages from the [Upstream NuGet Repository](#upstream-nuget-repository) and add them to the [Downloaded Packages Feed](#locally-downloaded-packages-folder).
+Download packages from the [Upstream NuGet Repository](../NuGetPuller/README.md#upstream-nuget-repository) and add them to the [Downloaded Packages Feed](../NuGetPuller/README.md#locally-downloaded-packages-folder).
 
 - `--download` **Required**: Identifier(s) of package to download.
   
@@ -102,7 +55,7 @@ Download packages from the [Upstream NuGet Repository](#upstream-nuget-repositor
   
   If no version is specified, the latest version of each package will be downloaded.
 - `--no-dependencies` *(Optional - stand-alone switch)*: Do not download dependencies.
-  If this switch is not used, then all dependencies will be downloaded and added to the [Downloaded Packages Feed](#locally-downloaded-packages-folder) as well.
+  If this switch is not used, then all dependencies will be downloaded and added to the [Downloaded Packages Feed](../NuGetPuller/README.md#locally-downloaded-packages-folder) as well.
 
 Example:
 
@@ -112,7 +65,7 @@ NuGetPuller --download=Microsoft.Extensions.Logging,Microsoft.Extensions.Configu
 
 ### Add Package Files
 
-Add package file(s) to the [Downloaded Packages Feed](#locally-downloaded-packages-folder).
+Add package file(s) to the [Downloaded Packages Feed](../NuGetPuller/README.md#locally-downloaded-packages-folder).
 
 - `--add-file` **Required**: Path to an individual `.nupkg` file, a `.zip` file containing package files, or to a subdirectory of `.nupkg` files. This will not recursively search sub-folders.
   
@@ -132,7 +85,7 @@ NuGetPuller --add-file=john.doe/downloads
 
 ### Remove Packages
 
-Remove packages from the [Downloaded Packages Feed](#locally-downloaded-packages-folder).
+Remove packages from the [Downloaded Packages Feed](../NuGetPuller/README.md#locally-downloaded-packages-folder).
 
 - `--remove` **Required**: Identifier of package to remove.
   
@@ -150,7 +103,7 @@ NuGetPuller --remove=Microsoft.Extensions.Logging,Microsoft.Extensions.Configura
 
 ### Check Package Dependencies
 
-Verify that all dependiencies have been downloaded for all packages in the [Downloaded Packages Feed](#locally-downloaded-packages-folder).
+Verify that all dependiencies have been downloaded for all packages in the [Downloaded Packages Feed](../NuGetPuller/README.md#locally-downloaded-packages-folder).
 
 - `--check-depencencies` **Required** *(stand-alone switch)*: Check locally downloaded packages for dependencies.
 - `--package-id` *(Optional)*: Identifier of pecific package to check.
@@ -177,7 +130,7 @@ NuGetPuller --check-depencencies=System.Text.Json,Microsoft.Extensions.Hosting -
 
 ### Export Local NuGet Feed Metadata
 
-Create a [NuGet Feed Metadata File](#nuget-feed-metadata-file) that represents all versions of all packages in the [Downloaded Packages Feed](#locally-downloaded-packages-folder).
+Create a [NuGet Feed Metadata File](../NuGetPuller/README.md#nuget-feed-metadata-file) that represents all versions of all packages in the [Downloaded Packages Feed](../NuGetPuller/README.md#locally-downloaded-packages-folder).
 
 - `--export-metadata` **Required:**: Path of the metadata file to create.
 
@@ -189,8 +142,8 @@ NuGetPuller --export-metadata=MyLocaRepo.json
 
 ### Create File Transfer Bundle
 
-This creates a ZIP file which contains NuGet packages to be transferred to an [Offline NuGet Feed](#offline-nuget-feed).
-To efficiently synchronize content with another NuGet feed, this can reference a [NuGet Feed Metadata File](#nuget-feed-metadata-file)
+This creates a ZIP file which contains NuGet packages to be transferred to an [Offline NuGet Feed](../NuGetPuller/README.md#offline-nuget-feed).
+To efficiently synchronize content with another NuGet feed, this can reference a [NuGet Feed Metadata File](../NuGetPuller/README.md#nuget-feed-metadata-file)
 to know which packages already exist in the target feed.
 
 Command line arguments are as follows:
@@ -198,20 +151,20 @@ Command line arguments are as follows:
 - `--create-bundle` **Required:**: Path of bundle file to create.
   
   If no extension is specified, this will use the `.zip` file extension.
-- `--create-from` *(Optional)*: Path of a [NuGet Feed Metadata File](#nuget-feed-metadata-file) representing the target [Offline NuGet Feed](#offline-nuget-feed).
+- `--create-from` *(Optional)*: Path of a [NuGet Feed Metadata File](../NuGetPuller/README.md#nuget-feed-metadata-file) representing the target [Offline NuGet Feed](../NuGetPuller/README.md#offline-nuget-feed).
   
   If this option is used, the output bundle will not contain any packages that are represented in the metadata file.
-- `--save-metadata-to` *(Optional)*: Path of file to save the updated [NuGet Feed Metadata File](#nuget-feed-metadata-file) to.
+- `--save-metadata-to` *(Optional)*: Path of file to save the updated [NuGet Feed Metadata File](../NuGetPuller/README.md#nuget-feed-metadata-file) to.
   
-  If the `--create-from` was used, the new metadata file will reflect the contents of the associated [Offline NuGet Feed](#offline-nuget-feed) after the packages from output bundle have been added; otherwise, the metadata file will contain all packages that were exported to the `.zip` file.
+  If the `--create-from` was used, the new metadata file will reflect the contents of the associated [Offline NuGet Feed](../NuGetPuller/README.md#offline-nuget-feed) after the packages from output bundle have been added; otherwise, the metadata file will contain all packages that were exported to the `.zip` file.
 
   It is okay if the `--create-from` and `--save-metadata-to` options refer to the same file.
 - `--package-id` *(Optional)*: Comma-separated list of specific package IDs to include in the bundle.
   
-  If this option is not specified, then all [locally downloaded](#locally-downloaded-packages-folder) packages not represented in the `--create-from` [metadata file](#nuget-feed-metadata-file) will be included in the bundle.
+  If this option is not specified, then all [locally downloaded](../NuGetPuller/README.md#locally-downloaded-packages-folder) packages not represented in the `--create-from` [metadata file](../NuGetPuller/README.md#nuget-feed-metadata-file) will be included in the bundle.
 - `--version` *(Optional)*: Comma-separated list of specific versions to include in the bundle.
   
-  If this option is not specified, then all [locally downloaded](#locally-downloaded-packages-folder) versions not represented in the `--create-from` [metadata file](#nuget-feed-metadata-file) will be included in the bundle.
+  If this option is not specified, then all [locally downloaded](../NuGetPuller/README.md#locally-downloaded-packages-folder) versions not represented in the `--create-from` [metadata file](../NuGetPuller/README.md#nuget-feed-metadata-file) will be included in the bundle.
   
 ```bash
 NuGetPuller --create-bundle=Updates.zip --create-from=DisconnectedServer.nuget.metadata.json --save-metadata-to=DisconnectedServer.nuget.metadata.json

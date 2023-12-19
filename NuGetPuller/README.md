@@ -1,6 +1,15 @@
 # NuGetPuller Common Library
 
 - [About NuGetPuller](#about-nugetpuller)
+- [Key Concepts](#key-concepts)
+  - [NuGet Server](#nuget-server)
+  - [Local NuGet Package Feed](#local-nuget-package-feed)
+  - [NuGet Repository](#nuget-repository)
+  - [Offline NuGet Feed](#offline-nuget-feed)
+  - [Upstream NuGet Repository](#upstream-nuget-repository)
+  - [Locally Downloaded Packages Folder](#locally-downloaded-packages-folder)
+  - [File Transfer Bundle](#file-transfer-bundle)
+- [NuGet Feed Metadata File](#nuget-feed-metadata-file)
 - [Links](#links)
 - [Application Settings](#application-settings)
   - [Upstream Service Index URL](#upstream-service-index-url)
@@ -20,6 +29,47 @@ The purpose of this library is the basae class for applications that synchronize
 An example use-case would be for a locally-hosted NuGet feed on a machine that does not have direct access to the internet. You can use this to download NuGet packages, including any dependencies, and then create a bundle of packages (a ZIP file) which can then be transferred to that disconnected host and imported into the Local NuGet Feed.
 
 This uses package manifest files to represent which packages already exist in other locally-hosted NuGet feeds. This minimizes bundle sizes, because it doesn't have to include packages that already exist in the target NuGet feed.
+
+## Key Concepts
+
+### NuGet Server
+
+A *"NuGet Server"* is a web-based service implementing the the [NuGet Server API](https://learn.microsoft.com/en-us/nuget/api/overview).
+
+### Local NuGet Package Feed
+
+A *"Local NuGet Package Feed"* is a subdirectory that contains specially-named `.nupkg` files representing individual versions of NuGet packages.
+
+### NuGet Repository
+
+This is a generic term for either a [NuGet Server](#nuget-server) or a [Local NuGet Feed](#local-nuget-package-feed).
+
+### Offline NuGet Feed
+
+An *"Offline NuGet Feed"* is a [Local NuGet Package Feed](#local-nuget-package-feed) for an environment that does not have internet access.
+It is also conceptually assumed that the user interface application may not have direct access to this feed.
+
+### Upstream NuGet Repository
+
+This is the source [NuGet Repository](#nuget-repository) that packages will be downloaded from.
+
+This can specified using the [UpstreamServiceIndexUrl application setting](#upstream-service-index-url).
+
+Typically, this will be a [NuGet Server](#nuget-server) using `https://api.nuget.org/v3/index.json` as the URL.
+
+### Locally Downloaded Packages Folder
+
+This application saves locally-downloaded packages in a [Local NuGet Package Feed](#local-nuget-package-feed), which can be specified using the [LocalFeedPath application setting](#local-nuget-feed-path).
+
+Typically, this is a folder named `LocalFeed` in the same subdirectory as the `NuGetPuller.CLI` executable.
+
+### File Transfer Bundle
+
+A ZIP file containing [locally-downloaded](#locally-downloaded-packages-folder) `.nupkg` files to be transferred to an [Offline NuGet Feed](#offline-nuget-feed).
+
+## NuGet Feed Metadata File
+
+This is a `JSON` file which contains metadata indicating what packages already exist in an [Offline NuGet Feed](#offline-nuget-feed).
 
 ## Links
 
