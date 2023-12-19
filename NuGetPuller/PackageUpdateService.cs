@@ -9,21 +9,21 @@ using static NuGetPuller.NuGetPullerStatic;
 namespace NuGetPuller;
 
 /// <summary>
-/// Updates packages in Local Nuget Feed subdirectory with new packages/versions from the Upstream NuGet Repository.
+/// Updates packages in the Downloaded NuGet Packages Folder with new packages/versions from the Upstream NuGet Repository.
 /// </summary>
-/// <param name="localClient">The service for managing packages in the Local NuGet Feed subdirectory.</param>
+/// <param name="downloadedPackagesClient">The service for managing packages in the Downloaded NuGet Packages Folder.</param>
 /// <param name="upstreamClient">The service for retrieving packages from the Upstream NuGet Repository.</param>
 /// <param name="logger">The logger to write events to.</param>
-public class PackageUpdateService(ILocalNuGetFeedService localClient, IUpstreamNuGetClientService upstreamClient, ILogger<PackageUpdateService> logger)
+public class PackageUpdateService(IDownloadedPackagesService downloadedPackagesClient, IUpstreamNuGetClientService upstreamClient, ILogger<PackageUpdateService> logger)
 {
-    private readonly ILocalNuGetFeedService _localClient = localClient;
+    private readonly IDownloadedPackagesService _downloadedPackagesClient = downloadedPackagesClient;
     private readonly IUpstreamNuGetClientService _upstreamClient = upstreamClient;
     private readonly ILogger _logger = logger;
 
     public async Task UpdatePackagesAsync(IEnumerable<string> packageIds, CancellationToken cancellationToken)
     {
         var updater = await Updater.CreateAsync(this, cancellationToken);
-        var localFindPackageById = await _localClient.GetFindPackageByIdResourceAsync(cancellationToken);
+        var downloadedFindPackageById = await _downloadedPackagesClient.GetFindPackageByIdResourceAsync(cancellationToken);
         var versionComparer = VersionComparer.VersionReleaseMetadata;
         HashSet<PackageIdentity> downloaded = new(PackageIdentity.Comparer);
         HashQueue<PackageIdentity> toCheck = new(PackageIdentity.Comparer);
@@ -35,13 +35,13 @@ public class PackageUpdateService(ILocalNuGetFeedService localClient, IUpstreamN
                 _logger.NuGetPackageNotFound(packageId, _upstreamClient);
                 continue;
             }
-            var localVersions = await _localClient.GetAllVersionsAsync(packageId, localFindPackageById, cancellationToken);
-            if (localVersions is null || !localVersions.Any())
+            var downloadedVersions = await _downloadedPackagesClient.GetAllVersionsAsync(packageId, downloadedFindPackageById, cancellationToken);
+            if (downloadedVersions is null || !downloadedVersions.Any())
             {
-                _logger.NuGetPackageNotFound(packageId, _localClient);
+                _logger.NuGetPackageNotFound(packageId, _downloadedPackagesClient);
                 continue;
             }
-            foreach (NuGetVersion version in upstreamVersions.Where(u => !localVersions.Contains(u, versionComparer)))
+            foreach (NuGetVersion version in upstreamVersions.Where(u => !downloadedVersions.Contains(u, versionComparer)))
             {
                 PackageIdentity identity = new(packageId, version);
                 toCheck.TryEnqueue(identity);
@@ -60,7 +60,7 @@ public class PackageUpdateService(ILocalNuGetFeedService localClient, IUpstreamN
                     if (downloaded.Contains(pkg))
                         continue;
                     downloaded.Add(pkg);
-                    if (!await _localClient.DoesPackageExistAsync(pkg.Id, pkg.Version, localFindPackageById, cancellationToken) && toCheck.TryEnqueue(pkg))
+                    if (!await _downloadedPackagesClient.DoesPackageExistAsync(pkg.Id, pkg.Version, downloadedFindPackageById, cancellationToken) && toCheck.TryEnqueue(pkg))
                         await updater.DownloadFileAsync(identity, _logger, cancellationToken);
                 }
         }
@@ -69,14 +69,14 @@ public class PackageUpdateService(ILocalNuGetFeedService localClient, IUpstreamN
     {
         private readonly VersionFolderPathResolver _pathResolver;
         private readonly TempStagingFolder _tempStaging;
-        private readonly ILocalNuGetFeedService _localClient;
+        private readonly IDownloadedPackagesService _downloadedPackagesClient;
         private readonly PackageUpdateResource _updateResource;
         private readonly IUpstreamNuGetClientService _upstreamClient;
         internal FindPackageByIdResource UpstreamFindPackageById { get; }
         private Updater(PackageUpdateService updateService, PackageUpdateResource updateResource, FindPackageByIdResource findPackageById)
         {
             _pathResolver = new((_tempStaging = new()).Directory.FullName);
-            _localClient = updateService._localClient;
+            _downloadedPackagesClient = updateService._downloadedPackagesClient;
             _updateResource = updateResource;
             _upstreamClient = updateService._upstreamClient;
             UpstreamFindPackageById = findPackageById;
@@ -84,7 +84,7 @@ public class PackageUpdateService(ILocalNuGetFeedService localClient, IUpstreamN
         internal static async Task<Updater> CreateAsync(PackageUpdateService updateService, CancellationToken cancellationToken) =>
             new Updater(
                 updateService: updateService,
-                updateResource: await updateService._localClient.GetPackageUpdateResourceAsync(cancellationToken),
+                updateResource: await updateService._downloadedPackagesClient.GetPackageUpdateResourceAsync(cancellationToken),
                 findPackageById: await updateService._upstreamClient.GetFindPackageByIdResourceAsync(cancellationToken)
             );
         internal async Task DownloadFileAsync(PackageIdentity identity, ILogger logger, CancellationToken cancellationToken)
@@ -104,7 +104,7 @@ public class PackageUpdateService(ILocalNuGetFeedService localClient, IUpstreamN
                 logger.UnexpectedPackageDownloadFailure(identity.Id, identity.Version, error);
                 return;
             }
-            await _localClient.AddPackageAsync(packageFile.FullName, false, _updateResource, cancellationToken);
+            await _downloadedPackagesClient.AddPackageAsync(packageFile.FullName, false, _updateResource, cancellationToken);
         }
         public void Dispose() => _tempStaging.Dispose();
     }

@@ -24,11 +24,11 @@
 
 ## About NuGetPuller
 
-The purpose of this library is the basae class for applications that synchronize a Local NuGet Feed with an upstream NuGet repository as well as other locally-hosted NuGet repositories.
+The purpose of this library is the basae class for applications that synchronize Local NuGet Feeds with an upstream NuGet repository.
 
 An example use-case would be for a locally-hosted NuGet feed on a machine that does not have direct access to the internet. You can use this to download NuGet packages, including any dependencies, and then create a bundle of packages (a ZIP file) which can then be transferred to that disconnected host and imported into the Local NuGet Feed.
 
-This uses package manifest files to represent which packages already exist in other locally-hosted NuGet feeds. This minimizes bundle sizes, because it doesn't have to include packages that already exist in the target NuGet feed.
+This uses package metadata files to represent which packages already exist in other locally-hosted NuGet feeds. This minimizes bundle sizes, because it doesn't have to include packages that already exist in the target NuGet feed.
 
 ## Key Concepts
 
@@ -59,7 +59,7 @@ Typically, this will be a [NuGet Server](#nuget-server) using `https://api.nuget
 
 ### Locally Downloaded Packages Folder
 
-This application saves locally-downloaded packages in a [Local NuGet Package Feed](#local-nuget-package-feed), which can be specified using the [LocalFeedPath application setting](#local-nuget-feed-path).
+This application saves locally-downloaded packages in a [Local NuGet Package Feed](#local-nuget-package-feed), which can be specified using the [DownloadedPackagesFolder application setting](#local-nuget-feed-path).
 
 Typically, this is a folder named `LocalFeed` in the same subdirectory as the `NuGetPuller.CLI` executable.
 
@@ -89,7 +89,7 @@ Following are the configuration options for the `NuGetPuller` configuration sect
 
 ### Local NuGet Feed Path
 
-- `LocalFeedPath` - The path of Local NuGet Feed.
+- `DownloadedPackagesFolder` - The path of Local NuGet Feed.
   - The default location of the Local NuGet Feed is a folder named `LocalFeed` in the same subdirectory as the `NuGetPuller.CLI` executable.
 
 ### Global Packages Folder Path
@@ -102,7 +102,7 @@ Following are the configuration options for the `NuGetPuller` configuration sect
 {
     "NuGetPuller": {
         "UpstreamServiceIndexUrl": "file://myserver/myshare",
-        "LocalFeedPath": "C:/users/john.doe/Documents/MyLocalFeed",
+        "DownloadedPackagesFolder": "C:/users/john.doe/Documents/MyLocalFeed",
         "GlobalPackagesFolder": "C:/users/john.doe/Downloads/MyNuGetGpf"
     }
 }

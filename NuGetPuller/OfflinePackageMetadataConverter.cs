@@ -7,27 +7,27 @@ using static NuGetPuller.NuGetPullerStatic;
 
 namespace NuGetPuller;
 
-public class OfflinePackageManifestConverter : JsonConverter
+public class OfflinePackageMetadataConverter : JsonConverter
 {
-    public const string LocalManfestFieldId = "id";
+    public const string OfflinePkgMetadataFieldId = "id";
 
-    private const string LocalManfestFieldHeadingId = $"        \"{LocalManfestFieldId}\": ";
+    private const string OfflinePkgMetadataFieldHeadingId = $"        \"{OfflinePkgMetadataFieldId}\": ";
 
-    public const string LocalManfestFieldTitle = "title";
+    public const string OfflinePkgMetadataFieldTitle = "title";
 
-    private const string LocalManfestFieldHeadingTitle = $"        \"{LocalManfestFieldTitle}\": ";
+    private const string OfflinePkgMetadataFieldHeadingTitle = $"        \"{OfflinePkgMetadataFieldTitle}\": ";
 
-    public const string LocalManfestFieldSummary = "summary";
+    public const string OfflinePkgMetadataFieldSummary = "summary";
 
-    private const string LocalManfestFieldHeadingSummary = $"        \"{LocalManfestFieldSummary}\": ";
+    private const string OfflinePkgMetadataFieldHeadingSummary = $"        \"{OfflinePkgMetadataFieldSummary}\": ";
 
-    public const string LocalManfestFieldDescription = "description";
+    public const string OfflinePkgMetadataFieldDescription = "description";
 
-    private const string LocalManfestFieldHeadingDescription = $"        \"{LocalManfestFieldDescription}\": ";
+    private const string OfflinePkgMetadataFieldHeadingDescription = $"        \"{OfflinePkgMetadataFieldDescription}\": ";
 
-    public const string LocalManfestFieldVersions = "versions";
+    public const string OfflinePkgMetadataFieldVersions = "versions";
 
-    private const string LocalManfestFieldHeadingVersions = $"        \"{LocalManfestFieldVersions}\": ";
+    private const string OfflinePkgMetadataFieldHeadingVersions = $"        \"{OfflinePkgMetadataFieldVersions}\": ";
 
     private static readonly JsonSerializerSettings MetadataSerializationSettings = new()
     {
@@ -46,19 +46,19 @@ public class OfflinePackageManifestConverter : JsonConverter
 
     public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
     {
-        if (value is OfflinePackageManifest offlinePackageManifest)
+        if (value is OfflinePackageMetadata offlineMetadata)
         {
             var obj = new JObject
             {
-                { LocalManfestFieldId, JToken.FromObject(offlinePackageManifest.Identifier) }
+                { OfflinePkgMetadataFieldId, JToken.FromObject(offlineMetadata.Identifier) }
             };
-            if (!string.IsNullOrWhiteSpace(offlinePackageManifest.Title))
-                obj.Add(LocalManfestFieldTitle, JToken.FromObject(offlinePackageManifest.Title));
-            if (!string.IsNullOrWhiteSpace(offlinePackageManifest.Summary))
-                obj.Add(LocalManfestFieldSummary, JToken.FromObject(offlinePackageManifest.Summary));
-            if (!string.IsNullOrWhiteSpace(offlinePackageManifest.Description))
-                obj.Add(LocalManfestFieldDescription, JToken.FromObject(offlinePackageManifest.Description));
-            obj.Add(LocalManfestFieldVersions, JToken.FromObject(offlinePackageManifest.Versions.Select(v => v.ToString()).ToArray()));
+            if (!string.IsNullOrWhiteSpace(offlineMetadata.Title))
+                obj.Add(OfflinePkgMetadataFieldTitle, JToken.FromObject(offlineMetadata.Title));
+            if (!string.IsNullOrWhiteSpace(offlineMetadata.Summary))
+                obj.Add(OfflinePkgMetadataFieldSummary, JToken.FromObject(offlineMetadata.Summary));
+            if (!string.IsNullOrWhiteSpace(offlineMetadata.Description))
+                obj.Add(OfflinePkgMetadataFieldDescription, JToken.FromObject(offlineMetadata.Description));
+            obj.Add(OfflinePkgMetadataFieldVersions, JToken.FromObject(offlineMetadata.Versions.Select(v => v.ToString()).ToArray()));
             serializer.Serialize(writer, obj);
         }
         else
@@ -70,25 +70,25 @@ public class OfflinePackageManifestConverter : JsonConverter
         if (reader.TokenType == JsonToken.Null)
             return null;
         JObject jObject = JObject.Load(reader, MetadataLoadSettings);
-        string[]? versionStrings = jObject.Value<string[]>(LocalManfestFieldVersions);
-        OfflinePackageManifest result;
+        string[]? versionStrings = jObject.Value<string[]>(OfflinePkgMetadataFieldVersions);
+        OfflinePackageMetadata result;
         if (versionStrings is null)
-            result = new(jObject.Value<string>(LocalManfestFieldId)!, []);
+            result = new(jObject.Value<string>(OfflinePkgMetadataFieldId)!, []);
         else
         {
             var versions = new NuGetVersion[(versionStrings = versionStrings.Where(s => !string.IsNullOrWhiteSpace(s)).ToArray()).Length];
             for (var i = 0; i < versionStrings.Length; i++)
                 versions[i] = NuGetVersion.Parse(versionStrings[i]);
-            result = new(jObject.Value<string>(LocalManfestFieldId)!, versions.Distinct<NuGetVersion>(VersionComparer.VersionReleaseMetadata).ToArray());
+            result = new(jObject.Value<string>(OfflinePkgMetadataFieldId)!, versions.Distinct<NuGetVersion>(VersionComparer.VersionReleaseMetadata).ToArray());
         }
-        result.Title = jObject.Value<string>(LocalManfestFieldTitle);
-        result.Summary = jObject.Value<string>(LocalManfestFieldSummary);
-        result.Description = jObject.Value<string>(LocalManfestFieldDescription);
+        result.Title = jObject.Value<string>(OfflinePkgMetadataFieldTitle);
+        result.Summary = jObject.Value<string>(OfflinePkgMetadataFieldSummary);
+        result.Description = jObject.Value<string>(OfflinePkgMetadataFieldDescription);
         return result;
     }
 
-    public override bool CanConvert(Type objectType) => objectType == typeof(OfflinePackageManifest);
-    public static async Task ExportLocalManifestAsync(IEnumerable<IPackageSearchMetadata> packages, StreamWriter writer, CancellationToken cancellationToken)
+    public override bool CanConvert(Type objectType) => objectType == typeof(OfflinePackageMetadata);
+    public static async Task ExportDownloadedPackageManifestAsync(IEnumerable<IPackageSearchMetadata> packages, StreamWriter writer, CancellationToken cancellationToken)
     {
         var pkgArr = packages.ToArray();
         if (pkgArr.Length > 0)
@@ -97,28 +97,28 @@ public class OfflinePackageManifestConverter : JsonConverter
             {
                 var hasVersion = group.Where(p => p.Identity.HasVersion).OrderByDescending(p => p.Identity.Version, VersionComparer.VersionReleaseMetadata);
                 var ordered = hasVersion.Concat(group.Where(p => !p.Identity.HasVersion));
-                await writer.WriteAsync(LocalManfestFieldHeadingId);
+                await writer.WriteAsync(OfflinePkgMetadataFieldHeadingId);
                 var precedingLine = JsonConvert.SerializeObject(group.Key, MetadataSerializationSettings);
                 var text = ordered.Select(p => p.Title).FirstOrDefault(t => !string.IsNullOrWhiteSpace(t));
                 if (text is not null)
                 {
                     await writer.WriteAsync(precedingLine);
                     await writer.WriteLineAsync(',');
-                    await writer.WriteAsync(LocalManfestFieldHeadingTitle);
+                    await writer.WriteAsync(OfflinePkgMetadataFieldHeadingTitle);
                     precedingLine = JsonConvert.SerializeObject(text, MetadataSerializationSettings);
                 }
                 if ((text = ordered.Select(p => p.Summary).FirstOrDefault(t => !string.IsNullOrWhiteSpace(t))) is not null)
                 {
                     await writer.WriteAsync(precedingLine);
                     await writer.WriteLineAsync(',');
-                    await writer.WriteAsync(LocalManfestFieldHeadingSummary);
+                    await writer.WriteAsync(OfflinePkgMetadataFieldHeadingSummary);
                     precedingLine = JsonConvert.SerializeObject(text, MetadataSerializationSettings);
                 }
                 if ((text = ordered.Select(p => p.Description).FirstOrDefault(t => !string.IsNullOrWhiteSpace(t))) is not null)
                 {
                     await writer.WriteAsync(precedingLine);
                     await writer.WriteLineAsync(',');
-                    await writer.WriteAsync(LocalManfestFieldHeadingDescription);
+                    await writer.WriteAsync(OfflinePkgMetadataFieldHeadingDescription);
                     precedingLine = JsonConvert.SerializeObject(text, MetadataSerializationSettings);
                 }
                 var versions = hasVersion.Select(p => p.Identity.Version).ToArray();
@@ -126,7 +126,7 @@ public class OfflinePackageManifestConverter : JsonConverter
                 {
                     await writer.WriteAsync(precedingLine);
                     await writer.WriteLineAsync(',');
-                    await writer.WriteAsync(LocalManfestFieldHeadingVersions);
+                    await writer.WriteAsync(OfflinePkgMetadataFieldHeadingVersions);
                     precedingLine = JsonConvert.SerializeObject(versions, MetadataSerializationSettings);
                 }
                 await writer.WriteLineAsync(precedingLine);

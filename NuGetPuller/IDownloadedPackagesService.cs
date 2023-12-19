@@ -5,9 +5,9 @@ using NuGet.Versioning;
 namespace NuGetPuller;
 
 /// <summary>
-/// Interface for reading from the Local NuGet Feed containing the downloaded packages.
+/// Interface for reading from the NuGet Packages Folder containing the downloaded packages.
 /// </summary>
-public interface ILocalNuGetFeedService : INuGetClientService
+public interface IDownloadedPackagesService : INuGetClientService
 {
     #region Methods using the Search Query API
 
@@ -19,18 +19,18 @@ public interface ILocalNuGetFeedService : INuGetClientService
     Task<PackageSearchResource> GetPackageSearchResourceAsync(CancellationToken cancellationToken);
 
     /// <summary>
-    /// Gets all packages in the Local NuGet Feed.
+    /// Gets all packages in the Downloaded NuGet Packages Folder.
     /// </summary>
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
-    /// <returns>Metadata for packages in Local NuGet Feed.</returns>
+    /// <returns>Metadata for packages in Downloaded NuGet Packages Folder.</returns>
     IAsyncEnumerable<IPackageSearchMetadata> GetAllPackagesAsync(CancellationToken cancellationToken);
 
     /// <summary>
-    /// Gets all packages in the Local NuGet Feed.
+    /// Gets all packages in the Downloaded NuGet Packages Folder.
     /// </summary>
     /// <param name="packageSearchResource">The NuGet resource for the NuGet Search Query API.</param>
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
-    /// <returns>Metadata for packages in Local NuGet Feed.</returns>
+    /// <returns>Metadata for packages in Downloaded NuGet Packages Folder.</returns>
     IAsyncEnumerable<IPackageSearchMetadata> GetAllPackagesAsync(PackageSearchResource? packageSearchResource, CancellationToken cancellationToken);
 
     #endregion

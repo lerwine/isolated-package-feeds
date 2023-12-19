@@ -9,13 +9,13 @@ namespace NuGetPuller.CLI;
 public partial class AppSettings : ISharedAppSettings
 {
     /// <summary>
-    /// If true, then all packages in the local NuGet source will be displayed in the output.
+    /// If true, then all packages in the Downloaded NuGet Packages Folder will be displayed in the output.
     /// </summary>
     /// <remarks>This is mapped from the <c>--list</c> (<see cref="COMMAND_LINE_SWITCH_list"/>) command line switch.</remarks>
-    public bool ListLocal { get; set; }
+    public bool ListDownloaded { get; set; }
 
     /// <summary>
-    /// If true, then all packages in the local NuGet source will be displayed in the output.
+    /// If true, then all packages in the Downloaded NuGet Packages Folder will be displayed in the output.
     /// </summary>
     /// <remarks>This is mapped from the <c>--include-versions</c> (<see cref="COMMAND_LINE_SWITCH_include_versions"/>) command line argument.</remarks>
     public bool IncludeVersions { get; set; }
@@ -43,13 +43,13 @@ public partial class AppSettings : ISharedAppSettings
     public bool NoDependencies { get; set; }
 
     /// <summary>
-    /// Semi-colon-separated list of package file paths or subdirectory paths to add to the Local NuGet Feed.
+    /// Semi-colon-separated list of package file paths or subdirectory paths to add to the Downloaded NuGet Packages Folder.
     /// </summary>
     /// <remarks>This is mapped from the <c>--add-file</c> (<see cref="COMMAND_LINE_SWITCH_add_file"/>) command line argument.</remarks>
     public string? AddPackageFiles { get; set; }
 
     /// <summary>
-    /// Comma-separated list of package IDs for packages to be deleted from the local reository.
+    /// Comma-separated list of package IDs for packages to be deleted from the Downloaded NuGet Packages Folder.
     /// </summary>
     /// <remarks>This is mapped from the <c>--remove</c> (<see cref="COMMAND_LINE_SWITCH_remove"/>) command line argument.</remarks>
     public string? Remove { get; set; }
@@ -61,13 +61,13 @@ public partial class AppSettings : ISharedAppSettings
     public string? SaveTo { get; set; }
 
     /// <summary>
-    /// Check to see if there are any missing dependencies for packages in the local feed.
+    /// Check to see if there are any missing dependencies for packages in the Downloaded NuGet Packages Folder.
     /// </summary>
     /// <remarks>This is mapped from the <c>--check-dependencies</c> (<see cref="COMMAND_LINE_SWITCH_check_depencencies"/>) command line switch.</remarks>
     public bool CheckDependencies { get; set; }
 
     /// <summary>
-    /// Used along with <see cref="CheckDependencies"/> and <see cref="CreateBundle"/> to indicate a specific list of comma-separated packages IDs to check, rather than referencing all packages in the local feed.
+    /// Used along with <see cref="CheckDependencies"/> and <see cref="CreateBundle"/> to indicate a specific list of comma-separated packages IDs to check, rather than referencing all packages in the Downloaded NuGet Packages Folder.
     /// </summary>
     /// <remarks>This is mapped from the <c>--package-id</c> (<see cref="COMMAND_LINE_SWITCH_package_id"/>) command line argument.</remarks>
     public string? PackageId { get; set; }
@@ -106,12 +106,6 @@ public partial class AppSettings : ISharedAppSettings
     /// <para>This is mapped from the <c>--save-metadata-to</c> (<see cref="COMMAND_LINE_SWITCH_save_metadata_to"/>) command line argument.</para></remarks>
     public string? SaveMetaDataTo { get; set; }
 
-    [Obsolete()]
-    public string? Import { get; set; }
-
-    [Obsolete()]
-    public string? TargetManifestFile { get; set; }
-
     /// <summary>
     /// Gets the override value for the <see cref="GlobalPackagesFolder" /> setting.
     /// </summary>
@@ -123,7 +117,7 @@ public partial class AppSettings : ISharedAppSettings
     /// <summary>
     /// Specifies the remote endpoint URL for the V3 NGet API or a subdirectory path that contains the Upstream NuGet Feed.
     /// </summary>
-    /// <remarks>The default value of this setting is defined in the <see cref="Default_Service_Index_URL" /> constant.
+    /// <remarks>The default value of this setting is defined in the <see cref="Default_Upstream_Service_Index_URL" /> constant.
     /// If this refers to a subdirectory and is not absolute, it will be resolved relative to the application assembly directory (<see cref="Microsoft.Extensions.Hosting.IHostEnvironment.ContentRootPath" />).
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
     /// <para>This can be overridden using the <c>--upstream-service-index</c> (<see cref="COMMAND_LINE_SWITCH_upstream_2D_service_2D_index"/>) command line argument.</para></remarks>
@@ -139,20 +133,20 @@ public partial class AppSettings : ISharedAppSettings
     public string? OverrideUpstreamServiceIndex { get; set; }
 
     /// <summary>
-    /// Specifies the relative or absolute path of a subdirectory for a local Nuget feed.
+    /// Specifies the relative or absolute path of a subdirectory for a Downloaded NuGet Packages Folder.
     /// </summary>
-    /// <remarks>If this path is not absolute, it will be resolved relative to the application assembly directory (<see cref="Microsoft.Extensions.Hosting.IHostEnvironment.ContentRootPath" />). The default value of this setting is defined in the <see cref="Default_Local_Feed_Folder_Name" /> constant.
+    /// <remarks>If this path is not absolute, it will be resolved relative to the application assembly directory (<see cref="Microsoft.Extensions.Hosting.IHostEnvironment.ContentRootPath" />). The default value of this setting is defined in the <see cref="Default_Downloaded_Packages_Folder_Name" /> constant.
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
-    /// <para>This can be overridden using the <c>--local-feed-path</c> (<see cref="COMMAND_LINE_SWITCH_local_2D_feed_2D_path"/>) command line argument.</para></remarks>
-    public string LocalFeedPath { get; set; } = null!;
+    /// <para>This can be overridden using the <c>--downloaded-packages-folder</c> (<see cref="COMMAND_LINE_SWITCH_downloaded_2D_packages_2D_folder"/>) command line argument.</para></remarks>
+    public string DownloadedPackagesFolder { get; set; } = null!;
 
     /// <summary>
-    /// Gets the override value for the <see cref="LocalFeedPath" /> setting.
+    /// Gets the override value for the <see cref="DownloadedPackagesFolder" /> setting.
     /// </summary>
     /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Directory.GetCurrentDirectory"/>).
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
-    /// <para>This is mapped from the <c>--local-feed-path</c> (<see cref="COMMAND_LINE_SWITCH_local_2D_feed_2D_path"/>) command line argument.</para></remarks>
-    public string? OverrideLocalFeed { get; set; }
+    /// <para>This is mapped from the <c>--downloaded-packages-folder</c> (<see cref="COMMAND_LINE_SWITCH_downloaded_2D_packages_2D_folder"/>) command line argument.</para></remarks>
+    public string? OverrideDownloadedPackagesFolder { get; set; }
 
     /// <summary>
     /// Specifies the relative or absolute path of the NuGet global packages folder.
@@ -171,7 +165,7 @@ public partial class AppSettings : ISharedAppSettings
 
     private static readonly ReadOnlyDictionary<string, string> _booleanSwitchMappings = new(new Dictionary<string, string>()
     {
-        { COMMAND_LINE_SWITCH_list, $"{nameof(NuGetPuller)}:{nameof(ListLocal)}" },
+        { COMMAND_LINE_SWITCH_list, $"{nameof(NuGetPuller)}:{nameof(ListDownloaded)}" },
         { COMMAND_LINE_SWITCH_include_versions, $"{nameof(NuGetPuller)}:{nameof(IncludeVersions)}" },
         { COMMAND_LINE_SWITCH_no_dependencies, $"{nameof(NuGetPuller)}:{nameof(NoDependencies)}" },
         { COMMAND_LINE_SWITCH_check_depencencies, $"{nameof(NuGetPuller)}:{nameof(CheckDependencies)}" },
@@ -193,8 +187,8 @@ public partial class AppSettings : ISharedAppSettings
         { COMMAND_LINE_SWITCH_create_bundle, $"{nameof(NuGetPuller)}:{nameof(CreateBundle)}" },
         { COMMAND_LINE_SWITCH_create_from, $"{nameof(NuGetPuller)}:{nameof(CreateFrom)}" },
         { COMMAND_LINE_SWITCH_save_metadata_to, $"{nameof(NuGetPuller)}:{nameof(SaveMetaDataTo)}" },
-        { COMMAND_LINE_SWITCH_local_2D_feed_2D_path, $"{nameof(NuGetPuller)}:{nameof(OverrideLocalFeed)}" },
-        { COMMAND_LINE_SWITCH_upstream_2D_service_2D_index, $"{nameof(NuGetPuller)}:{nameof(OverrideLocalFeed)}" },
+        { COMMAND_LINE_SWITCH_downloaded_2D_packages_2D_folder, $"{nameof(NuGetPuller)}:{nameof(OverrideDownloadedPackagesFolder)}" },
+        { COMMAND_LINE_SWITCH_upstream_2D_service_2D_index, $"{nameof(NuGetPuller)}:{nameof(OverrideDownloadedPackagesFolder)}" },
         { COMMAND_LINE_SWITCH_global_2D_packages_2D_folder, $"{nameof(NuGetPuller)}:{nameof(OverrideGlobalPackagesFolder)}" }
     });
 

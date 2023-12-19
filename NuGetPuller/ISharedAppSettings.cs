@@ -20,17 +20,17 @@ public interface ISharedAppSettings
     string? OverrideUpstreamServiceIndex { get; }
 
     /// <summary>
-    /// Specifies the relative or absolute path of a subdirectory for a Local Nuget Feed.
+    /// Specifies the relative or absolute path of a subdirectory for a Downloaded NuGet Packages Folder.
     /// </summary>
     /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory.
-    /// The default value of this setting is defined in the <see cref="NuGetPullerStatic.Default_Local_Feed_Folder_Name" /> constant.
+    /// The default value of this setting is defined in the <see cref="NuGetPullerStatic.Default_Downloaded_Packages_Folder_Name" /> constant.
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para></remarks>
-    string LocalFeedPath { get; set; }
+    string DownloadedPackagesFolder { get; set; }
 
     /// <summary>
-    /// Override for the <see cref="LocalFeedPath"/> setting.
+    /// Override for the <see cref="DownloadedPackagesFolder"/> setting.
     /// </summary>
-    string? OverrideLocalFeed { get; }
+    string? OverrideDownloadedPackagesFolder { get; }
 
     /// <summary>
     /// Specifies the relative or absolute path of the NuGet global packages folder.

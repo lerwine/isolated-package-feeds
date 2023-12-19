@@ -18,9 +18,9 @@ public interface IValidatedRepositoryPathsService
     LazyChainedConversion<string, Uri> UpstreamServiceIndexUrl { get; }
 
     /// <summary>
-    /// Lazy validation for the <see cref="ISharedAppSettings.LocalFeedPath"/> setting.
+    /// Lazy validation for the <see cref="ISharedAppSettings.DownloadedPackagesFolder"/> setting.
     /// </summary>
-    LazyChainedConversion<string, DirectoryInfo> LocalFeedPath { get; }
+    LazyChainedConversion<string, DirectoryInfo> DownloadedPackagesFolder { get; }
 
     /// <summary>
     /// Lazy validation for the <see cref="ISharedAppSettings.UpstreamServicGlobalPackagesFoldereIndex"/> setting.

@@ -9,11 +9,11 @@ using static NuGetPuller.NuGetPullerStatic;
 namespace NuGetPuller;
 
 /// <summary>
-/// Base class providing methods for managing the Local NuGet Feed.
+/// Service for managing the Downloaded NuGet Packages Folder.
 /// </summary>
 /// <param name="settings">The validated settings service.</param>
 /// <param name="logger">THe logger to write log information to.</param>
-public class LocalNuGetFeedService(IValidatedRepositoryPathsService settings, ILogger<LocalNuGetFeedService> logger) : NuGetClientService(Repository.Factory.GetCoreV3(settings.LocalFeedPath.GetResult().FullName), settings, logger, false), ILocalNuGetFeedService
+public class DownloadedPackagesService(IValidatedRepositoryPathsService settings, ILogger<DownloadedPackagesService> logger) : NuGetClientService(Repository.Factory.GetCoreV3(settings.DownloadedPackagesFolder.GetResult().FullName), settings, logger, false), IDownloadedPackagesService
 {
     #region Methods using the Search Query API
 
@@ -26,21 +26,21 @@ public class LocalNuGetFeedService(IValidatedRepositoryPathsService settings, IL
 
 
     /// <summary>
-    /// Gets all packages in the local repository.
+    /// Gets all packages in the Downloaded NuGet Packages Folder.
     /// </summary>
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
-    /// <returns>Metadata for packages in Local NuGet Feed.</returns>
+    /// <returns>Metadata for packages in Downloaded NuGet Packages Folder.</returns>
     public IAsyncEnumerable<IPackageSearchMetadata> GetAllPackagesAsync(CancellationToken cancellationToken) => GetAllPackagesAsync(null, cancellationToken);
 
     /// <summary>
-    /// Gets all packages in the Local NuGet Feed.
+    /// Gets all packages in the Downloaded NuGet Packages Folder.
     /// </summary>
     /// <param name="packageSearchResource">The NuGet resource for the NuGet Search Query API.</param>
     /// <param name="cancellationToken">The token to observe during the asynchronous operation.</param>
-    /// <returns>Metadata for packages in Local NuGet Feed.</returns>
+    /// <returns>Metadata for packages in Downloaded NuGet Packages Folder.</returns>
     public async IAsyncEnumerable<IPackageSearchMetadata> GetAllPackagesAsync(PackageSearchResource? packageSearchResource, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        using var scope = Logger.BeginGetAllLocalPackagesScope(SourceRepository.PackageSource.Source);
+        using var scope = Logger.BeginGetAllDownloadedPackagesScope(SourceRepository.PackageSource.Source);
         packageSearchResource ??= await GetPackageSearchResourceAsync(cancellationToken);
         var skip = 0;
         int count;
@@ -107,7 +107,7 @@ public class LocalNuGetFeedService(IValidatedRepositoryPathsService settings, IL
         packageUpdateResource ??= await GetPackageUpdateResourceAsync(cancellationToken);
         foreach (string id in packageIds.Distinct(PackageIdentitifierComparer))
         {
-            using var scope = Logger.BeginDeleteLocalPackageScope(id, PackageSourceLocation);
+            using var scope = Logger.BeginDeleteDownloadedPackageScope(id, PackageSourceLocation);
             var lc = id.ToLower();
             var allVersions = await findPackageByIdResource.GetAllVersionsAsync(lc, CacheContext, NuGetLogger, cancellationToken);
             if (allVersions is null || !allVersions.Any())
@@ -118,7 +118,7 @@ public class LocalNuGetFeedService(IValidatedRepositoryPathsService settings, IL
             foreach (var version in allVersions)
             {
                 bool success;
-                using var scope2 = Logger.BeginDeleteLocalPackageVersionScope(id, version, PackageSourceLocation);
+                using var scope2 = Logger.BeginDeleteDownloadedPackageVersionScope(id, version, PackageSourceLocation);
                 try
                 {
                     await packageUpdateResource.Delete(lc, version.ToString(), s => string.Empty, s => true, true, NuGetLogger);
@@ -153,7 +153,7 @@ public class LocalNuGetFeedService(IValidatedRepositoryPathsService settings, IL
     public async IAsyncEnumerable<(NuGetVersion Version, bool Success)> DeleteAsync(string packageId, FindPackageByIdResource? findPackageByIdResource, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(packageId);
-        using var scope = Logger.BeginDeleteLocalPackageScope(packageId, PackageSourceLocation);
+        using var scope = Logger.BeginDeleteDownloadedPackageScope(packageId, PackageSourceLocation);
         var lc = packageId.ToLower();
         var allVersions = await (findPackageByIdResource ?? await GetFindPackageByIdResourceAsync(cancellationToken)).GetAllVersionsAsync(lc, CacheContext, NuGetLogger, cancellationToken);
         if (allVersions is null || !allVersions.Any())
@@ -161,7 +161,7 @@ public class LocalNuGetFeedService(IValidatedRepositoryPathsService settings, IL
         var packageUpdate = await GetPackageUpdateResourceAsync(cancellationToken);
         foreach (var version in allVersions)
         {
-            using var scope2 = Logger.BeginDeleteLocalPackageVersionScope(lc, version, PackageSourceLocation);
+            using var scope2 = Logger.BeginDeleteDownloadedPackageVersionScope(lc, version, PackageSourceLocation);
             bool success;
             try
             {

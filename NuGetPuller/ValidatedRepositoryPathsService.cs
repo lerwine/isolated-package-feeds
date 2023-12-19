@@ -24,7 +24,7 @@ public sealed class ValidatedRepositoryPathsService<T>(IOptions<T> options, IHos
     /// Lazy validation for the <see cref="ISharedAppSettings.UpstreamServiceIndexUrl"/> setting.
     /// </summary>
     public LazyChainedConversion<string, Uri> UpstreamServiceIndexUrl { get; } = new LazyChainedConversion<string, Uri>(
-        () => options.Value.OverrideUpstreamServiceIndex.TryGetNonWhitesSpace(options.Value.UpstreamServiceIndexUrl, out string result) ? result : Default_Service_Index_URL,
+        () => options.Value.OverrideUpstreamServiceIndex.TryGetNonWhitesSpace(options.Value.UpstreamServiceIndexUrl, out string result) ? result : Default_Upstream_Service_Index_URL,
         value =>
         {
             Uri result;
@@ -49,11 +49,11 @@ public sealed class ValidatedRepositoryPathsService<T>(IOptions<T> options, IHos
         });
 
     /// <summary>
-    /// Lazy validation for the <see cref="ISharedAppSettings.LocalFeedPath"/> setting.
+    /// Lazy validation for the <see cref="ISharedAppSettings.DownloadedPackagesFolder"/> setting.
     /// </summary>
-    public LazyChainedConversion<string, DirectoryInfo> LocalFeedPath { get; } = new LazyChainedConversion<string, DirectoryInfo>(
-        () => options.Value.OverrideLocalFeed.TryGetNonWhitesSpace(options.Value.LocalFeedPath, out string result) ? result :
-            Path.Combine(hostEnvironment.ContentRootPath, Default_Local_Feed_Folder_Name),
+    public LazyChainedConversion<string, DirectoryInfo> DownloadedPackagesFolder { get; } = new LazyChainedConversion<string, DirectoryInfo>(
+        () => options.Value.OverrideDownloadedPackagesFolder.TryGetNonWhitesSpace(options.Value.DownloadedPackagesFolder, out string result) ? result :
+            Path.Combine(hostEnvironment.ContentRootPath, Default_Downloaded_Packages_Folder_Name),
         value =>
         {
             string path = value;

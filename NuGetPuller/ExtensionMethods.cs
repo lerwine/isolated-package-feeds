@@ -8,9 +8,9 @@ namespace NuGetPuller;
 
 public static class ExtensionMethods
 {
-    public static bool Contains(this IEnumerable<OfflinePackageManifest>? source, PackageIdentity identity) => source is not null && identity is not null && source.Any(m => m.Equals(identity));
+    public static bool Contains(this IEnumerable<OfflinePackageMetadata>? source, PackageIdentity identity) => source is not null && identity is not null && source.Any(m => m.Equals(identity));
 
-    public static bool Contains(this IEnumerable<OfflinePackageManifest>? source, string packageId, NuGetVersion? version = null) => source is not null && packageId is not null &&
+    public static bool Contains(this IEnumerable<OfflinePackageMetadata>? source, string packageId, NuGetVersion? version = null) => source is not null && packageId is not null &&
         ((version is null) ? source.Any(m => m.Equals(packageId)) : source.Any(m => m.Equals(packageId, version)));
 
     /// <summary>
@@ -19,13 +19,13 @@ public static class ExtensionMethods
     /// <param name="source">The offline package manifest list.</param>
     /// <param name="metadata">The package metadata to add.</param>
     /// <returns>The identities of the added packages.</returns>
-    public static async IAsyncEnumerable<PackageIdentity> ConcatAsync(this ICollection<OfflinePackageManifest> source, IAsyncEnumerable<IPackageSearchMetadata> metadata)
+    public static async IAsyncEnumerable<PackageIdentity> ConcatAsync(this ICollection<OfflinePackageMetadata> source, IAsyncEnumerable<IPackageSearchMetadata> metadata)
     {
         await foreach (var item in metadata)
         {
             var identity = item.Identity;
             string id = identity.Id;
-            OfflinePackageManifest? existing = source.FirstOrDefault(p => PackageIdentitifierComparer.Equals(id, p.Identifier));
+            OfflinePackageMetadata? existing = source.FirstOrDefault(p => PackageIdentitifierComparer.Equals(id, p.Identifier));
             if (existing is null)
             {
                 source.Add(new(item));
@@ -56,13 +56,13 @@ public static class ExtensionMethods
     /// <param name="source">The offline package manifest list.</param>
     /// <param name="metadata">The package metadata to add.</param>
     /// <returns>The identities of the added packages.</returns>
-    public static IEnumerable<PackageIdentity> Concat(this ICollection<OfflinePackageManifest> source, IEnumerable<IPackageSearchMetadata> metadata)
+    public static IEnumerable<PackageIdentity> Concat(this ICollection<OfflinePackageMetadata> source, IEnumerable<IPackageSearchMetadata> metadata)
     {
         foreach (var item in metadata)
         {
             var identity = item.Identity;
             string id = identity.Id;
-            OfflinePackageManifest? existing = source.FirstOrDefault(p => PackageIdentitifierComparer.Equals(id, p.Identifier));
+            OfflinePackageMetadata? existing = source.FirstOrDefault(p => PackageIdentitifierComparer.Equals(id, p.Identifier));
             if (existing is null)
             {
                 source.Add(new(item));

@@ -6,9 +6,9 @@ public class TestAppSettings : ISharedAppSettings
 
     public string? OverrideUpstreamServiceIndex { get; set; }
 
-    public string LocalFeedPath { get; set; } = string.Empty;
+    public string DownloadedPackagesFolder { get; set; } = string.Empty;
 
-    public string? OverrideLocalFeed { get; set; }
+    public string? OverrideDownloadedPackagesFolder { get; set; }
 
     public string GlobalPackagesFolder { get; set; } = string.Empty;
 

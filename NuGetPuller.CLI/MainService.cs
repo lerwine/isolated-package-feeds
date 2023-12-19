@@ -56,7 +56,7 @@ public class MainService : BackgroundService
         throw new NotImplementedException();
     }
 
-    private void WriteListLocalHelpToConsole()
+    private void WriteListDownloadedHelpToConsole()
     {
         throw new NotImplementedException();
     }
@@ -91,7 +91,7 @@ public class MainService : BackgroundService
         throw new NotImplementedException();
     }
 
-    private static async Task WriteLocalPackagesToConsoleAsync(ILocalNuGetFeedService localClientService, bool includeVersions, CancellationToken cancellationToken)
+    private static async Task WriteDownloadedPackagesToConsoleAsync(IDownloadedPackagesService localClientService, bool includeVersions, CancellationToken cancellationToken)
     {
         var allPackages = localClientService.GetAllPackagesAsync(cancellationToken);
         var count = 0;
@@ -192,7 +192,7 @@ public class MainService : BackgroundService
             if (versionStrings is not null)
                 WriteConsoleWarning("Command line switch {0} is ignored because {1} is not specified.", CommandLineSwitches.COMMAND_LINE_SWITCH_version,
                     CommandLineSwitches.COMMAND_LINE_SWITCH_package_id);
-            var localService = serviceProvider.GetRequiredService<ILocalNuGetFeedService>();
+            var localService = serviceProvider.GetRequiredService<IDownloadedPackagesService>();
             if (noDownload)
                 await CheckAllDependenciesAsync(localService, logger, cancellationToken);
             else
@@ -203,7 +203,7 @@ public class MainService : BackgroundService
             packageIds = packageIds.Distinct(PackageIdentitifierComparer).ToArray();
             if (ArePackageIdsValid(packageIds))
             {
-                var localService = serviceProvider.GetRequiredService<ILocalNuGetFeedService>();
+                var localService = serviceProvider.GetRequiredService<IDownloadedPackagesService>();
                 if (versionStrings is null)
                 {
                     if (noDownload)
@@ -231,12 +231,12 @@ public class MainService : BackgroundService
             if (versionStrings is not null)
                 WriteConsoleWarning("Command line switch {0} is ignored because {1} is not specified.", CommandLineSwitches.COMMAND_LINE_SWITCH_version,
                     CommandLineSwitches.COMMAND_LINE_SWITCH_package_id);
-            await ExportBundleAsync(path, createFrom, saveTo, serviceProvider.GetRequiredService<ILocalNuGetFeedService>(), logger, cancellationToken);
+            await ExportBundleAsync(path, createFrom, saveTo, serviceProvider.GetRequiredService<IDownloadedPackagesService>(), logger, cancellationToken);
         }
         else if (versionStrings is null)
-            await ExportBundleAsync(path, createFrom, saveTo, packageIds, serviceProvider.GetRequiredService<ILocalNuGetFeedService>(), logger, cancellationToken);
+            await ExportBundleAsync(path, createFrom, saveTo, packageIds, serviceProvider.GetRequiredService<IDownloadedPackagesService>(), logger, cancellationToken);
         else if (TryParseVersionStrings(versionStrings.Distinct(PackageIdentitifierComparer).ToArray(), out NuGetVersion[] versions))
-            await ExportBundleAsync(path, createFrom, saveTo, packageIds, versions, serviceProvider.GetRequiredService<ILocalNuGetFeedService>(), logger, cancellationToken);
+            await ExportBundleAsync(path, createFrom, saveTo, packageIds, versions, serviceProvider.GetRequiredService<IDownloadedPackagesService>(), logger, cancellationToken);
     }
 
     private static Task OnDownload(string[] packageIds, string[]? versionStrings, bool noDependencies, string? saveTo, IServiceProvider serviceProvider, ILogger logger, CancellationToken cancellationToken)
@@ -272,7 +272,7 @@ public class MainService : BackgroundService
             using var scope = _serviceProvider.CreateScope();
             if (_settings.CheckDependencies)
             {
-                if (_settings.ListLocal)
+                if (_settings.ListDownloaded)
                     WriteConsoleError("Command line switch {0} cannot be used with {1}.", CommandLineSwitches.COMMAND_LINE_SWITCH_check_depencencies, CommandLineSwitches.COMMAND_LINE_SWITCH_list);
                 else if (!string.IsNullOrWhiteSpace(_settings.CreateBundle))
                     WriteConsoleError("Command line switch {0} cannot be used with {1}.", CommandLineSwitches.COMMAND_LINE_SWITCH_check_depencencies, CommandLineSwitches.COMMAND_LINE_SWITCH_create_bundle);
@@ -304,7 +304,7 @@ public class MainService : BackgroundService
             }
             else
             {
-                if (_settings.ListLocal)
+                if (_settings.ListDownloaded)
                 {
                     if (!string.IsNullOrWhiteSpace(_settings.CreateBundle))
                         WriteConsoleError("Command line switch {0} cannot be used with {1}.", CommandLineSwitches.COMMAND_LINE_SWITCH_list, CommandLineSwitches.COMMAND_LINE_SWITCH_create_bundle);
@@ -327,9 +327,9 @@ public class MainService : BackgroundService
                         CheckIgnoredDependentCommandLineArgument(_settings.CreateFrom, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_create_from, CommandLineSwitches.COMMAND_LINE_SWITCH_create_bundle));
                         CheckIgnoredDependentCommandLineArgument(_settings.SaveMetaDataTo, () => (CommandLineSwitches.COMMAND_LINE_SWITCH_save_metadata_to, CommandLineSwitches.COMMAND_LINE_SWITCH_create_bundle));
                         if (_settings.Help)
-                            WriteListLocalHelpToConsole();
+                            WriteListDownloadedHelpToConsole();
                         else
-                            await WriteLocalPackagesToConsoleAsync(scope.ServiceProvider.GetRequiredService<ILocalNuGetFeedService>(), _settings.IncludeVersions, stoppingToken);
+                            await WriteDownloadedPackagesToConsoleAsync(scope.ServiceProvider.GetRequiredService<IDownloadedPackagesService>(), _settings.IncludeVersions, stoppingToken);
                     }
                 }
                 else
@@ -426,33 +426,33 @@ public class MainService : BackgroundService
             // var packageIds = _settings.Remove?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(PackageIdentitifierComparer);
             // HashSet<PackageIdentity> deletedPackages = new(PackageIdentityComparer.Default);
             // if (packageIds is not null && packageIds.Any())
-            //     await foreach (var (package, success) in scope.ServiceProvider.GetRequiredService<ILocalNuGetFeedService>().DeleteAsync(packageIds, stoppingToken))
+            //     await foreach (var (package, success) in scope.ServiceProvider.GetRequiredService<IDownloadedPackagesService>().DeleteAsync(packageIds, stoppingToken))
             //         if (success)
             //             deletedPackages.Add(package);
             // if ((packageIds = _settings.Add?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(PackageIdentitifierComparer)) is not null && packageIds.Any())
             // {
             //     Dictionary<string, HashSet<NuGetVersion>> packagesAdded = new(PackageIdentitifierComparer);
-            //     var localClientService = scope.ServiceProvider.GetRequiredService<ILocalNuGetFeedService>();
+            //     var localClientService = scope.ServiceProvider.GetRequiredService<IDownloadedPackagesService>();
             //     foreach (string id in packageIds)
-            //         await AddToLocalFromRemote(id, packagesAdded, localClientService, scope.ServiceProvider.GetRequiredService<IUpstreamNuGetClientService>(), _logger, stoppingToken);
+            //         await AddToDownloadedPackagesFolderFromRemote(id, packagesAdded, localClientService, scope.ServiceProvider.GetRequiredService<IUpstreamNuGetClientService>(), _logger, stoppingToken);
             // }
             // if (validatedSettings.Import.TryGetResult(out FileSystemInfo? importFrom))
             //     throw new NotImplementedException();
             // // await ImportAsync(validatedSettings.ImportPath, localClientService, _logger, stoppingToken);
             // if (_settings.UpdateAll)
             // {
-            //     var asyncEn = scope.ServiceProvider.GetRequiredService<ILocalNuGetFeedService>().GetAllPackagesAsync(stoppingToken);
+            //     var asyncEn = scope.ServiceProvider.GetRequiredService<IDownloadedPackagesService>().GetAllPackagesAsync(stoppingToken);
             //     if (!(packageIds = asyncEn.ToBlockingEnumerable(stoppingToken).Select(p => p.Identity.Id)).Any())
-            //         _logger.NoLocalPackagesExist();
+            //         _logger.NoDownloadedPackagesExist();
             //     else
             //         await scope.ServiceProvider.GetRequiredService<PackageUpdateService>().UpdatePackagesAsync(packageIds, stoppingToken);
             // }
             // else if ((packageIds = _settings.Update?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(PackageIdentitifierComparer)) is not null && packageIds.Any())
             //     await scope.ServiceProvider.GetRequiredService<PackageUpdateService>().UpdatePackagesAsync(packageIds, stoppingToken);
-            // if (_settings.ListLocal)
-            //     await ListLocalPackagesAsync(scope.ServiceProvider.GetRequiredService<ILocalNuGetFeedService>().GetAllPackagesAsync(stoppingToken).ToBlockingEnumerable(stoppingToken), validatedSettings.ExportLocalManifest.TryGetResult(out FileInfo? exportLocalManifest) ? exportLocalManifest.FullName : null, _logger, stoppingToken);
-            // if (validatedSettings.ExportLocalManifest.TryGetResult(out FileInfo? fileInfo))
-            //     await ExportLocalManifestAsync(scope.ServiceProvider.GetRequiredService<ILocalNuGetFeedService>().GetAllPackagesAsync(stoppingToken).ToBlockingEnumerable(stoppingToken), fileInfo.FullName, _logger, stoppingToken);
+            // if (_settings.ListDownloaded)
+            //     await ListDownloadedPackagesAsync(scope.ServiceProvider.GetRequiredService<IDownloadedPackagesService>().GetAllPackagesAsync(stoppingToken).ToBlockingEnumerable(stoppingToken), validatedSettings.ExportMetaData.TryGetResult(out FileInfo? exportLocalManifest) ? exportLocalManifest.FullName : null, _logger, stoppingToken);
+            // if (validatedSettings.ExportMetaData.TryGetResult(out FileInfo? fileInfo))
+            //     await ExportDownloadedPackageManifestAsync(scope.ServiceProvider.GetRequiredService<IDownloadedPackagesService>().GetAllPackagesAsync(stoppingToken).ToBlockingEnumerable(stoppingToken), fileInfo.FullName, _logger, stoppingToken);
             // if (validatedSettings.ExportBundle.TryGetResult(out fileInfo))
             //     throw new NotImplementedException();
             // // await ExportBundleAsync(validatedSettings.ExportBundlePath, validatedSettings.TargetManifestFilePath, validatedSettings.TargetManifestSaveAsPath, localClientService, _logger, stoppingToken);

@@ -5,12 +5,12 @@ using NuGetPuller.UnitTests.Helpers;
 
 namespace NuGetPuller.UnitTests;
 
-public class LocalNuGetFeedServiceTest
+public class DownloadedPackagesServiceTest
 {
     private HostingFake _hosting;
 
     [SetUp]
-    public void Setup() => _hosting = HostingFake.Setup<LocalNuGetFeedServiceTest>();
+    public void Setup() => _hosting = HostingFake.Setup<DownloadedPackagesServiceTest>();
 
     [TearDown]
     public async Task TearDown() => await _hosting.TearDownAsync();
@@ -19,7 +19,7 @@ public class LocalNuGetFeedServiceTest
     public async Task AddPackageAsyncTest()
     {
         using TempStagingFolder tempStagingFolder = new();
-        var target = _hosting.Host.Services.GetRequiredService<ILocalNuGetFeedService>();
+        var target = _hosting.Host.Services.GetRequiredService<IDownloadedPackagesService>();
         string packageId = "Microsoft.Extensions.Logging.Abstractions";
         var version = NuGetVersion.Parse("7.0.0");
         Assert.That(await target.DoesPackageExistAsync(packageId, version, CancellationToken.None), Is.False);
@@ -49,7 +49,7 @@ public class LocalNuGetFeedServiceTest
     public async Task DeleteAsyncTest()
     {
         using TempStagingFolder tempStagingFolder = new();
-        var target = _hosting.Host.Services.GetRequiredService<ILocalNuGetFeedService>();
+        var target = _hosting.Host.Services.GetRequiredService<IDownloadedPackagesService>();
         string packageId = "Microsoft.Extensions.Logging.Abstractions";
         var version1 = NuGetVersion.Parse("7.0.0");
         var version2 = NuGetVersion.Parse("6.0.4");

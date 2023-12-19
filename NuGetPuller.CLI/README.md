@@ -8,7 +8,7 @@
   - [Add Package Files](#add-package-files)
   - [Remove Packages](#remove-packages)
   - [Check Package Dependencies](#check-package-dependencies)
-  - [Export Local NuGet Feed Metadata](#export-local-nuget-feed-metadata)
+  - [Export Downloaded NuGet Package Metadata](#export-downloaded-nuget-package-metadata)
   - [Create File Transfer Bundle](#create-file-transfer-bundle)
   - [Override Application Settings](#override-application-settings)
 - [Application Settings](#application-settings)
@@ -128,7 +128,7 @@ Example:
 NuGetPuller --check-depencencies=System.Text.Json,Microsoft.Extensions.Hosting --no-download
 ```
 
-### Export Local NuGet Feed Metadata
+### Export Downloaded NuGet Package Metadata
 
 Create a [NuGet Feed Metadata File](../NuGetPuller/README.md#nuget-feed-metadata-file) that represents all versions of all packages in the [Downloaded Packages Feed](../NuGetPuller/README.md#locally-downloaded-packages-folder).
 
@@ -175,12 +175,12 @@ NuGetPuller --create-bundle=Updates.zip --create-from=DisconnectedServer.nuget.m
 The following optional command line arguments can be used to override [Applicaton Settings](../NuGetPuller/README.md#application-settings),
 and can be used in combination with other command line arguments:
 
-- `--local-feed-path`: Override the [LocalFeedPath](../NuGetPuller/README.md#local-nuget-feed-path) setting.
+- `--downloaded-packages-folder`: Override the [DownloadedPackagesFolder](../NuGetPuller/README.md#local-nuget-feed-path) setting.
   
   Example:
 
   ```bash
-  NuGetPuller --local-feed-path=john.doe/downloads --check-depencencies="System.Text.Json" --no-download
+  NuGetPuller --downloaded-packages-folder=john.doe/downloads --check-depencencies="System.Text.Json" --no-download
   ```
 
 - `--upstream-service-index`: Override the [UpstreamServiceIndexUrl](../NuGetPuller/README.md#upstream-service-index-url) setting.

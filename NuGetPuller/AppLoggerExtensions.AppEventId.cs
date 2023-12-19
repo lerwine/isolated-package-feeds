@@ -45,7 +45,7 @@ public static partial class AppLoggerExtensions
         /// <summary>
         /// Event ID for I/O errors when accessing NuGet Feed paths.
         /// </summary>
-        LocalFeedIOException = 0x8,
+        DownloadedPackagesFolderIOException = 0x8,
 
         /// <summary>
         /// Event ID for I/O errors for no-existent NuGet Feed paths.
@@ -55,7 +55,7 @@ public static partial class AppLoggerExtensions
         /// <summary>
         /// Event ID for invalid NuGet package metadata.
         /// </summary>
-        InvalidLocalMetaDataExportPath = 0xA,
+        InvalidMetaDataExportPath = 0xA,
 
         /// <summary>
         /// Event ID for security errors when saving or loading metadata files.
@@ -108,7 +108,7 @@ public static partial class AppLoggerExtensions
         PackageAlreadyAdded = 0x14,
 
         /// <summary>
-        /// Event ID when a specific package version could not be removed from the Local NuGet Feed.
+        /// Event ID when a specific package version could not be removed from the Downloaded NuGet Packages Folder.
         /// </summary>
         PackageVersionDeleteFailure = 0x15,
 
@@ -118,14 +118,14 @@ public static partial class AppLoggerExtensions
         UnexpectedPackageDownloadFailure = 0x16,
 
         /// <summary>
-        /// Event ID for unexpected error while adding a pacakge to the Local NuGet Feed.
+        /// Event ID for unexpected error while adding a pacakge to the Downloaded NuGet Packages Folder.
         /// </summary>
         UnexpectedAddFailure = 0x17,
 
         /// <summary>
-        /// Event ID when there are no packages in the Local NuGet Feed.
+        /// Event ID when there are no packages in the Downloaded NuGet Packages Folder.
         /// </summary>
-        NoLocalPackagesExist = 0x18,
+        NoDownloadedPackagesExist = 0x18,
 
         /// <summary>
         /// Event ID when an export bundle file content is invalid.
@@ -138,8 +138,8 @@ public static partial class AppLoggerExtensions
         DownloadingNuGetPackage = 0x1A,
         InvalidCreateFromPath = 0x1B,
         IgnoredDependentCommandLineArgument = 0x1C,
-        InvalidSaveManifestToPath = 0x1D,
-        PackageManifestOpenError = 0x1E,
+        InvalidSaveMetadataToPath = 0x1D,
+        PackageMetadataOpenError = 0x1E,
         PackageMetadataFileAccessDenied = 0x1F,
         PackageMetadataFileReadError = 0x20,
         PackageExportAccessDenied = 0x21,

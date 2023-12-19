@@ -6,7 +6,7 @@ using static NuGetPuller.NuGetPullerStatic;
 
 namespace NuGetPuller.UnitTests.Helpers;
 
-record HostingFake(IHost Host, string PreviousCwd, DirectoryInfo BaseDirectory, DirectoryInfo Cwd, DirectoryInfo LocalRepo)
+record HostingFake(IHost Host, string PreviousCwd, DirectoryInfo BaseDirectory, DirectoryInfo Cwd, DirectoryInfo DownloadedPackages)
 {
     private const string DIRNAME_CWD = "CWD";
 
@@ -24,7 +24,7 @@ record HostingFake(IHost Host, string PreviousCwd, DirectoryInfo BaseDirectory, 
         var previousCwd = Directory.GetCurrentDirectory();
         Directory.SetCurrentDirectory(cwd.FullName);
 
-        DirectoryInfo localRepo = new(Path.Combine(testContext.TestDirectory, Default_Local_Feed_Folder_Name));
+        DirectoryInfo localRepo = new(Path.Combine(testContext.TestDirectory, Default_Downloaded_Packages_Folder_Name));
         if (localRepo.Exists)
             localRepo.Delete(true);
 
@@ -44,11 +44,11 @@ record HostingFake(IHost Host, string PreviousCwd, DirectoryInfo BaseDirectory, 
             .ValidateDataAnnotations();
         builder.Services
             .AddSingleton<IValidatedRepositoryPathsService, ValidatedRepositoryPathsService<TestAppSettings>>()
-            .AddSingleton<ILocalNuGetFeedService, LocalNuGetFeedService>()
+            .AddSingleton<IDownloadedPackagesService, DownloadedPackagesService>()
             .AddSingleton<IUpstreamNuGetClientService, UpstreamNuGetClientService>();
         var host = builder.Build();
         host.Start();
-        return new(Host: host, PreviousCwd: previousCwd, BaseDirectory: baseDirectory, Cwd: cwd, LocalRepo: localRepo);
+        return new(Host: host, PreviousCwd: previousCwd, BaseDirectory: baseDirectory, Cwd: cwd, DownloadedPackages: localRepo);
     }
 
     internal async Task TearDownAsync()

@@ -14,7 +14,7 @@ public static class CommandLineSwitches
     /// <summary>
     /// List all packages in the local feed.
     /// </summary>
-    /// <remarks>This is mapped as a boolean switch to <see cref="AppSettings.ListLocal"/>.</remarks>
+    /// <remarks>This is mapped as a boolean switch to <see cref="AppSettings.ListDownloaded"/>.</remarks>
     public const string COMMAND_LINE_SWITCH_list = "--list";
 
     /// <summary>
@@ -110,9 +110,9 @@ public static class CommandLineSwitches
     public const string COMMAND_LINE_SWITCH_upstream_2D_service_2D_index = "--upstream-service-index";
 
     /// <summary>
-    /// Gets the command line switch that sets the <see cref="AppSettings.OverrideLocalFeed" /> value.
+    /// Gets the command line switch that sets the <see cref="AppSettings.OverrideDownloadedPackagesFolder" /> value.
     /// </summary>
-    public const string COMMAND_LINE_SWITCH_local_2D_feed_2D_path = "--local-feed-path";
+    public const string COMMAND_LINE_SWITCH_downloaded_2D_packages_2D_folder = "--downloaded-packages-folder";
 
     /// <summary>
     /// Gets the command line switch that sets the <see cref="AppSettings.OverrideGlobalPackagesFolder" /> value.
