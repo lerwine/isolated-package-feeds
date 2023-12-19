@@ -126,7 +126,7 @@ The initial scope is to create NuGet and NPM Package Feed services as well as co
 - [XML Toolkit](https://marketplace.visualstudio.com/items?itemName=SAPOSS.xml-toolkit)
 - [XML Tools](https://marketplace.visualstudio.com/items?itemName=DotJoshJohnson.xml)
 - [XML](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-xml)
-- 
+
 ## References
 
 General development reference links
