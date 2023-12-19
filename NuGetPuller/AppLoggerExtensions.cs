@@ -39,9 +39,9 @@ public static partial class AppLoggerExtensions
     private const string MESSAGE_Global_Packages_Folder = "Global NuGet Packages Folder";
 
     private const string Message_Not_File = "does not refer to a file";
-    
+
     private const string Message_Does_Not_Exist = "does not exist";
-    
+
     #region Nuget Logger Event Methods
 
     #region NuGetDebug Logger Event Methods
@@ -399,7 +399,6 @@ public static partial class AppLoggerExtensions
     private static readonly Action<ILogger, string, Exception?> DownloadedPackagesFolderPathNotFound = LoggerMessage.Define<string>(LogLevel.Critical,
         EventId_NuGetFeedPathNotFound, $"{Message_Downloaded_Packages_Folder_Path} \"{{Path}}\" {Message_Not_Found}.");
 
-
     // [LoggerMessage(EventId = (int)AppEventId.NuGetFeedPathNotFound, Level = LogLevel.Critical, Message = $"{Message_Downloaded_Packages_Folder_Path} \"{{Path}}\" {Message_Not_Found}.")]
     // private static partial void DownloadedPackagesFolderPathNotFound(ILogger logger, string path, Exception? exception);
 
@@ -443,7 +442,6 @@ public static partial class AppLoggerExtensions
 
     private static readonly Action<ILogger, string, Exception?> ExportDownloadedMetaDataPathTooLong = LoggerMessage.Define<string>(LogLevel.Critical,
         EventId_InvalidMetaDataExportPath, $"{MESSAGE_Downloaded_Nuget_Package_MetaData_Export_Path} \"{{Path}}\" {Message_Is_Too_Long}.");
-
 
     // [LoggerMessage(EventId = (int)AppEventId.InvalidMetaDataExportPath, Level = LogLevel.Critical, Message = $"{MESSAGE_Downloaded_Nuget_Package_MetaData_Export_Path} \"{{Path}}\" {Message_Is_Too_Long}.")]
     // private static partial void ExportDownloadedMetaDataPathTooLong(ILogger logger, string path, Exception exception);
@@ -602,20 +600,13 @@ public static partial class AppLoggerExtensions
             NuGetPackageNotFoundInRemoteServer(logger, packageId, clientService.PackageSourceLocation, exception);
     }
 
-
     [LoggerMessage(EventId = (int)AppEventId.NuGetPackageNotFound, Level = LogLevel.Warning,
         Message = "Version {Version} of package {PackageId} not found in NuGet Server (Service Index URL = {URL}).")]
     private static partial void NuGetPackageNotFoundInRemoteServer(ILogger logger, NuGetVersion version, string packageId, string url, Exception? exception);
 
-    [Obsolete("Put version argument before packageId")]
-    private static void NuGetPackageNotFoundInRemoteServer(ILogger logger, string packageId, NuGetVersion version, string url, Exception? exception) => NuGetPackageNotFoundInRemoteServer(logger, version, packageId, url, exception);
-    
     [LoggerMessage(EventId = (int)AppEventId.NuGetPackageNotFound, Level = LogLevel.Warning,
         Message = "Version {Version} of package {PackageId} not found in Downloaded Package Folder {PackageSourceLocation}.")]
     private static partial void NuGetPackageNotFoundInDownloadedPackageFolder(ILogger logger, NuGetVersion version, string packageId, string packageSourceLocation, Exception? exception);
-    
-    [Obsolete("Put version argument before packageId")]
-    private static void NuGetPackageNotFoundInDownloadedPackageFolder(ILogger logger, string packageId, NuGetVersion version, string packageSourceLocation, Exception? exception) => NuGetPackageNotFoundInDownloadedPackageFolder(logger, version, packageId, packageSourceLocation, exception);
 
     [LoggerMessage(EventId = (int)AppEventId.NuGetPackageNotFound, Level = LogLevel.Warning,
         Message = "Version {Version} of package {PackageId} not found in Upstream NuGet Feed {PackageSourceLocation}.")]
@@ -877,7 +868,7 @@ public static partial class AppLoggerExtensions
     /// </summary>
     /// <param name="logger">The current logger.</param>
     /// <param name="packageId">The identifier of the existing package.</param>
-    /// <param name="exception">The optional exception that caused the event.</param>;
+    /// <param name="exception">The optional exception that caused the event.</param>
     [LoggerMessage(EventId = (int)AppEventId.PackageAlreadyAdded, Level = LogLevel.Warning, Message = "NuGet Package {PackageId} has already been added to the Downloaded NuGet Packages Folder.")]
     public static partial void NuGetPackageAlreadyAdded(this ILogger logger, string packageId, Exception? exception = null);
 
@@ -943,7 +934,7 @@ public static partial class AppLoggerExtensions
     public static readonly EventId EventId_InvalidExportBundle = new((int)AppEventId.InvalidExportBundle, nameof(InvalidExportBundle));
 
     private const string Message_Export_Bundle_Path = "Export Bundle path";
-    
+
     private static readonly Action<ILogger, string, Exception?> LogInvalidExportBundle = LoggerMessage.Define<string>(LogLevel.Critical,
         EventId_InvalidExportBundle, $"{Message_Export_Bundle_Path} {{Path}} {Message_Is_Invalid}.");
 
@@ -974,6 +965,7 @@ public static partial class AppLoggerExtensions
     /// <param name="path">The export bundle path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     public static void ExportBundlePathNotAFile(this ILogger logger, string path, Exception? exception = null) => LogExportBundlePathNotAFile(logger, path, exception);
+
     // [LoggerMessage(EventId = (int)AppEventId.InvalidExportBundle, Level = LogLevel.Critical, Message = $"{Message_Export_Bundle_Path} {{Path}} {Message_Not_File}.")]
     // public static partial void ExportBundlePathNotAFile(this ILogger logger, string path, Exception? exception = null);
 
@@ -984,7 +976,7 @@ public static partial class AppLoggerExtensions
     }
 
     private const string Message_Export_Bundle_Path_Parent_Directory = "Parent directory of Export Bundle path";
-    
+
     private static readonly Action<ILogger, string, Exception?> LogExportBundleDirectoryNotFound = LoggerMessage.Define<string>(LogLevel.Critical,
         EventId_InvalidExportBundle, $"{Message_Export_Bundle_Path_Parent_Directory} {{Path}} {Message_Does_Not_Exist}.");
 
@@ -995,6 +987,7 @@ public static partial class AppLoggerExtensions
     /// <param name="path">The export bundle path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
     public static void ExportBundleDirectoryNotFound(this ILogger logger, string path, Exception? exception = null) => LogExportBundleDirectoryNotFound(logger, path, exception);
+
     // [LoggerMessage(EventId = (int)AppEventId.InvalidExportBundle, Level = LogLevel.Critical, Message = $"{Message_Export_Bundle_Path_Parent_Directory} {{Path}} {Message_Does_Not_Exist}.")]
     // public static partial void ExportBundleDirectoryNotFound(this ILogger logger, string path, Exception? exception = null);
 
@@ -1015,7 +1008,8 @@ public static partial class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The export bundle path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void ExportBundleAccessError(this ILogger logger, string path, Exception? exception = null) => LogExportBundleAccessError(logger, path, exception);
+    public static void ExportBundleAccessError(this ILogger logger, string path, Exception? exception = null) => LogExportBundleAccessError(logger, path, exception)
+
     // [LoggerMessage(EventId = (int)AppEventId.InvalidExportBundle, Level = LogLevel.Critical, Message = $"{Message_ExportBundleAccessError} {{Path}}.")]
     // public static partial void ExportBundleAccessError(this ILogger logger, string path, Exception? exception = null);
 
@@ -1128,50 +1122,50 @@ public static partial class AppLoggerExtensions
     #endregion
 
     #region PackageMetadataOpenError Logger Event Methods
-    
+
     public static readonly EventId EventId_PackageMetadataOpenError = new((int)AppEventId.PackageMetadataOpenError, nameof(PackageMetadataOpenError));
 
     private const string MESSAGE_Package_Metadata_File = "Offline package metadata file";
-    
+
     private const string MESSAGE_Package_Metadata_Path = "Offline package metadata file path";
-    
+
     private const string MESSAGE_Package_Metadata_Parent_Directory = "Parent directgory of offline package metadata file path";
-    
+
     private static readonly Action<ILogger, string, Exception?> LogPackageMetadataOpenError = LoggerMessage.Define<string>(LogLevel.Error,
         EventId_PackageMetadataOpenError, $"{MESSAGE_Package_Metadata_Path} {{Path}} {Message_Is_Invalid}.");
 
     // [LoggerMessage(EventId = (int)AppEventId.PackageMetadataOpenError, Level = LogLevel.Error, EventName = nameof(PackageMetadataOpenError),
     //     Message = $"{MESSAGE_Package_Metadata_Path} {{Path}} {Message_Is_Invalid}.")]
     // private static partial void LogPackageMetadataOpenError(ILogger logger, string path, Exception? exception);
-    
+
     private static readonly Action<ILogger, string, Exception?> OfflinePackageMetadataFileNotFound = LoggerMessage.Define<string>(LogLevel.Error,
         EventId_PackageMetadataOpenError, $"{MESSAGE_Package_Metadata_File} {{Path}} {Message_Not_Found}.");
 
     // [LoggerMessage(EventId = (int)AppEventId.PackageMetadataOpenError, Level = LogLevel.Error,
     //     Message = $"{MESSAGE_Package_Metadata_File} {{Path}} {Message_Not_Found}.")]
     // private static partial void OfflinePackageMetadataFileNotFound(ILogger logger, string path, Exception? exception);
-    
+
     private static readonly Action<ILogger, string, Exception?> LogOfflinePackageMetadataDirectoryNotFound = LoggerMessage.Define<string>(LogLevel.Error,
         EventId_PackageMetadataOpenError, $"{MESSAGE_Package_Metadata_Parent_Directory} {{Path}} {Message_Does_Not_Exist}.");
 
     // [LoggerMessage(EventId = (int)AppEventId.PackageMetadataOpenError, Level = LogLevel.Error,
     //     Message = $"{MESSAGE_Package_Metadata_Parent_Directory} {{Path}} {Message_Does_Not_Exist}.")]
     // private static partial void LogOfflinePackageMetadataDirectoryNotFound(ILogger logger, string path, Exception? exception);
-    
+
     private static readonly Action<ILogger, string, Exception?> LogOfflinePackageMetadataNotAFile = LoggerMessage.Define<string>(LogLevel.Error,
-        EventId_PackageMetadataOpenError,  $"{MESSAGE_Package_Metadata_Path} {{Path}} {Message_Not_File}.");
+        EventId_PackageMetadataOpenError, $"{MESSAGE_Package_Metadata_Path} {{Path}} {Message_Not_File}.");
 
     // [LoggerMessage(EventId = (int)AppEventId.PackageMetadataOpenError, Level = LogLevel.Error,
     //     Message = $"{MESSAGE_Package_Metadata_Path} {{Path}} {Message_Not_File}.")]
     // private static partial void LogOfflinePackageMetadataNotAFile(ILogger logger, string path, Exception? exception);
-    
+
     private static readonly Action<ILogger, string, Exception?> OfflinePackageMetadataPathTooLong = LoggerMessage.Define<string>(LogLevel.Error,
         EventId_PackageMetadataOpenError, $"{MESSAGE_Package_Metadata_Path} {{Path}} {Message_Is_Too_Long}.");
 
     // [LoggerMessage(EventId = (int)AppEventId.PackageMetadataOpenError, Level = LogLevel.Error,
     //     Message = $"{MESSAGE_Package_Metadata_Path} {{Path}} {Message_Is_Too_Long}.")]
     // private static partial void OfflinePackageMetadataPathTooLong(ILogger logger, string path, Exception? exception);
-    
+
     /// <summary>
     /// Logs a <see cref="AppEventId.PackageMetadataOpenError"/> <see cref="LogLevel.Error"/> event message.
     /// </summary>
@@ -1198,23 +1192,23 @@ public static partial class AppLoggerExtensions
         LogPackageMetadataOpenError(logger, path, exception);
         return factory($"{MESSAGE_Package_Metadata_Path} \"{path}\" {Message_Is_Invalid}.");
     }
-    
+
     public static T OfflinePackageMetadataNotAFile<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : LoggedException
     {
         LogOfflinePackageMetadataNotAFile(logger, path, exception);
         return factory($"{MESSAGE_Package_Metadata_Path} \"{path}\" {Message_Not_File}.");
     }
-    
+
     public static T OfflinePackageMetadataDirectoryNotFound<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : LoggedException
     {
         LogOfflinePackageMetadataDirectoryNotFound(logger, path, exception);
         return factory($"{MESSAGE_Package_Metadata_Parent_Directory} \"{path}\" {Message_Does_Not_Exist}.");
     }
-    
+
     #endregion
 
     #region PackageMetadataFileAccessDenied Logger Event Methods
-    
+
     public static readonly EventId EventId_PackageMetadataFileAccessDenied = new((int)AppEventId.PackageMetadataFileAccessDenied, nameof(PackageMetadataFileAccessDenied));
 
     private const string MESSAGE_Access_To_Package_MetaData_File = "Access to the Offline NuGet Feed metadata file";
@@ -1234,7 +1228,7 @@ public static partial class AppLoggerExtensions
     // [LoggerMessage(EventId = (int)AppEventId.PackageMetadataFileAccessDenied, Level = LogLevel.Error,
     //     Message = $"{MESSAGE_InsufficientPermissionsForPackageMetadataFile} {{Path}}.")]
     // private static partial void InsufficientPermissionsForPackageMetadataFile(ILogger logger, string path, Exception? exception);
-    
+
     /// <summary>
     /// Logs a <see cref="AppEventId.PackageMetadataFileAccessDenied"/> <see cref="LogLevel.Error"/> event message.
     /// </summary>
@@ -1253,22 +1247,22 @@ public static partial class AppLoggerExtensions
         LogPackageMetadataFileAccessDenied(logger, path, exception);
         return factory($"{MESSAGE_Access_To_Package_MetaData_File} \"{path}\" {Message_Is_Denied}.");
     }
-    
+
     #endregion
 
     #region PackageMetadataFileReadError Logger Event Methods
-    
+
     public static readonly EventId EventId_PackageMetadataFileReadError = new((int)AppEventId.PackageMetadataFileReadError, nameof(PackageMetadataFileReadError));
 
     private const string MESSAGE_PackageMetadataFileReadError = "Error parsing JSON data from offline package metadata file";
-    
+
     private static readonly Action<ILogger, string, Exception?> LogPackageMetadataFileReadError = LoggerMessage.Define<string>(LogLevel.Error,
         EventId_PackageMetadataFileReadError, $"{MESSAGE_PackageMetadataFileReadError} {{Path}}.");
 
     // [LoggerMessage(EventId = (int)AppEventId.PackageMetadataFileReadError, Level = LogLevel.Error, EventName = nameof(PackageMetadataFileReadError),
     //     Message = $"{MESSAGE_PackageMetadataFileReadError} {{Path}}.")]
     // private static partial void LogPackageMetadataFileReadError(ILogger logger, string path, Exception? exception);
-    
+
     /// <summary>
     /// Logs a <see cref="AppEventId.PackageMetadataFileReadError"/> <see cref="LogLevel.Error"/> event message.
     /// </summary>
@@ -1282,17 +1276,17 @@ public static partial class AppLoggerExtensions
         LogPackageMetadataFileReadError(logger, path, exception);
         return factory($"{MESSAGE_PackageMetadataFileReadError} {path}.");
     }
-    
+
     #endregion
 
     #region PackageExportAccessDenied Logger Event Methods
-    
+
     public static readonly EventId EventId_PackageExportAccessDenied = new((int)AppEventId.PackageExportAccessDenied, nameof(PackageExportAccessDenied));
 
     private const string MESSAGE_Access_To_Package_File = "Access to the Offline NuGet Feed metadata file";
 
     private const string MESSAGE_InsufficientPermissionsForPackageExport = "Caller has insufficient permissions to the Offline NuGet Feed metadata file";
-    
+
     private static readonly Action<ILogger, string, Exception?> LogPackageExportAccessDenied = LoggerMessage.Define<string>(LogLevel.Error,
         EventId_PackageExportAccessDenied, $"{MESSAGE_Access_To_Package_File} {{Path}} {Message_Is_Denied}.");
 
@@ -1302,11 +1296,11 @@ public static partial class AppLoggerExtensions
     // [LoggerMessage(EventId = (int)AppEventId.PackageExportAccessDenied, Level = LogLevel.Error, EventName = nameof(PackageExportAccessDenied),
     //     Message = $"{MESSAGE_Access_To_Package_File} {{Path}} {Message_Is_Denied}.")]
     // private static partial void LogPackageExportAccessDenied(ILogger logger, string path, Exception? exception);
-    
+
     // [LoggerMessage(EventId = (int)AppEventId.PackageExportAccessDenied, Level = LogLevel.Error,
     //     Message = $"{MESSAGE_InsufficientPermissionsForPackageExport} {{Path}}.")]
     // private static partial void InsufficientPermissionsForPackageExport(ILogger logger, string path, Exception? exception);
-    
+
     /// <summary>
     /// Logs a <see cref="AppEventId.PackageExportAccessDenied"/> <see cref="LogLevel.Error"/> event message.
     /// </summary>
@@ -1325,22 +1319,22 @@ public static partial class AppLoggerExtensions
         LogPackageExportAccessDenied(logger, path, exception);
         return factory($"{MESSAGE_Access_To_Package_File} \"{path}\" {Message_Is_Denied}.");
     }
-    
+
     #endregion
 
     #region PackageExportWriteError Logger Event Methods
-    
+
     public static readonly EventId EventId_PackageExportWriteError = new((int)AppEventId.PackageExportWriteError, nameof(PackageExportWriteError));
 
     private static readonly Action<ILogger, string, Exception?> LogPackageExportWriteError = LoggerMessage.Define<string>(LogLevel.Error,
         EventId_PackageExportWriteError, $"{MESSAGE_PackageExportWriteError} {{Path}}.");
 
     private const string MESSAGE_PackageExportWriteError = "Error writing package contents to file";
-    
+
     // [LoggerMessage(EventId = (int)AppEventId.PackageExportWriteError, Level = LogLevel.Error, EventName = nameof(PackageExportWriteError),
     //     Message = $"{MESSAGE_PackageExportWriteError} {{Path}}.")]
     // private static partial void LogPackageExportWriteError(ILogger logger, string path, Exception? exception);
-    
+
     /// <summary>
     /// Logs a <see cref="AppEventId.PackageExportWriteError"/> <see cref="LogLevel.Error"/> event message.
     /// </summary>
@@ -1354,7 +1348,7 @@ public static partial class AppLoggerExtensions
         LogPackageExportWriteError(logger, path, exception);
         return factory($"{MESSAGE_PackageExportWriteError} {path}.");
     }
-    
+
     #endregion
 
     #region GetDownloadResource Scope
