@@ -1,5 +1,6 @@
 # Isolated Package Feeds
 
+- [About Isolated Package Feeds](#about-isolated-package-feeds)
 - [Projects in solution](#projects-in-solution)
 - [Required Solution Development Dependencies](#required-solution-development-dependencies)
   - [APIs](#apis)
@@ -7,6 +8,8 @@
   - [Suggested VS Code Extensions](#suggested-vs-code-extensions)
 - [References](#references)
 - [Package Sources](#package-sources)
+
+## About Isolated Package Feeds
 
 The goal of this project is to develop content feed provders for environments that are isolated from the public internet, which caches and synchronizes content from public feed providers.
 
