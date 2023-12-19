@@ -1,10 +1,31 @@
 # NuGetPuller Common Library
 
+- [About NuGetPuller](#about-nugetpuller)
+- [Links](#links)
+- [Application Settings](#application-settings)
+  - [Upstream Service Index URL](#upstream-service-index-url)
+  - [Local NuGet Feed Path](#local-nuget-feed-path)
+  - [Global Packages Folder Path](#global-packages-folder-path)
+  - [Example application settings](#example-application-settings)
+- [Development](#development)
+  - [High Performance Logging](#high-performance-logging)
+  - [NuGet](#nuget)
+    - [Example Projects](#example-projects)
+    - [NuGet Alternatives](#nuget-alternatives)
+
+## About NuGetPuller
+
 The purpose of this library is the basae class for applications that synchronize a Local NuGet Feed with an upstream NuGet repository as well as other locally-hosted NuGet repositories.
 
 An example use-case would be for a locally-hosted NuGet feed on a machine that does not have direct access to the internet. You can use this to download NuGet packages, including any dependencies, and then create a bundle of packages (a ZIP file) which can then be transferred to that disconnected host and imported into the Local NuGet Feed.
 
 This uses package manifest files to represent which packages already exist in other locally-hosted NuGet feeds. This minimizes bundle sizes, because it doesn't have to include packages that already exist in the target NuGet feed.
+
+## Links
+
+- [Isolate Pacakge Feeds Home](../README.md)
+- [NuGetPuller CLI](../NuGetPuller.CLI/README.md)
+- [Unit Tests](../NuGetPuller.UnitTests/README.md)
 
 ## Application Settings
 
@@ -60,9 +81,9 @@ The event name will be the same as the [AppLoggerExtensions.NuGetPullerEventId e
   - [NuGetGallery](https://github.com/NuGet/NuGetGallery)
   - [NuGet.Server](https://github.com/NuGet/NuGet.Server)
   - [NuGet.Client](https://github.com/NuGet/NuGet.Client)
-- [Overview of Hosting Your Own NuGet Repositorys | Microsoft Learn](https://learn.microsoft.com/en-au/nuget/hosting-packages/overview)
-  - [Using NuGet.Server to Host NuGet Repositorys | Microsoft Learn](https://learn.microsoft.com/en-au/nuget/hosting-packages/overview)
-  - [Setting up Local NuGet Repositorys | Microsoft Learn](https://learn.microsoft.com/en-au/nuget/hosting-packages/local-repositorys)
+- [Overview of Hosting Your Own NuGet Repositories | Microsoft Learn](https://learn.microsoft.com/en-au/nuget/hosting-packages/overview)
+  - [Using NuGet.Server to Host NuGet Repositories | Microsoft Learn](https://learn.microsoft.com/en-au/nuget/hosting-packages/overview)
+  - [Setting up Local NuGet Repositories | Microsoft Learn](https://learn.microsoft.com/en-au/nuget/hosting-packages/local-Repositories)
 - [NuGet Command-Line Interface (CLI) Reference | Microsoft Learn](https://learn.microsoft.com/en-us/nuget/reference/nuget-exe-cli-reference?source=recommendations)
 - [Creating a local NuGet repository for offline development | Codurance](https://www.codurance.com/publications/2015/05/04/creating-a-local-nuget-repository)
 - [Installing a .nupkg on an offline machine | Nathan Manzi's Blog](https://nmanzi.com/blog/installing-nupkg-offline)

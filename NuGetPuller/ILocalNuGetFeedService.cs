@@ -30,7 +30,6 @@ public interface ILocalNuGetFeedService : INuGetClientService
     /// <returns>Metadata for packages in Local NuGet Feed.</returns>
     IAsyncEnumerable<IPackageSearchMetadata> GetAllPackagesAsync(PackageSearchResource? packageSearchResource, CancellationToken cancellationToken);
 
-
     #endregion
 
     #region Methods using the NuGet V3 Push and Delete API
