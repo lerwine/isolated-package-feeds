@@ -6,10 +6,19 @@ using Newtonsoft.Json;
 
 namespace NuGetPuller;
 
+/// <summary>
+/// Static NuGetPuller classes, defaults, and definitions.
+/// </summary>
 public static class NuGetPullerStatic
 {
+    /// <summary>
+    /// Comparer for package identifier and version strings.
+    /// </summary>
     public static readonly StringComparer PackageIdentitifierComparer = StringComparer.OrdinalIgnoreCase;
 
+    /// <summary>
+    /// Settings for deserializing <see cref="OfflinePackageManifest" /> objects.
+    /// </summary>
     public static readonly JsonSerializerSettings MetadataDeSerializationSettings = new()
     {
         MaxDepth = 512,
@@ -18,5 +27,4 @@ public static class NuGetPullerStatic
         Converters = [new OfflinePackageManifestConverter()],
         Formatting = Formatting.Indented
     };
-    
 }
