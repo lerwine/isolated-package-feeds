@@ -3,6 +3,7 @@ using IsolatedPackageFeeds.Shared.LazyInit;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using static NuGetPuller.NuGetPullerStatic;
 
 namespace NuGetPuller;
 
@@ -23,7 +24,7 @@ public sealed class ValidatedRepositoryPathsService<T>(IOptions<T> options, IHos
     /// Lazy validation for the <see cref="ISharedAppSettings.UpstreamServiceIndexUrl"/> setting.
     /// </summary>
     public LazyChainedConversion<string, Uri> UpstreamServiceIndexUrl { get; } = new LazyChainedConversion<string, Uri>(
-        () => options.Value.OverrideUpstreamServiceIndex.TryGetNonWhitesSpace(options.Value.UpstreamServiceIndexUrl, out string result) ? result : ServiceDefaults.Default_Service_Index_URL,
+        () => options.Value.OverrideUpstreamServiceIndex.TryGetNonWhitesSpace(options.Value.UpstreamServiceIndexUrl, out string result) ? result : Default_Service_Index_URL,
         value =>
         {
             Uri result;
@@ -52,7 +53,7 @@ public sealed class ValidatedRepositoryPathsService<T>(IOptions<T> options, IHos
     /// </summary>
     public LazyChainedConversion<string, DirectoryInfo> LocalFeedPath { get; } = new LazyChainedConversion<string, DirectoryInfo>(
         () => options.Value.OverrideLocalFeed.TryGetNonWhitesSpace(options.Value.LocalFeedPath, out string result) ? result :
-            Path.Combine(hostEnvironment.ContentRootPath, ServiceDefaults.Default_Local_Feed_Folder_Name),
+            Path.Combine(hostEnvironment.ContentRootPath, Default_Local_Feed_Folder_Name),
         value =>
         {
             string path = value;

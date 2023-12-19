@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using static NuGetPuller.NuGetPullerStatic;
 
 namespace NuGetPuller.UnitTests.Helpers;
 
@@ -23,7 +24,7 @@ record HostingFake(IHost Host, string PreviousCwd, DirectoryInfo BaseDirectory, 
         var previousCwd = Directory.GetCurrentDirectory();
         Directory.SetCurrentDirectory(cwd.FullName);
 
-        DirectoryInfo localRepo = new(Path.Combine(testContext.TestDirectory, ServiceDefaults.Default_Local_Feed_Folder_Name));
+        DirectoryInfo localRepo = new(Path.Combine(testContext.TestDirectory, Default_Local_Feed_Folder_Name));
         if (localRepo.Exists)
             localRepo.Delete(true);
 
