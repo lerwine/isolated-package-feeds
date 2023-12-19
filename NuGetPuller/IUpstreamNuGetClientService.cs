@@ -2,6 +2,9 @@ using NuGet.Protocol.Core.Types;
 
 namespace NuGetPuller;
 
+/// <summary>
+/// Interface for reading from the upstream NuGet web API or Local NuGet Feed.
+/// </summary>
 public interface IUpstreamNuGetClientService : INuGetClientService
 {
     /// <summary>
