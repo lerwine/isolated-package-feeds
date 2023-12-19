@@ -13,7 +13,7 @@
 - [Links](#links)
 - [Application Settings](#application-settings)
   - [Upstream Service Index URL](#upstream-service-index-url)
-  - [Local NuGet Feed Path](#local-nuget-feed-path)
+  - [Downloaded Packages Folder](#downloaded-packages-folder)
   - [Global Packages Folder Path](#global-packages-folder-path)
   - [Example application settings](#example-application-settings)
 - [Development](#development)
@@ -74,6 +74,8 @@ This is a `JSON` file which contains metadata indicating what packages already e
 ## Links
 
 - [Isolate Pacakge Feeds Home](../README.md)
+- [IsolatedPackageFeeds.Shared class library](../IsolatedPackageFeeds.Shared/README.md)
+- [IsolatedPackageFeeds.Shared unit tests](../IsolatedPackageFeeds.Shared.Tests/README.md)
 - [NuGetPuller CLI](../NuGetPuller.CLI/README.md)
 - [Unit Tests](../NuGetPuller.UnitTests/README.md)
 
