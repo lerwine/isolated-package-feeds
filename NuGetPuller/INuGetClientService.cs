@@ -4,6 +4,9 @@ using NuGet.Versioning;
 
 namespace NuGetPuller;
 
+/// <summary>
+/// Base interface for reading from a NuGet web API or Local NuGet Feed.
+/// </summary>
 public interface INuGetClientService : IDisposable
 {
     bool IsUpstream { get; }
