@@ -4,7 +4,7 @@ using NuGet.Packaging.Core;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
-using static IsolatedPackageFeeds.Shared.CommonStatic;
+using static NuGetPuller.NuGetPullerStatic;
 
 namespace NuGetPuller;
 
@@ -105,7 +105,7 @@ public class LocalNuGetFeedService(IValidatedRepositoryPathsService settings, IL
             yield break;
         findPackageByIdResource ??= await GetFindPackageByIdResourceAsync(cancellationToken);
         packageUpdateResource ??= await GetPackageUpdateResourceAsync(cancellationToken);
-        foreach (string id in packageIds.Distinct(NoCaseComparer))
+        foreach (string id in packageIds.Distinct(PackageIdentitifierComparer))
         {
             using var scope = Logger.BeginDeleteLocalPackageScope(id, PackageSourceLocation);
             var lc = id.ToLower();

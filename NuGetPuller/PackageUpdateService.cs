@@ -4,10 +4,16 @@ using NuGet.Packaging;
 using NuGet.Protocol.Core.Types;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
-using static IsolatedPackageFeeds.Shared.CommonStatic;
+using static NuGetPuller.NuGetPullerStatic;
 
 namespace NuGetPuller;
 
+/// <summary>
+/// Updates packages in Local Nuget Feed subdirectory with new packages/versions from the Upstream NuGet Repository.
+/// </summary>
+/// <param name="localClient">The service for managing packages in the Local NuGet Feed subdirectory.</param>
+/// <param name="upstreamClient">The service for retrieving packages from the Upstream NuGet Repository.</param>
+/// <param name="logger">The logger to write events to.</param>
 public class PackageUpdateService(ILocalNuGetFeedService localClient, IUpstreamNuGetClientService upstreamClient, ILogger<PackageUpdateService> logger)
 {
     private readonly ILocalNuGetFeedService _localClient = localClient;
@@ -21,7 +27,7 @@ public class PackageUpdateService(ILocalNuGetFeedService localClient, IUpstreamN
         var versionComparer = VersionComparer.VersionReleaseMetadata;
         HashSet<PackageIdentity> downloaded = new(PackageIdentity.Comparer);
         HashQueue<PackageIdentity> toCheck = new(PackageIdentity.Comparer);
-        foreach (string packageId in packageIds.Where(i => !string.IsNullOrWhiteSpace(i)).Distinct(NoCaseComparer))
+        foreach (string packageId in packageIds.Where(i => !string.IsNullOrWhiteSpace(i)).Distinct(PackageIdentitifierComparer))
         {
             var upstreamVersions = await _upstreamClient.GetAllVersionsAsync(packageId, updater.UpstreamFindPackageById, cancellationToken);
             if (upstreamVersions is null || !upstreamVersions.Any())

@@ -423,15 +423,15 @@ public class MainService : BackgroundService
             }
 
 
-            // var packageIds = _settings.Remove?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(NoCaseComparer);
+            // var packageIds = _settings.Remove?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(PackageIdentitifierComparer);
             // HashSet<PackageIdentity> deletedPackages = new(PackageIdentityComparer.Default);
             // if (packageIds is not null && packageIds.Any())
             //     await foreach (var (package, success) in scope.ServiceProvider.GetRequiredService<ILocalNuGetFeedService>().DeleteAsync(packageIds, stoppingToken))
             //         if (success)
             //             deletedPackages.Add(package);
-            // if ((packageIds = _settings.Add?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(NoCaseComparer)) is not null && packageIds.Any())
+            // if ((packageIds = _settings.Add?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(PackageIdentitifierComparer)) is not null && packageIds.Any())
             // {
-            //     Dictionary<string, HashSet<NuGetVersion>> packagesAdded = new(NoCaseComparer);
+            //     Dictionary<string, HashSet<NuGetVersion>> packagesAdded = new(PackageIdentitifierComparer);
             //     var localClientService = scope.ServiceProvider.GetRequiredService<ILocalNuGetFeedService>();
             //     foreach (string id in packageIds)
             //         await AddToLocalFromRemote(id, packagesAdded, localClientService, scope.ServiceProvider.GetRequiredService<IUpstreamNuGetClientService>(), _logger, stoppingToken);
@@ -447,7 +447,7 @@ public class MainService : BackgroundService
             //     else
             //         await scope.ServiceProvider.GetRequiredService<PackageUpdateService>().UpdatePackagesAsync(packageIds, stoppingToken);
             // }
-            // else if ((packageIds = _settings.Update?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(NoCaseComparer)) is not null && packageIds.Any())
+            // else if ((packageIds = _settings.Update?.Split(',').Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(PackageIdentitifierComparer)) is not null && packageIds.Any())
             //     await scope.ServiceProvider.GetRequiredService<PackageUpdateService>().UpdatePackagesAsync(packageIds, stoppingToken);
             // if (_settings.ListLocal)
             //     await ListLocalPackagesAsync(scope.ServiceProvider.GetRequiredService<ILocalNuGetFeedService>().GetAllPackagesAsync(stoppingToken).ToBlockingEnumerable(stoppingToken), validatedSettings.ExportLocalManifest.TryGetResult(out FileInfo? exportLocalManifest) ? exportLocalManifest.FullName : null, _logger, stoppingToken);
