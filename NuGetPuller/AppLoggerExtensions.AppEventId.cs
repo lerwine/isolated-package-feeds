@@ -137,12 +137,11 @@ public static partial class AppLoggerExtensions
         /// </summary>
         DownloadingNuGetPackage = 0x1A,
         InvalidCreateFromPath = 0x1B,
-        IgnoredDependentCommandLineArgument = 0x1C,
-        InvalidSaveMetadataToPath = 0x1D,
-        PackageMetadataOpenError = 0x1E,
-        PackageMetadataFileAccessDenied = 0x1F,
-        PackageMetadataFileReadError = 0x20,
-        PackageExportAccessDenied = 0x21,
-        PackageExportWriteError = 0x22
+        InvalidSaveMetadataToPath = 0x1C,
+        PackageMetadataOpenError = 0x1D,
+        PackageMetadataFileAccessDenied = 0x1E,
+        PackageMetadataFileReadError = 0x1F,
+        PackageExportAccessDenied = 0x20,
+        PackageExportWriteError = 0x21
     }
 }
