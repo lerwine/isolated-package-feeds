@@ -1008,7 +1008,7 @@ public static partial class AppLoggerExtensions
     /// <param name="logger">The current logger.</param>
     /// <param name="path">The export bundle path.</param>
     /// <param name="exception">The optional exception that caused the event.</param>
-    public static void ExportBundleAccessError(this ILogger logger, string path, Exception? exception = null) => LogExportBundleAccessError(logger, path, exception)
+    public static void ExportBundleAccessError(this ILogger logger, string path, Exception? exception = null) => LogExportBundleAccessError(logger, path, exception);
 
     // [LoggerMessage(EventId = (int)AppEventId.InvalidExportBundle, Level = LogLevel.Critical, Message = $"{Message_ExportBundleAccessError} {{Path}}.")]
     // public static partial void ExportBundleAccessError(this ILogger logger, string path, Exception? exception = null);
