@@ -37,10 +37,10 @@ public partial class MainServiceStatic
         out FileInfo targetMetadataFileInfo, out List<OfflinePackageMetadata> existingPackages)
     {
         var bundleFileInfo = GetFileInfo(bundlePath,
-            (p, e) => logger.ExportBundleAccessError(bundlePath, m => new OfflineMetaDataIOException(p, m, e), e),
-            (p, e) => logger.InvalidExportBundle(bundlePath, m => new OfflineMetaDataIOException(p, m, e), e),
-            p => logger.ExportBundlePathNotAFile(p, m => new OfflineMetaDataIOException(p, m)),
-            p => logger.ExportBundleDirectoryNotFound(p, m => new OfflineMetaDataIOException(p, m)));
+            (p, e) => logger.ExportBundleAccessDenied(bundlePath, m => new ExportBundleIOException(p, m, e), e),
+            (p, e) => logger.InvalidExportBundle(bundlePath, m => new ExportBundleIOException(p, m, e), e),
+            p => logger.ExportBundlePathNotAFile(p, m => new ExportBundleIOException(p, m)),
+            p => logger.ExportBundleDirectoryNotFound(p, m => new ExportBundleIOException(p, m)));
         if (string.IsNullOrEmpty(targetMetadataInput))
         {
             if (string.IsNullOrWhiteSpace(targetMetaDataOutput))
@@ -49,8 +49,8 @@ public partial class MainServiceStatic
                     throw logger.InvalidExportBundle(bundlePath, m => new OfflineMetaDataIOException(bundleFileInfo.FullName, m));
                 cancellationToken.ThrowIfCancellationRequested();
                 targetMetadataFileInfo = GetUniqueFileInfo(bundleFileInfo.Directory, Path.GetFileNameWithoutExtension(bundleFileInfo.Name), ".json",
-                    (p, e) => logger.ExportBundleAccessError(bundlePath, m => new OfflineMetaDataIOException(p, m, e), e),
-                    (p, e) => logger.InvalidExportBundle(bundlePath, m => new OfflineMetaDataIOException(p, m, e), e));
+                    (p, e) => logger.PackageMetadataFileAccessDenied(bundlePath, m => new OfflineMetaDataIOException(p, m, e), e),
+                    (p, e) => logger.PackageMetadataOpenError(bundlePath, m => new OfflineMetaDataIOException(p, m, e), e));
             }
             else
                 targetMetadataFileInfo = GetFileInfo(targetMetaDataOutput,
@@ -97,24 +97,27 @@ public partial class MainServiceStatic
         return Task.FromException(new NotImplementedException("NuGetPuller.MainServiceStatic.CreateBundleFileFileAsync not implemented"));
     }
 
-    private static Task SaveOfflineMetaDataAsync(List<OfflinePackageMetadata> existingTargetPackages, FileInfo targetMetadataFileInfo, FileInfo bundleFileInfo, CancellationToken cancellationToken)
+    private static void SaveOfflineMetaData(List<OfflinePackageMetadata> existingTargetPackages, FileInfo targetMetadataFileInfo, FileInfo bundleFileInfo, ILogger logger)
     {
-        // try
-        // {
-        //     // TODO: Save changes
-        // }
-        // catch (Exception exception)
-        // {
-        //     try
-        //     {
-        //         bundleFileInfo.Refresh();
-        //         if (bundleFileInfo.Exists)
-        //             bundleFileInfo.Delete();
-        //     }
-        //     catch (Exception e) { throw new AggregateException(exception, e); }
-        //     throw;
-        // }
-        return Task.FromException(new NotImplementedException());
+        try
+        {
+            using var stream = OpenFileStream(targetMetadataFileInfo.FullName, FileMode.Create, FileAccess.Write, FileShare.None,
+                (p, e) => logger.MetaDataExportPathAccessDenied(p, m => new ExportBundleIOException(p, m, e), e),
+                (p, e) => logger.InvalidMetaDataExportPath(p, m => new ExportBundleIOException(p, m, e), e)
+            );
+            // TODO: Save changes
+        }
+        catch (Exception exception)
+        {
+            try
+            {
+                bundleFileInfo.Refresh();
+                if (bundleFileInfo.Exists)
+                    bundleFileInfo.Delete();
+            }
+            catch (Exception e) { throw new AggregateException(exception, e); }
+            throw;
+        }
     }
 
     public static async Task<int> ExportBundleAsync(string bundlePath, string? targetMetadataInput, string? targetMetaDataOutput, IDownloadedPackagesService downloadedPackagesService, ILogger logger, CancellationToken cancellationToken)
@@ -175,7 +178,7 @@ public partial class MainServiceStatic
         foreach (var identity in toExport.Select(p => p.Identity))
             await ExportNupkgAsync(identity.Id, identity.Version, tempStagingFolder, pathResolver, downloadedPackagesService, logger, cancellationToken);
         await CreateBundleFileFileAsync(tempStagingFolder.Directory, bundleFileInfo, logger, cancellationToken);
-        await SaveOfflineMetaDataAsync(existingTargetPackages, targetMetadataFileInfo, bundleFileInfo, cancellationToken);
+        SaveOfflineMetaData(existingTargetPackages, targetMetadataFileInfo, bundleFileInfo, logger);
         return toExport.Count;
     }
 
@@ -235,7 +238,7 @@ public partial class MainServiceStatic
         foreach (var identity in toExport.Select(p => p.Identity))
             await ExportNupkgAsync(identity.Id, identity.Version, tempStagingFolder, pathResolver, downloadedPackagesService, logger, cancellationToken);
         await CreateBundleFileFileAsync(tempStagingFolder.Directory, bundleFileInfo, logger, cancellationToken);
-        await SaveOfflineMetaDataAsync(existingTargetPackages, targetMetadataFileInfo, bundleFileInfo, cancellationToken);
+        SaveOfflineMetaData(existingTargetPackages, targetMetadataFileInfo, bundleFileInfo, logger);
         return toExport.Count;
     }
 
@@ -313,7 +316,7 @@ public partial class MainServiceStatic
         foreach (var identity in toExport.Select(p => p.Identity))
             await ExportNupkgAsync(identity.Id, identity.Version, tempStagingFolder, pathResolver, downloadedPackagesService, logger, cancellationToken);
         await CreateBundleFileFileAsync(tempStagingFolder.Directory, bundleFileInfo, logger, cancellationToken);
-        await SaveOfflineMetaDataAsync(existingTargetPackages, targetMetadataFileInfo, bundleFileInfo, cancellationToken);
+        SaveOfflineMetaData(existingTargetPackages, targetMetadataFileInfo, bundleFileInfo, logger);
         return toExport.Count;
     }
 

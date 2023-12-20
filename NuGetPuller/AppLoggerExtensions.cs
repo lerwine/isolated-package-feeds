@@ -43,6 +43,8 @@ public static partial class AppLoggerExtensions
 
     private const string Message_Is_Not_A_File = "is not a file";
 
+    private const string Message_Unable_To_Open = "Unable to open";
+
     #region Nuget Logger Event Methods
 
     #region NuGetDebug Logger Event Methods
@@ -1001,6 +1003,9 @@ public static partial class AppLoggerExtensions
     private static readonly Action<ILogger, string, Exception?> LogExportBundleAccessError = LoggerMessage.Define<string>(LogLevel.Critical,
         EventId_InvalidExportBundle, $"{Message_ExportBundleAccessError} {{Path}}.");
 
+    private static readonly Action<ILogger, string, Exception?> LogExportBundleOpenError = LoggerMessage.Define<string>(LogLevel.Critical,
+        EventId_InvalidExportBundle, $"{Message_Unable_To_Open} {{Path}}.");
+
     /// <summary>
     /// Logs a <see cref="LogLevel.Critical"/> <see cref="AppEventId.InvalidExportBundle"/> error event message.
     /// </summary>
@@ -1012,8 +1017,42 @@ public static partial class AppLoggerExtensions
     // [LoggerMessage(EventId = (int)AppEventId.InvalidExportBundle, Level = LogLevel.Critical, Message = $"{Message_ExportBundleAccessError} {{Path}}.")]
     // public static partial void ExportBundleAccessError(this ILogger logger, string path, Exception? exception = null);
 
+    private const string MESSAGE_InsufficientPermissionsForExportBundle = "Caller has insufficient permissions to the export bundle path";
+
+    private static readonly Action<ILogger, string, Exception?> InsufficientPermissionsForExportBundle = LoggerMessage.Define<string>(LogLevel.Critical,
+        EventId_InvalidExportBundle, $"{MESSAGE_InsufficientPermissionsForExportBundle} {{Path}}.");
+
+    private const string MESSAGE_Access_To_Export_Bundle_Path = "Access to export bundle path";
+
+    private static readonly Action<ILogger, string, Exception?> LogExportBundleAccessDenied = LoggerMessage.Define<string>(LogLevel.Critical,
+        EventId_InvalidExportBundle, $"{MESSAGE_Access_To_Export_Bundle_Path} {{Path}} {Message_Is_Denied}.");
+
+    public static T ExportBundleAccessDenied<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : Exception
+    {
+        if (exception is System.Security.SecurityException)
+        {
+            InsufficientPermissionsForExportBundle(logger, path, exception);
+            return factory($"{MESSAGE_InsufficientPermissionsForExportBundle} \"{path}\".");
+        }
+        LogExportBundleAccessDenied(logger, path, exception);
+        return factory($"{MESSAGE_Access_To_Export_Bundle_Path} \"{path}\" {Message_Is_Denied}.");
+    }
+
+    public static T ExportBundleOpenError<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : Exception
+    {
+        LogExportBundleOpenError(logger, path, exception);
+        return factory($"{Message_Unable_To_Open} {path}.");
+    }
+
     public static T ExportBundleAccessError<T>(this ILogger logger, string path, Func<string, T> factory, Exception? exception = null) where T : Exception
     {
+        if (exception is System.Security.SecurityException)
+        {
+            InsufficientPermissionsForExportBundle(logger, path, exception);
+            return factory($"{MESSAGE_InsufficientPermissionsForExportBundle} \"{path}\".");
+        }
+        LogExportBundleAccessDenied(logger, path, exception);
+        return factory($"{MESSAGE_Access_To_Export_Bundle_Path} \"{path}\" {Message_Is_Denied}.");
         ExportBundleAccessError(logger, path, exception);
         return factory($"{Message_ExportBundleAccessError} {path}.");
     }
