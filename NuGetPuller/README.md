@@ -77,6 +77,7 @@ This is a `JSON` file which contains metadata indicating what packages already e
 - [IsolatedPackageFeeds.Shared class library](../IsolatedPackageFeeds.Shared/README.md)
 - [IsolatedPackageFeeds.Shared unit tests](../IsolatedPackageFeeds.Shared.Tests/README.md)
 - [NuGetPuller CLI](../NuGetPuller.CLI/README.md)
+- [NuGetPuller GUI](../NuGetPuller.Win/README.md)
 - [Unit Tests](../NuGetPuller.UnitTests/README.md)
 
 ## Application Settings

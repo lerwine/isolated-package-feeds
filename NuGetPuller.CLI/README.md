@@ -25,6 +25,7 @@ See [Key Concepts](../NuGetPuller/README.md#key-concepts) for a conceptual overv
 
 - [Isolate Pacakge Feeds Home](../README.md)
 - [NuGetPuller Class Library](../NuGetPuller/README.md) - Base class library for User Interface Applications.
+- [NuGetPuller GUI](../NuGetPuller.Win/README.md) - GUI interface.
 - [NuGetPuller Unit Tests](../NuGetPuller.UnitTests/README.md)
 
 ## Command Line Options

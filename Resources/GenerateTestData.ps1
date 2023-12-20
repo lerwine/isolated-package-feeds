@@ -1,13 +1,585 @@
 Add-Type -AssemblyName 'System.Text.Json';
 
-if ($null -eq $Script:Random) {
-    New-Variable -Name 'Random' -Option ReadOnly -Scope 'Script' -Value ([Random]::new());
+if ($null -eq $Script:Random) { New-Variable -Name 'Random' -Option ReadOnly -Scope 'Script' -Value ([Random]::new()) }
+if ($null -eq $Script:NumberChars) { New-Variable -Name 'NumberChars' -Option Constant -Scope 'Script' -Value '01234567890' }
+if ($null -eq $Script:UcHardConsonants) { New-Variable -Name 'UcAlpha' -Option Constant -Scope 'Script' -Value 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' }
+if ($null -eq $Script:UcVowels) { New-Variable -Name 'UcVowels' -Option Constant -Scope 'Script' -Value 'AEIOUY' }
+if ($null -eq $Script:UcHardConsonants) { New-Variable -Name 'UcHardConsonants' -Option Constant -Scope 'Script' -Value 'BCDGJKPQTX' }
+if ($null -eq $Script:UcSoftConsonants) { New-Variable -Name 'UcSoftConsonants' -Option Constant -Scope 'Script' -Value 'CFHLMNRSVWYZ' }
+if ($null -eq $Script:LcAlpha) { New-Variable -Name 'LcAlpha' -Option Constant -Scope 'Script' -Value 'abcdefghijklmnopqrstuvwxyz' }
+if ($null -eq $Script:LcVowels) { New-Variable -Name 'LcVowels' -Option Constant -Scope 'Script' -Value 'aeiouy' }
+if ($null -eq $Script:LcHardConsonants) { New-Variable -Name 'LcHardConsonants' -Option Constant -Scope 'Script' -Value 'bcdgjkpqtx' }
+if ($null -eq $Script:LcSoftConsonants) { New-Variable -Name 'LcSoftConsonants' -Option Constant -Scope 'Script' -Value 'cfhlmnrsvwyz' }
+if ($null -eq $Script:AlphaChars) { New-Variable -Name 'AlphaChars' -Option Constant -Scope 'Script' -Value ($Script:UcAlpha + $Script:LcAlpha) }
+if ($null -eq $Script:Vowels) { New-Variable -Name 'Vowels' -Option Constant -Scope 'Script' -Value ($Script:UcVowels + $Script:LcVowels) }
+if ($null -eq $Script:HardConsonants) { New-Variable -Name 'HardConsonants' -Option Constant -Scope 'Script' -Value ($Script:UcHardConsonants + $Script:LcHardConsonants) }
+if ($null -eq $Script:SoftConsonants) { New-Variable -Name 'SoftConsonants' -Option Constant -Scope 'Script' -Value ($Script:UcSoftConsonants + $Script:LcSoftConsonants) }
+if ($null -eq $Script:AlphaNum) { New-Variable -Name 'AlphaNum' -Option Constant -Scope 'Script' -Value ($Script:AlphaChars + $Script:NumberChars) }
+if ($null -eq $Script:UcAlphaNum) { New-Variable -Name 'UcAlphaNum' -Option Constant -Scope 'Script' -Value ($Script:UcAlpha + $Script:NumberChars) }
+if ($null -eq $Script:LcAlphaNum) { New-Variable -Name 'LcAlphaNum' -Option Constant -Scope 'Script' -Value ($Script:LcAlpha + $Script:NumberChars) }
+
+<#
+.SYNOPSIS
+    Generates a random number.
+#>
+Function Get-RandomNumber {
+
+    [CmdletBinding(DefaultParameterSetName = "FixedRepeat")]
+    Param(
+        [int]$MinValue = [Int]::MinValue,
+
+        [int]$MaxValue = [int]::MaxValue,
+
+        [Parameter(ParameterSetName = "FixedRepeat")]
+        [ValidateRange(1, [int]::MaxValue)]
+        [int]$Repeat = 1,
+
+        [Parameter(ParameterSetName = "RandomRepeat")]
+        [ValidateRange(0, [int]::MaxValue)]
+        [int]$MinRepeat = 1,
+
+        [Parameter(Mandatory = $true, ParameterSetName = "RandomRepeat")]
+        [ValidateRange(1, [int]::MaxValue)]
+        [int]$MaxRepeat
+    )
+    if ($MinValue -gt $MaxValue) {
+        Write-Error -Message "MinValue cannot be greater than MaxValue" -Category InvalidArgument -ErrorId 'InvalidValueRange';
+    }
+    if ($PSCmdlet.ParameterSetName -eq 'RandomRepeat') {
+        if ($MinRepeat -gt $MaxRepeat) {
+            Write-Error -Message "MinRepeat cannot be greater than MaxRepeat" -Category InvalidArgument -ErrorId 'InvalidRepeatRange';
+            $Repeat = 0;
+        } else {
+            if ($MinRepeat -eq $MaxRepeat) {
+                $Repeat = $MinRepeat;
+            } else {
+                if ($MaxRepeat -eq [int]::MaxValue) {
+                    $Repeat = $Script:Random.Next($MinRepeat - 1, [int]::MaxValue) + 1;
+                } else {
+                    $Repeat = $Script:Random.Next($MinRepeat, $MaxRepeat + 1);
+                }
+            }
+        }
+    }
+    if ($Repeat -gt 0) {
+        if ($MinValue -eq $MaxValue) {
+            for ($i = 0; $i -lt $Repeat; $i++) { $MinValue | Write-Output }
+        } else {
+            if ($MaxRepeat -eq [int]::MaxValue) {
+                if ($MinRepeat -eq [int]::MinValue) {
+                    for ($i = 0; $i -lt $Repeat; $i++) {
+                        if ($Script:Random.Next(0, 2) -eq 1) {
+                            ($Script:Random.Next(-1, $MaxValue) + 1) | Write-Output;
+                        } else {
+                            $Script:Random.Next($MinValue, 0) | Write-Output;
+                        }
+                    }
+                } else {
+                    for ($i = 0; $i -lt $Repeat; $i++) {
+                        ($Script:Random.Next($MinRepeat - 1, [int]::MaxValue) + 1) | Write-Output;
+                    }
+                }
+            } else {
+                for ($i = 0; $i -lt $Repeat; $i++) { $Script:Random.Next($MinRepeat, $MaxRepeat + 1) | Write-Output }
+            }
+        }
+    }
 }
 
-if ($null -eq $Script:NumberChars) {
-    New-Variable -Name 'NumberChars' -Option Constant -Scope 'Script' -Value '01234567890';
+Function Select-Random {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true)]
+        [AllowEmptyString()]
+        [object[]]$InputObject,
+
+        [ValidateRange(1, 1024)]
+        [int]$Count
+    )
+
+    Begin { $AllObjects = @() }
+
+    Process { $AllObjects += $InputObject }
+
+    End {
+        $Total = $AllObjects.Count;
+        if ($Total -le $Count) {
+            $AllObjects | Write-Output;
+        } else {
+            $Indexes = @();
+            for ($n = 0; $n -lt $Count; $n++) {
+                $i = $Script:Random.Next(0, $Total);
+                while ($Indexes -contains $i) { $i = $Script:Random.Next(0, $Total) }
+                $Indexes += $i;
+                $AllObjects[$i] | Write-Output;
+            }
+        }
+    }
 }
 
+Function Get-RandomString {
+    [CmdletBinding(DefaultParameterSetName = "FixedLength")]
+    Param(
+        [Parameter(Mandatory = $true, Position = 0)]
+        [string]$Source,
+
+        [Parameter(Position = 1, ParameterSetName = "FixedLength")]
+        [ValidateRange(1, [int]::MaxValue)]
+        [int]$Length = 1,
+
+        [Parameter(ParameterSetName = "RandomLength")]
+        [ValidateRange(0, [int]::MaxValue)]
+        [int]$MinLength = 1,
+
+        [Parameter(Mandatory = $true, ParameterSetName = "RandomLength")]
+        [ValidateRange(1, [int]::MaxValue)]
+        [int]$MaxLength = 8,
+
+        [ValidateRange(1, [int]::MaxValue)]
+        [int]$Repeat = 1,
+
+        [ValidateRange(0, [int]::MaxValue)]
+        [int]$MinRepeat = 1,
+
+        [ValidateRange(1, [int]::MaxValue)]
+        [int]$MaxRepeat = 1,
+
+        [string[]]$JoinWith
+    )
+
+    if (-not $PSBoundParameters.ContainsKey('Repeat')) {
+        if ($PSBoundParameters.ContainsKey('MaxRepeat')) {
+            if ($MinRepeat -gt $MaxRepeat) {
+                Write-Error -Message "MinRepeat cannot be greater than MaxRepeat" -Category InvalidArgument -ErrorId 'InvalidRepeatRange';
+                $Repeat = 0;
+            } else {
+                if ($MinRepeat -eq $MaxRepeat) {
+                    $Repeat = $MinRepeat;
+                } else {
+                    if (($Repeat = $Script:Random.Next($MinRepeat, $MaxRepeat)) -eq 0 -and $PSCmdlet.ParameterSetName -eq 'RandomLength' -and $MinLength -gt $MaxLength) {
+                        Write-Error -Message "MinLength cannot be greater than MaxLength" -Category InvalidArgument -ErrorId 'InvalidLengthRange';
+                    }
+                }
+            }
+        }
+    }
+    $SourceLen = $Soure.Length;
+    if ($Repeat -eq 1) {
+        if ($PSBoundParameters.ContainsKey('Length')) {
+            if ($Length -eq 1) {
+                $Source.Substring($Random.Next(0, $SourceLen), 1) | Write-Output;
+            } else {
+                $Writer = [System.IO.StringWriter]::new();
+                for ($n = 0; $n -lt $Length; $n++) { $Writer.Write($Source[$Random.Next(0, $SourceLen)]) }
+                $Writer.ToString() | Write-Output;
+            }
+        } else {
+            if ($MinLength -gt $MaxLength) {
+                Write-Error -Message "MinLength cannot be greater than MaxLength" -Category InvalidArgument -ErrorId 'InvalidLengthRange';
+            } else {
+                if ($MinLength -eq $MaxLength) {
+                    if ($MaxLength -eq 1) {
+                        $Source.Substring($Random.Next(0, $SourceLen), 1) | Write-Output;
+                    } else {
+                        $Writer = [System.IO.StringWriter]::new();
+                        for ($n = 0; $n -lt $MaxLength; $n++) { $Writer.Write($Source[$Random.Next(0, $SourceLen)]) }
+                        $Writer.ToString() | Write-Output;
+                    }
+                } else {
+                    switch ((Get-RandomNumber -MinValue $MinLength -MaxValue $MaxLength -Repeat $Repeat)) {
+                        0 { '' | Write-Output; break; }
+                        1 { $Source.Substring($Random.Next(0, $SourceLen), 1) | Write-Output; break; }
+                        default {
+                            $Writer = [System.IO.StringWriter]::new();
+                            for ($n = 0; $n -lt $_; $n++) { $Writer.Write($Source[$Random.Next(0, $SourceLen)]) }
+                            $Writer.ToString() | Write-Output;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        if ($Repeat -gt 1) {
+            if ($PSBoundParameters.ContainsKey('JoinWith')) {
+                $Writer = [System.IO.StringWriter]::new();
+                $Cwl = $JoinWith.Length;
+                if ($Cwl -eq 1) {
+                    $c = $JoinWith[0];
+                    if ($PSBoundParameters.ContainsKey('Length')) {
+                        if ($Length -eq 1) {
+                            $Writer.Write($Source[$Random.Next(0, $SourceLen)]);
+                            for ($i = 1; $i -lt $Repeat; $i++) {
+                                $Writer.Write($c);
+                                $Writer.Write($Source[$Random.Next(0, $SourceLen)]);
+                            }
+                        } else {
+                            for ($n = 0; $n -lt $Length; $n++) { $Writer.Write($Source[$Random.Next(0, $SourceLen)]) }
+                            for ($i = 1; $i -lt $Repeat; $i++) {
+                                $Writer.Write($c);
+                                $Writer.Write($Source[$Random.Next(0, $SourceLen)]);
+                            }
+                        }
+                    } else {
+                        if ($MinLength -gt $MaxLength) {
+                            Write-Error -Message "MinLength cannot be greater than MaxLength" -Category InvalidArgument -ErrorId 'InvalidLengthRange';
+                        } else {
+                            if ($MinLength -eq $MaxLength) {
+                                if ($MaxLength -eq 1) {
+                                    $Writer.Write($Source[$Random.Next(0, $SourceLen)]);
+                                    for ($i = 1; $i -lt $Repeat; $i++) {
+                                        $Writer.Write($c);
+                                        $Writer.Write($Source[$Random.Next(0, $SourceLen)]);
+                                    }
+                                } else {
+                                    for ($n = 0; $n -lt $MaxLength; $n++) { $Writer.Write($Source[$Random.Next(0, $SourceLen)]) }
+                                    for ($i = 1; $i -lt $Repeat; $i++) {
+                                        $Writer.Write($c);
+                                        for ($n = 0; $n -lt $MaxLength; $n++) { $Writer.Write($Source[$Random.Next(0, $SourceLen)]) }
+                                    }
+                                }
+                            } else {
+                                switch ((Get-RandomNumber -MinValue $MinLength -MaxValue $MaxLength -Repeat $Repeat)) {
+                                    0 { break; }
+                                    1 { $Writer.Write($Source[$Random.Next(0, $SourceLen)]); break; }
+                                    default {
+                                        for ($n = 0; $n -lt $_; $n++) { $Writer.Write($Source[$Random.Next(0, $SourceLen)]) }
+                                        break;
+                                    }
+                                }
+                                for ($i = 1; $i -lt $Repeat; $i++) {
+                                    $Writer.Write($c);
+                                    switch ((Get-RandomNumber -MinValue $MinLength -MaxValue $MaxLength -Repeat $Repeat)) {
+                                        0 { break; }
+                                        1 { $Writer.Write($Source[$Random.Next(0, $SourceLen)]); break; }
+                                        default {
+                                            for ($n = 0; $n -lt $_; $n++) { $Writer.Write($Source[$Random.Next(0, $SourceLen)]) }
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if ($PSBoundParameters.ContainsKey('Length')) {
+                        if ($Length -eq 1) {
+                            $Writer.Write($Source[$Random.Next(0, $SourceLen)]);
+                            for ($i = 1; $i -lt $Repeat; $i++) {
+                                $Writer.Write($JoinWith[$Random.Next(0, $Cwl)]);
+                                $Writer.Write($Source[$Random.Next(0, $SourceLen)]);
+                            }
+                        } else {
+                            for ($n = 0; $n -lt $Length; $n++) { $Writer.Write($Source[$Random.Next(0, $SourceLen)]) }
+                            for ($i = 1; $i -lt $Repeat; $i++) {
+                                $Writer.Write($JoinWith[$Random.Next(0, $Cwl)]);
+                                $Writer.Write($Source[$Random.Next(0, $SourceLen)]);
+                            }
+                        }
+                    } else {
+                        if ($MinLength -gt $MaxLength) {
+                            Write-Error -Message "MinLength cannot be greater than MaxLength" -Category InvalidArgument -ErrorId 'InvalidLengthRange';
+                        } else {
+                            if ($MinLength -eq $MaxLength) {
+                                if ($MaxLength -eq 1) {
+                                    $Writer.Write($Source[$Random.Next(0, $SourceLen)]);
+                                    for ($i = 1; $i -lt $Repeat; $i++) {
+                                        $Writer.Write($JoinWith[$Random.Next(0, $Cwl)]);
+                                        $Writer.Write($Source[$Random.Next(0, $SourceLen)]);
+                                    }
+                                } else {
+                                    for ($n = 0; $n -lt $MaxLength; $n++) { $Writer.Write($Source[$Random.Next(0, $SourceLen)]) }
+                                    for ($i = 1; $i -lt $Repeat; $i++) {
+                                        $Writer.Write($JoinWith[$Random.Next(0, $Cwl)]);
+                                        for ($n = 0; $n -lt $MaxLength; $n++) { $Writer.Write($Source[$Random.Next(0, $SourceLen)]) }
+                                    }
+                                }
+                            } else {
+                                switch ((Get-RandomNumber -MinValue $MinLength -MaxValue $MaxLength -Repeat $Repeat)) {
+                                    0 { break; }
+                                    1 { $Writer.Write($Source[$Random.Next(0, $SourceLen)]); break; }
+                                    default {
+                                        for ($n = 0; $n -lt $_; $n++) { $Writer.Write($Source[$Random.Next(0, $SourceLen)]) }
+                                        break;
+                                    }
+                                }
+                                for ($i = 1; $i -lt $Repeat; $i++) {
+                                    $Writer.Write($JoinWith[$Random.Next(0, $Cwl)]);
+                                    switch ((Get-RandomNumber -MinValue $MinLength -MaxValue $MaxLength -Repeat $Repeat)) {
+                                        0 { break; }
+                                        1 { $Writer.Write($Source[$Random.Next(0, $SourceLen)]); break; }
+                                        default {
+                                            for ($n = 0; $n -lt $_; $n++) { $Writer.Write($Source[$Random.Next(0, $SourceLen)]) }
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                $Writer.ToString() | Write-Output;
+            } else {
+                if ($PSBoundParameters.ContainsKey('Length')) {
+                    if ($Length -eq 1) {
+                        for ($i = 0; $i -lt $Repeat; $i++) { $Source.Substring($Random.Next(0, $SourceLen), 1) | Write-Output }
+                    } else {
+                        for ($i = 0; $i -lt $Repeat; $i++) {
+                            $Writer = [System.IO.StringWriter]::new();
+                            for ($n = 0; $n -lt $Length; $n++) { $Writer.Write($Source[$Random.Next(0, $SourceLen)]) }
+                            $Writer.ToString() | Write-Output;
+                        }
+                    }
+                } else {
+                    if ($PSCmdlet.ParameterSetName -eq 'RandomLength' -and $MinLength -gt $MaxLength) {
+                        Write-Error -Message "MinLength cannot be greater than MaxLength" -Category InvalidArgument -ErrorId 'InvalidLengthRange';
+                    } else {
+                        if ($MinLength -eq $MaxLength) {
+                            if ($MaxLength -eq 1) {
+                                for ($i = 0; $i -lt $Repeat; $i++) { $Source.Substring($Random.Next(0, $SourceLen), 1) | Write-Output }
+                            } else {
+                                for ($i = 0; $i -lt $Repeat; $i++) {
+                                    $Writer = [System.IO.StringWriter]::new();
+                                    for ($n = 0; $n -lt $MaxLength; $n++) { $Writer.Write($Source[$Random.Next(0, $SourceLen)]) }
+                                    $Writer.ToString() | Write-Output;
+                                }
+                            }
+                        } else {
+                            (Get-RandomNumber -MinValue $MinLength -MaxValue $MaxLength -Repeat $Repeat) | ForEach-Object {
+                                switch ($_) {
+                                    0 { '' | Write-Output; break; }
+                                    1 { $Source.Substring($Random.Next(0, $SourceLen), 1) | Write-Output; break; }
+                                    default {
+                                        $Writer = [System.IO.StringWriter]::new();
+                                        for ($n = 0; $n -lt $_; $n++) { $Writer.Write($Source[$Random.Next(0, $SourceLen)]) }
+                                        $Writer.ToString() | Write-Output;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+Function Get-RandomCsIdentifer {
+    [CmdletBinding(DefaultParameterSetName = "FixedLength")]
+    Param(
+        [Parameter(Position = 1, ParameterSetName = "FixedLength")]
+        [ValidateRange(1, [int]::MaxValue)]
+        [int]$Length = 1,
+
+        [Parameter(ParameterSetName = "RandomLength")]
+        [ValidateRange(1, [int]::MaxValue)]
+        [int]$MinLength = 1,
+
+        [Parameter(Mandatory = $true, ParameterSetName = "RandomLength")]
+        [ValidateRange(1, [int]::MaxValue)]
+        [int]$MaxLength = 8,
+
+        [ValidateRange(1, [int]::MaxValue)]
+        [int]$Segments = 1,
+
+        [ValidateRange(1, [int]::MaxValue)]
+        [int]$MinSegments = 1,
+
+        [ValidateRange(1, [int]::MaxValue)]
+        [int]$MaxSegments = 1,
+
+        [ValidateSet('UcFirst', 'LcFirst', 'AllUpper', 'AllLower')]
+        [string]$Style = 'UcFirst',
+
+        [string[]]$JoinWith = @('.'),
+
+        [switch]$NoNumbers
+    )
+
+    if (-not $PSBoundParameters.ContainsKey('Segments')) {
+        if ($PSBoundParameters.ContainsKey('MaxSegments')) {
+            if ($MinSegments -gt $MaxSegments) {
+                Write-Error -Message "MinSegments cannot be greater than MaxSegments" -Category InvalidArgument -ErrorId 'InvalidSegmentRange';
+                $Segments = 0;
+            } else {
+                if ($MinSegments -eq $MaxSegments) {
+                    $Segments = $MinSegments;
+                } else {
+                    if (($Segments = $Script:Random.Next($MinSegments, $MaxSegments)) -eq 0 -and $PSCmdlet.ParameterSetName -eq 'RandomLength' -and $MinLength -gt $MaxLength) {
+                        Write-Error -Message "MinLength cannot be greater than MaxLength" -Category InvalidArgument -ErrorId 'InvalidLengthRange';
+                    }
+                }
+            }
+        }
+    }
+    if ($Segments -gt 0) {
+        if ($PSBoundParameters.ContainsKey('Length')) {
+            switch ($Style) {
+                'LcFirst' {
+                    if ($Length -eq 1) {
+                        (Get-RandomString -Source $Script:LcAlpha -Length 1 -Repeat $Segments -JoinWith $JoinWith) | Write-Output;
+                    } else {
+                        $Writer = [System.IO.StringWriter]::new();
+                        $Writer.Write((Get-RandomString -Source $Script:LcAlpha -Length 1));
+                        if ($NoNumbers.IsPresent) {
+                            $Writer.Write((Get-RandomString -Source $Script:AlphaChars -Length $Length - 1));
+                            if ($Segments -gt 1) {
+                                $Jwc = $JoinWith.Count;
+                                if ($Jwc -gt 1) {
+                                    for ($i = 1; $i -lt $Segments; $i++) {
+                                        $Writer.Write($JoinWith[$Script:Random.Next(0, $Jwc)]);
+                                        $Writer.Write((Get-RandomString -Source $Script:LcAlpha -Length 1));
+                                        $Writer.Write((Get-RandomString -Source $Script:AlphaChars -Length $Length - 1));
+                                    }
+                                } else {
+                                    $c = $JoinWith[0];
+                                    for ($i = 1; $i -lt $Segments; $i++) {
+                                        $Writer.Write($c);
+                                        $Writer.Write((Get-RandomString -Source $Script:LcAlpha -Length 1));
+                                        $Writer.Write((Get-RandomString -Source $Script:AlphaChars -Length $Length - 1));
+                                    }
+                                }
+                            }
+                        } else {
+                            $Writer.Write((Get-RandomString -Source $Script:AlphaNum -Length $Length - 1));
+                            if ($Segments -gt 1) {
+                                $Jwc = $JoinWith.Count;
+                                if ($Jwc -gt 1) {
+                                    for ($i = 1; $i -lt $Segments; $i++) {
+                                        $Writer.Write($JoinWith[$Script:Random.Next(0, $Jwc)]);
+                                        $Writer.Write((Get-RandomString -Source $Script:LcAlpha -Length 1));
+                                        $Writer.Write((Get-RandomString -Source $Script:AlphaNum -Length $Length - 1));
+                                    }
+                                } else {
+                                    $c = $JoinWith[0];
+                                    for ($i = 1; $i -lt $Segments; $i++) {
+                                        $Writer.Write($c);
+                                        $Writer.Write((Get-RandomString -Source $Script:LcAlpha -Length 1));
+                                        $Writer.Write((Get-RandomString -Source $Script:AlphaNum -Length $Length - 1));
+                                    }
+                                }
+                            }
+                        }
+                        $Writer.ToString() | Write-Output;
+                    }
+                    break;
+                }
+                'AllUpper' {
+                    if ($NoNumbers.IsPresent -or $Length -eq 1) {
+                        (Get-RandomString -Source $Script:UcAlpha -Length $Length -Repeat $Segments -JoinWith $JoinWith) | Write-Output;
+                    } else {
+                        $Writer = [System.IO.StringWriter]::new();
+                        $Writer.Write((Get-RandomString -Source $Script:UcAlpha -Length 1));
+                        $Writer.Write((Get-RandomString -Source $Script:UcAlphaNum -Length $Length - 1));
+                        if ($Segments -gt 1) {
+                            $Jwc = $JoinWith.Count;
+                            if ($Jwc -gt 1) {
+                                for ($i = 1; $i -lt $Segments; $i++) {
+                                    $Writer.Write($JoinWith[$Script:Random.Next(0, $Jwc)]);
+                                    $Writer.Write((Get-RandomString -Source $Script:UcAlpha -Length 1));
+                                    $Writer.Write((Get-RandomString -Source $Script:UcAlphaNum -Length $Length - 1));
+                                }
+                            } else {
+                                $c = $JoinWith[0];
+                                for ($i = 1; $i -lt $Segments; $i++) {
+                                    $Writer.Write($c);
+                                    $Writer.Write((Get-RandomString -Source $Script:UcAlpha -Length 1));
+                                    $Writer.Write((Get-RandomString -Source $Script:UcAlphaNum -Length $Length - 1));
+                                }
+                            }
+                        }
+                        $Writer.ToString() | Write-Output;
+                    }
+                    break;
+                }
+                'AllLower' {
+                    if ($NoNumbers.IsPresent -or $Length -eq 1) {
+                        (Get-RandomString -Source $Script:LcAlpha -Length $Length -Repeat $Segments -JoinWith $JoinWith) | Write-Output;
+                    } else {
+                        $Writer = [System.IO.StringWriter]::new();
+                        $Writer.Write((Get-RandomString -Source $Script:LcAlpha -Length 1));
+                        $Writer.Write((Get-RandomString -Source $Script:LcAlphaNum -Length $Length - 1));
+                        if ($Segments -gt 1) {
+                            $Jwc = $JoinWith.Count;
+                            if ($Jwc -gt 1) {
+                                for ($i = 1; $i -lt $Segments; $i++) {
+                                    $Writer.Write($JoinWith[$Script:Random.Next(0, $Jwc)]);
+                                    $Writer.Write((Get-RandomString -Source $Script:LcAlpha -Length 1));
+                                    $Writer.Write((Get-RandomString -Source $Script:LcAlphaNum -Length $Length - 1));
+                                }
+                            } else {
+                                $c = $JoinWith[0];
+                                for ($i = 1; $i -lt $Segments; $i++) {
+                                    $Writer.Write($c);
+                                    $Writer.Write((Get-RandomString -Source $Script:LcAlpha -Length 1));
+                                    $Writer.Write((Get-RandomString -Source $Script:LcAlphaNum -Length $Length - 1));
+                                }
+                            }
+                        }
+                        $Writer.ToString() | Write-Output;
+                    }
+                    break;
+                }
+                default {
+                    if ($Length -eq 1) {
+                        (Get-RandomString -Source $Script:UcAlpha -Length 1 -Repeat $Segments -JoinWith $JoinWith) | Write-Output;
+                    } else {
+                        $Writer = [System.IO.StringWriter]::new();
+                        $Writer.Write((Get-RandomString -Source $Script:UcAlpha -Length 1));
+                        if ($NoNumbers.IsPresent) {
+                            $Writer.Write((Get-RandomString -Source $Script:AlphaChars -Length $Length - 1));
+                            if ($Segments -gt 1) {
+                                $Jwc = $JoinWith.Count;
+                                if ($Jwc -gt 1) {
+                                    for ($i = 1; $i -lt $Segments; $i++) {
+                                        $Writer.Write($JoinWith[$Script:Random.Next(0, $Jwc)]);
+                                        $Writer.Write((Get-RandomString -Source $Script:UcAlpha -Length 1));
+                                        $Writer.Write((Get-RandomString -Source $Script:AlphaChars -Length $Length - 1));
+                                    }
+                                } else {
+                                    $c = $JoinWith[0];
+                                    for ($i = 1; $i -lt $Segments; $i++) {
+                                        $Writer.Write($c);
+                                        $Writer.Write((Get-RandomString -Source $Script:UcAlpha -Length 1));
+                                        $Writer.Write((Get-RandomString -Source $Script:AlphaChars -Length $Length - 1));
+                                    }
+                                }
+                            }
+                        } else {
+                            $Writer.Write((Get-RandomString -Source $Script:AlphaNum -Length $Length - 1));
+                            if ($Segments -gt 1) {
+                                $Jwc = $JoinWith.Count;
+                                if ($Jwc -gt 1) {
+                                    for ($i = 1; $i -lt $Segments; $i++) {
+                                        $Writer.Write($JoinWith[$Script:Random.Next(0, $Jwc)]);
+                                        $Writer.Write((Get-RandomString -Source $Script:UcAlpha -Length 1));
+                                        $Writer.Write((Get-RandomString -Source $Script:AlphaNum -Length $Length - 1));
+                                    }
+                                } else {
+                                    $c = $JoinWith[0];
+                                    for ($i = 1; $i -lt $Segments; $i++) {
+                                        $Writer.Write($c);
+                                        $Writer.Write((Get-RandomString -Source $Script:UcAlpha -Length 1));
+                                        $Writer.Write((Get-RandomString -Source $Script:AlphaNum -Length $Length - 1));
+                                    }
+                                }
+                            }
+                        }
+                        $Writer.ToString() | Write-Output;
+                    }
+                    break;
+                }
+            }
+        } else {
+
+        }
+    }
+}
+
+"$(('http', 'https') | Select-Random)://$(Get-RandomCsIdentifer -MinSegments 1 -MaxSegments 3 -Style AllLower -MaxLength 6)"
+
+<#
 class PreReleaseSegment {
     [bool]$AltSeparator;
     [string]$Value;
@@ -327,31 +899,6 @@ Function Get-RandomChars {
     }
 }
 
-Function Get-RandomNumber {
-    Param(
-        [Parameter(Mandatory = $true)]
-        [ValidateRange(1, 10)]
-        [int]$MinLength,
-        [Parameter(Mandatory = $true)]
-        [ValidateRange(1, 10)]
-        [int]$MaxLength
-    )
-    $Length = $Script:Random.Next($MinLength, $MaxLength + 1);
-    switch ($Length)
-    {
-        1 { return $Script:Random.Next(0, 10); }
-        2 { return $Script:Random.Next(10, 100); }
-        3 { return $Script:Random.Next(100, 1000); }
-        4 { return $Script:Random.Next(1000, 10000); }
-        5 { return $Script:Random.Next(10000, 100000); }
-        6 { return $Script:Random.Next(100000, 1000000); }
-        7 { return $Script:Random.Next(1000000, 10000000); }
-        8 { return $Script:Random.Next(10000000, 100000000); }
-        9 { return $Script:Random.Next(100000000, 1000000000); }
-        default { return $Script:Random.Next(999999999, 2147483647) + 1; }
-    }
-}
-
 Function Get-RandomNumberChars {
     Param(
         [Parameter(Mandatory = $true)]
@@ -518,6 +1065,7 @@ foreach ($HasPrefix in @($false, $true)) {
         }
     }
 }
+#>
 <#
 $TestDataText = [System.Linq.Enumerable]::Range(1, 8) | ForEach-Object {
     $NumberCount = $_;

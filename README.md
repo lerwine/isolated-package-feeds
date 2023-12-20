@@ -26,6 +26,7 @@ The initial scope is to create NuGet and NPM Package Feed services as well as co
 - [CdnServer](./CdnServer/README.md) - CDN website for hosting libraries downloaded by the `CdnGetter` application.
 - [NuGetPuller](./NuGetPuller/README.md) - Class library for managing local NuGet repositories and retrieve packages from an upstream NuGet repository.
 - [NuGetPuller.CLI](./NuGetPuller.CLI/README.md) - Console application to manage Local NuGet Feed of packages hosted by an upstream NuGet repository.
+- [NuGetPuller.CLI](./NuGetPuller.Win/README.md) - GUI application to manage Local NuGet Feed of packages hosted by an upstream NuGet repository.
 - [NuGetPuller.UnitTests](./NuGetPuller.UnitTests/README.md) - Unit tests for `NuGetPuller` application.
 
 ## Required Solution Development Dependencies
