@@ -107,14 +107,6 @@ public partial class AppSettings : ISharedAppSettings
     public string? SaveMetaDataTo { get; set; }
 
     /// <summary>
-    /// Gets the override value for the <see cref="GlobalPackagesFolder" /> setting.
-    /// </summary>
-    /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Directory.GetCurrentDirectory"/>).
-    /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
-    /// <para>This is mapped from the <c>--global-packages-folder</c> (<see cref="COMMAND_LINE_SWITCH_global_2D_packages_2D_folder"/>) command line argument.</para></remarks>
-    public string? OverrideGlobalPackagesFolder { get; set; }
-
-    /// <summary>
     /// Specifies the remote endpoint URL for the V3 NGet API or a subdirectory path that contains the Upstream NuGet Feed.
     /// </summary>
     /// <remarks>The default value of this setting is defined in the <see cref="Default_Upstream_Service_Index_URL" /> constant.
@@ -155,6 +147,14 @@ public partial class AppSettings : ISharedAppSettings
     /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
     /// <para>This can be overridden using the <c>--global-packages-folder</c> (<see cref="COMMAND_LINE_SWITCH_global_2D_packages_2D_folder"/>) command line argument.</para></remarks>
     public string GlobalPackagesFolder { get; set; } = null!;
+
+    /// <summary>
+    /// Gets the override value for the <see cref="GlobalPackagesFolder" /> setting.
+    /// </summary>
+    /// <remarks>If this path is not absolute, it will be resolved relative to the current working directory (<see cref="Directory.GetCurrentDirectory"/>).
+    /// <para>You can use environment variables (<see cref="Environment.ExpandEnvironmentVariables(string)"/>) for specifying this option.</para>
+    /// <para>This is mapped from the <c>--global-packages-folder</c> (<see cref="COMMAND_LINE_SWITCH_global_2D_packages_2D_folder"/>) command line argument.</para></remarks>
+    public string? OverrideGlobalPackagesFolder { get; set; }
 
     /// <summary>
     /// Gets or sets the value indicating whether to write help information to the console.

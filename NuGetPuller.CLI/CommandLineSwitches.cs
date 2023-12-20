@@ -7,8 +7,10 @@ public static class CommandLineSwitches
     /// </summary>
     public const string COMMAND_LINE_VALUE_all = "all";
 
+    // TODO: Move to NuGetPuller
     public const string EXTENSION_nupkg = ".nupkg";
 
+    // TODO: Move to NuGetPuller
     public const string METADATA_EXTENSION_nuget_metadata_json = ".nuget.metadata.json";
     
     /// <summary>
@@ -133,5 +135,4 @@ public static class CommandLineSwitches
     /// Gets the command line switch that sets <see cref="AppSettings.Help" /> to <see langword="true"/>.
     /// </summary>
     public const string COMMAND_LINE_SWITCH__3F_ = "-?";
-
 }
