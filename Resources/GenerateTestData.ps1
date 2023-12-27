@@ -19,694 +19,152 @@ if ($null -eq $Script:UcAlphaNum) { New-Variable -Name 'UcAlphaNum' -Option Cons
 if ($null -eq $Script:LcAlphaNum) { New-Variable -Name 'LcAlphaNum' -Option Constant -Scope 'Script' -Value ($Script:LcAlpha + $Script:NumberChars) }
 
 <#
-.SYNOPSIS
-    Generates a random number.
+* : Zero or more characters
++ : One or more numbers
+# : # characters
+#-# : Character range
+$Pattern = '^(([*+]|\d+(-\d+)?)(=([*+]|\d+(-\d+)?)?)?|=([*+]|\d+(-\d+)?)?)$';
+$Script:__Convert_RangePatternToTuple.IsMatch('0');
+$Script:__Convert_RangePatternToTuple.IsMatch('0-1');
+$Script:__Convert_RangePatternToTuple.IsMatch('0=');
+$Script:__Convert_RangePatternToTuple.IsMatch('0-1=');
+$Script:__Convert_RangePatternToTuple.IsMatch('=0');
+$Script:__Convert_RangePatternToTuple.IsMatch('=0-1');
+$Script:__Convert_RangePatternToTuple.IsMatch('=');
+$Script:__Convert_RangePatternToTuple.IsMatch('0=0');
+$Script:__Convert_RangePatternToTuple.IsMatch('0-1=0');
+$Script:__Convert_RangePatternToTuple.IsMatch('0=0-1');
+$Script:__Convert_RangePatternToTuple.IsMatch('0-1=0-1');
 #>
-Function Get-RandomNumber {
 
-    [CmdletBinding(DefaultParameterSetName = "FixedRepeat")]
-    Param(
-        [int]$MinValue = [Int]::MinValue,
+if ($null -eq (Get-Module -Name 'Pester')) { Import-Module -Name 'Pester' }
 
-        [int]$MaxValue = [int]::MaxValue,
+BeforeAll {
+    if ($null -ne (Get-Module -Name 'TestDataGeneration')) { Remove-Module -Name 'TestDataGeneration' }
+    Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath 'TestDataGeneration/TestDataGeneration.psd1') -ErrorAction Stop;
+}
 
-        [Parameter(ParameterSetName = "FixedRepeat")]
-        [ValidateRange(1, [int]::MaxValue)]
-        [int]$Repeat = 1,
+Describe 'Get-Planet' {
+    Context 'Values by parameter' {
+        Context 'Single Value' {
 
-        [Parameter(ParameterSetName = "RandomRepeat")]
-        [ValidateRange(0, [int]::MaxValue)]
-        [int]$MinRepeat = 1,
-
-        [Parameter(Mandatory = $true, ParameterSetName = "RandomRepeat")]
-        [ValidateRange(1, [int]::MaxValue)]
-        [int]$MaxRepeat
-    )
-    if ($MinValue -gt $MaxValue) {
-        Write-Error -Message "MinValue cannot be greater than MaxValue" -Category InvalidArgument -ErrorId 'InvalidValueRange';
-    }
-    if ($PSCmdlet.ParameterSetName -eq 'RandomRepeat') {
-        if ($MinRepeat -gt $MaxRepeat) {
-            Write-Error -Message "MinRepeat cannot be greater than MaxRepeat" -Category InvalidArgument -ErrorId 'InvalidRepeatRange';
-            $Repeat = 0;
-        } else {
-            if ($MinRepeat -eq $MaxRepeat) {
-                $Repeat = $MinRepeat;
-            } else {
-                if ($MaxRepeat -eq [int]::MaxValue) {
-                    $Repeat = $Script:Random.Next($MinRepeat - 1, [int]::MaxValue) + 1;
-                } else {
-                    $Repeat = $Script:Random.Next($MinRepeat, $MaxRepeat + 1);
-                }
-            }
+        }
+        Context 'Two Values' {
+            
+        }
+        Context 'More Than Two Values' {
+            
         }
     }
-    if ($Repeat -gt 0) {
-        if ($MinValue -eq $MaxValue) {
-            for ($i = 0; $i -lt $Repeat; $i++) { $MinValue | Write-Output }
-        } else {
-            if ($MaxRepeat -eq [int]::MaxValue) {
-                if ($MinRepeat -eq [int]::MinValue) {
-                    for ($i = 0; $i -lt $Repeat; $i++) {
-                        if ($Script:Random.Next(0, 2) -eq 1) {
-                            ($Script:Random.Next(-1, $MaxValue) + 1) | Write-Output;
-                        } else {
-                            $Script:Random.Next($MinValue, 0) | Write-Output;
-                        }
-                    }
-                } else {
-                    for ($i = 0; $i -lt $Repeat; $i++) {
-                        ($Script:Random.Next($MinRepeat - 1, [int]::MaxValue) + 1) | Write-Output;
-                    }
-                }
-            } else {
-                for ($i = 0; $i -lt $Repeat; $i++) { $Script:Random.Next($MinRepeat, $MaxRepeat + 1) | Write-Output }
-            }
+    Context 'Values by pipeline' {
+        Context 'Single Value' {
+
         }
+        Context 'Two Values' {
+            
+        }
+        Context 'More Than Two Values' {
+            
+        }
+    }
+    It 'Given single value of 0, it returns { Item1: 0, Item2: 0 }' {
+        $Tuple = Convert-RangeValuesToTuple -Values 0;
+        $Tuple.Item1 | Should -Be 0;
+        $Tuple.Item2 | Should -Be 0;
+    }
+    It 'With piped single value of 0, it returns { Item1: 0, Item2: 0 }' {
+        $Tuple = 0 | Convert-RangeValuesToTuple;
+        $Tuple.Item1 | Should -Be 0;
+        $Tuple.Item2 | Should -Be 0;
+    }
+    It 'Given single value of [int]::MinValue, it returns { Item1: [int]::MinValue, Item2: [int]::MinValue }' {
+        $Tuple = Convert-RangeValuesToTuple -Values [int]::MinValue;
+        $Tuple.Item1 | Should -Be [int]::MinValue;
+        $Tuple.Item2 | Should -Be [int]::MinValue;
+    }
+    It 'With piped single value of [int]::MinValue, it returns { Item1: [int]::MinValue, Item2: [int]::MinValue }' {
+        $Tuple = [int]::MinValue | Convert-RangeValuesToTuple;
+        $Tuple.Item1 | Should -Be [int]::MinValue;
+        $Tuple.Item2 | Should -Be [int]::MinValue;
+    }
+    It 'Given single value of 2, it returns { Item1: 2, Item2: 2 }' {
+        $Tuple = Convert-RangeValuesToTuple -Values 2;
+        $Tuple.Item1 | Should -Be 2;
+        $Tuple.Item2 | Should -Be 2;
+    }
+    It 'With piped single value of 3, it returns { Item1: 3, Item2: 3 }' {
+        $Tuple = 3 | Convert-RangeValuesToTuple;
+        $Tuple.Item1 | Should -Be 3;
+        $Tuple.Item2 | Should -Be 3;
+    }
+    It 'Given values of (4, 6), it returns { Item1: 4, Item2: 6 }' {
+        $Tuple = Convert-RangeValuesToTuple -Values 4, 6;
+        $Tuple.Item1 | Should -Be 4;
+        $Tuple.Item2 | Should -Be 6;
+    }
+    It 'With piped values of (3, 5), it returns { Item1: 3, Item2: 5 }' {
+        $Tuple = (3, 5) | Convert-RangeValuesToTuple;
+        $Tuple.Item1 | Should -Be 3;
+        $Tuple.Item2 | Should -Be 5;
+    }
+    It 'Given values of (-1, 7), it returns { Item1: -1, Item2: 7 }' {
+        $Tuple = Convert-RangeValuesToTuple -Values -1, 7;
+        $Tuple.Item1 | Should -Be -1;
+        $Tuple.Item2 | Should -Be 7;
+    }
+    It 'With piped values of (-32768, 65536), it returns { Item1: -32768, Item2: 65536 }' {
+        $Tuple = (-32768, 65536) | Convert-RangeValuesToTuple;
+        $Tuple.Item1 | Should -Be -32768;
+        $Tuple.Item2 | Should -Be 65536;
     }
 }
 
-Function Select-Random {
-    [CmdletBinding()]
-    Param(
-        [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true)]
-        [AllowEmptyString()]
-        [object[]]$InputObject,
-
-        [ValidateRange(1, 1024)]
-        [int]$Count
-    )
-
-    Begin { $AllObjects = @() }
-
-    Process { $AllObjects += $InputObject }
-
-    End {
-        $Total = $AllObjects.Count;
-        if ($Total -le $Count) {
-            $AllObjects | Write-Output;
-        } else {
-            $Indexes = @();
-            for ($n = 0; $n -lt $Count; $n++) {
-                $i = $Script:Random.Next(0, $Total);
-                while ($Indexes -contains $i) { $i = $Script:Random.Next(0, $Total) }
-                $Indexes += $i;
-                $AllObjects[$i] | Write-Output;
-            }
-        }
-    }
-}
-
-Function Get-RandomString {
-    [CmdletBinding(DefaultParameterSetName = "FixedLength")]
-    Param(
-        [Parameter(Mandatory = $true, Position = 0)]
-        [ValidateLength(2, [int]::MaxValue)]
-        [string]$Source,
-
-        [Parameter(Position = 1, ParameterSetName = "FixedLength")]
-        [ValidateRange(1, [int]::MaxValue)]
-        [int]$Length = 1,
-
-        [Parameter(ParameterSetName = "RandomLength")]
-        [ValidateRange(0, [int]::MaxValue)]
-        [int]$MinLength = 1,
-
-        [Parameter(Mandatory = $true, ParameterSetName = "RandomLength")]
-        [ValidateRange(1, [int]::MaxValue)]
-        [int]$MaxLength = 8,
-
-        [ValidateRange(1, [int]::MaxValue)]
-        [int]$Repeat = 1,
-
-        [ValidateRange(0, [int]::MaxValue)]
-        [int]$MinRepeat = 1,
-
-        [ValidateRange(1, [int]::MaxValue)]
-        [int]$MaxRepeat = 1,
-
-        [string[]]$JoinWith,
-
-        [System.IO.StreamWriter]$Writer
-    )
-    $SourceLen = $Source.Length;
-    if ((-not $PSBoundParameters.ContainsKey('Repeat')) -and ($Repeat = $MaxRepeat) -ne $MinRepeat) {
-        if ($MinRepeat -gt $MaxRepeat) {
-            Write-Error -Message "MinRepeat cannot be greater than the MaxRepeat" -Category InvalidArgument -ErrorId 'InvalidLengthRange' -TargetObject $MinRepeat -CategoryTargetName 'MinRepeat';
-            $Repeat = 0;
-        } else {
-            $Repeat = Get-RandomNumber -MinValue $MinRepeat -MaxValue $MaxRepeat;
-        }
-    }
-    if ($Repeat -gt 1) {
-        if ($PSBoundParameters.ContainsKey('Length') -or ($Length = $MaxLength) -eq $MinLength) {
-            if ($PSBoundParameters.ContainsKey('JoinWith')) {
-                if (-not $PSBoundParameters.ContainsKey('Writer')) { $Writer = [System.IO.StringWriter]::new() }
-                $Jwc = $JoinWith.Count;
-                if ($Jwc -eq 1) {
-                    # Repeat: >1; Length: >0; Jwc = 1
-                    for ($i = 1; $i -lt $Length; $i++) { $Writer.Write($Source[$Script:Random.Next(0, $SourceLen)]) }
-                    $c = $JoinWith[0];
-                    for ($n = 1; $n -lt $Repeat; $n++) {
-                        $Writer.Write($c);
-                        for ($i = 1; $i -lt $Length; $i++) { $Writer.Write($Source[$Script:Random.Next(0, $SourceLen)]) }
-                    }
-                } else {
-                    # Repeat: >1; Length: >0; Jwc = >1
-                    for ($i = 1; $i -lt $Length; $i++) { $Writer.Write($Source[$Script:Random.Next(0, $SourceLen)]) }
-                    for ($n = 1; $n -lt $Repeat; $n++) {
-                        $Writer.Write($JoinWith[$Script:Random.Next(0, $Jwc)]);
-                        for ($i = 1; $i -lt $Length; $i++) { $Writer.Write($Source[$Script:Random.Next(0, $SourceLen)]) }
-                    }
-                }
-                if (-not $PSBoundParameters.ContainsKey('Writer')) { $Writer.ToString() | Write-Output }
-            } else {
-                if ($PSBoundParameters.ContainsKey('Writer')) {
-                    # Repeat: >1; Length: >0; Jwc = 0
-                    for ($n = 0; $n -lt $Repeat; $n++) {
-                        for ($i = 1; $i -lt $Length; $i++) { $Writer.Write($Source[$Script:Random.Next(0, $SourceLen)]) }
-                    }
-                } else {
-                    if ($Length -eq 1) {
-                        # Repeat: >1; Length: 1; Jwc = 0
-                        for ($i = 1; $i -lt $Repeat; $i++) { $Source.Substring($Script:Random.Next(0, $SourceLen), 1) | Write-Output }
-                    } else {
-                        # Repeat: >1; Length: >1; Jwc = 0
-                        for ($n = 0; $n -lt $Repeat; $n++) {
-                            $Writer = [System.IO.StringWriter]::new();
-                            for ($i = 1; $i -lt $Length; $i++) { $Writer.Write($Source[$Script:Random.Next(0, $SourceLen)]) }
-                            $Writer.ToString() | Write-Output;
-                        }
-                    }
-                }
-            }
-        } else {
-            if ($MinLength -gt $MaxLength) {
-                Write-Error -Message "MinLength cannot be greater than the MaxLength" -Category InvalidArgument -ErrorId 'InvalidLengthRange' -TargetObject $MinLength -CategoryTargetName 'MinLength';
-            } else {
-                if ($PSBoundParameters.ContainsKey('JoinWith')) {
-                    if (-not $PSBoundParameters.ContainsKey('Writer')) { $Writer = [System.IO.StringWriter]::new() }
-                    $Jwc = $JoinWith.Count;
-                    $Length = Get-RandomNumber -MinValue $MinLength -MaxValue $MaxLength;
-                    for ($i = 0; $i -lt $Length; $i++) { $Writer.Write($Source[$Script:Random.Next(0, $SourceLen)]) }
-                    if ($Jwc -eq 1) {
-                        # Repeat: >1; MinLength:MaxLength; Jwc: 1
-                        $c = $JoinWith[0];
-                        for ($n = 1; $n -lt $Repeat; $n++) {
-                            $Writer.Write($c);
-                            $Length = Get-RandomNumber -MinValue $MinLength -MaxValue $MaxLength;
-                            for ($i = 0; $i -lt $Length; $i++) { $Writer.Write($Source[$Script:Random.Next(0, $SourceLen)]) }
-                        }
-                    } else {
-                        # Repeat: >1; MinLength:MaxLength; Jwc: >1
-                        for ($n = 1; $n -lt $Repeat; $n++) {
-                            $Writer.Write($JoinWith[$Script:Random.Next(0, $Jwc)]);
-                            $Length = Get-RandomNumber -MinValue $MinLength -MaxValue $MaxLength;
-                            for ($i = 0; $i -lt $Length; $i++) { $Writer.Write($Source[$Script:Random.Next(0, $SourceLen)]) }
-                        }
-                    }
-                    if (-not $PSBoundParameters.ContainsKey('Writer')) { $Writer.ToString() | Write-Output }
-                } else {
-                    if ($PSBoundParameters.ContainsKey('Writer')) {
-                        # Repeat: >1; MinLength:MaxLength; Jwc: 0
-                        for ($n = 0; $n -lt $Repeat; $n++) {
-                            $Length = Get-RandomNumber -MinValue $MinLength -MaxValue $MaxLength;
-                            for ($i = 0; $i -lt $Length; $i++) { $Writer.Write($Source[$Script:Random.Next(0, $SourceLen)]) }
-                        }
-                    } else {
-                        # Repeat: >1; MinLength:MaxLength; Jwc: 0
-                        $Writer = [System.IO.StringWriter]::new();
-                        for ($n = 0; $n -lt $Repeat; $n++) {
-                            $Length = Get-RandomNumber -MinValue $MinLength -MaxValue $MaxLength;
-                            for ($i = 0; $i -lt $Length; $i++) { $Writer.Write($Source[$Script:Random.Next(0, $SourceLen)]) }
-                        }
-                        $Writer.ToString() | Write-Output;
-                    }
-                }
-            }
-        }
-    } else {
-        if ($Repeat -eq 1) {
-            if ($PSBoundParameters.ContainsKey('Length') -or ($Length = $MaxLength) -eq $MinLength) {
-                if ($Length -gt 1) {
-                    # Repeat: 1; Length: >1
-                    if ($PSBoundParameters.ContainsKey('Writer')) {
-                        for ($i = 0; $i -lt $Length; $i++) { $Writer.Write($Source[$Script:Random.Next(0, $SourceLen)]) }
-                    } else {
-                        $Writer = [System.IO.StringWriter]::new();
-                        for ($i = 0; $i -lt $Length; $i++) { $Writer.Write($Source[$Script:Random.Next(0, $SourceLen)]) }
-                        $Writer.ToString() | Write-Output;
-                    }
-                } else {
-                    # Repeat: 1; Length: 1
-                    if ($PSBoundParameters.ContainsKey('Writer')) {
-                        $Writer.Write($Source[$Script:Random.Next(0, $SourceLen)]);
-                    } else {
-                        $Source.Substring($Script:Random.Next(0, $SourceLen), 1) | Write-Output;
-                    }
-                }
-            } else {
-                if ($MinLength -gt $MaxLength) {
-                    Write-Error -Message "MinLength cannot be greater than the MaxLength" -Category InvalidArgument -ErrorId 'InvalidLengthRange' -TargetObject $MinLength -CategoryTargetName 'MinLength';
-                } else {
-                    if (($Length = Get-RandomNumber -MinValue $MinLength -MaxValue $MaxLength) -gt 1) {
-                        # Repeat: 1; Length: >1
-                        if ($PSBoundParameters.ContainsKey('Writer')) {
-                            for ($i = 0; $i -lt $Length; $i++) { $Writer.Write($Source[$Script:Random.Next(0, $SourceLen)]) }
-                        } else {
-                            $Writer = [System.IO.StringWriter]::new();
-                            for ($i = 0; $i -lt $Length; $i++) { $Writer.Write($Source[$Script:Random.Next(0, $SourceLen)]) }
-                            $Writer.ToString() | Write-Output;
-                        }
-                    } else {
-                        if ($Length -eq 1) {
-                            # Repeat: 1; Length: 1
-                            if ($PSBoundParameters.ContainsKey('Writer')) {
-                                $Writer.Write($Source[$Script:Random.Next(0, $SourceLen)]);
-                            } else {
-                                $Source.Substring($Script:Random.Next(0, $SourceLen), 1) | Write-Output;
-                            }
-                        } else {
-                            # Repeat: 1; Length: 0
-                            if (-not $PSBoundParameters.ContainsKey('Writer')) { '' | Write-Output }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-Function Get-RandomCsIdentifer {
-    [CmdletBinding(DefaultParameterSetName = "FixedLength")]
-    Param(
-        [Parameter(Position = 1, ParameterSetName = "FixedLength")]
-        [ValidateRange(1, [int]::MaxValue)]
-        [int]$Length = 1,
-
-        [Parameter(ParameterSetName = "RandomLength")]
-        [ValidateRange(1, [int]::MaxValue)]
-        [int]$MinLength = 1,
-
-        [Parameter(Mandatory = $true, ParameterSetName = "RandomLength")]
-        [ValidateRange(1, [int]::MaxValue)]
-        [int]$MaxLength = 8,
-
-        [ValidateRange(1, [int]::MaxValue)]
-        [int]$SegmentCount = 1,
-
-        [ValidateRange(1, [int]::MaxValue)]
-        [int]$MinSegmentCount = 1,
-
-        [ValidateRange(1, [int]::MaxValue)]
-        [int]$MaxSegmentCount = 1,
-
-        [ValidateSet('UcFirst', 'LcFirst', 'AllUpper', 'AllLower')]
-        [string]$Style = 'UcFirst',
-
-        [string[]]$JoinWith = @('.'),
-
-        [switch]$NoNumbers,
-
-        [System.IO.StreamWriter]$Writer
-    )
-    if ((-not $PSBoundParameters.ContainsKey('SegmentCount')) -and ($SegmentCount = $MaxSegmentCount) -ne $MinSegmentCount) {
-        if ($MinSegmentCount -gt $MaxSegmentCount) {
-            Write-Error -Message "MinSegmentCount cannot be greater than the MaxSegmentCount" -Category InvalidArgument -ErrorId 'InvalidSegmentCountRange' -TargetObject $MinSegmentCount -CategoryTargetName 'MinSegmentCount';
-            $SegmentCount = 0;
-        } else {
-            $SegmentCount = Get-RandomNumber -MinValue $MinSegmentCount -MaxValue $MaxSegmentCount;
-        }
-    }
-    if ($SegmentCount -gt 1) {
-        if (-not $PSBoundParameters.ContainsKey('Writer')) { $Writer = [System.IO.StringWriter]::new() }
-        $Jwc = $JoinWith.Length;
-        if ($PSBoundParameters.ContainsKey('Length') -or ($Length = $MaxLength) -eq $MinLength) {
-            # SegmentCount: >1; Length: >0
-            if ($Jwc -eq 1) {
-                $c = $JoinWith[0];
-                switch ($Style) {
-                    'AllUpper' {
-                        if ($NoNumbers.IsPresent) {
-                            Get-RandomString -Source $Script:UcAlpha -Length $Length -Writer $Writer;
-                            for ($n = 1; $n -lt $SegmentCount; $n++) {
-                                $Writer.Write($c);
-                                Get-RandomString -Source $Script:UcAlpha -Length $Length -Writer $Writer;
-                            }
-                        } else {
-                            $Count = $Script:UcAlpha.Length;
-                            $Writer.Write($Script:UcAlpha[$Script:Random.Next(0, $Count)]);
-                            Get-RandomString -Source $Script:UcAlphaNum -Length ($Length - 1) -Writer $Writer;
-                            for ($n = 1; $n -lt $SegmentCount; $n++) {
-                                $Writer.Write($c);
-                                $Writer.Write($Script:UcAlpha[$Script:Random.Next(0, $Count)]);
-                                Get-RandomString -Source $Script:UcAlphaNum -Length ($Length - 1) -Writer $Writer;
-                            }
-                        }
-                        break;
-                    }
-                    'AllLower' {
-                        $Count = $Script:LcAlpha.Length;
-                        if ($NoNumbers.IsPresent) {
-                            Get-RandomString -Source $Script:LcAlpha -Length $Length -Writer $Writer;
-                            for ($n = 1; $n -lt $SegmentCount; $n++) {
-                                $Writer.Write($c);
-                                Get-RandomString -Source $Script:LcAlpha -Length $Length -Writer $Writer;
-                            }
-                        } else {
-                            $Writer.Write($Script:LcAlpha[$Script:Random.Next(0, $Count)]);
-                            Get-RandomString -Source $Script:LcAlphaNum -Length ($Length - 1) -Writer $Writer;
-                            for ($n = 1; $n -lt $SegmentCount; $n++) {
-                                $Writer.Write($c);
-                                $Writer.Write($Script:LcAlpha[$Script:Random.Next(0, $Count)]);
-                                Get-RandomString -Source $Script:LcAlphaNum -Length ($Length - 1) -Writer $Writer;
-                            }
-                        }
-                        break;
-                    }
-                    'LcFirst' {
-                        $Count = $Script:LcAlpha.Length;
-                        $Writer.Write($Script:LcAlpha[$Script:Random.Next(0, $Count)]);
-                        if ($NoNumbers.IsPresent) {
-                            Get-RandomString -Source $Script:AlphaChars -Length ($Length - 1) -Writer $Writer;
-                            for ($n = 1; $n -lt $SegmentCount; $n++) {
-                                $Writer.Write($c);
-                                $Writer.Write($Script:LcAlpha[$Script:Random.Next(0, $Count)]);
-                                Get-RandomString -Source $Script:AlphaChars -Length ($Length - 1) -Writer $Writer;
-                            }
-                        } else {
-                            Get-RandomString -Source $Script:AlphaNum -Length ($Length - 1) -Writer $Writer;
-                            for ($n = 1; $n -lt $SegmentCount; $n++) {
-                                $Writer.Write($c);
-                                $Writer.Write($Script:LcAlpha[$Script:Random.Next(0, $Count)]);
-                                Get-RandomString -Source $Script:AlphaNum -Length ($Length - 1) -Writer $Writer;
-                            }
-                        }
-                        break;
-                    }
-                    default {
-                        $Count = $Script:UcAlpha.Length;
-                        $Writer.Write($Script:UcAlpha[$Script:Random.Next(0, $l)]);
-                        if ($NoNumbers.IsPresent) {
-                            Get-RandomString -Source $Script:AlphaChars -Length ($Length - 1) -Writer $Writer;
-                            for ($n = 1; $n -lt $SegmentCount; $n++) {
-                                $Writer.Write($c);
-                                $Writer.Write($Script:UcAlpha[$Script:Random.Next(0, $l)]);
-                                Get-RandomString -Source $Script:AlphaChars -Length ($Length - 1) -Writer $Writer;
-                            }
-                        } else {
-                            Get-RandomString -Source $Script:AlphaNum -Length ($Length - 1) -Writer $Writer;
-                            for ($n = 1; $n -lt $SegmentCount; $n++) {
-                                $Writer.Write($c);
-                                $Writer.Write($Script:UcAlpha[$Script:Random.Next(0, $l)]);
-                                Get-RandomString -Source $Script:AlphaNum -Length ($Length - 1) -Writer $Writer;
-                            }
-                        }
-                        break;
-                    }
-                }
-            } else {
-                switch ($Style) {
-                    'AllUpper' {
-                        if ($NoNumbers.IsPresent) {
-                            Get-RandomString -Source $Script:UcAlpha -Length $Length -Writer $Writer;
-                            for ($n = 1; $n -lt $SegmentCount; $n++) {
-                                $Writer.Write($JoinWith[$Script:Random.Next(0, $Jwc)]);
-                                Get-RandomString -Source $Script:UcAlpha -Length $Length -Writer $Writer;
-                            }
-                        } else {
-                            $Count = $Script:UcAlpha.Length;
-                            $Writer.Write($Script:UcAlpha[$Script:Random.Next(0, $Count)]);
-                            Get-RandomString -Source $Script:UcAlphaNum -Length ($Length - 1) -Writer $Writer;
-                            for ($n = 1; $n -lt $SegmentCount; $n++) {
-                                $Writer.Write($JoinWith[$Script:Random.Next(0, $Jwc)]);
-                                $Writer.Write($Script:UcAlpha[$Script:Random.Next(0, $Count)]);
-                                Get-RandomString -Source $Script:UcAlphaNum -Length ($Length - 1) -Writer $Writer;
-                            }
-                        }
-                        break;
-                    }
-                    'AllLower' {
-                        $Count = $Script:LcAlpha.Length;
-                        if ($NoNumbers.IsPresent) {
-                            Get-RandomString -Source $Script:LcAlpha -Length $Length -Writer $Writer;
-                            for ($n = 1; $n -lt $SegmentCount; $n++) {
-                                $Writer.Write($JoinWith[$Script:Random.Next(0, $Jwc)]);
-                                Get-RandomString -Source $Script:LcAlpha -Length $Length -Writer $Writer;
-                            }
-                        } else {
-                            $Writer.Write($Script:LcAlpha[$Script:Random.Next(0, $Count)]);
-                            Get-RandomString -Source $Script:LcAlphaNum -Length ($Length - 1) -Writer $Writer;
-                            for ($n = 1; $n -lt $SegmentCount; $n++) {
-                                $Writer.Write($JoinWith[$Script:Random.Next(0, $Jwc)]);
-                                $Writer.Write($Script:LcAlpha[$Script:Random.Next(0, $Count)]);
-                                Get-RandomString -Source $Script:LcAlphaNum -Length ($Length - 1) -Writer $Writer;
-                            }
-                        }
-                        break;
-                    }
-                    'LcFirst' {
-                        $Count = $Script:LcAlpha.Length;
-                        $Writer.Write($Script:LcAlpha[$Script:Random.Next(0, $Count)]);
-                        if ($NoNumbers.IsPresent) {
-                            Get-RandomString -Source $Script:AlphaChars -Length ($Length - 1) -Writer $Writer;
-                            for ($n = 1; $n -lt $SegmentCount; $n++) {
-                                $Writer.Write($JoinWith[$Script:Random.Next(0, $Jwc)]);
-                                $Writer.Write($Script:LcAlpha[$Script:Random.Next(0, $Count)]);
-                                Get-RandomString -Source $Script:AlphaChars -Length ($Length - 1) -Writer $Writer;
-                            }
-                        } else {
-                            Get-RandomString -Source $Script:AlphaNum -Length ($Length - 1) -Writer $Writer;
-                            for ($n = 1; $n -lt $SegmentCount; $n++) {
-                                $Writer.Write($JoinWith[$Script:Random.Next(0, $Jwc)]);
-                                $Writer.Write($Script:LcAlpha[$Script:Random.Next(0, $Count)]);
-                                Get-RandomString -Source $Script:AlphaNum -Length ($Length - 1) -Writer $Writer;
-                            }
-                        }
-                        break;
-                    }
-                    default {
-                        $Count = $Script:UcAlpha.Length;
-                        $Writer.Write($Script:UcAlpha[$Script:Random.Next(0, $l)]);
-                        if ($NoNumbers.IsPresent) {
-                            Get-RandomString -Source $Script:AlphaChars -Length ($Length - 1) -Writer $Writer;
-                            for ($n = 1; $n -lt $SegmentCount; $n++) {
-                                $Writer.Write($c);
-                                $Writer.Write($Script:UcAlpha[$Script:Random.Next(0, $l)]);
-                                Get-RandomString -Source $Script:AlphaChars -Length ($Length - 1) -Writer $Writer;
-                            }
-                        } else {
-                            Get-RandomString -Source $Script:AlphaNum -Length ($Length - 1) -Writer $Writer;
-                            for ($n = 1; $n -lt $SegmentCount; $n++) {
-                                $Writer.Write($c);
-                                $Writer.Write($Script:UcAlpha[$Script:Random.Next(0, $l)]);
-                                Get-RandomString -Source $Script:AlphaNum -Length ($Length - 1) -Writer $Writer;
-                            }
-                        }
-                        break;
-                    }
-                }
-            }
-        } else {
-            if ($MinLength -gt $MaxLength) {
-                Write-Error -Message "MinLength cannot be greater than the MaxLength" -Category InvalidArgument -ErrorId 'InvalidSegmentCountRange' -TargetObject $MinLength -CategoryTargetName 'MinLength';
-            } else {
-                if ($Jwc -eq 1) {
-                    $c = $JoinWith[0];
-                    # TODO: SegmentCount: >1; MinLength:MaxLength; JWD: 1
-                } else {
-                    # TODO: SegmentCount: >1; MinLength:MaxLength; JWD: >1
-                }
-            }
-        }
-        if (-not $PSBoundParameters.ContainsKey('Writer')) { $Writer.ToString() | Write-Output }
-    } else {
-        if ($SegmentCount -eq 1) {
-            if ($PSBoundParameters.ContainsKey('Length') -or ($Length = $MaxLength) -eq $MinLength) {
-                # SegmentCount: 1; Length: >0
-                if ($Length -gt 1) {
-                    if (-not $PSBoundParameters.ContainsKey('Writer')) { $Writer = [System.IO.StringWriter]::new() }
-                    switch ($Style) {
-                        'AllUpper' {
-                            if ($NoNumbers.IsPresent) {
-                                Get-RandomString -Source $Script:UcAlpha -Length $Length -Writer $Writer;
-                            } else {
-                                $Writer.Write($Script:UcAlpha[$Script:Random.Next(0, $Script:UcAlpha.Length)]);
-                                Get-RandomString -Source $Script:UcAlphaNum -Length ($Length - 1) -Writer $Writer;
-                            }
-                            break;
-                        }
-                        'AllLower' {
-                            if ($NoNumbers.IsPresent) {
-                                Get-RandomString -Source $Script:LcAlpha -Length $Length -Writer $Writer;
-                            } else {
-                                $Writer.Write($Script:LcAlpha[$Script:Random.Next(0, $Script:LcAlpha.Length)]);
-                                Get-RandomString -Source $Script:LcAlphaNum -Length ($Length - 1) -Writer $Writer;
-                            }
-                            break;
-                        }
-                        'LcFirst' {
-                            $Writer.Write($Script:LcAlpha[$Script:Random.Next(0, $Script:LcAlpha.Length)]);
-                            if ($NoNumbers.IsPresent) {
-                                $Count = $Script:AlphaChars.Length;
-                                for ($i = 1; $i -lt $Length; $i++) { $Writer.Write($Script:AlphaChars[$Script:Random.Next(0, $Count)]) }
-                            } else {
-                                Get-RandomString -Source $Script:AlphaNum -Length ($Length - 1) -Writer $Writer;
-                            }
-                            break;
-                        }
-                        default {
-                            $Writer.Write($Script:UcAlpha[$Script:Random.Next(0, $Script:UcAlpha.Length)]);
-                            if ($NoNumbers.IsPresent) {
-                                Get-RandomString -Source $Script:AlphaChars -Length ($Length - 1) -Writer $Writer;
-                            } else {
-                                Get-RandomString -Source $Script:AlphaNum -Length ($Length - 1) -Writer $Writer;
-                            }
-                            break;
-                        }
-                    }
-                    if (-not $PSBoundParameters.ContainsKey('Writer')) { $Writer.ToString() | Write-Output }
-                } else {
-                    if ($PSBoundParameters.ContainsKey('Writer')) {
-                        switch ($Style) {
-                            'AllLower' {
-                                $Writer.Write($Script:LcAlpha[$Script:Random.Next(0, $Script:LcAlpha.Length)]);
-                                break;
-                            }
-                            'LcFirst' {
-                                $Writer.Write($Script:LcAlpha[$Script:Random.Next(0, $Script:LcAlpha.Length)]);
-                                break;
-                            }
-                            default {
-                                $Writer.Write($Script:UcAlpha[$Script:Random.Next(0, $Script:UcAlpha.Length)]);
-                                break;
-                            }
-                        }
-                    } else {
-                        switch ($Style) {
-                            'AllLower' {
-                                $Script:LcAlpha.Substring($Script:Random.Next(0, $Script:LcAlpha.Length), 1) | Write-Output;
-                                break;
-                            }
-                            'LcFirst' {
-                                $Script:LcAlpha.Substring($Script:Random.Next(0, $Script:LcAlpha.Length), 1) | Write-Output;
-                                break;
-                            }
-                            default {
-                                $Script:UcAlpha.Substring($Script:Random.Next(0, $Script:UcAlpha.Length), 1) | Write-Output;
-                                break;
-                            }
-                        }
-                    }
-                }
-            } else {
-                if ($MinLength -gt $MaxLength) {
-                    Write-Error -Message "MinLength cannot be greater than the MaxLength" -Category InvalidArgument -ErrorId 'InvalidSegmentCountRange' -TargetObject $MinLength -CategoryTargetName 'MinLength';
-                } else {
-                    switch (Get-RandomNumber -MinValue $MinLength -MaxValue $MaxLength) {
-                        0 {
-                            # SegmentCount: 1; Length: 0
-                            if (-not $PSBoundParameters.ContainsKey('Writer')) { '' | Write-Output }
-                            break;
-                        }
-                        1 {
-                            # SegmentCount: 1; Length: 1
-                            if ($PSBoundParameters.ContainsKey('Writer')) {
-                                switch ($Style) {
-                                    'AllLower' {
-                                        $Writer.Write($Script:LcAlpha[$Script:Random.Next(0, $Script:LcAlpha.Length)]);
-                                        break;
-                                    }
-                                    'LcFirst' {
-                                        $Writer.Write($Script:LcAlpha[$Script:Random.Next(0, $Script:LcAlpha.Length)]);
-                                        break;
-                                    }
-                                    default {
-                                        $Writer.Write($Script:UcAlpha[$Script:Random.Next(0, $Script:UcAlpha.Length)]);
-                                        break;
-                                    }
-                                }
-                            } else {
-                                switch ($Style) {
-                                    'AllLower' {
-                                        $Script:LcAlpha.Substring($Script:Random.Next(0, $Script:LcAlpha.Length), 1) | Write-Output;
-                                        break;
-                                    }
-                                    'LcFirst' {
-                                        $Script:LcAlpha.Substring($Script:Random.Next(0, $Script:LcAlpha.Length), 1) | Write-Output;
-                                        break;
-                                    }
-                                    default {
-                                        $Script:UcAlpha.Substring($Script:Random.Next(0, $Script:UcAlpha.Length), 1) | Write-Output;
-                                        break;
-                                    }
-                                }
-                            }
-                            break;
-                        }
-                        default {
-                            # SegmentCount: 1; Length: >1
-                            if (-not $PSBoundParameters.ContainsKey('Writer')) { $Writer = [System.IO.StringWriter]::new() }
-                            switch ($Style) {
-                                'AllUpper' {
-                                    $Count = $Script:UcAlpha.Length;
-                                    if ($NoNumbers.IsPresent) {
-                                        for ($i = 0; $i -lt $Length; $i++) { $Writer.Write($Script:UcAlpha[$Script:Random.Next(0, $Count)]) }
-                                    } else {
-                                        $Writer.Write($Script:UcAlpha[$Script:Random.Next(0, $Count)]);
-                                        for ($i = 1; $i -lt $Length; $i++) { $Writer.Write($Script:UcAlphaNum[$Script:Random.Next(0, $Count)]) }
-                                    }
-                                    break;
-                                }
-                                'AllLower' {
-                                    $Count = $Script:LcAlpha.Length;
-                                    if ($NoNumbers.IsPresent) {
-                                        for ($i = 0; $i -lt $Length; $i++) { $Writer.Write($Script:LcAlpha[$Script:Random.Next(0, $Count)]) }
-                                    } else {
-                                        $Writer.Write($Script:LcAlpha[$Script:Random.Next(0, $Count)]);
-                                        for ($i = 1; $i -lt $Length; $i++) { $Writer.Write($Script:LcAlphaNum[$Script:Random.Next(0, $Count)]) }
-                                    }
-                                    break;
-                                }
-                                'LcFirst' {
-                                    $Writer.Write($Script:LcAlpha[$Script:Random.Next(0, $Script:LcAlpha.Length)]);
-                                    if ($NoNumbers.IsPresent) {
-                                        $Count = $Script:AlphaChars.Length;
-                                        for ($i = 1; $i -lt $Length; $i++) { $Writer.Write($Script:AlphaChars[$Script:Random.Next(0, $Count)]) }
-                                    } else {
-                                        $Count = $Script:AlphaNum.Length;
-                                        for ($i = 1; $i -lt $Length; $i++) { $Writer.Write($Script:AlphaNum[$Script:Random.Next(0, $Count)]) }
-                                    }
-                                    break;
-                                }
-                                default {
-                                    $Writer.Write($Script:UcAlpha[$Script:Random.Next(0, $Script:UcAlpha.Length)]);
-                                    if ($NoNumbers.IsPresent) {
-                                        $Count = $Script:AlphaChars.Length;
-                                        for ($i = 1; $i -lt $Length; $i++) { $Writer.Write($Script:AlphaChars[$Script:Random.Next(0, $Count)]) }
-                                    } else {
-                                        $Count = $Script:AlphaNum.Length;
-                                        for ($i = 1; $i -lt $Length; $i++) { $Writer.Write($Script:AlphaNum[$Script:Random.Next(0, $Count)]) }
-                                    }
-                                    break;
-                                }
-                            }
-                            if (-not $PSBoundParameters.ContainsKey('Writer')) { $Writer.ToString() | Write-Output }
-                            break;
-                        }
-                    }
-                }
-            }
-        } else {
-            if ($MinLength -gt $MaxLength) {
-                Write-Error -Message "MinLength cannot be greater than the MaxLength" -Category InvalidArgument -ErrorId 'InvalidSegmentCountRange' -TargetObject $MinLength -CategoryTargetName 'MinLength';
-            }
-        }
-    }
-}
-
+<#
 "$(('http', 'https') | Select-Random)://$(Get-RandomCsIdentifer -MinSegmentCount 1 -MaxSegmentCount 3 -Style AllLower -MaxLength 6)"
 
+$Pattern = @'
+^
+(
+    (
+        \d+(,\d*)?
+    |
+        [*+]
+    )
+    (
+        =
+        (
+            (
+                \d+(,\d*)?
+            |
+                [*+]
+            )
+        )?
+    )?
+|
+    =
+    (
+        (
+            \d+(,\d*)?
+        |
+            [*+]
+        )
+    )?
+)
+$
+'@ -replace '[\r\n\s]+', '';
+$Pattern
+(
+    '1', '1,', '1,2', '*', '+',
+    '1=', '1,=', '1,2=', '*=', '+=',
+    '1=1', '1,=1', '1,2=1', '*=1', '+=1',
+    '1=1,', '1,=1,', '1,2=1,', '*=1,', '+=1,',
+    '1=1,1', '1,=1,1', '1,2=1,1', '*=1,1', '+=1,1',
+    '1=*', '1,=*', '1,2=*', '*=*', '+=*',
+    '1=+', '1,=+', '1,2=+', '*=+', '+=+',
+    '=1', '=1,', '=1,2', '=*', '=+', '='
+) | ForEach-Object {
+    if ($_ -notmatch $Pattern) { Write-Warning -Message "Failed: $_" }
+}
 <#
 class PreReleaseSegment {
     [bool]$AltSeparator;
