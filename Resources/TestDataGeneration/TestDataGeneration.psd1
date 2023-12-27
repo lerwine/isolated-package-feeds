@@ -57,7 +57,7 @@ Copyright = '(c) Lenny. All rights reserved.'
 # RequiredAssemblies = @()
 
 # Script files (.ps1) that are run in the caller's environment prior to importing this module.
-# ScriptsToProcess = @()
+ScriptsToProcess = @('TestDataGenerationTypes.ps1')
 
 # Type files (.ps1xml) to be loaded when importing this module
 # TypesToProcess = @()
@@ -69,7 +69,7 @@ Copyright = '(c) Lenny. All rights reserved.'
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = @()
+FunctionsToExport = @("Convert-RangeValuesToTuple", "Convert-RangePatternToTuple", "Get-RandomCharacterSource", "Get-RandomNumber", "Select-Random", "Get-RandomIpAddress")
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()

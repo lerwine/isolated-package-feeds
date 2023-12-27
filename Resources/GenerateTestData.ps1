@@ -1,22 +1,5 @@
-Add-Type -AssemblyName 'System.Text.Json';
-
-if ($null -eq $Script:Random) { New-Variable -Name 'Random' -Option ReadOnly -Scope 'Script' -Value ([Random]::new()) }
-if ($null -eq $Script:NumberChars) { New-Variable -Name 'NumberChars' -Option Constant -Scope 'Script' -Value '01234567890' }
-if ($null -eq $Script:UcHardConsonants) { New-Variable -Name 'UcAlpha' -Option Constant -Scope 'Script' -Value 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' }
-if ($null -eq $Script:UcVowels) { New-Variable -Name 'UcVowels' -Option Constant -Scope 'Script' -Value 'AEIOUY' }
-if ($null -eq $Script:UcHardConsonants) { New-Variable -Name 'UcHardConsonants' -Option Constant -Scope 'Script' -Value 'BCDGJKPQTX' }
-if ($null -eq $Script:UcSoftConsonants) { New-Variable -Name 'UcSoftConsonants' -Option Constant -Scope 'Script' -Value 'CFHLMNRSVWYZ' }
-if ($null -eq $Script:LcAlpha) { New-Variable -Name 'LcAlpha' -Option Constant -Scope 'Script' -Value 'abcdefghijklmnopqrstuvwxyz' }
-if ($null -eq $Script:LcVowels) { New-Variable -Name 'LcVowels' -Option Constant -Scope 'Script' -Value 'aeiouy' }
-if ($null -eq $Script:LcHardConsonants) { New-Variable -Name 'LcHardConsonants' -Option Constant -Scope 'Script' -Value 'bcdgjkpqtx' }
-if ($null -eq $Script:LcSoftConsonants) { New-Variable -Name 'LcSoftConsonants' -Option Constant -Scope 'Script' -Value 'cfhlmnrsvwyz' }
-if ($null -eq $Script:AlphaChars) { New-Variable -Name 'AlphaChars' -Option Constant -Scope 'Script' -Value ($Script:UcAlpha + $Script:LcAlpha) }
-if ($null -eq $Script:Vowels) { New-Variable -Name 'Vowels' -Option Constant -Scope 'Script' -Value ($Script:UcVowels + $Script:LcVowels) }
-if ($null -eq $Script:HardConsonants) { New-Variable -Name 'HardConsonants' -Option Constant -Scope 'Script' -Value ($Script:UcHardConsonants + $Script:LcHardConsonants) }
-if ($null -eq $Script:SoftConsonants) { New-Variable -Name 'SoftConsonants' -Option Constant -Scope 'Script' -Value ($Script:UcSoftConsonants + $Script:LcSoftConsonants) }
-if ($null -eq $Script:AlphaNum) { New-Variable -Name 'AlphaNum' -Option Constant -Scope 'Script' -Value ($Script:AlphaChars + $Script:NumberChars) }
-if ($null -eq $Script:UcAlphaNum) { New-Variable -Name 'UcAlphaNum' -Option Constant -Scope 'Script' -Value ($Script:UcAlpha + $Script:NumberChars) }
-if ($null -eq $Script:LcAlphaNum) { New-Variable -Name 'LcAlphaNum' -Option Constant -Scope 'Script' -Value ($Script:LcAlpha + $Script:NumberChars) }
+if ($null -ne (Get-Module -Name 'TestDataGeneration')) { Remove-Module -Name 'TestDataGeneration' }
+Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath 'TestDataGeneration/TestDataGeneration.psd1') -ErrorAction Stop;
 
 <#
 * : Zero or more characters
@@ -36,88 +19,6 @@ $Script:__Convert_RangePatternToTuple.IsMatch('0-1=0');
 $Script:__Convert_RangePatternToTuple.IsMatch('0=0-1');
 $Script:__Convert_RangePatternToTuple.IsMatch('0-1=0-1');
 #>
-
-if ($null -eq (Get-Module -Name 'Pester')) { Import-Module -Name 'Pester' }
-
-BeforeAll {
-    if ($null -ne (Get-Module -Name 'TestDataGeneration')) { Remove-Module -Name 'TestDataGeneration' }
-    Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath 'TestDataGeneration/TestDataGeneration.psd1') -ErrorAction Stop;
-}
-
-Describe 'Get-Planet' {
-    Context 'Values by parameter' {
-        Context 'Single Value' {
-
-        }
-        Context 'Two Values' {
-            
-        }
-        Context 'More Than Two Values' {
-            
-        }
-    }
-    Context 'Values by pipeline' {
-        Context 'Single Value' {
-
-        }
-        Context 'Two Values' {
-            
-        }
-        Context 'More Than Two Values' {
-            
-        }
-    }
-    It 'Given single value of 0, it returns { Item1: 0, Item2: 0 }' {
-        $Tuple = Convert-RangeValuesToTuple -Values 0;
-        $Tuple.Item1 | Should -Be 0;
-        $Tuple.Item2 | Should -Be 0;
-    }
-    It 'With piped single value of 0, it returns { Item1: 0, Item2: 0 }' {
-        $Tuple = 0 | Convert-RangeValuesToTuple;
-        $Tuple.Item1 | Should -Be 0;
-        $Tuple.Item2 | Should -Be 0;
-    }
-    It 'Given single value of [int]::MinValue, it returns { Item1: [int]::MinValue, Item2: [int]::MinValue }' {
-        $Tuple = Convert-RangeValuesToTuple -Values [int]::MinValue;
-        $Tuple.Item1 | Should -Be [int]::MinValue;
-        $Tuple.Item2 | Should -Be [int]::MinValue;
-    }
-    It 'With piped single value of [int]::MinValue, it returns { Item1: [int]::MinValue, Item2: [int]::MinValue }' {
-        $Tuple = [int]::MinValue | Convert-RangeValuesToTuple;
-        $Tuple.Item1 | Should -Be [int]::MinValue;
-        $Tuple.Item2 | Should -Be [int]::MinValue;
-    }
-    It 'Given single value of 2, it returns { Item1: 2, Item2: 2 }' {
-        $Tuple = Convert-RangeValuesToTuple -Values 2;
-        $Tuple.Item1 | Should -Be 2;
-        $Tuple.Item2 | Should -Be 2;
-    }
-    It 'With piped single value of 3, it returns { Item1: 3, Item2: 3 }' {
-        $Tuple = 3 | Convert-RangeValuesToTuple;
-        $Tuple.Item1 | Should -Be 3;
-        $Tuple.Item2 | Should -Be 3;
-    }
-    It 'Given values of (4, 6), it returns { Item1: 4, Item2: 6 }' {
-        $Tuple = Convert-RangeValuesToTuple -Values 4, 6;
-        $Tuple.Item1 | Should -Be 4;
-        $Tuple.Item2 | Should -Be 6;
-    }
-    It 'With piped values of (3, 5), it returns { Item1: 3, Item2: 5 }' {
-        $Tuple = (3, 5) | Convert-RangeValuesToTuple;
-        $Tuple.Item1 | Should -Be 3;
-        $Tuple.Item2 | Should -Be 5;
-    }
-    It 'Given values of (-1, 7), it returns { Item1: -1, Item2: 7 }' {
-        $Tuple = Convert-RangeValuesToTuple -Values -1, 7;
-        $Tuple.Item1 | Should -Be -1;
-        $Tuple.Item2 | Should -Be 7;
-    }
-    It 'With piped values of (-32768, 65536), it returns { Item1: -32768, Item2: 65536 }' {
-        $Tuple = (-32768, 65536) | Convert-RangeValuesToTuple;
-        $Tuple.Item1 | Should -Be -32768;
-        $Tuple.Item2 | Should -Be 65536;
-    }
-}
 
 <#
 "$(('http', 'https') | Select-Random)://$(Get-RandomCsIdentifer -MinSegmentCount 1 -MaxSegmentCount 3 -Style AllLower -MaxLength 6)"
