@@ -108,18 +108,18 @@ class SwVersion {
     [System.Collections.ObjectModel.Collection[BuildSegment]]$Build;
 
     SwVersion([bool]$HasPrefix, [int]$NumberCount, [bool]$NoPreSeparator, [int]$PreReleaseCount, [int]$BuildCount) {
-        $this.Major = Get-RandomNumber -MinLength 1 -MaxLength 4;
+        $this.Major = Get-RandomInteger -MinLength 1 -MaxLength 4;
         if ($Script:Random.Next(0, 2) -eq 1) { $this.Major *= -1 }
         if ($NumberCount -gt 1) {
-            $this.Minor = Get-RandomNumber -MinLength 1 -MaxLength 4;
+            $this.Minor = Get-RandomInteger -MinLength 1 -MaxLength 4;
             if ($NumberCount -gt 2) {
-                $this.Patch = Get-RandomNumber -MinLength 1 -MaxLength 4;
+                $this.Patch = Get-RandomInteger -MinLength 1 -MaxLength 4;
                 if ($NumberCount -gt 3) {
-                    $this.Revision = Get-RandomNumber -MinLength 1 -MaxLength 4;
+                    $this.Revision = Get-RandomInteger -MinLength 1 -MaxLength 4;
                     if ($NumberCount -gt 4) {
                         $this.AdditionalNumerical = [System.Collections.ObjectModel.Collection[int]]::new();
                         for ($i = 4; $i -lt $NumberCount; $i++) {
-                            $this.AdditionalNumerical.Add((Get-RandomNumber -MinLength 1 -MaxLength 4));
+                            $this.AdditionalNumerical.Add((Get-RandomInteger -MinLength 1 -MaxLength 4));
                         }
                     }
                 }
@@ -386,7 +386,7 @@ Function Get-RandomChars {
     }
 }
 
-Function Get-RandomNumberChars {
+Function Get-RandomIntegerChars {
     Param(
         [Parameter(Mandatory = $true)]
         [int]$MinCount,
@@ -419,7 +419,7 @@ foreach ($HasPrefix in @($false, $true)) {
                     })).Replace('\', '\\').Replace('"', '\"');
                     $StringWriter.Write($Pfx);
                 }
-                $Major = -join (Get-RandomNumberChars -MinCount 1 -MaxCount 4);
+                $Major = -join (Get-RandomIntegerChars -MinCount 1 -MaxCount 4);
                 if ($Script:Random.Next(0, 3) -eq 1) { $Major = "-$Major" }
                 $StringWriter.Write($Major);
                 $Minor = $null;
@@ -427,23 +427,23 @@ foreach ($HasPrefix in @($false, $true)) {
                 $Rev = $null;
                 $Xnum = $null;
                 if ($VersionNumberCount -gt 1) {
-                    $Minor = -join (Get-RandomNumberChars -MinCount 1 -MaxCount 4);
+                    $Minor = -join (Get-RandomIntegerChars -MinCount 1 -MaxCount 4);
                     if ($Script:Random.Next(0, 3) -eq 1) { $Minor = "-$Minor" }
                     $StringWriter.Write('.');
                     $StringWriter.Write($Minor);
                     if ($VersionNumberCount -gt 2) {
-                        $Patch = -join (Get-RandomNumberChars -MinCount 1 -MaxCount 4);
+                        $Patch = -join (Get-RandomIntegerChars -MinCount 1 -MaxCount 4);
                         if ($Script:Random.Next(0, 3) -eq 1) { $Patch = "-$Patch" }
                         $StringWriter.Write('.');
                         $StringWriter.Write($Patch);
                         if ($VersionNumberCount -gt 3) {
-                            $Rev = -join (Get-RandomNumberChars -MinCount 1 -MaxCount 4);
+                            $Rev = -join (Get-RandomIntegerChars -MinCount 1 -MaxCount 4);
                             if ($Script:Random.Next(0, 3) -eq 1) { $Rev = "-$Rev" }
                             $StringWriter.Write('.');
                             $StringWriter.Write($Rev);
                             if ($VersionNumberCount -gt 4) {
                                 $XNum = ([System.Linq.Enumerable]::Range(4, $VersionNumberCount) | ForEach-Object {
-                                    $n = -join (Get-RandomNumberChars -MinCount 1 -MaxCount 4);
+                                    $n = -join (Get-RandomIntegerChars -MinCount 1 -MaxCount 4);
                                     if ($Script:Random.Next(0, 3) -eq 1) { "-$n" } else { $n }
                                 }) -join '.';
                                 $StringWriter.Write('.');
@@ -581,19 +581,19 @@ for ($r = 0; $r -lt 50; $r++) {
         $VersionString = Get-RandomString -MinLength 1 -MaxLength 8 -Omit '.+-0123456789';
     }
     $VersionPrefix = $VersionString;
-    $Major = Get-RandomNumber -MinLength 1 -MaxLength 4;
+    $Major = Get-RandomInteger -MinLength 1 -MaxLength 4;
     if ($Script:Random.Next(0, 2) -eq 1) { $Major *= -1 }
     $VersionString += $Major;
     $Minor = $Patch = $Revision = -1;
     $Count = $Script:Random.Next(1, 5);
     if ($Count -gt 1) {
-        $Minor = Get-RandomNumber -MinLength 1 -MaxLength 4;
+        $Minor = Get-RandomInteger -MinLength 1 -MaxLength 4;
         $VersionString += '.' + $Minor;
         if ($Count -gt 2) {
-            $Patch = Get-RandomNumber -MinLength 1 -MaxLength 4;
+            $Patch = Get-RandomInteger -MinLength 1 -MaxLength 4;
             $VersionString += '.' + $Patch;
             if ($Count -gt 3) {
-                $Revision = Get-RandomNumber -MinLength 1 -MaxLength 4;
+                $Revision = Get-RandomInteger -MinLength 1 -MaxLength 4;
                 $VersionString += '.' + $Revision;
             }
         }
@@ -602,7 +602,7 @@ for ($r = 0; $r -lt 50; $r++) {
     if ($Count -eq 3 -and $Script:Random.Next(0, 2) -eq 1) {
         $Count = $Script:Random.Next(1, 5);
         for ($i = 0; $i -lt $Count; $i++) {
-            $Value = Get-RandomNumber -MinLength 1 -MaxLength 4;
+            $Value = Get-RandomInteger -MinLength 1 -MaxLength 4;
             $AdditionalNumerical += $Value;
             $VersionString += '.' + $Value;
         }
