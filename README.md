@@ -2,8 +2,8 @@
 
 - [About Isolated Package Feeds](#about-isolated-package-feeds)
 - [Projects in solution](#projects-in-solution)
-- [Required Solution Development Dependencies](#required-solution-development-dependencies)
-  - [APIs](#apis)
+- [Solution Development Dependencies](#solution-development-dependencies)
+  - [Required APIs](#required-apis)
   - [Required / Strongly Suggested VS Code Extensions](#required--strongly-suggested-vs-code-extensions)
   - [Suggested VS Code Extensions](#suggested-vs-code-extensions)
 - [References](#references)
@@ -29,9 +29,9 @@ The initial scope is to create NuGet and NPM Package Feed services as well as co
 - [NuGetPuller.CLI](./NuGetPuller.Win/README.md) - GUI application to manage Local NuGet Feed of packages hosted by an upstream NuGet repository.
 - [NuGetPuller.UnitTests](./NuGetPuller.UnitTests/README.md) - Unit tests for `NuGetPuller` application.
 
-## Required Solution Development Dependencies
+## Solution Development Dependencies
 
-### APIs
+### Required APIs
 
 | Installer                                                                     | Dev Container Feature                                                                                                   |
 |-------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|
