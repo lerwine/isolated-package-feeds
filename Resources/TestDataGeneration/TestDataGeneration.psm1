@@ -114,7 +114,7 @@ Function Convert-RangeValuesToTuple {
 .SYNOPSIS
     Generates a random number.
 #>
-Function Get-RandomNumber {
+Function Get-RandomInteger {
     [CmdletBinding(DefaultParameterSetName = "FixedRepeat")]
     Param(
         [Parameter(ValueFromPipelineByPropertyName = $true)]
@@ -165,7 +165,7 @@ class RandomCharacterSource
             0 { return [char]0; }
             1 { return $this.Values[0]; }
         }
-        return $this.Values[(Get-RandomNumber -MinValue 0 -MaxValue $this.Values.Length)];
+        return $this.Values[(Get-RandomInteger -MinValue 0 -MaxValue $this.Values.Length)];
     }
     
     [string] GetNext([int]$Length) {
@@ -175,11 +175,11 @@ class RandomCharacterSource
             1 { return [string]::new($this.Values[0], $Length); }
         }
         $arr = New-Object -TypeName 'System.Char[]' -ArgumentList $Length;
-        for ($i = 0; $i -lt $Length; $i++) { $arr[$i] = $this.Values[(Get-RandomNumber -MinValue 0 -MaxValue $this.Values.Length)] }
+        for ($i = 0; $i -lt $Length; $i++) { $arr[$i] = $this.Values[(Get-RandomInteger -MinValue 0 -MaxValue $this.Values.Length)] }
         return [string]::new($arr);
     }
 
-    [string] GetNext([int]$MinLength, [int]$MaxLength) { return GetNext((Get-RandomNumber -MinValue $MinLength -MaxValue $MaxLength)) }
+    [string] GetNext([int]$MinLength, [int]$MaxLength) { return GetNext((Get-RandomInteger -MinValue $MinLength -MaxValue $MaxLength)) }
     
     [void] WriteNext([System.IO.TextWriter]$Writer) {
         switch ($this.Values.Length) {
@@ -192,7 +192,7 @@ class RandomCharacterSource
                 break;
             }
             default {
-                $Writer.Write($this.Values[(Get-RandomNumber -MinValue 0 -MaxValue $this.Values.Length)]);
+                $Writer.Write($this.Values[(Get-RandomInteger -MinValue 0 -MaxValue $this.Values.Length)]);
                 break;
             }
         }
@@ -212,13 +212,13 @@ class RandomCharacterSource
                 break;
             }
             default {
-                for ($i = 0; $i -lt $Length; $i++) { $Writer.Write($this.Values[(Get-RandomNumber -MinValue 0 -MaxValue $this.Values.Length)]) }
+                for ($i = 0; $i -lt $Length; $i++) { $Writer.Write($this.Values[(Get-RandomInteger -MinValue 0 -MaxValue $this.Values.Length)]) }
                 break;
             }
         }
     }
 
-    [void] WriteNext([System.IO.TextWriter]$Writer, [int]$MinLength, [int]$MaxLength) { WriteNext($Writer, (Get-RandomNumber -MinValue $MinLength -MaxValue $MaxLength)) }
+    [void] WriteNext([System.IO.TextWriter]$Writer, [int]$MinLength, [int]$MaxLength) { WriteNext($Writer, (Get-RandomInteger -MinValue $MinLength -MaxValue $MaxLength)) }
 
     RandomCharacterSource([char[]]$Values) { $this.Values = $Values }
 }
@@ -254,7 +254,7 @@ Function Select-Random {
     }
 }
 
-Function Get-RandomIpAddress {
+Function Get-RandomIpV4Address {
     [CmdletBinding()]
     Param(
         [ValidateRange(1, 32768)]
