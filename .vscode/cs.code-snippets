@@ -1448,8 +1448,8 @@
             "/// </summary>",
             "public ${2} ${1}",
             "{",
-            "\tget => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/};",
-            "\tset => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/} = value;",
+            "    get => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/};",
+            "    set => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/} = value;",
             "}",
             "",
             "#endregion"
@@ -1461,9 +1461,21 @@
         "scope": "csharp",
         "body": [
             "#pragma warning disable ${1:Code}",
-            "\t${TM_SELECTED_TEXT}$0",
+            "${TM_SELECTED_TEXT}$0",
             "#pragma warning restore ${1}"
         ],
         "description": "Disable Warning(s)"
+    },
+    "Monitor Enter/Exit": {
+        "prefix": "monitor-enter-exit",
+        "scope": "csharp",
+        "body": [
+            "Monitor.Enter(SyncRoot);",
+            "try",
+            "{",
+            "    ${TM_SELECTED_TEXT}$0",
+            "}",
+            "finally { Monitor.Exit(SyncRoot); }"
+        ]
     }
 }
