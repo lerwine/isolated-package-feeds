@@ -8,6 +8,7 @@
   - [Suggested VS Code Extensions](#suggested-vs-code-extensions)
 - [References](#references)
 - [Package Sources](#package-sources)
+- [TODO](#todo)
 
 ## About Isolated Package Feeds
 
@@ -173,3 +174,9 @@ Following is a list of package sources it would be desirable to mirror for offli
   - Alternatives:
     - [npm packages in the Package Registry | GitLab](https://docs.gitlab.com/ee/user/packages/npm_registry/)
 - [CDNs](./CdnGetter/README.md#references-and-links)
+
+## TODO
+
+- [ ] Check out [Light-weight Desktop (desktop-lite)](https://github.com/devcontainers/features/tree/main/src/desktop-lite) for possible desktop development in GitHub container.
+- [ ] Check out [Live Server](http://github.com/devcontainers-contrib/features/tree/main/src/live-server) as possible means of manually testing web apps.
+  - [ ] [NGrok](https://github.com/jckimble/devcontainer-features/blob/main/src/ngrok/README.md) could be used for tunneling.
