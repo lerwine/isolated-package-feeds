@@ -1,6 +1,7 @@
 {
     "Define LoggerMessage w/no args": {
         "prefix": "logger-message0",
+        "scope": "csharp",
         "body": [
             "/// <summary>",
             "/// Logs a <see cref=\"AppEventId.${1:EventName}\"/> <see cref=\"LogLevel.${2|Error,Warning,Information,Trace,Debug|}\"/> message.",
@@ -15,6 +16,7 @@
     },
     "Define LoggerMessage Factory w/no args": {
         "prefix": "logger-get-message0",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -42,6 +44,7 @@
     },
     "Define LoggerMessage Exception Factory w/no args": {
         "prefix": "logger-exception0",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -71,6 +74,7 @@
     },
     "Define LoggerMessage w/1 arg": {
         "prefix": "logger-message1",
+        "scope": "csharp",
 		"body": [
             "/// <summary>",
             "/// Logs a <see cref=\"AppEventId.${1:EventName}\"/> <see cref=\"LogLevel.${2|Error,Warning,Information,Trace,Debug|}\"/> message.",
@@ -86,6 +90,7 @@
     },
     "Define LoggerMessage Factory w/1 arg": {
         "prefix": "logger-get-message1",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -114,6 +119,7 @@
     },
     "Define LoggerMessage Exception Factory w/1 arg": {
         "prefix": "logger-exception1",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -143,6 +149,7 @@
     },
     "Define LoggerMessage w/2 args": {
         "prefix": "logger-message2",
+        "scope": "csharp",
 		"body": [
             "/// <summary>",
             "/// Logs a <see cref=\"AppEventId.${1:EventName}\"/> <see cref=\"LogLevel.${2|Error,Warning,Information,Trace,Debug|}\"/> message.",
@@ -159,6 +166,7 @@
     },
     "Define LoggerMessage Factory w/2 args": {
         "prefix": "logger-get-message2",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -188,6 +196,7 @@
     },
     "Define LoggerMessage Exception Factory w/2 args": {
         "prefix": "logger-exception2",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -218,6 +227,7 @@
     },
     "Define LoggerMessage w/3 args": {
         "prefix": "logger-message3",
+        "scope": "csharp",
 		"body": [
             "/// <summary>",
             "/// Logs a <see cref=\"AppEventId.${1:EventName}\"/> <see cref=\"LogLevel.${2|Error,Warning,Information,Trace,Debug|}\"/> message.",
@@ -235,6 +245,7 @@
     },
     "Define LoggerMessage Factory w/3 args": {
         "prefix": "logger-get-message3",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -265,6 +276,7 @@
     },
     "Define LoggerMessage Exception Factory w/3 args": {
         "prefix": "logger-exception3",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -297,6 +309,7 @@
     },
     "Define LoggerMessage w/4 args": {
         "prefix": "logger-message4",
+        "scope": "csharp",
 		"body": [
             "/// <summary>",
             "/// Logs a <see cref=\"AppEventId.${1:EventName}\"/> <see cref=\"LogLevel.${2|Error,Warning,Information,Trace,Debug|}\"/> message.",
@@ -315,6 +328,7 @@
     },
     "Define LoggerMessage Factory w/4 args": {
         "prefix": "logger-get-message4",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -346,6 +360,7 @@
     },
     "Define LoggerMessage Exception Factory w/4 args": {
         "prefix": "logger-exception4",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -379,6 +394,7 @@
     },
     "Define LoggerMessage w/5 args": {
         "prefix": "logger-message5",
+        "scope": "csharp",
 		"body": [
             "/// <summary>",
             "/// Logs a <see cref=\"AppEventId.${1:EventName}\"/> <see cref=\"LogLevel.${2|Error,Warning,Information,Trace,Debug|}\"/> message.",
@@ -398,6 +414,7 @@
     },
     "Define LoggerMessage Factory w/5 args": {
         "prefix": "logger-get-message5",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -430,6 +447,7 @@
     },
     "Define LoggerMessage Exception Factory w/5 args": {
         "prefix": "logger-exception5",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -464,6 +482,7 @@
     },
     "Define LoggerMessage w/6 args": {
         "prefix": "logger-message6",
+        "scope": "csharp",
 		"body": [
             "/// <summary>",
             "/// Logs a <see cref=\"AppEventId.${1:EventName}\"/> <see cref=\"LogLevel.${2|Error,Warning,Information,Trace,Debug|}\"/> message.",
@@ -484,6 +503,7 @@
     },
     "Define LoggerMessage Factory w/6 args": {
         "prefix": "logger-get-message6",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -517,6 +537,7 @@
     },
     "Define LoggerMessage Exception Factory w/6 args": {
         "prefix": "logger-exception6",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -552,6 +573,7 @@
     },
     "Define Critical LoggerMessage w/no args": {
         "prefix": "logger-message0-c",
+        "scope": "csharp",
         "body": [
             "/// <summary>",
             "/// Logs a <see cref=\"LogLevel.Critical\"/> <see cref=\"AppEventId.${1:EventName}\"/> error event message.",
@@ -566,6 +588,7 @@
     },
     "Define Critical LoggerMessage Factory w/no args": {
         "prefix": "logger-get-message0-c",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -593,6 +616,7 @@
     },
     "Define Critical LoggerMessage Exception Factory w/no args": {
         "prefix": "logger-exception0-c",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -622,6 +646,7 @@
     },
     "Define Critical LoggerMessage w/1 arg": {
         "prefix": "logger-message1-c",
+        "scope": "csharp",
 		"body": [
             "/// <summary>",
             "/// Logs a <see cref=\"LogLevel.Critical\"/> <see cref=\"AppEventId.${1:EventName}\"/> error event message.",
@@ -637,6 +662,7 @@
     },
     "Define Critical LoggerMessage Factory w/1 arg": {
         "prefix": "logger-get-message1-c",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -665,6 +691,7 @@
     },
     "Define Critical LoggerMessage Exception Factory w/1 arg": {
         "prefix": "logger-exception1-c",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -694,6 +721,7 @@
     },
     "Define Critical LoggerMessage w/2 args": {
         "prefix": "logger-message2-c",
+        "scope": "csharp",
 		"body": [
             "/// <summary>",
             "/// Logs a <see cref=\"LogLevel.Critical\"/> <see cref=\"AppEventId.${1:EventName}\"/> error event message.",
@@ -710,6 +738,7 @@
     },
     "Define Critical LoggerMessage Factory w/2 args": {
         "prefix": "logger-get-message2-c",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -739,6 +768,7 @@
     },
     "Define Critical LoggerMessage Exception Factory w/2 args": {
         "prefix": "logger-exception2-c",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -769,6 +799,7 @@
     },
     "Define Critical LoggerMessage w/3 args": {
         "prefix": "logger-message3-c",
+        "scope": "csharp",
 		"body": [
             "/// <summary>",
             "/// Logs a <see cref=\"LogLevel.Critical\"/> <see cref=\"AppEventId.${1:EventName}\"/> error event message.",
@@ -786,6 +817,7 @@
     },
     "Define Critical LoggerMessage Factory w/3 args": {
         "prefix": "logger-get-message3-c",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -816,6 +848,7 @@
     },
     "Define Critical LoggerMessage Exception Factory w/3 args": {
         "prefix": "logger-exception3-c",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -848,6 +881,7 @@
     },
     "Define Critical LoggerMessage w/4 args": {
         "prefix": "logger-message4-c",
+        "scope": "csharp",
 		"body": [
             "/// <summary>",
             "/// Logs a <see cref=\"LogLevel.Critical\"/> <see cref=\"AppEventId.${1:EventName}\"/> error event message.",
@@ -866,6 +900,7 @@
     },
     "Define Critical LoggerMessage Factory w/4 args": {
         "prefix": "logger-get-message4-c",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -897,6 +932,7 @@
     },
     "Define Critical LoggerMessage Exception Factory w/4 args": {
         "prefix": "logger-exception4-c",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -930,6 +966,7 @@
     },
     "Define Critical LoggerMessage w/5 args": {
         "prefix": "logger-message5-c",
+        "scope": "csharp",
 		"body": [
             "/// <summary>",
             "/// Logs a <see cref=\"LogLevel.Critical\"/> <see cref=\"AppEventId.${1:EventName}\"/> error event message.",
@@ -949,6 +986,7 @@
     },
     "Define Critical LoggerMessage Factory w/5 args": {
         "prefix": "logger-get-message5-c",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -981,6 +1019,7 @@
     },
     "Define Critical LoggerMessage Exception Factory w/5 args": {
         "prefix": "logger-exception5-c",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -1015,6 +1054,7 @@
     },
     "Define Critical LoggerMessage w/6 args": {
         "prefix": "logger-message6-c",
+        "scope": "csharp",
 		"body": [
             "/// <summary>",
             "/// Logs a <see cref=\"LogLevel.Critical\"/> <see cref=\"AppEventId.${1:EventName}\"/> error event message.",
@@ -1035,6 +1075,7 @@
     },
     "Define Critical LoggerMessage Factory w/6 args": {
         "prefix": "logger-get-message6-c",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -1068,6 +1109,7 @@
     },
     "Define Critical LoggerMessage Exception Factory w/6 args": {
         "prefix": "logger-exception6-c",
+        "scope": "csharp",
 		"body": [
             "#region ${1:EventName} Logger Event Methods",
             "",
@@ -1103,6 +1145,7 @@
     },
     "Define Logger Scope w/no args": {
         "prefix": "logger-scope0",
+        "scope": "csharp",
 		"body": [
             "#region ${1:ScopeName} Scope",
             "",
@@ -1121,6 +1164,7 @@
     },
     "Define Logger Scope w/1 arg": {
         "prefix": "logger-scope1",
+        "scope": "csharp",
 		"body": [
             "#region ${1:ScopeName} Scope",
             "",
@@ -1142,6 +1186,7 @@
     },
     "Define Logger Scope w/2 args": {
         "prefix": "logger-scope2",
+        "scope": "csharp",
 		"body": [
             "#region ${1:ScopeName} Scope",
             "",
@@ -1164,6 +1209,7 @@
     },
     "Define Logger Scope w/3 args": {
         "prefix": "logger-scope3",
+        "scope": "csharp",
 		"body": [
             "#region ${1:ScopeName} Scope",
             "",
@@ -1187,6 +1233,7 @@
     },
     "Define Logger Scope w/4 args": {
         "prefix": "logger-scope4",
+        "scope": "csharp",
 		"body": [
             "#region ${1:ScopeName} Scope",
             "",
@@ -1211,6 +1258,7 @@
     },
     "Define Logger Scope w/5 args": {
         "prefix": "logger-scope5",
+        "scope": "csharp",
 		"body": [
             "#region ${1:ScopeName} Scope",
             "",
@@ -1236,6 +1284,7 @@
     },
     "Define Logger Scope w/6 args": {
         "prefix": "logger-scope6",
+        "scope": "csharp",
 		"body": [
             "#region ${1:ScopeName} Scope",
             "",
@@ -1259,37 +1308,9 @@
 		],
 		"description": "Create Logger scope definition with 6 extra arguments."
     },
-    "Property and backing field": {
-        "prefix": "propfull",
-        "body": [
-            "#region ${1:PropertyName} Property",
-            "",
-            "private ${2:Type} _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}$0;",
-            "",
-            "/// <summary>",
-            "/// ${3:description}",
-            "/// </summary>",
-            "public ${2} ${1}",
-            "{",
-            "\tget => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/};",
-            "\tset => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/} = value;",
-            "}",
-            "",
-            "#endregion"
-        ],
-        "description": "Property and backing field"
-    },
-    "#pragma warning disable": {
-        "prefix": "pragma-warning-disable",
-        "body": [
-            "#pragma warning disable ${1:Code}",
-            "\t${TM_SELECTED_TEXT}$0",
-            "#pragma warning restore ${1}"
-        ],
-        "description": "Disable Warning(s)"
-    },
     "Exception w/1 custom property": {
         "prefix": "exception1",
+        "scope": "csharp",
         "body": [
             "/// <summary>",
             "/// Represents a ${1:Name} exception."
@@ -1323,6 +1344,7 @@
     },
     "Exception w/2 custom properties": {
         "prefix": "exception2",
+        "scope": "csharp",
         "body": [
             "/// <summary>",
             "/// Represents a ${1:Name} exception."
@@ -1365,6 +1387,7 @@
     },
     "Exception w/3 custom properties": {
         "prefix": "exception3",
+        "scope": "csharp",
         "body": [
             "/// <summary>",
             "/// Represents a ${1:Name} exception."
@@ -1411,5 +1434,48 @@
             "}"
         ],
         "description": "Exception with 3 custom properties."
+    },
+    "Property and backing field": {
+        "prefix": "propfull",
+        "scope": "csharp",
+        "body": [
+            "#region ${1:PropertyName} Property",
+            "",
+            "private ${2:Type} _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/}$0;",
+            "",
+            "/// <summary>",
+            "/// ${3:description}",
+            "/// </summary>",
+            "public ${2} ${1}",
+            "{",
+            "    get => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/};",
+            "    set => _${1/(\\s*[A-Z]+)(.*)/${1:/downcase}$2/} = value;",
+            "}",
+            "",
+            "#endregion"
+        ],
+        "description": "Property and backing field"
+    },
+    "#pragma warning disable": {
+        "prefix": "pragma-warning-disable",
+        "scope": "csharp",
+        "body": [
+            "#pragma warning disable ${1:Code}",
+            "${TM_SELECTED_TEXT}$0",
+            "#pragma warning restore ${1}"
+        ],
+        "description": "Disable Warning(s)"
+    },
+    "Monitor Enter/Exit": {
+        "prefix": "monitor-enter-exit",
+        "scope": "csharp",
+        "body": [
+            "Monitor.Enter(SyncRoot);",
+            "try",
+            "{",
+            "    ${TM_SELECTED_TEXT}$0",
+            "}",
+            "finally { Monitor.Exit(SyncRoot); }"
+        ]
     }
 }
